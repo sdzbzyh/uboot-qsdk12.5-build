@@ -1,0 +1,401 @@
+diff --git a/u-boot-2016/arch/arm/dts/ipq807x-inseego_fg2000.dts b/u-boot-2016/arch/arm/dts/ipq807x-inseego_fg2000.dts
+--- a/u-boot-2016/arch/arm/dts/ipq807x-inseego_fg2000.dts
++++ b/u-boot-2016/arch/arm/dts/ipq807x-inseego_fg2000.dts
+@@ -23,6 +23,8 @@
+ 		console = "/serial@78B3000";
+ 		uart2 = "/serial@78B0000";
+ 		pci0 = "/pci@20000000";
+ 		mmc = "/sdhci@07824000";
++		i2c0 = "/i2c@78b6000";
++		i2c1 = "/i2c@78b9000";
+ 	};
+ 
+ 	keys {
+@@ -50,6 +52,58 @@
+ 			active_level = <GPIO_ACTIVE_LOW>;
+         };
+     };
++
++	/*
++	 * FG2000 AW9523 is connected to BLSP1 QUP5 I2C:
++	 * SDA/SCL = GPIO21/GPIO22, 7-bit address = 0x5b.
++	 */
++	i2c1: i2c@78b9000 {
++		compatible = "qcom,qup-i2c";
++		#address-cells = <1>;
++		#size-cells = <0>;
++		reg = <0x78b9000 0x600>;
++		clock-frequency = <400000>;
++		status = "okay";
++
++		i2c_gpio {
++			scl {
++				gpio = <21>;
++				func = <2>;
++				pull = <GPIO_NO_PULL>;
++				drvstr = <GPIO_8MA>;
++				oe = <GPIO_OE_ENABLE>;
++			};
++
++			sda {
++				gpio = <22>;
++				func = <2>;
++				pull = <GPIO_NO_PULL>;
++				drvstr = <GPIO_8MA>;
++				oe = <GPIO_OE_ENABLE>;
++			};
++		};
++
++		aw9523@5b {
++			compatible = "awinic,aw9523-pinctrl";
++			reg = <0x5b>;
++		};
++	};
++
++	/*
++	 * These labels are used by the existing U-Boot status/failsafe code.
++	 * They live outside /leds so SoC GPIO initialization won't treat
++	 * expander GPIO numbers as IPQ8074 TLMM GPIO numbers.
++	 */
++	aw9523-leds {
++		led-blue {
++			label = "blink_led";
++			aw9523-gpio = <2>;
++			active_level = <GPIO_ACTIVE_HIGH>;
++		};
++
++		led-red {
++			label = "power_led";
++			aw9523-gpio = <5>;
++			active_level = <GPIO_ACTIVE_HIGH>;
++		};
++
++		led-green {
++			label = "system_led";
++			aw9523-gpio = <3>;
++			active_level = <GPIO_ACTIVE_HIGH>;
++		};
++	};
+ 
+ 	ess-switch {
+ 		switch_mac_mode = <0x00>;
+diff --git a/u-boot-2016/lib/ipq_led.c b/u-boot-2016/lib/ipq_led.c
+--- a/u-boot-2016/lib/ipq_led.c
++++ b/u-boot-2016/lib/ipq_led.c
+@@ -20,6 +20,7 @@
+ 
+ #include <common.h>
+ #include <errno.h>
++#include <i2c.h>
+ #include <fdtdec.h>
+ #include <dt-bindings/gpio/gpio.h>
+ #include <ipq_led.h>
+@@ -27,16 +28,99 @@
+ typedef struct {
+ 	unsigned int gpio;
+ 	unsigned int active_level;
++	unsigned int aw9523_gpio;
+ } led_info_t;
+ 
+ static struct {
+ 	const char *label;
+ 	led_info_t info;
+ } last_used_led;
+ 
++/*
++ * AW9523 register map. The FG2000 status LEDs are on port 0:
++ * blue=GPIO2, green=GPIO3, red=GPIO5.
++ */
++#define AW9523_I2C_BUS		1
++#define AW9523_I2C_ADDR		0x5b
++#define AW9523_REG_INPUT0	0x00
++#define AW9523_REG_OUTPUT0	0x02
++#define AW9523_REG_CONFIG0	0x04
++#define AW9523_REG_INT_EN0	0x06
++#define AW9523_REG_CHIP_ID	0x10
++#define AW9523_REG_GCR		0x11
++#define AW9523_REG_PORT_MODE0	0x12
++#define AW9523_REG_SOFT_RESET	0x7f
++#define AW9523_CHIP_ID		0x23
++#define AW9523_GCR_PUSH_PULL	BIT(4)
++#define AW9523_LED_MASK		(BIT(2) | BIT(3) | BIT(5))
++
+ DECLARE_GLOBAL_DATA_PTR;
+ 
++static struct udevice *aw9523_dev;
++static int aw9523_initialized;
++static u8 aw9523_port0_state;
++
++static int aw9523_write_reg(u8 reg, u8 value)
++{
++	return dm_i2c_reg_write(aw9523_dev, reg, value);
++}
++
++static int aw9523_init(void)
++{
++	int ret;
++	int chip_id;
++
++	if (aw9523_initialized)
++		return 0;
++
++	ret = i2c_get_chip_for_busnum(AW9523_I2C_BUS, AW9523_I2C_ADDR,
++				      1, &aw9523_dev);
++	if (ret)
++		return ret;
++
++	/* A soft reset is harmless if the chip is already at its defaults. */
++	ret = aw9523_write_reg(AW9523_REG_SOFT_RESET, 0);
++	if (ret)
++		return ret;
++
++	mdelay(1);
++	chip_id = dm_i2c_reg_read(aw9523_dev, AW9523_REG_CHIP_ID);
++	if (chip_id < 0)
++		return chip_id;
++	if (chip_id != AW9523_CHIP_ID)
++		return -ENODEV;
++
++	/*
++	 * Put the ports in a safe state before enabling LED outputs:
++	 * all inputs, output latches low, then GPIO/push-pull mode.
++	 */
++	ret = aw9523_write_reg(AW9523_REG_CONFIG0, 0xff);
++	if (ret)
++		return ret;
++	ret = aw9523_write_reg(AW9523_REG_CONFIG0 + 1, 0xff);
++	if (ret)
++		return ret;
++	ret = aw9523_write_reg(AW9523_REG_OUTPUT0, 0x00);
++	if (ret)
++		return ret;
++	ret = aw9523_write_reg(AW9523_REG_OUTPUT0 + 1, 0x00);
++	if (ret)
++		return ret;
++	ret = aw9523_write_reg(AW9523_REG_GCR, AW9523_GCR_PUSH_PULL);
++	if (ret)
++		return ret;
++	ret = aw9523_write_reg(AW9523_REG_PORT_MODE0, 0xff);
++	if (ret)
++		return ret;
++	ret = aw9523_write_reg(AW9523_REG_PORT_MODE0 + 1, 0xff);
++	if (ret)
++		return ret;
++	ret = aw9523_write_reg(AW9523_REG_INT_EN0, 0xff);
++	if (ret)
++		return ret;
++	ret = aw9523_write_reg(AW9523_REG_INT_EN0 + 1, 0xff);
++	if (ret)
++		return ret;
++
++	/* AW9523 config bit 1=input, 0=output. Keep unused pins as inputs. */
++	ret = aw9523_write_reg(AW9523_REG_CONFIG0,
++			       (u8)~AW9523_LED_MASK);
++	if (ret)
++		return ret;
++
++	aw9523_port0_state = 0;
++	aw9523_initialized = 1;
++	return 0;
++}
++
++static int aw9523_gpio_set(unsigned int pin, int on)
++{
++	u8 state;
++	int ret;
++
++	/* FG2000's three status LEDs are all connected to AW9523 port 0. */
++	if (pin >= 8)
++		return -EINVAL;
++
++	ret = aw9523_init();
++	if (ret)
++		return ret;
++
++	if (on)
++		state = aw9523_port0_state | BIT(pin);
++	else
++		state = aw9523_port0_state & ~BIT(pin);
++
++	ret = aw9523_write_reg(AW9523_REG_OUTPUT0, state);
++	if (!ret)
++		aw9523_port0_state = state;
++
++	return ret;
++}
++
++static int aw9523_gpio_get(unsigned int pin)
++{
++	int ret;
++
++	if (pin >= 8)
++		return 0;
++
++	ret = aw9523_init();
++	if (ret)
++		return 0;
++
++	return !!(aw9523_port0_state & BIT(pin));
++}
++
+ static int led_get_info_by_label(const char *led_label, led_info_t *led_info)
+ {
+-	int parent, node;
++	static const char * const led_paths[] = {
++		"/leds",
++		"/aw9523-leds",
++	};
++	int parent, node;
+ 	int ret, strings_count;
++	int path;
+ 	const char *node_label;
+ 
+ 	if (!led_label)
+ 		return -EINVAL;
+ 
+ 	if (last_used_led.label && !strcmp(last_used_led.label, led_label)) {
+ 		led_info->gpio = last_used_led.info.gpio;
+ 		led_info->active_level = last_used_led.info.active_level;
++		led_info->aw9523_gpio = last_used_led.info.aw9523_gpio;
+ 		return 0;
+ 	}
+ 
+-	parent = fdt_path_offset(gd->fdt_blob, "/leds");
+-	if (parent < 0)
+-		return -ENOENT;
+-
+-	fdt_for_each_subnode(gd->fdt_blob, node, parent) {
+-		strings_count = fdt_count_strings(gd->fdt_blob, node, "label");
+-		for (int i = 0; i < strings_count; i++) {
+-			node_label = NULL;
+-			ret = fdt_get_string_index(gd->fdt_blob, node, "label", i, &node_label);
+-			if (!ret && node_label && !strcmp(node_label, led_label)) {
+-				led_info->gpio = fdtdec_get_uint(gd->fdt_blob, node, "gpio", GPIO_NOT_FOUND);
+-				led_info->active_level = fdtdec_get_uint(gd->fdt_blob, node, "active_level", GPIO_ACTIVE_HIGH);
+-				return 0;
++	for (path = 0; path < ARRAY_SIZE(led_paths); path++) {
++		parent = fdt_path_offset(gd->fdt_blob, led_paths[path]);
++		if (parent < 0)
++			continue;
++
++		fdt_for_each_subnode(gd->fdt_blob, node, parent) {
++			strings_count = fdt_count_strings(gd->fdt_blob, node, "label");
++			for (int i = 0; i < strings_count; i++) {
++				node_label = NULL;
++				ret = fdt_get_string_index(gd->fdt_blob, node,
++							   "label", i, &node_label);
++				if (!ret && node_label &&
++				    !strcmp(node_label, led_label)) {
++					led_info->gpio = fdtdec_get_uint(
++						gd->fdt_blob, node, "gpio",
++						GPIO_NOT_FOUND);
++					led_info->aw9523_gpio = fdtdec_get_uint(
++						gd->fdt_blob, node, "aw9523-gpio",
++						GPIO_NOT_FOUND);
++					led_info->active_level = fdtdec_get_uint(
++						gd->fdt_blob, node, "active_level",
++						GPIO_ACTIVE_HIGH);
++					return 0;
++				}
+ 			}
+ 		}
+ 	}
+@@ -97,39 +181,74 @@
+ void led_control(led_op_t op, const char *label)
+ {
+ 	int ret;
+ 	led_info_t led;
+-    unsigned int value;
++	unsigned int value;
++	int on;
+ 
+ 	ret = led_get_info_by_label(label, &led);
+-	if (ret || led.gpio == GPIO_NOT_FOUND)
++	if (ret)
+ 		return;
+ 
+-    ret = led_get_out_value(op, led.gpio, led.active_level, &value);
+-    if (ret)
+-        return;
++	if (led.aw9523_gpio != GPIO_NOT_FOUND) {
++		if (op == LED_OP_TOGGLE)
++			on = !aw9523_gpio_get(led.aw9523_gpio);
++		else
++			on = (op == LED_OP_ON);
+ 
+-	gpio_set_value(led.gpio, value);
++		if (led.active_level == GPIO_ACTIVE_LOW)
++			on = !on;
++		aw9523_gpio_set(led.aw9523_gpio, on);
++	} else {
++		if (led.gpio == GPIO_NOT_FOUND)
++			return;
+ 
+-	last_used_led.label = label;
+-	last_used_led.info.gpio = led.gpio;
+-	last_used_led.info.active_level = led.active_level;
++		ret = led_get_out_value(op, led.gpio, led.active_level, &value);
++		if (ret)
++			return;
++		gpio_set_value(led.gpio, value);
++	}
++
++	last_used_led.label = label;
++	last_used_led.info = led;
+ }
+ 
++static void led_control_node(int node, led_op_t op)
++{
++	unsigned int gpio, aw9523_gpio, active_level, value;
++	int on;
++
++	gpio = fdtdec_get_uint(gd->fdt_blob, node, "gpio", GPIO_NOT_FOUND);
++	aw9523_gpio = fdtdec_get_uint(gd->fdt_blob, node, "aw9523-gpio",
++				       GPIO_NOT_FOUND);
++	active_level = fdtdec_get_uint(gd->fdt_blob, node, "active_level",
++				       GPIO_ACTIVE_HIGH);
++
++	if (aw9523_gpio != GPIO_NOT_FOUND) {
++		if (op == LED_OP_TOGGLE)
++			on = !aw9523_gpio_get(aw9523_gpio);
++		else
++			on = (op == LED_OP_ON);
++
++		if (active_level == GPIO_ACTIVE_LOW)
++			on = !on;
++		aw9523_gpio_set(aw9523_gpio, on);
++		return;
++	}
++
++	if (gpio != GPIO_NOT_FOUND &&
++	    !led_get_out_value(op, gpio, active_level, &value))
++		gpio_set_value(gpio, value);
++}
++
+ void led_control_all(led_op_t op)
+ {
+-	int parent, node;
+-	unsigned int gpio, active_level, value;
++	static const char * const led_paths[] = {
++		"/leds",
++		"/aw9523-leds",
++	};
++	int parent, node, path;
+ 
+-	parent = fdt_path_offset(gd->fdt_blob, "/leds");
+-	if (parent < 0)
+-		return;
++	for (path = 0; path < ARRAY_SIZE(led_paths); path++) {
++		parent = fdt_path_offset(gd->fdt_blob, led_paths[path]);
++		if (parent < 0)
++			continue;
+ 
+-	fdt_for_each_subnode(gd->fdt_blob, node, parent) {
+-		gpio = fdtdec_get_uint(gd->fdt_blob, node, "gpio", GPIO_NOT_FOUND);
+-		active_level = fdtdec_get_uint(gd->fdt_blob, node, "active_level", GPIO_ACTIVE_HIGH);
+-		if (gpio != GPIO_NOT_FOUND && !led_get_out_value(op, gpio, active_level, &value))
+-            gpio_set_value(gpio, value);
++		fdt_for_each_subnode(gd->fdt_blob, node, parent)
++			led_control_node(node, op);
+ 	}
+ }
