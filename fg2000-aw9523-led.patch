@@ -1,5 +1,5 @@
 diff --git a/u-boot-2016/arch/arm/dts/ipq807x-inseego_fg2000.dts b/u-boot-2016/arch/arm/dts/ipq807x-inseego_fg2000.dts
---- a/u-boot-2016/arch/arm/dts/ipq807x-inseego_fg2000.dts
+a/u-boot-2016/arch/arm/dts/ipq807x-inseego_fg2000.dts
 +++ b/u-boot-2016/arch/arm/dts/ipq807x-inseego_fg2000.dts
 @@ -23,6 +23,8 @@
  		console = "/serial@78B3000";
@@ -10,37 +10,37 @@ diff --git a/u-boot-2016/arch/arm/dts/ipq807x-inseego_fg2000.dts b/u-boot-2016/a
 +		i2c1 = "/i2c@78b9000";
  	};
  
- 	keys {
+ 	键 {
 @@ -50,6 +52,58 @@
  			active_level = <GPIO_ACTIVE_LOW>;
          };
      };
 +
 +	/*
-+	 * FG2000 AW9523 is connected to BLSP1 QUP5 I2C:
-+	 * SDA/SCL = GPIO21/GPIO22, 7-bit address = 0x5b.
++	 * FG2000 AW9523 连接到 BLSP1 QUP5 I2C:
++	 * SDA/SCL = GPIO21/GPIO22，7位地址 = 0x5b。
 +	 */
 +	i2c1: i2c@78b9000 {
-+		compatible = "qcom,qup-i2c";
++		兼容 = "qcom,qup-i2c";
 +		#address-cells = <1>;
 +		#size-cells = <0>;
 +		reg = <0x78b9000 0x600>;
-+		clock-frequency = <400000>;
++		时钟频率 = <400000>;
 +		status = "okay";
 +
 +		i2c_gpio {
 +			scl {
 +				gpio = <21>;
-+				func = <2>;
-+				pull = <GPIO_NO_PULL>;
++				func = <3>;
++				pull = <GPIO_PULL_UP>;
 +				drvstr = <GPIO_8MA>;
 +				oe = <GPIO_OE_ENABLE>;
 +			};
 +
 +			sda {
 +				gpio = <22>;
-+				func = <2>;
-+				pull = <GPIO_NO_PULL>;
++				func = <3>;
++				pull = <GPIO_PULL_UP>;
 +				drvstr = <GPIO_8MA>;
 +				oe = <GPIO_OE_ENABLE>;
 +			};
