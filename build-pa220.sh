@@ -80,6 +80,25 @@ if [ -z "$TOOLCHAIN_DIR" ]; then
         fail "mips64-octeon-linux-gnu-gcc not found; pass the OCTEON SDK toolchain directory"
 fi
 
+# Apply PA-220-specific maintenance patches maintained in this integration repo.
+# Patch application is idempotent: already-applied patches are left in place.
+PA220_SOURCE_ROOT=$(git -C "$UBOOT_DIR" rev-parse --show-toplevel)
+PATCH_DIR="$ROOT_DIR/patches/pa220"
+if [ -d "$PATCH_DIR" ]; then
+    for PATCH_FILE in "$PATCH_DIR"/*.patch; do
+        [ -f "$PATCH_FILE" ] || continue
+        if git -C "$PA220_SOURCE_ROOT" apply --reverse --check "$PATCH_FILE" >/dev/null 2>&1; then
+            echo "PA-220 patch already applied: $(basename "$PATCH_FILE")"
+        else
+            git -C "$PA220_SOURCE_ROOT" apply --check "$PATCH_FILE" || \
+                fail "patch does not apply cleanly: $PATCH_FILE"
+            git -C "$PA220_SOURCE_ROOT" apply "$PATCH_FILE" || \
+                fail "failed to apply patch: $PATCH_FILE"
+            echo "Applied PA-220 patch: $(basename "$PATCH_FILE")"
+        fi
+    done
+fi
+
 if [ -n "$TOOLCHAIN_DIR" ]; then
     "$UBOOT_DIR/build.sh" "$TOOLCHAIN_DIR"
 else
