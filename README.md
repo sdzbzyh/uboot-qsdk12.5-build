@@ -218,3 +218,5 @@ Fork 本仓库后，在 GitHub Actions 中手动触发“构建并发布”工�
 ## PA-220 (OCTEON) 独立构建
 
 PA-220 使用独立的 Cavium OCTEON U-Boot 源码和 MIPS64 工具链，不属于本仓库原有的 Qualcomm QSDK U-Boot 2016 构建目标。请使用独立入口 `./build-pa220.sh /path/to/tools-gcc-4.7`，不要将 PA-220 板级代码直接混入原有 QSDK 构建流程。首次运行会检出固定版本源码；构建依赖、产物位置及启动/闪存风险见 [doc/PA220.md](doc/PA220.md)。
+
+PA-220 维护功能盘点、只读诊断命令和后续 Web/固件管理开发路线见 [doc/PA220-MAINTENANCE.md](doc/PA220-MAINTENANCE.md)。
