@@ -28,13 +28,13 @@ fail() {
     exit 1
 }
 
-if [ "\${1:-}" = "-h" ] || [ "\${1:-}" = "--help" ]; then
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
     usage
     exit 0
 fi
 [ "$#" -le 1 ] || fail "too many arguments (use --help)"
 
-TOOLCHAIN_DIR=\${1:-\${OCTEON_TOOLCHAIN_DIR:-}}
+TOOLCHAIN_DIR=${1:-${OCTEON_TOOLCHAIN_DIR:-}}
 if [ -n "$TOOLCHAIN_DIR" ]; then
     case "$TOOLCHAIN_DIR" in
         /*) ;;
@@ -50,11 +50,11 @@ command -v git >/dev/null 2>&1 || fail "git is required"
 command -v make >/dev/null 2>&1 || fail "make is required"
 command -v nproc >/dev/null 2>&1 || fail "nproc is required by the PA-220 build script"
 
-if [ -n "\${PA220_UBOOT_DIR:-}" ]; then
+if [ -n "${PA220_UBOOT_DIR:-}" ]; then
     UBOOT_DIR=$PA220_UBOOT_DIR
     [ -d "$UBOOT_DIR" ] || fail "PA220_UBOOT_DIR does not exist: $UBOOT_DIR"
 else
-    REPO_DIR=\${PA220_REPO_DIR:-$ROOT_DIR/external/pa220-openwrt}
+    REPO_DIR=${PA220_REPO_DIR:-$ROOT_DIR/external/pa220-openwrt}
     UBOOT_DIR="$REPO_DIR/u-boot"
 
     if ! git -C "$REPO_DIR" rev-parse --show-toplevel >/dev/null 2>&1; then
@@ -89,7 +89,7 @@ fi
 BUILT_IMAGE="$UBOOT_DIR/u-boot-octeon_pa220.bin"
 [ -s "$BUILT_IMAGE" ] || fail "build did not produce $BUILT_IMAGE"
 
-OUTPUT_DIR=\${PA220_OUTPUT_DIR:-$ROOT_DIR/bin/pa220}
+OUTPUT_DIR=${PA220_OUTPUT_DIR:-$ROOT_DIR/bin/pa220}
 mkdir -p "$OUTPUT_DIR"
 cp -f "$BUILT_IMAGE" "$OUTPUT_DIR/u-boot-octeon_pa220.bin"
 echo "PA-220 U-Boot image: $OUTPUT_DIR/u-boot-octeon_pa220.bin"
