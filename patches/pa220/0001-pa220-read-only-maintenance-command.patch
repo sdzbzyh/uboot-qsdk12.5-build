@@ -1,0 +1,97 @@
+diff --git a/u-boot/board/octeon/pa220/pa220_board.c b/u-boot/board/octeon/pa220/pa220_board.c
+--- a/u-boot/board/octeon/pa220/pa220_board.c
++++ b/u-boot/board/octeon/pa220/pa220_board.c
+@@ -270,4 +270,79 @@
+  return CMD_RET_USAGE;
+ }
+ 
+ U_BOOT_CMD(cpld, 5, 0, do_cpld,
+ 	   "read/write PA-220 CPLD registers",
+ 	   "[display]            - show registers 0-d\n"
+ 	   "cpld read <reg>           - read one register (hex)\n"
+ 	   "cpld write <reg> <val>    - write one register (hex)\n"
+ 	   "cpld write -f d <val>     - write reg d (flash select/reboot!)");
++
++/*
++ * Read-only maintenance summary. Keep this command safe to run while
++ * investigating a board: it must not modify environment, CPLD or storage.
++ */
++static const char *pa220_env_value(const char *name)
++{
++	char *value = getenv(name);
++
++	return value ? value : "(not set)";
++}
++
++static void pa220_print_status(void)
++{
++	printf("PA-220 maintenance status\n");
++	printf("-------------------------\n");
++	printf("Board type : %lu\n", gd->board_type);
++	printf("DRAM       : %llu MiB (%llu bytes)\n",
++	       (unsigned long long)(gd->ram_size >> 20),
++	       (unsigned long long)gd->ram_size);
++	printf("CPU clock  : %lu MHz\n",
++	       gd->cpu_clk / 1000000);
++	printf("Relocated  : 0x%llx\n",
++	       (unsigned long long)gd->relocaddr);
++	printf("Ethernet   : active=%s, primary=%s\n",
++	       pa220_env_value("ethact"),
++	       pa220_env_value("ethprime"));
++	printf("IPv4       : address=%s, server=%s, gateway=%s\n",
++	       pa220_env_value("ipaddr"),
++	       pa220_env_value("serverip"),
++	       pa220_env_value("gatewayip"));
++
++	if (!pa220_cpld_mapped()) {
++		puts("CPLD       : boot bus CS0 is not mapped\n");
++		return;
++	}
++
++	printf("CPLD       : version=%u, power/reg1=0x%02x\n",
++	       cvmx_read64_uint8(CVMX_ADD_IO_SEG(0x1b040000ull)),
++	       cvmx_read64_uint8(CVMX_ADD_IO_SEG(0x1b040001ull)));
++	printf("PHY reset  : reg5=0x%02x (bit2=%s)\n",
++	       cvmx_read64_uint8(CVMX_ADD_IO_SEG(0x1b040005ull)),
++	       (cvmx_read64_uint8(CVMX_ADD_IO_SEG(0x1b040005ull)) & 0x04) ?
++	       "asserted" : "released");
++	printf("LED state  : reg6=0x%02x reg7=0x%02x\n",
++	       cvmx_read64_uint8(CVMX_ADD_IO_SEG(0x1b040006ull)),
++	       cvmx_read64_uint8(CVMX_ADD_IO_SEG(0x1b040007ull)));
++	printf("Flash CPLD : regd=0x%02x (read only; do not change casually)\n",
++	       cvmx_read64_uint8(CVMX_ADD_IO_SEG(0x1b04000dull)));
++}
++
++static void pa220_print_environment_info(void)
++{
++	puts("PA-220 environment storage\n");
++	puts("---------------------------\n");
++	printf("Backend    : SPI NOR, bus %u, chip-select %u\n",
++	       CONFIG_ENV_SPI_BUS, CONFIG_ENV_SPI_CS);
++	printf("Primary    : offset 0x%08x, size 0x%x\n",
++	       CONFIG_ENV_OFFSET, CONFIG_ENV_SIZE);
++	printf("Redundant  : offset 0x%08x, sector 0x%x\n",
++	       CONFIG_ENV_OFFSET_REDUND, CONFIG_ENV_SECT_SIZE);
++	puts("WARNING    : saveenv writes to SPI NOR.\n");
++	puts("RAM test   : do not run saveenv or sf erase/write/update.\n");
++}
++
++static int do_pa220(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
++{
++	if (argc == 1 || !strcmp(argv[1], "status")) {
++		pa220_print_status();
++		return CMD_RET_SUCCESS;
++	}
++
++	if (argc == 2 && !strcmp(argv[1], "env")) {
++		pa220_print_environment_info();
++		return CMD_RET_SUCCESS;
++	}
++
++	return CMD_RET_USAGE;
++}
++
++U_BOOT_CMD(pa220, 2, 1, do_pa220,
++	   "PA-220 read-only maintenance information",
++	   "status  - show board, memory, network and CPLD status\n"
++	   "pa220 env     - show environment storage and write warning");
