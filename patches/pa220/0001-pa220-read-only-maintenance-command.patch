@@ -1,17 +1,8 @@
 diff --git a/u-boot/board/octeon/pa220/pa220_board.c b/u-boot/board/octeon/pa220/pa220_board.c
 --- a/u-boot/board/octeon/pa220/pa220_board.c
 +++ b/u-boot/board/octeon/pa220/pa220_board.c
-@@ -270,4 +270,79 @@
-  return CMD_RET_USAGE;
- }
- 
- U_BOOT_CMD(cpld, 5, 0, do_cpld,
- 	   "read/write PA-220 CPLD registers",
- 	   "[display]            - show registers 0-d\n"
- 	   "cpld read <reg>           - read one register (hex)\n"
- 	   "cpld write <reg> <val>    - write one register (hex)\n"
+@@ -272,1 +272,87 @@
  	   "cpld write -f d <val>     - write reg d (flash select/reboot!)");
-+
 +/*
 + * Read-only maintenance summary. Keep this command safe to run while
 + * investigating a board: it must not modify environment, CPLD or storage.
@@ -49,17 +40,17 @@ diff --git a/u-boot/board/octeon/pa220/pa220_board.c b/u-boot/board/octeon/pa220
 +	}
 +
 +	printf("CPLD       : version=%u, power/reg1=0x%02x\n",
-+	       cvmx_read64_uint8(CVMX_ADD_IO_SEG(0x1b040000ull)),
-+	       cvmx_read64_uint8(CVMX_ADD_IO_SEG(0x1b040001ull)));
++	       (unsigned int)cvmx_read64_uint8(CVMX_ADD_IO_SEG(0x1b040000ull)),
++	       (unsigned int)cvmx_read64_uint8(CVMX_ADD_IO_SEG(0x1b040001ull)));
 +	printf("PHY reset  : reg5=0x%02x (bit2=%s)\n",
-+	       cvmx_read64_uint8(CVMX_ADD_IO_SEG(0x1b040005ull)),
++	       (unsigned int)cvmx_read64_uint8(CVMX_ADD_IO_SEG(0x1b040005ull)),
 +	       (cvmx_read64_uint8(CVMX_ADD_IO_SEG(0x1b040005ull)) & 0x04) ?
 +	       "asserted" : "released");
 +	printf("LED state  : reg6=0x%02x reg7=0x%02x\n",
-+	       cvmx_read64_uint8(CVMX_ADD_IO_SEG(0x1b040006ull)),
-+	       cvmx_read64_uint8(CVMX_ADD_IO_SEG(0x1b040007ull)));
++	       (unsigned int)cvmx_read64_uint8(CVMX_ADD_IO_SEG(0x1b040006ull)),
++	       (unsigned int)cvmx_read64_uint8(CVMX_ADD_IO_SEG(0x1b040007ull)));
 +	printf("Flash CPLD : regd=0x%02x (read only; do not change casually)\n",
-+	       cvmx_read64_uint8(CVMX_ADD_IO_SEG(0x1b04000dull)));
++	       (unsigned int)cvmx_read64_uint8(CVMX_ADD_IO_SEG(0x1b04000dull)));
 +}
 +
 +static void pa220_print_environment_info(void)
@@ -67,11 +58,14 @@ diff --git a/u-boot/board/octeon/pa220/pa220_board.c b/u-boot/board/octeon/pa220
 +	puts("PA-220 environment storage\n");
 +	puts("---------------------------\n");
 +	printf("Backend    : SPI NOR, bus %u, chip-select %u\n",
-+	       CONFIG_ENV_SPI_BUS, CONFIG_ENV_SPI_CS);
++	       (unsigned int)CONFIG_ENV_SPI_BUS,
++	       (unsigned int)CONFIG_ENV_SPI_CS);
 +	printf("Primary    : offset 0x%08x, size 0x%x\n",
-+	       CONFIG_ENV_OFFSET, CONFIG_ENV_SIZE);
++	       (unsigned int)CONFIG_ENV_OFFSET,
++	       (unsigned int)CONFIG_ENV_SIZE);
 +	printf("Redundant  : offset 0x%08x, sector 0x%x\n",
-+	       CONFIG_ENV_OFFSET_REDUND, CONFIG_ENV_SECT_SIZE);
++	       (unsigned int)CONFIG_ENV_OFFSET_REDUND,
++	       (unsigned int)CONFIG_ENV_SECT_SIZE);
 +	puts("WARNING    : saveenv writes to SPI NOR.\n");
 +	puts("RAM test   : do not run saveenv or sf erase/write/update.\n");
 +}
