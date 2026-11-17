@@ -1,0 +1,7 @@
+
+DECIMAL       HEXADECIMAL     DESCRIPTION
+--------------------------------------------------------------------------------
+360496        0x58030         Flattened device tree, size: 3929 bytes, version: 17
+440088        0x6B718         Motorola S-Record; binary data in text format, record type: header
+1872992       0x1C9460        Flattened device tree, size: 10850 bytes, version: 17
+

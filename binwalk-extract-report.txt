@@ -1,0 +1,10 @@
+
+Scan Time:     2026-11-17 15:29:17
+Target File:   /home/debian/PA-220/pa220-spi-normal-working.img
+MD5 Checksum:  1226a935926d78a62a3f3aeccbbb0757
+Signatures:    436
+
+DECIMAL       HEXADECIMAL     DESCRIPTION
+--------------------------------------------------------------------------------
+440088        0x6B718         Motorola S-Record; binary data in text format, record type: header
+
