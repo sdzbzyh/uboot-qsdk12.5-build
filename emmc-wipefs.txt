@@ -1,0 +1,2 @@
+DEVICE            OFFSET TYPE UUID LABEL
+pa220-mmcblk0.img 0x1fe  dos       

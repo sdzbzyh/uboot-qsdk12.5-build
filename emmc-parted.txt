@@ -1,0 +1,16 @@
+Model:  (file)
+Disk /home/debian/PA-220/pa220-mmcblk0.img: 57802752s
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+Disk Flags: 
+
+Number  Start      End        Size       Type      File system     Flags
+ 1      16s        3967s      3952s      primary   ext2
+ 2      3968s      8004031s   8000064s   primary   ext3
+ 3      8004032s   16004095s  8000064s   primary   ext3
+ 4      16004096s  57802751s  41798656s  extended
+ 5      16004112s  40004159s  24000048s  logical   ext3
+ 6      40004176s  48004223s  8000048s   logical   ext3
+ 7      48004240s  48008191s  3952s      logical   linux-swap(v1)  swap
+ 8      48008208s  57802751s  9794544s   logical   ext3
+

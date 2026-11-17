@@ -1,0 +1,16 @@
+Disk pa220-mmcblk0.img: 27.56 GiB, 29595009024 bytes, 57802752 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x00000000
+
+Device             Boot    Start      End  Sectors  Size Id Type
+pa220-mmcblk0.img1            16     3967     3952  1.9M 83 Linux
+pa220-mmcblk0.img2          3968  8004031  8000064  3.8G 83 Linux
+pa220-mmcblk0.img3       8004032 16004095  8000064  3.8G 83 Linux
+pa220-mmcblk0.img4      16004096 57802751 41798656 19.9G  5 Extended
+pa220-mmcblk0.img5      16004112 40004159 24000048 11.4G 83 Linux
+pa220-mmcblk0.img6      40004176 48004223  8000048  3.8G 83 Linux
+pa220-mmcblk0.img7      48004240 48008191     3952  1.9M 82 Linux swap / Solaris
+pa220-mmcblk0.img8      48008208 57802751  9794544  4.7G 83 Linux
