@@ -1,0 +1,140 @@
+/dts-v1/;
+
+/ {
+	model = "cavium,generic_spi_stage2";
+	compatible = "cavium,generic_spi_stage2";
+	#address-cells = <0x02>;
+	#size-cells = <0x02>;
+	interrupt-parent = <0x01>;
+
+	soc@0 {
+		compatible = "simple-bus";
+		#address-cells = <0x02>;
+		#size-cells = <0x02>;
+		ranges;
+
+		interrupt-controller@1070000000000 {
+			compatible = "cavium,octeon-3860-ciu";
+			interrupt-controller;
+			#interrupt-cells = <0x02>;
+			reg = <0x10700 0x00 0x00 0x7000>;
+			linux,phandle = <0x01>;
+			phandle = <0x01>;
+		};
+
+		gpio-controller@1070000000800 {
+			#gpio-cells = <0x02>;
+			compatible = "cavium,octeon-3860-gpio";
+			reg = <0x10700 0x800 0x00 0x100>;
+			gpio-controller;
+			interrupt-controller;
+			#interrupt-cells = <0x02>;
+			interrupts = <0x00 0x10>;
+		};
+
+		i2c@1180000001000 {
+			#address-cells = <0x01>;
+			#size-cells = <0x00>;
+			compatible = "cavium,octeon-3860-twsi";
+			reg = <0x11800 0x1000 0x00 0x200>;
+			interrupts = <0x00 0x2d>;
+			clock-frequency = <0x186a0>;
+		};
+
+		i2c@1180000001200 {
+			#address-cells = <0x01>;
+			#size-cells = <0x00>;
+			compatible = "cavium,octeon-3860-twsi";
+			reg = <0x11800 0x1200 0x00 0x200>;
+			interrupts = <0x00 0x3b>;
+			clock-frequency = <0x186a0>;
+		};
+
+		serial@1180000000800 {
+			compatible = "cavium,octeon-3860-uart", "ns16550";
+			reg = <0x11800 0x800 0x00 0x400>;
+			clock-frequency = <0x00>;
+			#current-speed = <0x1c200>;
+			current-speed = <0x2580>;
+			reg-shift = <0x03>;
+			interrupts = <0x00 0x22>;
+		};
+
+		serial@1180000000c00 {
+			compatible = "cavium,octeon-3860-uart", "ns16550";
+			reg = <0x11800 0xc00 0x00 0x400>;
+			clock-frequency = <0x00>;
+			#current-speed = <0x1c200>;
+			current-speed = <0x2580>;
+			reg-shift = <0x03>;
+			interrupts = <0x00 0x23>;
+		};
+
+		spi@1070000001000 {
+			compatible = "cavium,octeon-3010-spi";
+			reg = <0x10700 0x1000 0x00 0x100>;
+			interrupts = <0x00 0x3a>;
+			#address-cells = <0x01>;
+			#size-cells = <0x00>;
+
+			eeprom@0 {
+				compatible = "st,m95256", "atmel,at25";
+				reg = <0x00>;
+				spi-max-frequency = <0x4c4b40>;
+				spi-cpha;
+				spi-cpol;
+				pagesize = <0x40>;
+				size = <0x8000>;
+				address-width = <0x10>;
+				cavium,qlm-trim = "9,eeprom";
+			};
+
+			nor-flash@2 {
+				compatible = "micron,n25q128";
+				reg = <0x02>;
+				spi-max-frequency = <0x17d7840>;
+				spi-cpha;
+				spi-cpol;
+				pagesize = <0x100>;
+				size = <0x1000000>;
+				address-width = <0x18>;
+			};
+		};
+
+		nand-flash-interface@1070001000000 {
+			compatible = "cavium,octeon-5230-nand";
+			reg = <0x10700 0x1000000 0x00 0x100 0x11800 0x168 0x00 0x20>;
+			#address-cells = <0x01>;
+			#size-cells = <0x00>;
+			interrupts = <0x00 0x3f>;
+
+			flash@2 {
+				compatible = "nand-flash";
+				reg = <0x02>;
+				nand-ecc-mode = "hw_syndrome";
+				nand-ecc-size = <0x400>;
+				nand-ecc-bytes = <0x2a>;
+				nand-bus-width = <0x08>;
+			};
+		};
+
+		dma-engine@1180000000100 {
+			compatible = "cavium,octeon-5750-bootbus-dma";
+			reg = <0x11800 0x100 0x00 0x08>;
+			interrupts = <0x00 0x3f>;
+		};
+
+		dma-engine@1180000000108 {
+			compatible = "cavium,octeon-5750-bootbus-dma";
+			reg = <0x11800 0x108 0x00 0x08>;
+			interrupts = <0x00 0x3f>;
+		};
+	};
+
+	aliases {
+		twsi0 = "/soc@0/i2c@1180000001000";
+		twsi1 = "/soc@0/i2c@1180000001200";
+		uart0 = "/soc@0/serial@1180000000800";
+		uart1 = "/soc@0/serial@1180000000c00";
+	};
+};
