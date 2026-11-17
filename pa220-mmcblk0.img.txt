@@ -1,0 +1,161 @@
+X-Ways Forensics 20.5 SR-1 x64
+2022/11/17, 15:44:17
+
+[G:\pa220-mmcblk0.img]
+
+总容量: 29,595,009,024 字节 = 27.6 GB
+每扇区字节数: 512
+扇区统计: 57,802,752
+
+分区类型: MBR
+未分区空间: 0 扇区 
+
+分区 1
+扇区 16 - 3,967
+分区表: 扇区 0
+文件系统： Ext2
+总容量: 2,023,424 字节 = 1.9 MB
+扇区统计: 3,952
+每扇区字节数: 512
+每簇字节数: 1,024
+空余簇: 1,919 = 97% 空余
+簇总数: 1,976
+Number of Inodes: 248
+Number of free Inodes: 237
+Number of block groups: 1
+Blocks per group: 8,192
+Inodes per group: 248
+Inode size: 128
+Uses sparse superblocks: 是
+Uses Flexible Block Groups: 否
+Uses Meta Block Groups: 否
+FS creation time: 2026/11/01d23:22:57 +8
+Last write time: 2026/11/01d23:59:29 +8
+
+分区 2
+扇区 3,968 - 8,004,031
+分区表: 扇区 0
+文件系统： Ext3
+总容量: 4,096,032,768 字节 = 3.8 GB
+扇区统计: 8,000,064
+每扇区字节数: 512
+每簇字节数: 4,096
+空余簇: 973,725 = 97% 空余
+簇总数: 1,000,008
+Number of Inodes: 250,976
+Number of free Inodes: 250,959
+Number of block groups: 31
+Blocks per group: 32,768
+Inodes per group: 8,096
+Inode size: 128
+Uses sparse superblocks: 是
+Uses Flexible Block Groups: 否
+Uses Meta Block Groups: 否
+FS creation time: 2026/11/17d14:02:17 +8
+Last mount time: 2026/11/17d14:02:25 +8
+Last write time: 2026/11/17d14:02:25 +8
+
+分区 3
+扇区 8,004,032 - 16,004,095
+分区表: 扇区 0
+文件系统： Ext3
+总容量: 4,096,032,768 字节 = 3.8 GB
+扇区统计: 8,000,064
+每扇区字节数: 512
+每簇字节数: 4,096
+空余簇: 236,557 = 24% 空余
+簇总数: 1,000,008
+Number of Inodes: 250,976
+Number of free Inodes: 189,874
+Number of block groups: 31
+Blocks per group: 32,768
+Inodes per group: 8,096
+Inode size: 128
+Uses sparse superblocks: 是
+Uses Flexible Block Groups: 否
+Uses Meta Block Groups: 否
+FS creation time: 2026/06/15d07:47:32 +8
+Last mount time: 2026/06/15d20:54:12 +8
+Last write time: 2026/11/02d00:19:37 +8
+
+分区 4
+扇区 16,004,112 - 40,004,159
+分区表: 扇区 16,004,096
+文件系统： Ext3
+总容量: 12,288,024,576 字节 = 11.4 GB
+扇区统计: 24,000,048
+每扇区字节数: 512
+每簇字节数: 4,096
+空余簇: 2,931,590 = 98% 空余
+簇总数: 3,000,006
+Number of Inodes: 750,720
+Number of free Inodes: 748,464
+Number of block groups: 92
+Blocks per group: 32,768
+Inodes per group: 8,160
+Inode size: 128
+Uses sparse superblocks: 是
+Uses Flexible Block Groups: 否
+Uses Meta Block Groups: 否
+FS creation time: 2026/11/01d23:22:21 +8
+Last mount time: 2026/11/17d13:44:05 +8
+Last write time: 2026/11/17d14:04:44 +8
+
+分区 5
+扇区 40,004,176 - 48,004,223
+分区表: 扇区 40,004,160
+文件系统： Ext3
+总容量: 4,096,024,576 字节 = 3.8 GB
+扇区统计: 8,000,048
+每扇区字节数: 512
+每簇字节数: 4,096
+空余簇: 692,315 = 69% 空余
+簇总数: 1,000,006
+Number of Inodes: 500,960
+Number of free Inodes: 500,228
+Number of block groups: 31
+Blocks per group: 32,768
+Inodes per group: 16,160
+Inode size: 128
+Uses sparse superblocks: 是
+Uses Flexible Block Groups: 否
+Uses Meta Block Groups: 否
+FS creation time: 2000/01/01d10:00:16 +8
+Last mount time: 2026/11/17d13:44:05 +8
+Last write time: 2026/11/17d14:04:44 +8
+
+分区 6
+扇区 48,004,240 - 48,008,191
+分区表: 扇区 48,004,224
+Linux Swap
+
+分区 7
+扇区 48,008,208 - 57,802,751
+分区表: 扇区 48,008,192
+文件系统： Ext3
+总容量: 5,014,806,528 字节 = 4.7 GB
+扇区统计: 9,794,544
+每扇区字节数: 512
+每簇字节数: 4,096
+空余簇: 1,195,768 = 98% 空余
+簇总数: 1,224,318
+Number of Inodes: 306,432
+Number of free Inodes: 306,330
+Number of block groups: 38
+Blocks per group: 32,768
+Inodes per group: 8,064
+Inode size: 128
+Uses sparse superblocks: 是
+Uses Flexible Block Groups: 否
+Uses Meta Block Groups: 否
+FS creation time: 2026/11/02d00:30:15 +8
+Last mount time: 2026/11/17d13:35:27 +8
+Last write time: 2026/11/17d13:35:27 +8
+
+未使用的 分区间隙 空间:
+扇区 0 - 15 (8.0 KB)
+扇区 16,004,096 - 16,004,111 (8.0 KB)
+扇区 40,004,160 - 40,004,175 (8.0 KB)
+扇区 48,004,224 - 48,004,239 (8.0 KB)
+扇区 48,008,192 - 48,008,207 (8.0 KB)
+= 40.0 KB
