@@ -194,3 +194,13 @@
 - USB 外接介质与内部 eMMC/SPI NOR 分开处理；仍属于持久化介质，Web 不开放通用 usb write。
 - CONFIG_CMD_OCTEON_ERASEENV 受 CONFIG_ENV_IS_IN_FLASH 条件控制；PA-220 使用 CONFIG_ENV_IS_IN_SPI_FLASH，该 parallel-NOR eraseenv 命令不属于当前 PA 配置路径。
 - P1-A4 所有写入入口仅作源码追踪，没有执行；编译和实机状态 NOT VERIFIED。
+
+
+## P1-A5 第一批 IPQ API/PA 板级硬件接口审计（2026-11-18）
+
+证据：`audit/P1-A5-IPQ-PA-HARDWARE-API.md`。
+
+- IPQ ipq_api.c 包含 SMEM/MIBIB/flash detect、GPIO/LED/button、9008 recovery、内存范围检查和 board info；PA-220 无 QCA SMEM/MIBIB，使用 eMMC GPT、TLV EEPROM、OCTEON CVMX GPIO 和 CPLD，不能直接移植。
+- common/main.c 在 CONFIG_HTTPD 下 autoboot 前调用 do_network_check()/do_httpd_check()；do_network_check() 可能 setenv 后 saveenv，failsafe_env_exists() 也可能 saveenv。不能将 CONFIG_HTTPD 启动钩子整体移植到 PA-220。
+- PA-220 现有板级 CPLD 操作：reg d bit0 pulse（normal-flash bootloader watchdog keepalive）、reg5 bit2 PHY reset、reg6/reg7 LED；保留现有初始化，不新增写操作。
+- PA-220 TLV EEPROM 用于 board descriptor、MAC、clock/DDR clock；只读信息可研究复用。
