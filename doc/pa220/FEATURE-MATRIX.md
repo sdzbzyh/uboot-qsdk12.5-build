@@ -22,9 +22,9 @@
 | DHCP Server | 给 PC/客户端分配地址 | 未实现 | 可适配-待实现 | 评估地址池、租约、冲突与报文处理 |
 | DHCP 报文过滤 | 防止上级 DHCP 报文干扰 | uBootKit 具有平台定制逻辑 | 需研究 | 确认 MGT 直连/桥接场景是否需要 |
 | Ping/DNS | 网络诊断 | 已配置相关网络栈能力 | 已配置 | 实机验证 |
-| TFTP | 下载/上传镜像 | 已配置 | 已配置 | RAM 下载、文件长度和传输可靠性测试 |
+| TFTP | 下载/上传镜像 | PA-220 已有旧版实现；RAM store_block 无 __tmp_load pre-write guard，也无显式 syncw | 已配置，但安全 RAM 接收需加固 | 统一 runtime named-block validator；每 block memcpy 前检查；传输完成后执行 syncw 语义同步；确认 direct-flash 分支关闭 |
 | HTTP 下载 | wget/HTTP 获取文件 | 需核实 PA-220 网络栈的 HTTP 客户端支持 | 需研究 | 检查旧版 U-Boot 的 wget/HTTP 代码依赖 |
-| HTTP 文件上传 | 浏览器上传文件 | 未实现 | 可适配-待实现 | 固定缓冲区、限长、接收超时、校验 |
+| HTTP 文件上传 | 浏览器上传文件 | 未实现；uBootKit 参考实现使用 IPQ 固定地址，PA-220 同名 flush_cache 实际为全局 I/D-cache 操作 | 可适配-待实现 | 使用运行时 __tmp_load；Content-Length 全量预留；每个 chunk 写入前检查；完成后使用 PA-220 syncw 语义同步；禁止 IPQ 地址/API |
 | 镜像校验 | CRC、哈希、镜像头检查 | CRC32、SHA-1/MD5/SHA-256 等配置已存在 | 已配置 | 核验命令和算法实现 |
 | eMMC/MMC | 设备识别、分区、读写 | MMC/eMMC 已配置 | 已配置 | 先只读识别和读回；写入需独立审批 |
 | 文件系统 | FAT、EXT2/3/4 | 读取与部分写入命令已配置 | 已配置 | 逐项验证驱动与实际分区 |
@@ -237,3 +237,15 @@
 - Stage2 已完成 DRAM 初始化；RAM-resident Stage3 从 dram_size_mbytes 环境变量接收 DRAM 容量，gd->ram_size 最终由该值/已检测值设置；默认 8192 MiB 不是实机容量证据。
 - PA-220 内存配置包含 TEXT_BASE=0xC0000000、SDRAM_BASE=0x80000000、LOAD_ADDR 默认0x20000000、MALLOC_LEN=12MiB、BOOTMAPSZ=1MiB、mtest 0x22000000–0x2A000000；项目既有 TFTP 地址 0x81000000 与默认 LOAD_ADDR 不同。
 - PA-220 安全 RAM 上传区尚未完成地址图，必须按 MIPS64/n32、cached/uncached alias、Stage2 handoff、U-Boot/heap/stack/GD/FDT/bootmap/mtest 等边界重写检查；未确认前不开放上传。
+
+
+## P1-A5 ELF64 / Cache 一致性审计补充（2026-11-18）
+
+证据：`audit/P1-A5-CALLCHAIN-RAM-CONVERGENCE.md` 第 23～26 节，以及 `P1-COMPLETION-AND-P2-ORDER.md`。
+
+- **ELF/bootelf**：PA-220 有 OCTEON 专用 `load_elf64_image()`，编译入口为 `CONFIG_CMD_OCTEON_ELF`。当前 `valid_elf_image()` 不接收文件长度；ELF64 PT_LOAD 和 section fallback 都缺少完整 source payload / program-header / destination-range 检查。little-endian 8-byte 转换循环对非 8-byte 整数倍长度存在尾部越界风险。结论：已有实现，**可适配-待加固**；所有 segment 必须在写入前验证到运行时 `__tmp_load`。
+- **PA-220 Cache API**：`flush_cache()` 实际执行全局同步并失效 I/D-cache；`flush_dcache_range()` 实际执行 `syncw`；`invalidate_dcache_range()` 是空实现。不可按 API 名称推断为逐行范围 flush。
+- **bootm**：镜像 load/decompress 完成后调用 `flush_cache()`；OS handoff hook 本身不执行另一个 cache-range 操作。
+- **bootelf**：loader 每个 segment/section 写入后调用 `flush_cache()`；`do_bootelf_exec()` 本身不再 flush，也不走 `arch_preboot_os()` 临时块释放路径。
+- **统一 RAM validator**：TFTP 每 block、HTTP 每 chunk、HTTP 完整 payload reservation、ELF 每个 segment 均在 memcpy/memset 前检查；唯一边界来源为运行时 `__tmp_load` descriptor。当前只是设计结论，尚未实现/编译/实测。
+- TFTP/HTTP payload 完成后的数据同步与 ELF/bootm 执行代码的 I/D-cache 维护必须区分；不得为每个网络 chunk 调用 PA-220 的全局 `flush_cache()`。
