@@ -96,3 +96,15 @@
 - **mac**：CONFIG_FAILSAFE_MAC_MANAGEMENT 默认关闭。uBootKit MAC 写路径会触发 SPI erase/write、NAND erase/write 或 MMC block_write。PA-220 MAC 来源为 TLV EEPROM/OCTEON board API；仅适配只读展示，任何 EEPROM 写入另行审查和授权。
 - 本批未执行存储写入、CPLD 写入、编译或实机验证。
 - P1-A2 仅剩 upgrade.c，仍按要求最后审计；不得将本批结论视为 P1-A2 完成。
+
+
+## P1-A2 最后一组：upgrade 与持久化写入审计（2026-11-18）
+
+证据：`audit/P1-A2-UPGRADE-PERSISTENT-WRITE-AUDIT.md`。按要求将 upgrade 放在 P1-A2 最后审计；至此用户指定的全部业务模块均完成源码静态审计。
+
+- /upload 只执行镜像识别/验证；/result 才调用 failsafe_write_image()，并通过 run_command() 执行写命令。
+- 已逐项记录 firmware、UBOOT、ART、CDT、PTABLE、SIMG 的 SPI/NAND/eMMC/分区写路径，以及 firmware 更新附带的 BOOTCONFIG/BOOTCONFIG1 隐式写入。
+- INITRAMFS 不调用 failsafe_write_image()，而在 HTTP 服务退出后 boot_from_mem()；不直接写持久化存储，但仍需 PA-220 专用 FIT/地址/启动路径审查。
+- QCA flash/MIBIB/ART/CDT/SMEM/bootconfig 机制不适用于 PA-220；PA-220 GPT/eMMC/SPI 写命令具备破坏性，不移植 Web 刷写入口。
+- check_fw_type() 接收 size 却不据此限制 magic 读取范围；上传验证不等同于签名验证或安全启动。
+- P1-A2 源码审计范围已覆盖 sysinfo/network/env/syslog/misc/webterm/backup/mibib/mac/upgrade；仍未编译、未实机验证，未执行任何持久化写入。
