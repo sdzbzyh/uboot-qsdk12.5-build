@@ -704,3 +704,17 @@ D-005 仍然保留“链接地址与加载地址必须区分”的决策，但 0
 6. TFTP 接收回调必须在 `memcpy` 前执行检查，不能依赖 `octeon_check_mem_load_range()` 的事后 warning。
 
 以上默认 8 GiB 结果可用于当前设计；最终仍以实机 `gd->ram_size`、named block 查询结果和 loadaddr 为准。
+
+
+## 17. TFTP 写入前安全边界的源码确认
+
+继续核对 `net/tftp.c` 与 `arch/mips/cpu/octeon/octeon_boot.c`：
+
+- `store_block()` 计算 `offset = block * TftpBlkSize + TftpBlockWrapOffset`；
+- 普通 RAM 接收分支直接执行 `memcpy((void *)(load_addr + offset), src, len)`；
+- 该写入前没有检查 `load_reserved_addr/load_reserved_size`；
+- `octeon_check_mem_load_range()` 读取 `fileaddr/filesize`，在加载完成后才检查并打印 warning；
+- 该检查没有阻止先前的 memcpy，也没有完整处理加法溢出；
+- 现有 TFTP 接收路径因此不能被视为具有 reserved-memory 越界保护。
+
+**后续实现要求进一步明确：**不能只在 TFTP 完成后调用现有 `octeon_check_mem_load_range()`。必须在每个接收 block 写 RAM 之前验证目的地址和长度，并对 block offset、`load_addr + offset`、`addr + len` 做溢出安全检查；越界时拒绝该 block/终止传输，绝不能先 memcpy 再告警。
