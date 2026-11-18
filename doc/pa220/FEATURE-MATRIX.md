@@ -85,3 +85,14 @@
 - **webterm**：/webterm/exec 通过 run_command 执行任意 U-Boot 命令，可能间接触发 saveenv、SPI/eMMC/文件系统写入；PA-220 Web 初版禁止。cmdlist 会暴露命令面，初版不提供。upload 依赖 QCA 固件辅助接口，且 set_file_info_env 副作用 UNKNOWN，不直接移植。
 - misc/webterm 均由 CONFIG_HTTPD 的 failsafe 构建路径编入；实际目标配置启用、编译和实机状态 NOT VERIFIED。
 - P1-A2 尚余 backup.c、mibib.c、mac.c；upgrade.c 仍按要求最后审计。
+
+
+## P1-A2 第三组存储/MAC 模块审计（2026-11-18）
+
+证据：`audit/P1-A2-BACKUP-MIBIB-MAC.md`。本批完成 `backup.c`、`mibib.c`、`mac.c)，upgrade.c 尚未审计。
+
+- **backup**：uBootKit 通过 SPI/NAND/MMC/SMEM 读取并导出数据；PA-220 可研究 eMMC GPT 和经硬件选择确认的 SPI NOR 只读备份。无 NAND/SMEM 对应机制。需修复整数溢出、范围、短读和设备探测边界；默认禁止无认证全盘导出。
+- **mibib**：依赖 Qualcomm 9008/SMEM/MIBIB/LED；本文件主要解析上传文件并更新运行时 SMEM 分区状态，不是直接 flash 写入。PA-220 使用 GPT/板级布局，不适用。
+- **mac**：CONFIG_FAILSAFE_MAC_MANAGEMENT 默认关闭。uBootKit MAC 写路径会触发 SPI erase/write、NAND erase/write 或 MMC block_write。PA-220 MAC 来源为 TLV EEPROM/OCTEON board API；仅适配只读展示，任何 EEPROM 写入另行审查和授权。
+- 本批未执行存储写入、CPLD 写入、编译或实机验证。
+- P1-A2 仅剩 upgrade.c，仍按要求最后审计；不得将本批结论视为 P1-A2 完成。
