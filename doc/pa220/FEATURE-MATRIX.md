@@ -160,3 +160,15 @@
 - **EXT4**：PA-220 有 ext4load/ext4ls/ext4write 源码入口；ext4fs_write 会更新文件数据、inode、bitmap、superblock、group descriptors 和 journal。覆盖文件先删除旧文件，失败可能丢失旧文件。
 - **FAT**：PA-220 有 fatload/fatls/fatwrite；fatwrite 更新文件数据、FAT 表和目录项。新版/旧版 file_fat_write API 签名不同。
 - 文件系统库最终 .config 是否完整启用仍待构建确认；未执行 GPT/EXT4/FAT 写入。
+
+
+## P1-A4 第三批环境变量/SPI 后端审计（2026-11-18）
+
+证据：`audit/P1-A4-ENV-SPI-BACKEND.md`。P1-A4 仍在进行，固件分区映射/bootloader update 尚待审计。
+
+- PA-220 环境由 CONFIG_ENV_IS_IN_SPI_FLASH 选择 common/env_sf.c，主/冗余偏移 0xE00000/0xE10000，环境大小 8 KiB，sector 64 KiB，bus0/CS0。
+- 冗余 saveenv() 每次擦除一个 64 KiB SPI NOR sector，写 8 KiB 环境结构、恢复 sector 剩余 56 KiB，并更新旧副本 flags；这是真实 SPI 持久化写入。
+- 启动 env_relocate_spec() 读取两份环境并按 CRC/flags 选择，不在正常读取路径写 SPI。
+- setenv()/env_import() 仅改变运行时 env；saveenv() 才持久化。uBootKit network/env handler 调用 saveenv 的写接口不能直接移植。
+- PA-220 include/environment.h 未发现 uBootKit 同名公开 env_export() API；只读导出需用 PA 旧版 hexport_r() 封装。
+- 未执行 saveenv/SF 写入；实际 SPI bus0/CS0 物理芯片映射仍 NOT VERIFIED。
