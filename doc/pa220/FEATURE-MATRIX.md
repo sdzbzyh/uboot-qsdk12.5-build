@@ -204,3 +204,15 @@
 - common/main.c 在 CONFIG_HTTPD 下 autoboot 前调用 do_network_check()/do_httpd_check()；do_network_check() 可能 setenv 后 saveenv，failsafe_env_exists() 也可能 saveenv。不能将 CONFIG_HTTPD 启动钩子整体移植到 PA-220。
 - PA-220 现有板级 CPLD 操作：reg d bit0 pulse（normal-flash bootloader watchdog keepalive）、reg5 bit2 PHY reset、reg6/reg7 LED；保留现有初始化，不新增写操作。
 - PA-220 TLV EEPROM 用于 board descriptor、MAC、clock/DDR clock；只读信息可研究复用。
+
+
+## P1-A5 第二批 QLM/MDIO/PHY/Bootbus 时序审计（2026-11-18）
+
+证据：`audit/P1-A5-QLM-MDIO-PHY-BOOTBUS.md`。
+
+- PA-220 DTS 描述 8 个 Marvell 88E1680 PHY（MDIO 8–15）和一个 88E1512（MDIO 1），由 OCTEON PHY 初始化代码按 marvell,reg-init 执行 MDIO 寄存器配置。
+- PA-220 board_configure_qlms() 存在，但固定源码未找到调用点；实际 DLM0 QSGMII/QSGMII 配置路径 NOT VERIFIED。
+- board_prepare_os_handoff() 由 octeon_bootloader_shutdown() 调用；board_enter_cli() 由 main_loop() 调用。CPLD reg5/reg7 的写入时序已确认。
+- octeon_boot_bus_board_post_init() 在 octeon_boot_bus_late_init() 内被调用，但固定源码中 late_init 的调用点尚未找到；reg d watchdog pulse 可达性 NOT VERIFIED。
+- 88x3140 PHY SPI Flash 编程命令受 CONFIG_PHY_MARVELL_FLASH_PGM 控制，PA-220 配置未定义该开关，且板上 PHY 为 88E1680/88E1512，不适用。
+- USB power GPIO2/GPIO3 在 U-Boot early_board_init() 被拉低；USB Mass Storage 命令源码存在不等于 U-Boot 阶段端口可用。
