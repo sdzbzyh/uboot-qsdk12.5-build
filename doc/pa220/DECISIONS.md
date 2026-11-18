@@ -58,3 +58,18 @@
 - 日期：2026-11-18
 - 决策：区分源码配置、补丁已实现、构建通过、RAM 启动通过和实机功能通过。
 - 理由：配置存在或编译成功均不能证明硬件功能正确。
+
+## D-010：RAM 接收和 ELF segment 写入统一受运行时 __tmp_load 边界约束
+
+- 日期：2026-11-18
+- 决策：TFTP block、HTTP chunk、完整 HTTP payload reservation 和 ELF segment 目标写入统一使用一个写入前范围验证入口；唯一权威范围来自运行时 `cvmx_bootmem_find_named_block("__tmp_load")` descriptor。
+- 理由：`loadaddr`/旧 globals/固定地址都不能独立证明 named block 仍存在或仍有效；TFTP 当前 memcpy 前无检查，ELF64 loader 当前也没有 segment 目标范围保护。
+- 实施要求：每次查询立即复制 static descriptor 字段；检查 descriptor 与 globals 一致；使用 checked add/multiply 和减法式半开区间检查；必须在 memcpy/memset 前拒绝越界；不把硬编码 RAM 地址写成最终安全地址。
+- 影响：P2/P6 实现前，不能把新 U-Boot 的 TFTP/HTTP 上传或 bootelf 任意 ELF 镜像加载标记为安全可用。
+
+## D-011：按 PA-220 实际 Cache API 语义区分数据同步与代码 Cache 维护
+
+- 日期：2026-11-18
+- 决策：PA-220 的 `flush_cache()` 视为全局同步并失效 I/D-cache 的操作；`flush_dcache_range()` 视为执行 `syncw` 的写入完成同步；`invalidate_dcache_range()` 当前为空实现。不得按函数名或其他 MIPS 平台实现推断其语义。
+- 理由：固定 PA-220 `arch/mips/cpu/octeon/cpu.c` 与 `cvmx-asm.h` 已确认实际指令和宏定义；`flush_cache(start,size)` 忽略地址/长度参数。
+- 影响：TFTP/HTTP payload 完成同步与 ELF/bootm 代码装载后的 I/D-cache 处理必须分别设计；不应对每个网络 chunk 调用全局 `flush_cache()`。任何后续优化必须保留可审查的同步/指令 Cache 一致性保证。
