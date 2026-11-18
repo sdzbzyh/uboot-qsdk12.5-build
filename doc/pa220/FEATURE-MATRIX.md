@@ -150,3 +150,13 @@
 - **SPI NOR**：PA-220 启用 OCTEON SPI、SPI_FLASH、Winbond W25Q128、CONFIG_CMD_SF；板级注释明确 intended read-only。sf write/erase/update 命令虽存在，项目仍禁止执行。实际 bus/CS 与双 Flash/CPLD 选择关系尚未实测。
 - **EXT_CSD**：CONFIG_OCTEON_MMC_NO_RST_N=1 明确保护 RST_n_FUNCTION OTP；必须保留。boot/RPMB 配置类命令需独立审查。
 - 未执行任何 mmc/SF/saveenv/CPLD 写操作；GPT/文件系统/环境后端尚未完成。
+
+
+## P1-A4 第二批 GPT/文件系统审计（2026-11-18）
+
+证据：`audit/P1-A4-GPT-FILESYSTEM.md`。P1-A4 整体仍在进行。
+
+- **GPT**：PA-220 启用 EFI_PARTITION/PARTITION_UUIDS/CMD_GPT；旧版 gpt write 会经 gpt_restore()/write_gpt_table() 对 eMMC LBA0、主/备 GPT header 和 entry array 执行 block_write。gpt_mmc_default() 忽略 gpt_restore() 返回值；旧命令无 verify 子命令。只读 GPT 检查可复用，写入不开放。
+- **EXT4**：PA-220 有 ext4load/ext4ls/ext4write 源码入口；ext4fs_write 会更新文件数据、inode、bitmap、superblock、group descriptors 和 journal。覆盖文件先删除旧文件，失败可能丢失旧文件。
+- **FAT**：PA-220 有 fatload/fatls/fatwrite；fatwrite 更新文件数据、FAT 表和目录项。新版/旧版 file_fat_write API 签名不同。
+- 文件系统库最终 .config 是否完整启用仍待构建确认；未执行 GPT/EXT4/FAT 写入。
