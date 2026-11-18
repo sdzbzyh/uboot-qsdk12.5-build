@@ -873,3 +873,20 @@ HTTP 接收过程由 TCP callback 将收到的 payload 通过 CPU `memcpy` 分�
 4. 在上述静态证据闭环后，再完成 P1-A5 的最终板级初始化时序、功能矩阵、ROADMAP 和 P1 总结。
 
 以上源码结论不修改 PA-220 固定源码；本轮没有执行任何 EEPROM、SPI、eMMC 或其他持久化写入。
+
+
+## 21. bootm 与 bootelf 对临时上传区的不同处理
+
+继续核对 `common/cmd_bootm.c`、`arch/mips/lib/bootm.c`、`common/cmd_elf.c` 和 `arch/mips/cpu/octeon/commands/cmd_elf64.c`：
+
+- `bootm_start()` 的 OS 执行路径会在调用实际 OS boot function 前调用 `arch_preboot_os()`，因此会进入 PA-220 的 `octeon_bootloader_shutdown()`，并按上一节规则释放 `__tmp*` 临时 named blocks（除非 `api_enable` 存在）。
+- `bootelf` 命令的 `do_bootelf()` 则直接验证/装载 ELF 并调用 `do_bootelf_exec()`，没有调用 `arch_preboot_os()`。应用返回 U-Boot 后，`__tmp_load` 不会因为这条命令本身而被释放。
+- OCTEON 的 64-bit `cmd_elf64.c` 覆盖实现中，`do_bootelf_exec()` 直接调用 entry，没有在该函数内执行 `flush_cache()` 或关闭 D-cache；不能将通用 `cmd_elf.c` 的 QNX 注释当作 OCTEON 64-bit 路径的缓存保证。
+- 当前没有完成 `load_elf64_image()` 内部各 segment copy、D/I-cache 同步和目标入口跳转前 cache maintenance 的完整追踪。
+
+**实现含义：**
+
+1. 上传区生命周期不能简单等同于“执行任何 boot 命令就释放”；bootm OS handoff 与 bootelf 应分别处理。
+2. bootelf 读取 ELF header/program header 并将 segment 装载到目标地址时，必须验证每个 segment 的目标范围；仅验证上传 ELF 文件本身位于 `__tmp_load` 并不代表其声明的 segment 地址安全。
+3. Web/TFTP 上传缓冲区 cache maintenance 与 ELF segment 目的地址 cache maintenance 是两个不同问题，不能只 flush 原始上传 buffer 就认为整个 bootelf 路径已解决。
+4. 该项留作后续 bootelf/ELF loader 专项核查，不影响本轮当前阶段性构建；不得在未核查前宣称 bootelf 缓存一致性已闭环。
