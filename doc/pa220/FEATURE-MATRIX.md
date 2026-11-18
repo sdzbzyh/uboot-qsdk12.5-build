@@ -259,8 +259,8 @@
 |---|---|---|
 | P2-1 | 集成分支/HEAD、固定源码 commit、uBootKit 审计 commit、构建脚本、补丁、PA-220 原生入口、配置入口和产物命名 | **已完成 GitHub 静态核查**；本地 apply check 留待干净构建 |
 | P2-2 | Linux 构建主机、宿主机依赖、OCTEON SDK GCC/binutils 完整版本和路径 | **已完成环境核查与最小交叉编译/链接验证**；完整 U-Boot 构建仍待 P2-3/P2-4 |
-| P2-3 | 全新固定源码 checkout、补丁应用、完整日志、配置快照、map/ELF、uboot_end、BIN 大小和 SHA256 | 待执行 |
-| P2-4 | 镜像头、CRC、board/image type、链接/重定位符号及目标对象/符号实际编入 | 待 P2-3 成功后执行 |
+| P2-3 | 全新固定源码 checkout、补丁应用、完整构建、配置快照、map/ELF、BIN 和 SHA256 | **构建成功；主要产物静态核查完成，仍有差异项待收敛** |
+| P2-4 | OCTEON ELF64 loader、Cache API、named-block API 等关键目标对象/符号实际编入及链接/重定位边界 | 待执行 |
 
 状态纪律：旧构建日志或配置宏不作为本轮构建成功证据；P2-2/P2-3/P2-4 未完成前不得标记 P2 完成。
 
