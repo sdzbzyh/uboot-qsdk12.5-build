@@ -1,0 +1,10 @@
+DATE=2026-11-18T17:00:57+08:00
+HOST=Linux debian 6.12.115+deb13.1-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.12.115-2 (2026-11-01) x86_64 GNU/Linux
+ARCH=x86_64
+NPROC=8
+HOST_GCC=gcc (Debian 14.2.0-19) 14.2.0
+MAKE=GNU Make 4.4.1
+GIT=git version 2.47.3
+SDK=/home/debian/OCTEON-SDK/tools-gcc-4.7
+TARGET_GCC=mips64-octeon-linux-gnu-gcc (Cavium Inc. Version: SDK_BUILD build 52) 4.7.0
+TARGET_LD=GNU ld (Cavium Inc. Version: SDK_BUILD build 52) 2.23.52
