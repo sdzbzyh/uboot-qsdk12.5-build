@@ -249,3 +249,17 @@
 - **bootelf**：loader 每个 segment/section 写入后调用 `flush_cache()`；`do_bootelf_exec()` 本身不再 flush，也不走 `arch_preboot_os()` 临时块释放路径。
 - **统一 RAM validator**：TFTP 每 block、HTTP 每 chunk、HTTP 完整 payload reservation、ELF 每个 segment 均在 memcpy/memset 前检查；唯一边界来源为运行时 `__tmp_load` descriptor。当前只是设计结论，尚未实现/编译/实测。
 - TFTP/HTTP payload 完成后的数据同步与 ELF/bootm 执行代码的 I/D-cache 维护必须区分；不得为每个网络 chunk 调用 PA-220 的全局 `flush_cache()`。
+
+
+## P2 构建复核进度（2026-11-18）
+
+证据：`audit/P2-1-BUILD-INPUT-LOCK.md`。
+
+| 子项 | 内容 | 状态 |
+|---|---|---|
+| P2-1 | 集成分支/HEAD、固定源码 commit、uBootKit 审计 commit、构建脚本、补丁、PA-220 原生入口、配置入口和产物命名 | **已完成 GitHub 静态核查**；本地 apply check 留待干净构建 |
+| P2-2 | Linux 构建主机、宿主机依赖、OCTEON SDK GCC/binutils 完整版本和路径 | 待用户提供实际构建机信息；当前会话无法访问用户本地工具链 |
+| P2-3 | 全新固定源码 checkout、补丁应用、完整日志、配置快照、map/ELF、uboot_end、BIN 大小和 SHA256 | 待执行 |
+| P2-4 | 镜像头、CRC、board/image type、链接/重定位符号及目标对象/符号实际编入 | 待 P2-3 成功后执行 |
+
+状态纪律：旧构建日志或配置宏不作为本轮构建成功证据；P2-2/P2-3/P2-4 未完成前不得标记 P2 完成。
