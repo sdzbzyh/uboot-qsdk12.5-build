@@ -216,3 +216,14 @@
 - octeon_boot_bus_board_post_init() 在 octeon_boot_bus_late_init() 内被调用，但固定源码中 late_init 的调用点尚未找到；reg d watchdog pulse 可达性 NOT VERIFIED。
 - 88x3140 PHY SPI Flash 编程命令受 CONFIG_PHY_MARVELL_FLASH_PGM 控制，PA-220 配置未定义该开关，且板上 PHY 为 88E1680/88E1512，不适用。
 - USB power GPIO2/GPIO3 在 U-Boot early_board_init() 被拉低；USB Mass Storage 命令源码存在不等于 U-Boot 阶段端口可用。
+
+
+## P1-A5 第三批 OCTEON Watchdog/OS handoff 审计（2026-11-18）
+
+证据：`audit/P1-A5-WATCHDOG-HANDOFF.md`。
+
+- PA-220 CONFIG_HW_WATCHDOG 已启用；Makefile 编入 octeon_wd.o 和 cmd_octeon_wd.o。
+- watchdog_enable/watchdog_timeout 环境 callback 在变量 create/overwrite 时立即调用 hw_watchdog_start；delete 时 disable。callback 不检查变量值，设为字符串 "0" 也会启动。
+- octwd test 会故意不喂狗并等待 NMI，不得开放 Web。
+- octeon_bootloader_shutdown() 在 OS handoff 调用 hw_watchdog_disable()，然后关闭网络/USB；该函数关闭 core0 watchdog，未调用 disable_all。
+- OCTEON CIU watchdog 与 CPLD reg d flash-failover watchdog 是两套独立硬件。
