@@ -718,3 +718,158 @@ D-005 仍然保留“链接地址与加载地址必须区分”的决策，但 0
 - 现有 TFTP 接收路径因此不能被视为具有 reserved-memory 越界保护。
 
 **后续实现要求进一步明确：**不能只在 TFTP 完成后调用现有 `octeon_check_mem_load_range()`。必须在每个接收 block 写 RAM 之前验证目的地址和长度，并对 block offset、`load_addr + offset`、`addr + len` 做溢出安全检查；越界时拒绝该 block/终止传输，绝不能先 memcpy 再告警。
+
+
+## 18. load-reserved named block 生命周期与运行时查询接口
+
+本轮继续核对 PA-220 固定源码 commit `801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`，重点确认 `__tmp_load` 是否会在 U-Boot 生命周期内被释放，以及 Web/TFTP 应使用什么接口确认其仍然有效。
+
+### 18.1 named block 的真实名称和类型
+
+证据文件：
+
+- `arch/mips/include/asm/arch-octeon/octeon_mem_map.h`
+- `arch/mips/lib/board_octeon.c`
+- `arch/mips/cpu/octeon/octeon_boot.c`
+
+源码定义：
+
+- `OCTEON_BOOTLOADER_LOAD_MEM_NAME = "__tmp_load"`
+- `OCTEON_BOOTLOADER_NAMED_BLOCK_TMP_PREFIX = "__tmp"`
+- `OCTEON_LINUX_RESERVED_MEM_NAME = "__tmp_reserved_linux"`
+
+`__tmp_load` 是临时 named block，不是永久保留的普通 DRAM 区。它的设计注释明确说明：供 U-Boot 加载 ELF 等镜像使用，在应用/OS 启动前释放。
+
+### 18.2 创建时机
+
+`octeon_boot.c` 在 bootmem allocator/descriptor 初始化后，完成 idle-core named block 分配，再调用 `octeon_configure_load_memory()`。该函数由 `board_octeon.c:__octeon_configure_load_memory()` 实现，并以 `OCTEON_BOOTLOADER_LOAD_MEM_NAME` 创建 named block。
+
+分配成功后设置：
+
+- 环境变量 `loadaddr`；
+- 全局变量 `load_reserved_addr`；
+- 全局变量 `load_reserved_size`。
+
+该分配不是每次 TFTP/Web 请求重新执行；正常 U-Boot CLI 生命周期内，named block 由 bootmem allocator 持续登记。分配失败时不会建立有效的 reserved globals，故不能只看环境变量 `loadaddr`。
+
+### 18.3 释放时机与例外
+
+`common/cmd_bootm.c` 在调用实际 OS boot function 前调用 `arch_preboot_os()`。PA-220 的 `arch_preboot_os()` 实现位于 `arch/mips/cpu/octeon/octeon_boot.c`，进入 `octeon_bootloader_shutdown()`。
+
+该 shutdown 路径：
+
+1. 执行板级 OS handoff hook；
+2. 关闭 watchdog；
+3. 在 `api_enable` 环境变量不存在时，关闭网络/USB 等相关设备；
+4. 调用 `octeon_free_tmp_named_blocks()`；
+5. 最后重新保留低 1 MiB。
+
+`octeon_free_tmp_named_blocks()` 遍历 bootmem named-block descriptor，对所有名称以 `"__tmp"` 开头且 size 非零的 block 调用 `cvmx_bootmem_phy_named_block_free()`。因此至少包括 `__tmp_load` 和 `__tmp_reserved_linux`，不是只释放单个 load block。
+
+**例外：**若 `api_enable` 环境变量存在，shutdown 会跳过 `octeon_free_tmp_named_blocks()`。不能假设所有 handoff 都会释放这些 block。
+
+释放函数没有清零对应 DRAM 内容；它释放的是 bootmem allocator 的占用登记。释放后不能再把旧地址当作仍被保留、可供 Web/TFTP 写入的安全区。
+
+另一个需要避免的状态是：释放函数没有同步清零 `load_reserved_addr/load_reserved_size` 两个全局变量。bootm 的 OS handoff 路径在进入 OS 前调用 `arch_preboot_os()`；在会返回的 fake-go/调试路径中，若执行后继续回到 U-Boot，旧 globals 可能仍保留数值，但 named block 已经释放。后续实现不能仅凭 globals 非零就判定 block 仍有效，必须重新查询 named block descriptor。
+
+### 18.4 可用的只读 named-block 查询 API
+
+`cvmx-bootmem.h` 声明：
+
+- `cvmx_bootmem_find_named_block(const char *name)`
+- 返回 `const cvmx_bootmem_named_block_desc_t *`；未找到返回 NULL；
+- descriptor 中有 `base_addr`、`size`、`name`。
+
+另有 `cvmx_bootmem_phy_named_block_find(name, flags)`，返回 named-block descriptor 的物理地址或 0。
+
+**后续首选接口：**通过 `cvmx_bootmem_find_named_block(OCTEON_BOOTLOADER_LOAD_MEM_NAME)` 读取 descriptor，并校验：
+
+1. descriptor 存在；
+2. `base_addr`、`size` 非零；
+3. descriptor 的 `base_addr/size` 与 `load_reserved_addr/load_reserved_size` 一致；
+4. 当前服务状态仍处于 U-Boot 可用阶段，未进入 OS handoff 清理阶段。
+
+若旧版构建配置无法直接使用该指针 API，再评估 `cvmx_bootmem_phy_named_block_find()` 或遍历 descriptor array 的兼容实现。环境变量 `loadaddr` 只作为默认目的地址提示，不作为安全边界的权威数据源。
+
+### 18.5 生命周期结论
+
+- 正常 U-Boot CLI/TFTP/Web 阶段：`__tmp_load` 由 bootmem named block 管理，可作为**条件安全**上传区。
+- OS handoff：默认会释放所有 `__tmp*` block；`api_enable` 存在时跳过释放。
+- handoff 后或 fake-go 返回后：必须重新查询 named block，不能只相信仍未清零的 globals。
+- 不应在 Web/TFTP 服务运行期间主动释放或重新分配 `__tmp_load`。
+- 该生命周期结论来自固定源码，不需要实机验证；实际 descriptor base/size 仍留待构建后只读确认。
+
+## 19. TFTP 与 Web 上传的写入/缓存路径对照
+
+### 19.1 PA-220 原生 TFTP RAM 写入
+
+证据文件：`net/tftp.c:store_block()`。
+
+当前普通 RAM 分支：
+
+- 计算 `offset = block * TftpBlkSize + TftpBlockWrapOffset`；
+- 计算 `newsize = offset + len`；
+- 直接执行 `memcpy((void *)(load_addr + offset), src, len)`；
+- 更新 `NetBootFileXferSize`。
+
+在该函数中没有看到：
+
+- 对 `load_reserved_addr/load_reserved_size` 的 pre-write 范围校验；
+- 对 block 乘法、offset 加法、目的地址加法的溢出保护；
+- `flush_cache()` / `flush_dcache_range()` 等显式 cache maintenance。
+
+若启用了 `CONFIG_SYS_DIRECT_FLASH_TFTP`，还存在直接 flash 写分支；RAM-only 维护服务不得把该分支误当作受 reserved RAM 限制的路径，必须确保配置/调用方式不会让上传请求落入 flash 写分支。
+
+因此既有 TFTP 代码仍不能直接用于安全上传：每个数据 block 写入前必须先完成防溢出计算和完整 reserved-range 校验，拒绝越界 block 后立即终止传输。
+
+### 19.2 uBootKit HTTP 上传路径（仅作为待适配行为参考）
+
+固定 uBootKit 源码：`chenxin527/uboot-qsdk12.5-build@9ce315735ac88fd0a7c7697bc527a8616ed0a972`。
+
+`net/httpd.c` 当前的 `httpd_get_upload_buffer_ptr()`：
+
+- RAM >= 512 MiB 时选择 `CONFIG_SYS_SDRAM_BASE + 256 MiB`；
+- 否则选择 IPQ 专用 `IPQ_TFTP_MIN_ADDR`；
+- 调用 IPQ `is_memory_region_available()` 判断；
+- 返回固定地址作为上传 buffer。
+
+HTTP 接收过程由 TCP callback 将收到的 payload 通过 CPU `memcpy` 分段复制到 `upload_ptr + upload_size`。上传完成后调用 `flush_cache(upload_ptr, payload_size)`，然后把完整 payload 交给 URI handler。
+
+适配 PA-220 时：
+
+1. 必须移除 IPQ 固定地址和 IPQ memory-availability API；
+2. 用 PA-220 `__tmp_load` named block descriptor 提供上传 buffer；
+3. 在第一次 payload memcpy 前，按整个 HTTP payload 长度预留并验证范围；
+4. 每个后续 TCP chunk 仍需验证当前 offset/len 不超过预先确认的总长度；
+5. 上传完成后执行 PA-220 适用的 cache maintenance，再将 buffer 交给镜像验证/解析逻辑；
+6. 不能让 URI handler 绕过上述检查直接持有任意 RAM 指针。
+
+### 19.3 Cache coherency 当前结论
+
+- HTTP 参考实现显式调用 `flush_cache()`，表明上传结束后有意将 CPU 写入的数据做 cache maintenance。
+- PA-220 原生 TFTP `store_block()` 没有在该函数中执行 cache flush。
+- PA-220 MIPS `do_bootm_linux()` 的准备/跳转代码本身也没有显示出通用 `flush_cache()` 调用；`octeon_bootloader_shutdown()` 的已核查路径同样没有明确的 upload-buffer flush。
+- 当前证据不足以断言整个启动链绝对没有其他 cache 维护机制；但不能把 TFTP 的 CPU memcpy 等同于“已完成供 OS/其他执行单元读取的 cache 同步”。
+
+**后续实现要求：**HTTP/TFTP 接收结束后必须有明确、可审查的 PA-220 cache maintenance 方案；同时确认 bootm/bootelf/OS handoff 对已加载镜像的缓存处理。该项属于后续实现必须闭环的源码工作，不需要为了本轮 P1 阶段继续猜测硬件 cache 状态，也不阻塞当前阶段性构建。
+
+## 20. 本轮结论与后续待办
+
+本轮已完成源码确认：
+
+- `__tmp_load` 的真实名称及 `"__tmp"` 临时块前缀；
+- 创建时机与 U-Boot 正常运行期间的生命周期；
+- OS handoff 的释放调用链及 `api_enable` 例外；
+- named-block descriptor 的只读查询 API；
+- globals 在释放后未清零的生命周期注意事项；
+- PA-220 TFTP 当前缺少 pre-write range validation 和显式 cache flush；
+- uBootKit HTTP 的 IPQ 固定地址不可移植，但“分段 CPU memcpy + 完成后 cache flush”的流程可作为设计参考。
+
+下一轮继续核对的重点：
+
+1. 明确 PA-220 旧版 bootmem descriptor 查询 API 在当前 PA-220 配置下的可用性，并据此确定最终 helper 的实现方式；
+2. 追踪 TFTP/HTTP 上传后的镜像消费路径，尤其 bootm/bootelf 对上传 buffer 的缓存与 handoff 处理；
+3. 将 range validator 设计为 HTTP/TFTP 共用、写入前调用的单一入口；
+4. 在上述静态证据闭环后，再完成 P1-A5 的最终板级初始化时序、功能矩阵、ROADMAP 和 P1 总结。
+
+以上源码结论不修改 PA-220 固定源码；本轮没有执行任何 EEPROM、SPI、eMMC 或其他持久化写入。
