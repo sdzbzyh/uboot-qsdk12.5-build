@@ -289,3 +289,257 @@ D-005 仍然保留“链接地址与加载地址必须区分”的决策，但 0
 4. 板级时序的硬件结果：PHY link、CPLD watchdog/failsafe 行为仍需实机验证
 
 以上均不允许在 P1 中用猜测替代证据。
+
+
+## 12. 第二轮源码收敛：TLV EEPROM 地址语义与有效访问窗口
+
+本轮继续直接核对 PA-220 固定源码树 `sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8` 中实际随项目保存的 U-Boot 源码，而不是仅依赖前一轮摘要。
+
+### 12.1 FDT/板级描述只能确认“配置意图”，不能确认物理容量
+
+`u-boot/board/octeon/pa220/pa220.dts` 的 I2C0 节点明确：
+
+- I2C 控制器：`cavium,octeon-3860-twsi`
+- CSR：`0x1180000001000`
+- U-Boot bus 编号映射为 bus 0；
+- EEPROM slave：`0x57`
+- FDT compatible：`atmel,24c256`
+- page size：64 bytes；
+- 注释同时明确写着“Answers 1-byte offsets only”。
+
+因此 `24c256` 只能作为 FDT 的设备描述，不能作为本项目已经确认的物理 BOM 证据。
+
+`u-boot/include/configs/octeon_pa220.h` 又明确：
+
+- `CONFIG_SYS_I2C_EEPROM_ADDR = 0x57`
+- `CONFIG_SYS_I2C_EEPROM_ADDR_LEN = 1`
+- page write bits = 6，即配置 page size 64 bytes。
+
+**物理 EEPROM 型号/物理容量仍为 UNKNOWN。**
+
+### 12.2 但“当前 U-Boot 实际能访问多少”已经可以源码确定
+
+`u-boot/common/cmd_eeprom.c:eeprom_read()` 在 `CONFIG_SYS_I2C_EEPROM_ADDR_LEN == 1` 时构造：
+
+- `addr[0] = offset >> 8`
+- `addr[1] = offset & 0xff`
+- 随后调用 `i2c_read(addr[0] | dev_addr, offset, 1, ...)`
+
+也就是说这里的“1-byte address length”实际语义是：
+
+**I2C slave address 的 bank selector + 1-byte EEPROM internal offset。**
+
+随后 `u-boot/drivers/i2c/octeon_i2c.c` 的 OCTEON I2C 驱动只使用目标地址的低 7 bit 发出 slave address。因此在固定 `dev_addr = 0x57` 的情况下，offset 的高位不能产生一个新的可用 slave address；内部 EEPROM offset 最终仍只有低 8 bit。
+
+所以当前这套 U-Boot EEPROM 访问路径的**有效软件访问窗口为 256 bytes，并会以 0x100 为周期重复访问同一低 8-bit 地址窗口**。
+
+这不是“物理 EEPROM 容量 = 256 bytes”的证明；它只证明：
+
+> 即使板上实际器件大于 256 bytes，当前这套 U-Boot 配置/驱动也无法通过现有 `eeprom_read()` 正常访问其 0x100 以上的独立存储空间。
+
+因此此前“实际容量 UNKNOWN”仍然成立，但现在增加一个更强的源码结论：
+
+- **physical capacity：UNKNOWN**
+- **current U-Boot effective readable window：256 bytes**
+- **software cannot use current path to prove/read physical capacity >256 bytes**
+
+### 12.3 TLV parser 的边界行为
+
+`arch/mips/cpu/octeon/lib_octeon_shared.c`：
+
+- header 大小为 8 bytes；
+- `EEPROM_END_TYPE (0xffff)` 直接结束扫描；
+- tuple length 必须满足 `sizeof(header) <= length <= 256`；
+- `buf_len` 必须不小于 tuple length；
+- checksum 会验证 header + payload；
+- `octeon_tlv_get_tuple_addr()` 从 offset 0（除非定义了 `CONFIG_EEPROM_TLV_BASE_ADDRESS`）连续累加 tuple length。
+
+但 parser **没有 EEPROM physical capacity 参数，也没有独立的总扫描上限**。
+
+此外，在 U-Boot 路径中，读取 tuple payload 的第二次 `eeprom_read()` 调用没有检查其返回值；因此底层读取失败后仍可能继续对目标缓冲区做 checksum 计算。
+
+结论：
+
+**parser 对 tuple 自身长度有边界检查，但不能保证 tuple 扫描不会因为错误 END/损坏数据而超出真实 EEPROM；真实容量边界必须由硬件/运行时验证。**
+
+这不阻塞当前 P1 构建，因为我们没有必要为了“证明物理容量”修改构建逻辑；最终 Web/CLI 只读展示可以把物理容量标为 UNKNOWN，并在实机测试阶段补齐证据。
+
+### 12.4 TLV 实机只读验证：本项目后续测试必须执行
+
+以下测试全部只读，不执行任何 EEPROM 写命令：
+
+1. `i2c dev 0`
+2. `i2c probe 57`
+3. 确认 `0x57` 存在；
+4. 在已经确认的 RAM load 区内读取 0x100 bytes：
+   `eeprom read <safe_ram_addr> 0 100`
+5. `md.b <safe_ram_addr> 100`，记录原始 TLV；
+6. 再读取 offset `0x100`：
+   `eeprom read <safe_ram_addr> 100 100`
+7. 再读取 offset `0x200`：
+   `eeprom read <safe_ram_addr> 200 100`
+8. 比较三个窗口是否发生 0x100 周期重复；
+9. 记录 TLV END tuple、board descriptor、MAC tuple、clock tuple 的实际位置；
+10. 将上述输出完整反馈给本项目，以便最终判断：
+   - 实际有效 TLV 区域；
+   - 当前 U-Boot 访问窗口是否足够；
+   - 是否需要以后增加正确的 16-bit EEPROM addressing 支持。
+
+如果后续 Linux/OpenWrt 已经启动并提供 i2c-tools，则可以再做纯只读的 I2C 总线/EEPROM 检查；但不要为了 P1 阻塞构建去追这个问题。
+
+**禁止：`eeprom write`、`tlv_eeprom set`、`tlv_eeprom delete`、任何 I2C EEPROM 写操作。**
+
+## 13. 第二轮源码收敛：RAM load-memory
+
+### 13.1 默认 PA-220 大内存情况下的 load block 已可进一步精确
+
+`octeon_configure_load_memory()` 的源码公式为：
+
+- 自动 size：OCTEON II/III、RAM > 256 MiB 时：
+  `min(256 MiB, (ram_size - 256 MiB) / 3 向下按 1 MiB 对齐)`
+- 对 PA-220 默认 8 GiB RAM，这个值最终为 **256 MiB**；
+- 自动 base 计算经过 boot-bus hole 修正后最终落在 **0x20000000**；
+- 随后：
+  - `loadaddr = 0x20000000`
+  - `load_reserved_addr = 0x20000000`
+  - `load_reserved_size = 0x10000000`
+
+即默认 8 GiB 配置下的候选 load block 为：
+
+`[0x20000000, 0x30000000)`
+
+这是**物理地址区间**。
+
+### 13.2 Linux reserved 区与 load block 不重叠
+
+`octeon_configure_linux_reserved_memory()` 在默认自动模式下：
+
+- RAM >= 1 GiB：`size = min(ram_size / 2, 240 MiB)`
+- 默认 base = `OCTEON_LINUX_RESERVED_MEM`
+- PA-220 固定低地址布局下，该 base 为约 1 MiB。
+
+因此默认 8 GiB 情况下：
+
+- Linux reserved：约 `0x00100000 .. 0x0F100000`
+- load block：`0x20000000 .. 0x30000000`
+
+两者没有重叠。
+
+### 13.3 U-Boot relocation 区也与 load block 分离
+
+`board_init_f_finish()` 的实际公式：
+
+1. CN63XX/CN70XX 及更新型号：
+   `u_boot_mem_top = 0x20000000 + (gd->ram_size - 0x10000000)`
+2. U-Boot 长度：
+   `len = ALIGN_UP(&uboot_end - CONFIG_SYS_MONITOR_BASE, 64 KiB)`
+3. 向下扣除：
+   - U-Boot code/data/bss；
+   - `STACK_SIZE = 64 KiB + CONFIG_SYS_BOOTPARAMS_LEN`；
+   - `TOTAL_MALLOC_LEN`；
+4. 再根据 TLB mapping size 向下对齐；
+5. 得到 `u_boot_base_phys`；
+6. 最终：
+   `bd->bi_uboot_ram_addr = u_boot_base_phys`
+   `bd->bi_uboot_ram_used_size = u_boot_mem_top - u_boot_base_phys`。
+
+因此最终 relocation 地址不能在源码审计阶段写死；但对 PA-220 默认 8 GiB 情况，可以确认它位于 DRAM 映射的高端区域，而不是 0x20000000..0x30000000 的 load block。
+
+### 13.4 0x81000000 的结论进一步明确
+
+`CONFIG_SYS_SDRAM_BASE = 0x80000000` 是 cached address。
+
+因此：
+
+`0x81000000` 对应低端 DRAM physical address **0x01000000 (16 MiB)**。
+
+该地址落在默认 Linux reserved 区内部，因此：
+
+**0x81000000 = UNSAFE 作为默认 Web/TFTP 上传地址。**
+
+这不是因为它“看起来危险”，而是可以由 OCTEON MIPS cached alias + Linux reserved memory 公式直接推出。
+
+### 13.5 load block 是当前最合理的候选安全区
+
+当前源码证据已经足以把结论从“候选”提高到：
+
+**CONDITIONALLY SAFE / 首选运行时上传区**
+
+条件是：
+
+1. `octeon_configure_load_memory()` 成功；
+2. `load_reserved_addr/load_reserved_size` 非零；
+3. 上传地址从运行时 `loadaddr` / reserved block 获取；
+4. 上传长度不超过 `load_reserved_size`；
+5. 不把 `CONFIG_SYS_LOAD_ADDR` 单独当作安全性证明；
+6. 不在 P1/P6 中重新使用固定 `0x81000000`。
+
+当前 TFTP 接收路径本身仍然是直接：
+
+`memcpy(load_addr + offset, src, len)`
+
+没有在接收每个 block 前做 reserved-range 硬限制。
+
+源码另有 `octeon_check_mem_load_range()`，它只能依据 `fileaddr/filesize` **事后发出 warning**，不能阻止越界写入。
+
+因此最终 Web/TFTP 安全实现必须在写 RAM **之前**检查：
+
+`addr >= load_reserved_addr`
+
+且：
+
+`addr + size <= load_reserved_addr + load_reserved_size`
+
+并处理整数溢出。
+
+### 13.6 P1 不阻塞构建的运行时验证项目
+
+上述 RAM 映射已经足够指导当前构建，不需要为了 P1 再增加“猜测型”补丁。
+
+**构建完成、RAM 启动后请务必反馈以下结果：**
+
+1. 完整启动日志中：
+   - `Base DRAM address used by u-boot:`
+   - `DRAM:`
+   - `Stack Pointer at:`
+   - `Using TLB mapping size:`（若 DEBUG 日志可见）
+   - `load address / size` 相关输出；
+2. `printenv loadaddr octeon_reserved_mem_load_size octeon_reserved_mem_load_base`
+3. `bdinfo`
+4. 若可用，读取/显示 bootmem named block 信息；
+5. 最重要的是记录最终：
+   - `loadaddr`
+   - `load_reserved_addr`
+   - `load_reserved_size`
+   - `gd->ram_size`
+   - `bd->bi_uboot_ram_addr`
+   - `bd->bi_uboot_ram_used_size`
+
+这些结果回来后即可把 RAM 状态从 **CONDITIONALLY SAFE** 收敛为实机确认值，而无需修改当前构建。
+
+## 14. 当前阶段结论更新
+
+本轮没有修改 PA-220 固定源码，也没有执行任何 EEPROM/flash 持久化写入。
+
+当前 P1-A5 的剩余项目应分成两类：
+
+### 不阻塞构建、留待实机验证
+
+- EEPROM physical model/capacity：**UNKNOWN**
+- EEPROM 有效 TLV 终止位置：**待实机读取**
+- EEPROM 当前 U-Boot 访问窗口：**源码已确定为 256 bytes**
+- RAM 最终 relocation 数值：**需最终构建日志**
+- load block 实际运行时地址/大小：**需启动后确认**
+
+### 已足够指导后续编码
+
+- EEPROM 读取地址：**bus 0 / slave 0x57**
+- 当前 EEPROM addressing scheme：**bank-selector + 8-bit internal offset**
+- 不应假定物理 EEPROM = 24C256；
+- 不应在 Web 中提供 EEPROM 写接口；
+- 默认 8 GiB PA-220 的 load block：**physical 0x20000000..0x30000000**
+- 0x81000000：**UNSAFE**
+- Web/TFTP 后续应使用运行时 reserved load block；
+- TFTP 越界检查必须在 RAM 写入之前完成，而不能依赖事后 warning。
+
+**因此本轮没有必要为了 EEPROM 物理容量或最终 relocation 数值阻塞 U-Boot 构建。后续构建完成后，按本节测试清单收集结果即可。**
