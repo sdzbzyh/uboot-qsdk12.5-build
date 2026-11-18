@@ -34,3 +34,22 @@
 - 新增补丁按功能拆分，尽量小而可审查；构建脚本负责确定性叠加。
 - 任何持久化写入功能必须先完成 dry-run、边界检查、备份和恢复设计。
 - 用户使用 TFTP 将镜像加载到 RAM 进行测试，因此早期阶段优先保留 RAM 测试方式；但 RAM 加载地址仍必须依据已确认的启动链资料和设备状态使用。
+
+## P1 子阶段审计进度（2026-11-18）
+
+本节是源码审计进度记录，不改变 P2–P11 的既定路线和依赖关系。
+
+| 子阶段 | 内容 | 当前状态 | 证据 |
+|---|---|---|---|
+| P1-A0 | uBootKit 固定源码树与模块边界 | 已完成 | audit/P1-A0-UBOOTKIT-SOURCE-MAP.md |
+| P1-A1 核心 | HTTPD/TCP/failsafe 核心链路 | 已完成 | audit/P1-A1-HTTP-TCP-WEB.md |
+| P1-A1 页面 | fsdata 页面 URL、main.js 请求与 URI handler 映射 | 已完成 | audit/P1-A1-PAGE-URI-CALLCHAIN.md |
+| P1-A2 第一组 | sysinfo/network/env/syslog | 已完成 | audit/P1-A2-READONLY-WEB-MODULES.md |
+| P1-A2 第二组 | misc/webterm | 已完成 | audit/P1-A2-MISC-WEBTERM.md |
+| P1-A2 第三组 | backup/mibib/mac | 已完成 | audit/P1-A2-BACKUP-MIBIB-MAC.md |
+| P1-A2 最后 | upgrade 及全部持久化写入路径 | 已完成 | audit/P1-A2-UPGRADE-PERSISTENT-WRITE-AUDIT.md |
+| P1-A3 | 网络服务（DHCP/BOOTP/TFTP/WGET/Telnet/网络驱动） | 尚未开始 | 待建立独立审计报告 |
+| P1-A4 | 存储、分区、文件系统、环境后端和固件管理 | 尚未开始 | 待建立独立审计报告 |
+| P1-A5 | IPQ 硬件信息/平台钩子与 OCTEON 对照 | 尚未开始 | 待建立独立审计报告 |
+
+P1-A2 已完成的是固定 uBootKit commit 下的源码静态审计，不表示 PA-220 适配代码已实现、已编译或已实机验证。所有存储写入路径均只作静态追踪，没有执行。
