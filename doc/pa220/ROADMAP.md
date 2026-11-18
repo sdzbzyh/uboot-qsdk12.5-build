@@ -5,7 +5,7 @@
 | 节点 | 名称 | 主要交付 | 完成判据 |
 |---|---|---|---|
 | P0 | 项目文档体系 | 章程、仓库基线、功能矩阵、决策记录、测试计划、节点报告 | 文档进入 GitHub，版本和分支边界清楚 |
-| P1 | uBootKit 功能源码审计 | 按文件/函数建立完整功能清单，标注平台依赖 | 所有目标功能均有适配结论和证据来源 |
+| P1 | uBootKit 功能源码审计 | 已完成 A0～A5 固定源码静态审计；明确适配结论、风险和运行时待验证项 | 所有目标功能均有适配结论和证据来源；未构建/未实机验证项单独标记 |
 | P2 | PA-220 基线与构建复核 | 固定源码、补丁叠加、工具链和构建可重复性 | 干净环境构建成功，产物头和哈希记录完整 |
 | P3 | CLI/只读诊断完善 | 板卡、内存、时钟、网络、存储、EEPROM、CPLD 只读信息 | 编译和 RAM 启动验证通过；无持久化写入 |
 | P4 | 网络维护基础 | MGT 网络配置、DHCP Client/Server 评估、下载服务 | 网络功能逐项可复现，退出服务后 CLI/autoboot 正常 |
@@ -50,6 +50,39 @@
 | P1-A2 最后 | upgrade 及全部持久化写入路径 | 已完成 | audit/P1-A2-UPGRADE-PERSISTENT-WRITE-AUDIT.md |
 | P1-A3 | 网络服务（DHCP/BOOTP/TFTP/WGET/Telnet/网络驱动） | 已完成源码静态审计；未编译/未实机验证 | audit/P1-A3-BOOTP-DHCP.md；audit/P1-A3-TFTP-WGET-TELNET.md；audit/P1-A3-ETH-NET-ABORT.md |
 | P1-A4 | 存储、分区、文件系统、环境后端和固件管理 | 已完成源码静态审计；未编译/未实机验证 | audit/P1-A4-EMMC-SPI-CORE.md；audit/P1-A4-GPT-FILESYSTEM.md；audit/P1-A4-ENV-SPI-BACKEND.md；audit/P1-A4-BOOTLOADER-UPDATE.md；audit/P1-A4-USB-STORAGE.md |
-| P1-A5 | IPQ 硬件信息/平台钩子与 OCTEON 对照 | 进行中：硬件调用链已收敛；TLV physical capacity 仍 UNKNOWN，但当前 U-Boot 有效访问窗口已由源码确定为 256 bytes；默认 8 GiB PA-220 load block 已收敛到 physical 0x20000000..0x30000000，0x81000000 已明确 UNSAFE；本轮补齐 __tmp_load 生命周期、OS handoff 释放路径、named-block 只读查询 API（函数返回 static descriptor，调用方需立即复制字段）；确认 bootm OS handoff 会释放临时块而 bootelf 路径不调用 arch_preboot_os；TFTP 仍缺写入前范围检查且未在 store_block 显式 cache flush，HTTP 参考实现有 flush_cache 但 IPQ 固定地址不可移植；最终 relocation/load block 运行时数值待构建后确认。上述 UNKNOWN 项不阻塞当前构建，后续按审计文档测试清单实机验证 | audit/P1-A5-IPQ-PA-HARDWARE-API.md；audit/P1-A5-TLVEEPROM-CPLD.md；audit/P1-A5-QLM-MDIO-PHY-BOOTBUS.md；audit/P1-A5-WATCHDOG-HANDOFF.md；audit/P1-A5-BOARD-INFO-MEMORY.md；audit/P1-A5-CALLCHAIN-RAM-CONVERGENCE.md |
+| P1-A5 | IPQ 硬件信息/平台钩子与 OCTEON 对照 | **已完成源码静态审计**：板级初始化/QLM/MDIO/PHY/CPLD/boot-bus 调用链已收敛；TLV 当前 U-Boot 有效访问窗口 256 bytes（物理容量 UNKNOWN）；默认 8 GiB load block 源码公式为 physical [0x20000000,0x30000000)，0x81000000 UNSAFE；__tmp_load 生命周期/释放例外/descriptor 查询已确认；OCTEON ELF64 loader、PT_LOAD/section 写入路径和 PA-220 Cache API 语义已完成审计；TFTP/HTTP/ELF 统一 pre-write validator 仍未实现。最终 relocation/load block 运行时数值及硬件行为待构建后只读验证，不阻塞当前构建 | audit/P1-A5-IPQ-PA-HARDWARE-API.md；audit/P1-A5-TLVEEPROM-CPLD.md；audit/P1-A5-QLM-MDIO-PHY-BOOTBUS.md；audit/P1-A5-WATCHDOG-HANDOFF.md；audit/P1-A5-BOARD-INFO-MEMORY.md；audit/P1-A5-CALLCHAIN-RAM-CONVERGENCE.md；P1-COMPLETION-AND-P2-ORDER.md |
 
 P1-A2 已完成的是固定 uBootKit commit 下的源码静态审计，不表示 PA-220 适配代码已实现、已编译或已实机验证。所有存储写入路径均只作静态追踪，没有执行。
+
+
+## P1 总结与 P2 启动顺序（2026-11-18）
+
+P1-A0～A5 的固定源码静态审计已完成。P1 完成仅表示源码调用链和适配边界有证据，不表示任何新功能已构建或实机通过。完整结论和下一阶段顺序见 `P1-COMPLETION-AND-P2-ORDER.md`。
+
+### P2：基线与可重复构建复核
+
+按以下顺序执行，不提前跳到 HTTP 上传或持久化安装：
+
+1. **锁定构建输入**：确认集成仓库仍在 `feature/pa220-ubootkit-web`；PA-220 固定源码仍为 `801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`；uBootKit 固定审计源码仍为 `9ce315735ac88fd0a7c7697bc527a8616ed0a972`；确认补丁顺序、工具链版本和构建脚本，不修改两个固定源码仓库或 main。
+2. **干净构建**：执行 `build-pa220.sh`，保存完整日志、最终 `.config`、工具链版本、map/ELF、`uboot_end`、产物大小和 SHA256。构建失败先修复构建确定性，不用未验证的硬件猜测补丁。
+3. **构建产物静态核对**：确认 `CONFIG_CMD_OCTEON_ELF` 和 `cmd_elf64.o` 的实际编入情况；确认 `load_elf64_image`、`flush_cache`、`flush_dcache_range`、`cvmx_bootmem_find_named_block` 等目标符号/对象；记录 linker 与 relocation 计算所需符号。
+4. **RAM 启动**：优先使用原厂 Stage2 的 TFTP 将新 Stage3 加载到 RAM 测试，不执行 SPI/eMMC/NAND/EEPROM 写入。统一 pre-write validator 尚未实现前，不把新 U-Boot 自己的 TFTP 接收路径用于任意 RAM 地址的安全上传。
+5. **只读运行时确认**：记录启动日志中的 DRAM 容量、Stack Pointer、Base DRAM address、TLB map size（若有）；执行 `bdinfo`；执行 `printenv loadaddr octeon_reserved_mem_load_base octeon_reserved_mem_load_size`；通过只读 named-block 查询确认 `__tmp_load` descriptor 的 base/size，并记录最终 relocation 地址及使用长度。若现有 CLI 没有 named-block 只读显示命令，将其列入 P3 只读诊断，不为此阻塞 P2。
+6. **TLV EEPROM 只读确认**：按 P1-A5 文档执行 `i2c dev 0`、`i2c probe 57`，并只读读取 offset 0、0x100、0x200 等窗口；记录 END tuple/MAC/board descriptor/clock tuple。严禁 eeprom write / TLV set/delete。
+7. **P2 验收**：干净环境构建成功，产物头/大小/hash/map 记录完整；RAM 启动结果与只读运行时数据分开记录。编译成功不得标记为实机通过。
+
+### P2 之后的开发依赖顺序
+
+- **P3 CLI/只读诊断**：先输出板卡、时钟、DRAM、relocation、named block、网络/存储只读状态。
+- **P4 网络维护基础**：复核 DHCP Client/TFTP 等已有路径；服务调度和网络行为通过实机验证。
+- **P5 HTTP/Web 只读管理**：先建立 HTTP/TCP 服务和只读 handler，不提供任意命令执行、环境写入或存储写入。
+- **P6 RAM 文件接收与校验**：在开放 HTTP/TFTP 上传前，先实现统一 `__tmp_load` pre-write validator，并分别接入 TFTP block、HTTP chunk、完整 payload reservation 和 ELF segment；加入 checked add/multiply、source/destination 范围与 Cache 同步。未完成此项不得把上传功能标记为安全可用。
+- **P7 固件解析与安装预览**：只解析 RAM payload，生成 dry-run 目标映射，不写介质。
+- **P8 eMMC 安装事务**：单独设计备份/回退/读回校验，获得专项审查和明确授权后才测试。
+- **P9 启动管理与恢复**：依赖真实启动链和持久化状态证据。
+- **P10 SPI 维护**：独立高风险节点，默认只读探测/备份；写入另行审查授权。
+- **P11 集成回归发布**：矩阵逐项闭环，清楚区分源码、构建、RAM 启动和实机功能状态。
+
+### 持续有效的运行时验证纪律
+
+不影响阶段性构建且可在构建后通过只读命令确认的事项，不作为静态审计阻塞项；必须记录并在相应构建后提醒用户执行命令、反馈结果。任何 `saveenv`、EEPROM 写入、SPI/eMMC/NAND/flash 持久化写入仍然禁止，除非未来独立获得明确授权。
