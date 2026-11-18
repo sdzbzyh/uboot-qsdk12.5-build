@@ -630,3 +630,77 @@ D-005 仍然保留“链接地址与加载地址必须区分”的决策，但 0
 以上值均可在构建后通过 map/ELF 符号、启动 DEBUG 日志及 U-Boot 运行时查询确认，不阻塞当前阶段构建。后续实机测试仍按第 13.6 节清单执行，并补充提供最终 ELF/map 中的 `uboot_end` 与 `CONFIG_SYS_TEXT_BASE`。
 
 **安全结论保持：0x81000000 不作为默认上传地址；上传 buffer 使用运行时 load-reserved named block，并在写入前做完整范围与溢出检查。**
+
+
+## 16. load-memory 算法与地址映射最终交叉核对
+
+本轮找到了此前需要进一步确认的实际实现：`arch/mips/lib/board_octeon.c:__octeon_configure_load_memory()`（约 620–735 行），并与 `lib/addr_map.c` 交叉核对。
+
+### 16.1 默认大小算法
+
+对于非 OCTEON1PLUS（PA-220 的 OCTEON II/III 路径）：
+
+- 若 RAM <= 256 MiB：`min(128 MiB, align_down((RAM * 2 / 5), 1 MiB))`
+- 若 RAM > 256 MiB：`min(256 MiB, align_down(((RAM - 256 MiB) / 3), 1 MiB)`
+
+默认 PA-220 8 GiB RAM 落入第二分支，计算结果超过 256 MiB，因此最终 size = **256 MiB**。
+
+若环境变量 `octeon_reserved_mem_load_size` 存在且不是 `auto`，则直接按十六进制解析覆盖自动 size。size 为 0 时不分配 named block，并输出 no reserved memory warning。
+
+### 16.2 默认 base 算法
+
+默认 `octeon_reserved_mem_load_base` 为 auto 时，代码先按 DRAM 低 256/512 MiB 区域、之前分配预留空间和 boot-bus hole 计算 mem_top，再得到 addr。
+
+对于 8 GiB RAM / 256 MiB load size：
+
+- mem_top 经 OCTEON II+ boot-bus hole 修正后计算；
+- addr 最初可能落在 512 MiB 以上；
+- 随后代码将 addr 限制为不高于 512 MiB；
+- 最终 base = **0x20000000**。
+
+所以默认 load block 是：
+
+`physical base 0x20000000 + size 0x10000000 = [0x20000000, 0x30000000)`
+
+### 16.3 named block 与 loadaddr 的关系
+
+分配使用：
+
+`cvmx_bootmem_phy_named_block_alloc(size, addr, addr + size, 0, "__tmp_load", 0)`
+
+成功后：
+
+- `setenv("loadaddr", "0x20000000")`
+- `load_reserved_addr = addr`
+- `load_reserved_size = size`
+
+代码注释明确指出：若 reserved block 创建成功，`loadaddr` 每次启动都会被覆盖为 reserved block base。
+
+若 named block 分配失败，会打印 ERROR；该分支没有设置 loadaddr/load_reserved globals。因此 Web/TFTP 不能只检查 loadaddr 是否存在，必须同时检查 load-reserved base/size 是否有效，并确认 named block 分配成功。
+
+### 16.4 地址空间交叉核对
+
+`cvmx-address.h` 的物理地址 decode 表明确：
+
+- DRAM cached：`0x00000000 .. 0x0fffffff`
+- Boot Bus uncached：`0x10000000 .. 0x1fffffff`
+- DRAM cached：`0x20000000 ..`
+
+`board_octeon.c` 后续为第一段 256 MiB 建立 1:1 addrmap，并为 256 MiB 以上的 DRAM 区域建立从虚拟 `0x20000000` 到 physical `0x20000000` 的映射；`lib/addr_map.c` 的转换公式为：
+
+`physical = virtual - entry.vaddr + entry.paddr`
+
+因此 PA-220 默认 loadaddr `0x20000000` 对应本段 DRAM 的 identity mapping，和 named block allocator 的 physical base 一致。该结论来自地址 decode + addrmap 实现，不是仅从变量名推测。
+
+### 16.5 当前编码指导
+
+后续上传实现应当：
+
+1. 在 load-memory 配置成功后取得 `load_reserved_addr` / `load_reserved_size`；
+2. 确认 `__tmp_load` named block 存在且 base/size 一致；
+3. 上传目标地址必须位于该物理/addrmap identity 区间；
+4. 对 `addr + len` 做溢出安全检查；
+5. 只有完整满足 `addr >= base` 且 `len <= size - (addr - base)` 才允许写入；
+6. TFTP 接收回调必须在 `memcpy` 前执行检查，不能依赖 `octeon_check_mem_load_range()` 的事后 warning。
+
+以上默认 8 GiB 结果可用于当前设计；最终仍以实机 `gd->ram_size`、named block 查询结果和 loadaddr 为准。
