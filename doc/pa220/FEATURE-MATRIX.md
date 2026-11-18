@@ -129,3 +129,14 @@
 - **TelnetD**：PA-220 无对应 TCP server；uBootKit TelnetD 无认证并执行任意 run_command，PA-220 不移植。
 - TelnetD 自动启动检查变量为 telnet_en（默认 true），而命令帮助写 telnetd_enable，源码文档与实现不一致。
 - TFTP/WGET/TelnetD 均未在 PA-220 编译或实机验证。
+
+
+## P1-A3 第三批网络栈/网卡/中止路径审计（2026-11-18）
+
+证据：`audit/P1-A3-ETH-NET-ABORT.md`。至此 P1-A3 网络服务源码静态审计完成。
+
+- **Ethernet**：PA-220 保留 OCTEON eth_device driver，CONFIG_OCTEON_ETH、QSGMII/AGL 配置和 CVMX IPD/PIP/PKO 实现存在；不移植 IPQ Ethernet/PPE。
+- **NetLoop**：PA-220 已有旧版 Ethernet/ARP/IP/ICMP/UDP/NetLoop；net_process_received_packet() 没有 TCP 分支。HTTPD/WGET/TelnetD 仍需 TCP transport + 收包/调度层重写。
+- **DHCP Client/TFTP**：PA-220 已有旧版等价实现；DHCP Server 需重写并统一 NetLoop 调度。
+- **net_abort**：uBootKit 通过 autoboot.c 调用，默认 net_abort_en=true；UDP 37541 收到 UBOOT:ABORT 后可中断 autoboot 并进入 httpd/cli_loop。无认证，PA-220 不直接移植。
+- 本阶段所有新增网络服务均未在 PA-220 编译或实机验证。
