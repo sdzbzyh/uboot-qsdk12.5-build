@@ -93,7 +93,7 @@ P1-A0～A5 的固定源码静态审计已完成。P1 完成仅表示源码调用
 证据：`audit/P2-1-BUILD-INPUT-LOCK.md`。
 
 - **P2-1 已完成 GitHub 静态输入核查**：核查起点 HEAD 为 `4f9aaafaa5549adcf7b2042c19ed6621758e7639`；P2-1 记录提交后 HEAD 为 `06a844f158653463ccd2add3eeba4228d6c738bf`。PA-220 原始仓库与构建脚本使用的镜像仓库均可读取固定 commit `801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`；uBootKit 固定审计 commit `9ce315735ac88fd0a7c7697bc527a8616ed0a972` 可读取。当前仅有一项 PA-220 补丁。
-- **P2-2 待执行**：当前会话无法访问用户实际 Linux 构建主机/本地 OCTEON SDK。需要用户提供实际工具链路径和主机/工具版本输出。
+- **P2-2 已完成**：用户实际 Debian 13.7 x86_64 构建主机及 OCTEON SDK `tools-gcc-4.7` 已核查；Cavium GCC 4.7.0 / Binutils 2.23.52 已通过 MIPS64r2 OCTEON 大端目标文件编译和 `-nostdlib` 基本链接测试。宿主工具、sysroot 路径和交叉工具可用性有实际输出证据。完整 PA-220 U-Boot 构建、旧版 host tools 集成和 SDK 运行库完整性仍留待 P2-3/P2-4；详见 `audit/P2-2-HOST-TOOLCHAIN.md`。
 - **P2-3 待执行**：应使用全新且不存在的 `PA220_REPO_DIR` 做干净 checkout；现有脚本不会自动 clean，也不会自动归档完整 map/ELF/版本/hash 记录。
 - **P2-4 待执行**：以本轮构建产物实际内容为准，不能以配置宏存在推断对象已编入。
-- 在 P2-2 环境确认前，不假定历史日志中的 `/home/debian/OCTEON-SDK/tools-gcc-4.7` 仍是有效路径。
+- P2-2 已通过用户当前主机输出确认 `/home/debian/OCTEON-SDK/tools-gcc-4.7` 为本轮实际工具链路径；该路径只代表本轮主机环境，不应硬编码为所有构建环境的通用默认值。
