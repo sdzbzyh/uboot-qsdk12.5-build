@@ -84,7 +84,7 @@ sysinfo.c:86-286 的 sysinfo_handler 生成 JSON，包含版本、FDT board 信�
 ### 4.3 network
 network.c:94-171 注册 /network/info、/network/set、/network/reset。读取/修改 ipaddr、netmask、serverip、custom_network；修改路径调用 setenv() 和 saveenv()。默认值可来自 CONFIG_IPADDR、CONFIG_NETMASK、CONFIG_SERVERIP。failsafe.c 还可在 CONFIG_NET_FORCE_IPADDR 下将编译期地址写入网络全局状态。
 PA-220 旧网络栈有 NetOurIP、NetServerIP 等状态，配置包含 DHCP/Ping/TFTP；环境变量接口存在。但修改环境变量不等于更新旧网络栈当前运行状态，handler 必须重新设计网络状态同步。
-高风险：PA-220 octeon_pa220.h 定义 CONFIG_ENV_IS_IN_SPI_FLASH、CONFIG_ENV_OFFSET=0xe00000、CONFIG_ENV_OFFSET_REDUND=0xe10000。PA-220 旧版 env_flash.c 的 saveenv() 会执行 flash_sect_erase() 和 flash_write()。因此不能照搬网络设置接口，也不能在 RAM 测试中触发保存。只读网络信息可重写；设置接口必须从第一版 Web 中禁用。
+高风险：PA-220 octeon_pa220.h 定义 CONFIG_ENV_IS_IN_SPI_FLASH、CONFIG_ENV_OFFSET=0xe00000、CONFIG_ENV_OFFSET_REDUND=0xe10000。PA-220 实际使用 common/env_sf.c（由 CONFIG_ENV_IS_IN_SPI_FLASH 选择）的 saveenv() 会执行 spi_flash_erase() 和 spi_flash_write()。因此不能照搬网络设置接口，也不能在 RAM 测试中触发保存。只读网络信息可重写；设置接口必须从第一版 Web 中禁用。
 
 ### 4.4 env
 env.c:135-374 注册列表、设置、删除、全部/单项重置和恢复上传。读取路径使用 env_export()、getenv()、getenv_default()；修改路径使用 setenv()、env_import()，并在每个变更路径调用 saveenv()。
