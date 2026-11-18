@@ -48,7 +48,7 @@
 | P1-A2 第二组 | misc/webterm | 已完成 | audit/P1-A2-MISC-WEBTERM.md |
 | P1-A2 第三组 | backup/mibib/mac | 已完成 | audit/P1-A2-BACKUP-MIBIB-MAC.md |
 | P1-A2 最后 | upgrade 及全部持久化写入路径 | 已完成 | audit/P1-A2-UPGRADE-PERSISTENT-WRITE-AUDIT.md |
-| P1-A3 | 网络服务（DHCP/BOOTP/TFTP/WGET/Telnet/网络驱动） | 进行中：BOOTP/DHCP、TFTP/WGET/TelnetD 已审计；eth/net/net_abort 待审计 | audit/P1-A3-BOOTP-DHCP.md；audit/P1-A3-TFTP-WGET-TELNET.md |
+| P1-A3 | 网络服务（DHCP/BOOTP/TFTP/WGET/Telnet/网络驱动） | 已完成源码静态审计；未编译/未实机验证 | audit/P1-A3-BOOTP-DHCP.md；audit/P1-A3-TFTP-WGET-TELNET.md；audit/P1-A3-ETH-NET-ABORT.md |
 | P1-A4 | 存储、分区、文件系统、环境后端和固件管理 | 尚未开始 | 待建立独立审计报告 |
 | P1-A5 | IPQ 硬件信息/平台钩子与 OCTEON 对照 | 尚未开始 | 待建立独立审计报告 |
 
