@@ -118,3 +118,10 @@ octeon_pa220  mips  octeon  pa220  octeon  -  octeon_pa220:OCTEON_PA220,OCTEON_P
 - 当前尚未验证用户构建机和 OCTEON SDK 工具链，不能声称 P2-2 完成。
 - 下一步先完成 P2-2：用户提供实际构建机和工具链路径/版本输出；再决定是否需要对构建脚本作最小、独立、可审查的可重复构建改进，然后执行全新 checkout 的干净构建。
 - 不执行 `saveenv`、EEPROM/TLV 写入、CPLD 写入、SPI/eMMC/NAND/USB block 写入或固件安装。P1 确认的 `__tmp_load` 边界和统一 RAM validator 要求保持不变；validator 未实现不阻塞本阶段基础构建。
+
+
+## 9. 现有文档中的旧构建指引
+
+- `doc/PA220.md` 是当前构建入口概览；其示例工具链路径仍只是示例，不能当作当前机器路径。
+- `doc/PA220-MAINTENANCE.md` 保留较早的 M0/M1 路线和 `feature/pa220-maintenance` checkout 示例。该分支名不适用于本轮集成仓库工作；本项目实际工作分支固定为 `feature/pa220-ubootkit-web`，不得照旧文档切换分支。
+- 功能矩阵的实际路径是 `doc/pa220/FEATURE-MATRIX.md`，仓库根目录不存在 `FEATURE-MATRIX.md`。
