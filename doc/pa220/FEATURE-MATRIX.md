@@ -118,3 +118,14 @@
 - **DHCP Server**：uBootKit 有 CONFIG_DHCPD 服务端；PA-220 没有对应服务端对象。其 UDP handler、NetLoop 调度、地址池和租约机制需在 PA-220 旧网络栈上重写/验证。
 - DHCP Server 当前最多 8 个 RAM 租约槽，无租约到期回收，池耗尽回退可能重复分配；不能原样移植。
 - 编译和实机状态 NOT VERIFIED；TFTP/WGET/TelnetD/eth/net/net_abort 尚未完成审计。
+
+
+## P1-A3 第二批网络服务审计（2026-11-18）
+
+证据：`audit/P1-A3-TFTP-WGET-TELNET.md`。P1-A3 仍在进行。
+
+- **TFTP GET/PUT/Server**：PA-220 已有旧版实现和 CONFIG_CMD_TFTPPUT/CONFIG_CMD_TFTPSRV；无需移植新版 tftp.c。PA-220 store_block 默认写 RAM，但若 CONFIG_SYS_DIRECT_FLASH_TFTP 启用会调用 flash_write；固定板级头未发现该宏，最终 .config 未验证。PA-220 TFTP load_addr 缺少 uBootKit 新版的 IPQ 内存边界保护，需补板级内存范围检查。
+- **WGET**：PA-220 无 wget.o/TCP client，需独立实现；uBootKit 版本只支持 HTTP，不支持 TLS/IPv6/chunked。
+- **TelnetD**：PA-220 无对应 TCP server；uBootKit TelnetD 无认证并执行任意 run_command，PA-220 不移植。
+- TelnetD 自动启动检查变量为 telnet_en（默认 true），而命令帮助写 telnetd_enable，源码文档与实现不一致。
+- TFTP/WGET/TelnetD 均未在 PA-220 编译或实机验证。
