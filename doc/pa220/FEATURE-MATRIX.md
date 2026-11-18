@@ -63,3 +63,15 @@
 - `syslog`：uBootKit 依赖 `gd->console_out` membuff；PA-220 对应缓冲实现 UNKNOWN，需进一步检查。
 - `backup/mibib/mac/webterm/upgrade`：路由和主要副作用入口已定位；逐模块调用链仍按 P1-A2 顺序审计，upgrade 最后完成。
 - 配置启用、编译成功、实机验证均 NOT VERIFIED；本批只完成源码审计。
+
+
+## P1-A2 第一组 Web 业务模块审计（2026-11-18）
+
+证据：`audit/P1-A2-READONLY-WEB-MODULES.md`。本批只完成 `sysinfo.c`、`network.c`、`env.c`、`syslog.c)，不是 P1-A2 全部完成。
+
+- **sysinfo**：通用 JSON/页面可借鉴；SMEM、IPQ API、QCA MMC host、NAND 数据源不能直接用于 PA-220，硬件采集需重写。PA-220 OCTEON SPI/MMC/GPT 配置存在，但未构建/实测。
+- **network**：PA-220 旧网络栈通过 NetInitLoop 从环境读取 ipaddr/serverip；Web 运行期修改环境不等于更新当前网络状态。网络写 handler 调用 saveenv，PA-220 common/env_sf.c 会擦写 SPI 环境区，禁止照搬。
+- **env**：PA-220 有 getenv/getenv_default/env_import 和 hexport_r 基础；全量只读导出需重写并脱敏。所有写接口调用 saveenv；env_restore 还存在上传长度检查不足问题。
+- **syslog**：uBootKit 依赖 gd->console_out/membuff；PA-220 global_data/console 检查到的是 precon 缓冲，不等价于运行期日志环形缓冲，后端需重写。
+- 四模块均为 uBootKit 源码存在且由 CONFIG_HTTPD 的 failsafe 构建路径编入；目标 defconfig 是否实际启用、构建结果和实机功能均 NOT VERIFIED。
+- P1-A2 尚余 misc、webterm、backup、mibib、mac，upgrade 仍按要求最后审计。
