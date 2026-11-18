@@ -184,3 +184,13 @@
 - Stage1 路径无上传长度至少 8 KiB 的检查；短镜像可能越界读取 RAM。SPI updater 未启用分支另有 image_map 未初始化即 memset 的源码缺陷。
 - PA-220 当前 Stage3 位于 SPI 启动链，由原厂前级加载；QCA APPBL/ART/CDT/SMEM 和通用 Octeon eMMC Stage1/2 不能直接映射。
 - 未执行 bootloaderupdate/mmc write/erase/sf write/erase/update/saveenv。
+
+
+## P1-A4 第五批 USB 存储及介质边界审计（2026-11-18）
+
+证据：`audit/P1-A4-USB-STORAGE.md`。至此 P1-A4 存储/分区/文件系统/环境后端/固件更新源码审计完成。
+
+- PA-220 配置启用 USB host/mass-storage 命令；usb read 读取到 RAM，usb write 经 block_write 写入外接 USB 存储。
+- USB 外接介质与内部 eMMC/SPI NOR 分开处理；仍属于持久化介质，Web 不开放通用 usb write。
+- CONFIG_CMD_OCTEON_ERASEENV 受 CONFIG_ENV_IS_IN_FLASH 条件控制；PA-220 使用 CONFIG_ENV_IS_IN_SPI_FLASH，该 parallel-NOR eraseenv 命令不属于当前 PA 配置路径。
+- P1-A4 所有写入入口仅作源码追踪，没有执行；编译和实机状态 NOT VERIFIED。
