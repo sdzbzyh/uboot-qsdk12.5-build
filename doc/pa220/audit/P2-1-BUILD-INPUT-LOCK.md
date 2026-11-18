@@ -125,3 +125,15 @@ octeon_pa220  mips  octeon  pa220  octeon  -  octeon_pa220:OCTEON_PA220,OCTEON_P
 - `doc/PA220.md` 是当前构建入口概览；其示例工具链路径仍只是示例，不能当作当前机器路径。
 - `doc/PA220-MAINTENANCE.md` 保留较早的 M0/M1 路线和 `feature/pa220-maintenance` checkout 示例。该分支名不适用于本轮集成仓库工作；本项目实际工作分支固定为 `feature/pa220-ubootkit-web`，不得照旧文档切换分支。
 - 功能矩阵的实际路径是 `doc/pa220/FEATURE-MATRIX.md`，仓库根目录不存在 `FEATURE-MATRIX.md`。
+
+
+## 10. P2-2 后续状态补记（2026-11-18）
+
+本报告第 6、8 节记录的是 P2-1 完成时的工具链未知状态。该状态已由后续 P2-2 实际环境核查更新，不应继续作为当前状态引用。
+
+- 用户实际构建主机已确认是 Debian GNU/Linux 13.7 (trixie) x86_64，宿主 GCC/G++ 14.2.0、GNU Make 4.4.1、Git 2.47.3。
+- 用户当前 OCTEON 工具链路径已确认：`/home/debian/OCTEON-SDK/tools-gcc-4.7`。
+- Cavium GCC 4.7.0 / SDK Build 52、Binutils 2.23.52 已通过 MIPS64r2 OCTEON 大端目标文件编译及 `-nostdlib` 基本链接测试。
+- P2-2 已完成；完整 PA-220 U-Boot 干净构建仍待 P2-3/P2-4。
+
+详细证据与未验证边界见 `P2-2-HOST-TOOLCHAIN.md`。
