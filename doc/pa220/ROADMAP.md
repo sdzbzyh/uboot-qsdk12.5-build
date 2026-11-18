@@ -50,6 +50,6 @@
 | P1-A2 最后 | upgrade 及全部持久化写入路径 | 已完成 | audit/P1-A2-UPGRADE-PERSISTENT-WRITE-AUDIT.md |
 | P1-A3 | 网络服务（DHCP/BOOTP/TFTP/WGET/Telnet/网络驱动） | 已完成源码静态审计；未编译/未实机验证 | audit/P1-A3-BOOTP-DHCP.md；audit/P1-A3-TFTP-WGET-TELNET.md；audit/P1-A3-ETH-NET-ABORT.md |
 | P1-A4 | 存储、分区、文件系统、环境后端和固件管理 | 已完成源码静态审计；未编译/未实机验证 | audit/P1-A4-EMMC-SPI-CORE.md；audit/P1-A4-GPT-FILESYSTEM.md；audit/P1-A4-ENV-SPI-BACKEND.md；audit/P1-A4-BOOTLOADER-UPDATE.md；audit/P1-A4-USB-STORAGE.md |
-| P1-A5 | IPQ 硬件信息/平台钩子与 OCTEON 对照 | 进行中：IPQ API/SMEM、PA GPIO/CPLD/TLV EEPROM、QLM/MDIO/PHY、Watchdog/OS handoff 已审计；未确认调用链和板级时序待收敛 | audit/P1-A5-IPQ-PA-HARDWARE-API.md；audit/P1-A5-TLVEEPROM-CPLD.md；audit/P1-A5-QLM-MDIO-PHY-BOOTBUS.md；audit/P1-A5-WATCHDOG-HANDOFF.md |
+| P1-A5 | IPQ 硬件信息/平台钩子与 OCTEON 对照 | 进行中：IPQ API/SMEM、PA GPIO/CPLD/TLV EEPROM、QLM/MDIO/PHY、Watchdog/OS handoff、board info/DRAM memory map 已审计；未确认调用链、EEPROM 地址容量和 RAM 边界待收敛 | audit/P1-A5-IPQ-PA-HARDWARE-API.md；audit/P1-A5-TLVEEPROM-CPLD.md；audit/P1-A5-QLM-MDIO-PHY-BOOTBUS.md；audit/P1-A5-WATCHDOG-HANDOFF.md；audit/P1-A5-BOARD-INFO-MEMORY.md |
 
 P1-A2 已完成的是固定 uBootKit commit 下的源码静态审计，不表示 PA-220 适配代码已实现、已编译或已实机验证。所有存储写入路径均只作静态追踪，没有执行。
