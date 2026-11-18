@@ -172,3 +172,15 @@
 - setenv()/env_import() 仅改变运行时 env；saveenv() 才持久化。uBootKit network/env handler 调用 saveenv 的写接口不能直接移植。
 - PA-220 include/environment.h 未发现 uBootKit 同名公开 env_export() API；只读导出需用 PA 旧版 hexport_r() 封装。
 - 未执行 saveenv/SF 写入；实际 SPI bus0/CS0 物理芯片映射仍 NOT VERIFIED。
+
+
+## P1-A4 第四批 OCTEON Bootloader 更新路径审计（2026-11-18）
+
+证据：`audit/P1-A4-BOOTLOADER-UPDATE.md`。
+
+- PA-220 配置启用 CONFIG_CMD_OCTEON_BOOTLOADER_UPDATE，Makefile 编入 cmd_octeon_bootloader.o。
+- CONFIG_SYS_NO_FLASH 排除并行 NOR updater；当前固定 PA-220 配置链未发现 CONFIG_OCTEON_SPI_BOOT_END，因此通用 OCTEON SPI bootloader updater 分支未启用。
+- CONFIG_OCTEON_MMC 启用 eMMC updater：Stage1 可 block_write 覆盖 LBA0–15；failsafe Stage2 可写 LBA0x10 起始区域。当前设备是否使用该 eMMC boot chain 尚未确认，不得运行。
+- Stage1 路径无上传长度至少 8 KiB 的检查；短镜像可能越界读取 RAM。SPI updater 未启用分支另有 image_map 未初始化即 memset 的源码缺陷。
+- PA-220 当前 Stage3 位于 SPI 启动链，由原厂前级加载；QCA APPBL/ART/CDT/SMEM 和通用 Octeon eMMC Stage1/2 不能直接映射。
+- 未执行 bootloaderupdate/mmc write/erase/sf write/erase/update/saveenv。
