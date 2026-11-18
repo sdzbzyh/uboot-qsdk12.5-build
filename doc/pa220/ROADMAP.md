@@ -49,7 +49,7 @@
 | P1-A2 第三组 | backup/mibib/mac | 已完成 | audit/P1-A2-BACKUP-MIBIB-MAC.md |
 | P1-A2 最后 | upgrade 及全部持久化写入路径 | 已完成 | audit/P1-A2-UPGRADE-PERSISTENT-WRITE-AUDIT.md |
 | P1-A3 | 网络服务（DHCP/BOOTP/TFTP/WGET/Telnet/网络驱动） | 已完成源码静态审计；未编译/未实机验证 | audit/P1-A3-BOOTP-DHCP.md；audit/P1-A3-TFTP-WGET-TELNET.md；audit/P1-A3-ETH-NET-ABORT.md |
-| P1-A4 | 存储、分区、文件系统、环境后端和固件管理 | 进行中：eMMC/SPI、GPT、EXT4/FAT、SPI 环境后端已审计；固件分区映射/bootloader update 待审计 | audit/P1-A4-EMMC-SPI-CORE.md；audit/P1-A4-GPT-FILESYSTEM.md；audit/P1-A4-ENV-SPI-BACKEND.md |
+| P1-A4 | 存储、分区、文件系统、环境后端和固件管理 | 进行中：eMMC/SPI、GPT、EXT4/FAT、SPI 环境后端、Bootloader updater 已审计；剩余存储命令/介质边界待核对 | audit/P1-A4-EMMC-SPI-CORE.md；audit/P1-A4-GPT-FILESYSTEM.md；audit/P1-A4-ENV-SPI-BACKEND.md；audit/P1-A4-BOOTLOADER-UPDATE.md |
 | P1-A5 | IPQ 硬件信息/平台钩子与 OCTEON 对照 | 尚未开始 | 待建立独立审计报告 |
 
 P1-A2 已完成的是固定 uBootKit commit 下的源码静态审计，不表示 PA-220 适配代码已实现、已编译或已实机验证。所有存储写入路径均只作静态追踪，没有执行。
