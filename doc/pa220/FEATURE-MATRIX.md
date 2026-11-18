@@ -75,3 +75,13 @@
 - **syslog**：uBootKit 依赖 gd->console_out/membuff；PA-220 global_data/console 检查到的是 precon 缓冲，不等价于运行期日志环形缓冲，后端需重写。
 - 四模块均为 uBootKit 源码存在且由 CONFIG_HTTPD 的 failsafe 构建路径编入；目标 defconfig 是否实际启用、构建结果和实机功能均 NOT VERIFIED。
 - P1-A2 尚余 misc、webterm、backup、mibib、mac，upgrade 仍按要求最后审计。
+
+
+## P1-A2 第二组 Web 业务模块审计（2026-11-18）
+
+证据：`audit/P1-A2-MISC-WEBTERM.md`。本批完成 `misc.c`、`webterm.c)，不代表 P1-A2 全部结束。
+
+- **misc**：静态页面分发、gzip 资源处理和版本信息可重写；HTTPD response 生命周期需适配 PA-220 旧版环境。/reboot 是复位动作，Web 初版不提供。
+- **webterm**：/webterm/exec 通过 run_command 执行任意 U-Boot 命令，可能间接触发 saveenv、SPI/eMMC/文件系统写入；PA-220 Web 初版禁止。cmdlist 会暴露命令面，初版不提供。upload 依赖 QCA 固件辅助接口，且 set_file_info_env 副作用 UNKNOWN，不直接移植。
+- misc/webterm 均由 CONFIG_HTTPD 的 failsafe 构建路径编入；实际目标配置启用、编译和实机状态 NOT VERIFIED。
+- P1-A2 尚余 backup.c、mibib.c、mac.c；upgrade.c 仍按要求最后审计。
