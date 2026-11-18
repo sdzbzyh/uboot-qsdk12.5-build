@@ -543,3 +543,90 @@ D-005 仍然保留“链接地址与加载地址必须区分”的决策，但 0
 - TFTP 越界检查必须在 RAM 写入之前完成，而不能依赖事后 warning。
 
 **因此本轮没有必要为了 EEPROM 物理容量或最终 relocation 数值阻塞 U-Boot 构建。后续构建完成后，按本节测试清单收集结果即可。**
+
+
+## 15. RAM 第二轮核对：链接布局、重定位映射与地址语义
+
+本轮继续核对 PA-220 固定源码 commit，不修改 PA-220 源码。
+
+### 15.1 链接地址与 ELF 布局
+
+证据文件：
+
+- `board/octeon/pa220/config.mk`
+- `arch/mips/cpu/octeon/u-boot.lds`
+- `include/configs/octeon_common.h`
+
+确认：
+
+- PA-220 `CONFIG_SYS_TEXT_BASE = 0xC0000000`；
+- linker script 的入口为 `_start`；
+- `.text` 从 `CONFIG_SYS_TEXT_BASE + SIZEOF_HEADERS` 开始；
+- 随后依次组织 GOT、rodata、data、sdata、`.u_boot_list`、sbss、bss、scommon、cvmx_shared_bss；
+- `uboot_end` 标记拷贝范围结束；
+- 镜像长度由最终链接产物的 `uboot_end - CONFIG_SYS_MONITOR_BASE` 决定，并在 relocation 时向上按 64 KiB 对齐。
+
+注意：`0xC0000000` 是链接地址布局的起点，不能直接当成 DRAM physical address，也不能拿它与 named block 的物理地址区间直接比较。
+
+### 15.2 relocation 区间的源码公式
+
+`arch/mips/lib/board_octeon.c:board_init_f_finish()` 明确给出：
+
+1. 对 CN63XX 及更新 OCTEON：
+   `u_boot_mem_top = 0x20000000 + (gd->ram_size - 0x10000000)`（RAM > 256 MiB 分支）。
+2. `len = ALIGN_UP(uboot_end - CONFIG_SYS_MONITOR_BASE, 64 KiB)`。
+3. 代码/data/BSS 预留 `MAX(len, 512 KiB)`。
+4. 再扣除 `STACK_SIZE = 64 KiB + CONFIG_SYS_BOOTPARAMS_LEN` 和 `TOTAL_MALLOC_LEN`。
+5. 根据 `u_boot_mem_top - addr` 计算 TLB mapping alignment，向下对齐得到 `u_boot_base_phys`。
+6. U-Boot relocation 的物理占用区间为：
+   `[u_boot_base_phys, u_boot_mem_top)`。
+7. heap 起点为 `u_boot_base_phys + len`；malloc arena 大小为 `TOTAL_MALLOC_LEN`。
+8. stack/board data/global data/bootparams 由该函数继续在上述预留区中分配。
+9. 最终写入：
+   - `bd->bi_uboot_ram_addr = u_boot_base_phys`
+   - `bd->bi_uboot_ram_used_size = u_boot_mem_top - u_boot_base_phys`
+
+这证明 relocation 物理占用范围不是简单的“镜像大小”，而是包含 U-Boot 运行所需 heap、stack、bd、gd 和 bootparams 的整体保留窗口。
+
+### 15.3 虚拟地址映射
+
+同一函数后段调用：
+
+- `addrmap_set_entry(CONFIG_SYS_TEXT_BASE, bd->bi_uboot_ram_addr, bd->bi_uboot_map_size * 2, CONFIG_ADDR_MAP_CODE_IDX)`
+- 将 U-Boot link virtual base 映射到动态 relocation physical base；
+- `addrmap_set_entry(0, 0, min(gd->ram_size, 256 MiB), CONFIG_ADDR_MAP_FIRST_256MB_IDX)`；
+- boot bus 另有独立映射。
+
+所以运行时 U-Boot 代码地址 `0xC0000000` 经 addrmap 映射到动态 relocation physical address；不能用简单的 KSEG0 低 29-bit 截断来推算这个高地址映射。
+
+`cvmx-address.h` 对 XKPHYS 地址的结构定义为：最高两位 address region = XKPHYS，后续 CCA 位与 physical address 字段分离；该头文件明确把 XKPHYS 解释为通过 unmapped virtual address 访问 physical address。bootmem named block API 的分配器返回 physical base；指针型 API 再通过 `cvmx_phys_to_ptr()` 转成可访问指针。
+
+### 15.4 低地址/异常/FDT 等区域与最终安全上传区
+
+`octeon_mem_map.h` 明确写明 U-Boot 始终保留 DRAM 前 1 MiB；另有 idle-core code 与 bootmem descriptor 等固定保留区域。FDT 在早期初始化时由链接内嵌的 `__dtb_begin` 经 `MAKE_KSEG0()` 建立指针，后续另有 `__fdt` named block。异常 handler 也有独立 named block 名称 `__tmp_uboot_exception`。
+
+这意味着最终上传区不能仅凭“RAM 中没有看到 U-Boot 镜像”来判定空闲，必须以运行时 named block 的 base/size 为准，并且上传区边界校验要在网络接收数据写入内存之前执行。
+
+### 15.5 本轮结论与仍需运行时确认的值
+
+源码已确认：
+
+- link text base：`0xC0000000`；
+- linker 的完整段组织及 `uboot_end` 终点；
+- relocation 物理区间计算公式；
+- heap、stack、bd、gd、bootparams 的保留关系；
+- U-Boot virtual-to-physical addrmap 的建立方式；
+- bootmem named block 的地址语义是 physical base/size，指针 API 才转换成可访问指针。
+
+仍不应静态写死：
+
+- 最终 ELF 的 `uboot_end` / `len`；
+- 实际 `TOTAL_MALLOC_LEN`；
+- 最终 TLB map size；
+- 最终 `u_boot_base_phys`；
+- 最终 stack/gd/bd/bootparams 数值；
+- 最终运行时 `__tmp_load` named block 的地址与大小。
+
+以上值均可在构建后通过 map/ELF 符号、启动 DEBUG 日志及 U-Boot 运行时查询确认，不阻塞当前阶段构建。后续实机测试仍按第 13.6 节清单执行，并补充提供最终 ELF/map 中的 `uboot_end` 与 `CONFIG_SYS_TEXT_BASE`。
+
+**安全结论保持：0x81000000 不作为默认上传地址；上传 buffer 使用运行时 load-reserved named block，并在写入前做完整范围与溢出检查。**
