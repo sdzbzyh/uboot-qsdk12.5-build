@@ -51,3 +51,15 @@
 5. 适配结论、补丁编号、编译结果和实机验证证据。
 
 任何无法证明的适配结论都应保留为“需研究”，而不是标记完成。
+
+## P1-A1 页面与 URI 审计补充（2026-11-18）
+
+证据：`audit/P1-A1-PAGE-URI-CALLCHAIN.md`，uBootKit 固定 commit `9ce315735ac88fd0a7c7697bc527a8616ed0a972`，PA-220 固定 commit `801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`。
+
+- Web 页面统一通过 `/main.js` 发起业务请求；静态页面/URI 分发和 handler 注册框架具有结构复用价值，但 PA-220 尚无 HTTPD/TCP 服务实现，不能标记为已实现。
+- `sysinfo`：JSON/页面格式可借鉴；SMEM、QCA MMC host、IPQ API 硬件采集必须以 OCTEON/PA-220 接口重写。
+- `network`：PA-220 有旧网络栈及环境变量基础接口；uBootKit handler 修改环境后调用 `saveenv()`，不得直接移植。PA-220 环境保存在 SPI NOR。
+- `env`：PA-220 有 getenv/env_import 等基础接口；所有 set/unset/reset/restore 路径均涉及 `saveenv()`，第一版 Web 仅允许只读展示。
+- `syslog`：uBootKit 依赖 `gd->console_out` membuff；PA-220 对应缓冲实现 UNKNOWN，需进一步检查。
+- `backup/mibib/mac/webterm/upgrade`：路由和主要副作用入口已定位；逐模块调用链仍按 P1-A2 顺序审计，upgrade 最后完成。
+- 配置启用、编译成功、实机验证均 NOT VERIFIED；本批只完成源码审计。
