@@ -906,3 +906,256 @@ HTTP 接收过程由 TCP callback 将收到的 payload 通过 CPU `memcpy` 分�
 **实现注意：**调用 `cvmx_bootmem_find_named_block()` 后，应立即把 `base_addr`、`size` 复制到调用方自己的局部结构/变量中，不要长期保存返回指针，也不要在仍依赖该 static descriptor 内容时嵌套调用同一 API。
 
 这进一步确认了该接口适合作为 PA-220 上传区运行时查询的首选接口；具体目标配置的最终链接符号仍可在构建 map/ELF 中复核，不需要为此阻塞当前阶段。
+
+
+## 23. OCTEON ELF64 装载器的真实实现与边界审计
+
+固定 PA-220 源码：`IronDemiGod/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`。
+
+### 23.1 实际实现和编译入口
+
+- 实际实现：`u-boot/arch/mips/cpu/octeon/commands/cmd_elf64.c`。
+- 命令入口：`do_bootelf()`。
+- OCTEON ELF64 loader：`load_elf64_image(unsigned long addr, uint64_t load_override)`。
+- 编译入口：`u-boot/arch/mips/cpu/octeon/Makefile` 中 `CONFIG_CMD_OCTEON_ELF` 对应 `commands/cmd_elf64.o`；`include/configs/octeon_cmd_conf.h` 定义该命令配置。
+- 这不是通用 `common/cmd_elf.c` 的 ELF64 实现。通用文件不能替代本节的实际证据。
+
+### 23.2 Header / Program Header 读取路径
+
+`do_bootelf()` 只取得 ELF 起始地址（默认 `load_addr`，或命令参数），随后调用 `valid_elf_image(addr)`。该验证函数通过 `cvmx_phys_to_ptr(addr)` 读取 ELF header，只检查：
+
+- ELF magic；
+- ELFCLASS32 / ELFCLASS64；
+- `e_type == ET_EXEC`；
+- `e_machine == EM_MIPS`。
+
+它没有接收镜像长度参数，也没有检查 header、program-header table 或 section-header table 是否落在实际上传文件范围内。
+
+ELF64 loader 随后直接把 `addr` 转为 `Elf64_Ehdr *`，读取：
+
+- `e_phoff`
+- `e_phnum`
+- `e_phentsize`
+- `e_type`
+
+当 `ET_EXEC && e_phoff && e_phnum` 时，按 `e_phnum` 遍历 program header。每个 header 地址由：
+
+`(uint32_t)(addr + phoff + (i * phentsize))`
+
+计算，再读取 `p_type/p_offset/p_filesz/p_memsz/p_paddr`。
+
+### 23.3 已确认的整数、源文件和目标范围缺口
+
+当前代码没有完整执行以下验证：
+
+1. `e_phoff + e_phnum * e_phentsize` 的乘法/加法溢出检查；
+2. program-header table 是否完全位于上传 ELF payload 内；
+3. `e_phentsize` 是否与实际 `Elf64_Phdr` 布局兼容；
+4. `addr + phoff + i * phentsize` 经 `uint32_t` 转换后的截断/回绕；
+5. `p_offset + p_filesz` 是否落在上传 payload 内；
+6. `p_filesz <= p_memsz`；
+7. `p_paddr` 经 `octeon_fixup_xkphys()` 转换后的目标地址是否仍属于有效 `__tmp_load`；
+8. `daddr + p_memsz`、`daddr + filesz` 是否溢出；
+9. ELF entry 是否位于一个已验证的可执行 PT_LOAD segment 内。
+
+源数据地址也经过 32-bit 转换：`image = (unsigned char *)(uint32_t)(offset + addr)`，随后调用 `memcpy64(daddr, (int32_t)image, filesz)`。不能因为 `memcpy64()` 能处理非对齐和尾数字节，就认为它会验证源/目标范围；`octeon_boot.c` 中的实现注释明确要求调用者保证两个 64-bit 地址有效。
+
+### 23.4 Segment 写入与 little-endian 转换
+
+PT_LOAD 的当前顺序是：
+
+1. 由 `p_paddr` 或 `load_override` 得到目标地址；
+2. OCTEON 下调用 `octeon_fixup_xkphys(paddr)`；
+3. `memcpy64()` 复制 `p_filesz`；
+4. 若 `p_memsz > p_filesz`，`memset64()` 清零剩余空间；
+5. little-endian ELF 再以 8-byte `ld/dsbh/dshd/sd` 循环转换；
+6. 调用 `flush_cache(daddr, memsz)`。
+
+当前代码没有在第 2 步后检查目标 segment 是否位于 `__tmp_load`。此外 little-endian 转换循环条件为 `pos < memsz`、每轮固定递增 8；当 `memsz` 不是 8 的整数倍时，最后一次 8-byte 读写可能越过 segment 的逻辑末尾。P2 必须修正尾部处理或明确拒绝不符合约束的 segment，不能只把范围检查长度简单写成 `memsz` 而忽略实际 8-byte 访问。
+
+### 23.5 Section-header fallback 也是写内存路径
+
+若 ELF64 不满足 PT_LOAD 分支条件，当前实现会回退到 section-header 装载：
+
+- 直接读取 `e_shoff/e_shstrndx/e_shnum`；
+- 计算 section header 和 string table 地址；
+- 对 SHF_ALLOC section 执行 `memset64()` 或 `memcpy64()`；
+- 每个 section 后调用 `flush_cache()`。
+
+该 fallback 同样没有上传文件长度边界、整数溢出和 `__tmp_load` 目标范围检查；并且部分字段直接使用 ELF 结构体原始值而非统一 endian accessor。后续必须对 fallback 做同等验证，或明确限制 ELF64 只接受经过验证的 PT_LOAD 路径，不能留下未保护的第二条写内存路径。
+
+### 23.6 Entry 和执行阶段
+
+PT_LOAD 路径返回 `octeon_fixup_xkphys(e_entry)`。OCTEON 的 `do_bootelf_exec()` 位于 `arch/mips/cpu/octeon/octeon_exec.c`，先调用 `octeon_restore_std_mips_config()`，随后直接调用 entry；该执行包装函数本身没有额外的 `flush_cache()`。
+
+因此入口前 Cache 操作的实际位置是 ELF loader 的每个 segment 装载完成后，而不是 `do_bootelf_exec()`。同时 bootelf 不调用 `arch_preboot_os()`，不会走 bootm 的临时块释放链；应用返回 U-Boot 后仍须重新查询 named block，不能只相信未清零的 globals。
+
+### 23.7 ELF64 结论
+
+- 实际 loader 来源已定位并确认，不再是 UNKNOWN。
+- 当前 ELF64 loader **没有足够的源文件长度和目标 RAM 范围验证**。
+- `octeon_fixup_xkphys()` 负责地址格式规范化/清理 CCA 位，不是 RAM 安全范围验证器。
+- PT_LOAD 与 section fallback 两条写入路径都必须纳入 P2 加固。
+- 在加固完成前，不应把未经验证的 ELF 文件交给 `bootelf`；特别不能把“ELF 文件本身在 __tmp_load 内”当成 segment 目标安全的证明。
+
+## 24. PA-220 Cache API 的具体语义与调用链闭环
+
+固定 PA-220 源码中的实际实现位于 `u-boot/arch/mips/cpu/octeon/cpu.c`；底层宏位于 `u-boot/arch/mips/include/asm/arch-octeon/cvmx-asm.h`，定义由 `octeon_boot.h` 引入。
+
+### 24.1 API 的真实操作
+
+| API | 固定源码实际行为 | 不能误读为 |
+|---|---|---|
+| `flush_cache(start,size)` | `CVMX_SYNC`，随后 `CVMX_ICACHE_INVALIDATE` 和 `CVMX_DCACHE_INVALIDATE` | 指定范围逐 cache-line writeback |
+| `flush_dcache_range(start,stop)` | 执行 `CVMX_SYNCW` | 逐行 D-cache writeback/invalidate |
+| `invalidate_dcache_range(start,stop)` | 空实现 | 实际 D-cache invalidate |
+
+关键宏定义：
+
+- `CVMX_SYNC`：`sync` 指令并带 compiler memory clobber。
+- `CVMX_SYNCW`：`syncw` 指令并带 compiler memory clobber。
+- `CVMX_ICACHE_INVALIDATE`：执行同步后 `synci 0($0)`；源码注释描述为整个 I-cache 失效。
+- `CVMX_DCACHE_INVALIDATE`：执行同步后 `cache 9, 0($0)`；源码注释描述为整个 D-cache 失效。
+
+特别注意：`flush_cache()` 的 `start_addr/size` 参数在 PA-220 实现中没有参与运算，调用它会触发全局 I/D-cache 操作。不能根据 API 名称或其他 MIPS 平台实现推断它只影响传入区间。
+
+### 24.2 TFTP CPU memcpy 后的状态
+
+PA-220 `net/tftp.c:store_block()` 普通 RAM 分支执行 CPU `memcpy(load_addr + offset, src, len)`。该函数没有显式调用：
+
+- `flush_cache()`
+- `flush_dcache_range()`
+- `CVMX_SYNCW`
+
+所以现状是：**TFTP block 写入路径没有显式的完成同步操作**。不能仅凭 CPU memcpy 返回，就把数据已对后续消费者完成同步作为源码保证。
+
+### 24.3 HTTP 上传完成后的状态
+
+uBootKit 固定源码 `net/httpd.c` 在 HTTP payload 完成时调用 `flush_cache(upload_ptr, payload_size)`。这是可以参考的“上传完成后同步”流程，但它的 IPQ 固定地址/availability API 不能移植。
+
+若使用 PA-220 的同名 API，该调用不是局部 payload flush，而是 PA-220 CPU 层的全局同步和 I/D-cache 失效。另外原参考实现把 `upload_ptr[payload_size] = 0` 放在 `flush_cache()` 之后；若保留这个 NUL 终止字节，RAM reservation 需要覆盖 `payload_size + 1`，或改用长度感知解析、不再写尾随字节。
+
+### 24.4 bootm 的 Cache 路径
+
+PA-220 `common/cmd_bootm.c` 的 OS image load/decompress 路径在完成目标地址写入后调用：
+
+`flush_cache(load, (*load_end - load) * sizeof(ulong))`
+
+由于 PA-220 的 `flush_cache()` 忽略范围参数，实际效果是全局同步并失效 I/D-cache。
+
+随后 `boot_selected_os()` 调用 `arch_preboot_os()`，进入 OCTEON 的 `octeon_bootloader_shutdown()`；再由 `arch/mips/lib/bootm.c` 的 `boot_jump_linux()` 调用内核入口。已核对的 `arch_preboot_os()` / `boot_jump_linux()` 本身没有另一个 cache range 操作。
+
+因此准确结论是：**bootm 有装载完成后的全局 Cache 操作，但不是由 OS handoff hook 执行。**
+
+### 24.5 bootelf 的 Cache 路径
+
+PT_LOAD 每个 segment 在 copy、zero-fill 和 little-endian 转换后调用 `flush_cache(daddr, memsz)`；section fallback 每个可装载 section 后也调用该函数。根据 24.1，实际都是全局同步并失效 I/D-cache。
+
+`do_bootelf_exec()` 本身不再做 Cache 操作。当前 bootelf 的代码执行前同步来自 loader 的 segment/section 循环。
+
+## 25. 统一 RAM 写入前范围验证接口设计
+
+本节是 P2 实现约束，不代表代码已经实现或编译通过。
+
+### 25.1 唯一权威边界
+
+唯一可接受的 RAM 写入窗口来源：
+
+`cvmx_bootmem_find_named_block(OCTEON_BOOTLOADER_LOAD_MEM_NAME)`
+
+其中 `OCTEON_BOOTLOADER_LOAD_MEM_NAME` 为 `"__tmp_load"`。
+
+每次查询必须立即把 static descriptor 的 `base_addr/size` 复制到调用方变量；不能保存返回指针。必须检查：
+
+1. descriptor 存在；
+2. `base_addr != 0` 且 `size != 0`；
+3. `base_addr + size` 不溢出；
+4. `load_reserved_addr/load_reserved_size` 与当前 descriptor 一致；
+5. 当前仍处于 U-Boot 服务阶段，尚未进入释放临时块的 OS handoff。
+
+`loadaddr` 只是默认写入地址提示，不是安全边界权威数据。禁止使用硬编码地址、`gd->ram_size` 推算的空闲区或旧 globals 单独作为安全证明。
+
+### 25.2 统一接口建议
+
+建议提供一个无缓存 descriptor 指针的公共检查入口，例如：
+
+`int octeon_load_range_check(uint64_t addr, uint64_t len);`
+
+该函数每次调用都重新查询 `__tmp_load`，立即复制 descriptor 字段，再验证当前请求。内部统一采用半开区间和减法式检查：
+
+- 拒绝零长度写入；
+- 拒绝 `addr < base`；
+- `offset = addr - base`；
+- 拒绝 `offset > size`；
+- 拒绝 `len > size - offset`。
+
+先检查 `size <= UINT64_MAX - base`。不得先计算可能溢出的 `addr + len` 再比较。需要形成 end 地址时，必须先通过 checked-add helper。
+
+乘法统一采用：若 `a != 0` 且 `b > UINT64_MAX / a`，立即拒绝。所有 offset、地址和长度统一提升到 `uint64_t` 后再计算。
+
+### 25.3 TFTP 接收 block
+
+在 `store_block()` 的 RAM `memcpy` 之前：
+
+1. checked-multiply 计算 block offset；
+2. checked-add 合并 wrap offset；
+3. checked-add 计算目的地址；
+4. 调用统一范围检查；
+5. 只有检查通过才能 memcpy；
+6. 越界或溢出时拒绝当前 block 并终止/失败本次传输。
+
+若协商得到 TFTP `tsize`，在接收首 block 前先对完整 payload 做 reservation 检查；若服务器没有提供总长度，则把从 load address 到 named block 末端的剩余空间作为本次传输的最大允许窗口，并继续逐 block 检查，任何 block 都不得突破该窗口。
+
+### 25.4 HTTP payload/chunk
+
+HTTP 在第一次 payload memcpy 前已知 `Content-Length`，必须先对完整 payload 做一次 reservation 检查。随后每个 TCP chunk 写入前：
+
+- checked-add 计算 `upload_size + chunk_len`；
+- 确认不超过 `payload_size`；
+- checked-add 计算当前目的地址；
+- 对当前 chunk 再调用统一范围检查；
+- 检查通过后才能 memcpy。
+
+若继续写 `upload_ptr[payload_size] = 0`，预留长度必须包含额外 1 byte；更稳妥的方案是去掉尾随 NUL，后续解析全部使用显式 payload length。适配版 HTTP 上传的所有路径（包括小于内部 header buffer 的短 payload）都必须遵守统一 reservation 规则，不能出现绕过 named block validator 的小包分支。
+
+### 25.5 ELF source 和 segment destination
+
+ELF loader 必须显式取得当前上传镜像的真实长度；不能只用地址，也不能信任可能陈旧的 `filesize` 环境变量。
+
+写 segment 前至少验证：
+
+- ELF header 完整位于上传 payload；
+- `e_phoff`、`e_phnum * e_phentsize` 和 program-header table 全部无溢出且位于 payload；
+- `e_phentsize` 与实际读取结构布局兼容；
+- 每个 PT_LOAD 的 `p_offset/p_filesz` 完全位于 payload；
+- `p_filesz <= p_memsz`；
+- 目标地址经严格的 OCTEON 地址规范化后转换到与 named block 一致的 physical address domain；
+- 每个 segment 的实际写入长度（包括 endian conversion 的实际访问宽度）在 `__tmp_load` 内；
+- 所有 segment destination 不与仍需读取的 ELF source/header/program-header 数据重叠；
+- segment 之间不存在未经支持的目标重叠；
+- entry 位于一个已验证的可执行 PT_LOAD segment。
+
+`octeon_fixup_xkphys()` 之后仍必须做物理地址归一化和 named-block 检查；不能把它当成 range validator。section-header fallback 若保留，必须做同等级验证，否则应明确拒绝该 fallback。
+
+### 25.6 Cache 操作与范围验证分离
+
+范围检查解决“能不能写”；Cache 同步解决“写入何时对后续消费者可见”，两者不可互相替代。
+
+- TFTP/HTTP payload 完成后，优先调用 PA-220 `flush_dcache_range(start, stop)` 作为写入完成同步；该 API 实际执行 `syncw`，不是逐行 cache flush。调用前必须安全计算 stop。
+- 不应为了每个网络 chunk 调用 PA-220 的 `flush_cache()`，因为它会全局失效 I/D-cache。
+- ELF segment 装载后仍需处理执行代码的 I-cache 一致性；现有 `flush_cache()` 的全局操作语义已确认，P2 可以在确认性能/硬件语义后决定保留或优化，但不得静默改成 no-op。
+- bootm 现有装载后全局 Cache 操作应保持独立，不要把 bootm handoff 与 HTTP/TFTP 上传完成同步混为一个接口。
+
+## 26. P1-A5 静态审计收敛状态
+
+截至本次检查：
+
+- 板级 early init、CPLD/QLM/MDIO/PHY/boot-bus 调用链：已完成静态收敛；
+- TLV EEPROM 软件访问窗口：源码已确认 256 bytes；物理器件容量仍 UNKNOWN；
+- RAM relocation/linker/addrmap/load block：源码公式已确认；最终运行时 descriptor 和 relocation 数值待构建后只读验证；
+- `__tmp_load` 生命周期、释放例外和只读查询 API：已完成静态收敛；
+- TFTP/HTTP RAM 写入路径：已完成源码定位；尚未实现统一 pre-write validator；
+- OCTEON ELF64 loader 和 PA-220 Cache API：本轮已完成静态调用链/语义审计；
+- P1-A5 仍未进行最终构建或实机验证。
+
+**P1-A5 源码静态审计可以结束；不代表上传安全功能已经实现。**统一 validator、TFTP/HTTP 接入和 ELF loader 加固属于后续开发工作。TLV 实际容量、最终 relocation/load block 数值、PHY/CPLD 硬件行为等可在构建后用只读命令确认的事项，不阻塞阶段性构建，必须保留到实机测试清单。
