@@ -108,3 +108,13 @@
 - QCA flash/MIBIB/ART/CDT/SMEM/bootconfig 机制不适用于 PA-220；PA-220 GPT/eMMC/SPI 写命令具备破坏性，不移植 Web 刷写入口。
 - check_fw_type() 接收 size 却不据此限制 magic 读取范围；上传验证不等同于签名验证或安全启动。
 - P1-A2 源码审计范围已覆盖 sysinfo/network/env/syslog/misc/webterm/backup/mibib/mac/upgrade；仍未编译、未实机验证，未执行任何持久化写入。
+
+
+## P1-A3 第一批网络服务审计（2026-11-18）
+
+证据：`audit/P1-A3-BOOTP-DHCP.md`。P1-A3 整体仍在进行。
+
+- **BOOTP/DHCP Client**：PA-220 固定 U-Boot 已有旧版实现，CONFIG_CMD_NET/CONFIG_CMD_DHCP 配置入口存在；无需移植 uBootKit 的 bootp.c，后续只需核对最终配置和实机网络行为。
+- **DHCP Server**：uBootKit 有 CONFIG_DHCPD 服务端；PA-220 没有对应服务端对象。其 UDP handler、NetLoop 调度、地址池和租约机制需在 PA-220 旧网络栈上重写/验证。
+- DHCP Server 当前最多 8 个 RAM 租约槽，无租约到期回收，池耗尽回退可能重复分配；不能原样移植。
+- 编译和实机状态 NOT VERIFIED；TFTP/WGET/TelnetD/eth/net/net_abort 尚未完成审计。
