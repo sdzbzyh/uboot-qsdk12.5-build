@@ -14,6 +14,14 @@
 - common/cmd_usb.c 在 CONFIG_USB_STORAGE 下编入 mass-storage 命令路径。
 - 这说明 PA-220 源码有 USB host/mass-storage 能力；是否在实际硬件端口和最终 .config 工作，尚未验证。
 
+
+### 1.1 PA-220 U-Boot 阶段 USB 供电限制
+
+- board/octeon/pa220/pa220_board.c:120-145 的 early_board_init() 将 GPIO2/GPIO3 配置为输出低，注释说明 U-Boot 阶段保持 USB power off，直到 Linux 启动后再开启。
+- pa220.dts:437、457 将 USB power-gpios 分别绑定到 GPIO2/GPIO3。
+- 因此 CONFIG_CMD_USB/CONFIG_USB_STORAGE 只证明命令和驱动源码存在；不能证明 U-Boot 阶段 USB 端口已供电或可使用。
+- 当前 PA-220 U-Boot USB Mass Storage 实际可用性 NOT VERIFIED；不得将 USB 当作当前可用的维护/升级介质，也不得为 Web 功能自动拉高 GPIO2/GPIO3。
+
 ## 2. USB 命令读写路径
 
 文件：common/cmd_usb.c（704 行）。
