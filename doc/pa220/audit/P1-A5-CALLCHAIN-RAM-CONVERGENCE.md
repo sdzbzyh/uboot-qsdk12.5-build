@@ -860,16 +860,18 @@ HTTP 接收过程由 TCP callback 将收到的 payload 通过 CPU `memcpy` 分�
 - `__tmp_load` 的真实名称及 `"__tmp"` 临时块前缀；
 - 创建时机与 U-Boot 正常运行期间的生命周期；
 - OS handoff 的释放调用链及 `api_enable` 例外；
-- named-block descriptor 的只读查询 API；
+- named-block descriptor 查询 API 的声明、实现和基础 CVMX 编译入口；
+- 查询 API 返回 static descriptor、非 re-entrant，调用方必须立即复制字段；
 - globals 在释放后未清零的生命周期注意事项；
 - PA-220 TFTP 当前缺少 pre-write range validation 和显式 cache flush；
-- uBootKit HTTP 的 IPQ 固定地址不可移植，但“分段 CPU memcpy + 完成后 cache flush”的流程可作为设计参考。
+- uBootKit HTTP 的 IPQ 固定地址不可移植，但“分段 CPU memcpy + 完成后 cache flush”的流程可作为设计参考；
+- bootm OS handoff 与 bootelf 应用执行路径对临时 named block 的不同处理。
 
 下一轮继续核对的重点：
 
-1. 明确 PA-220 旧版 bootmem descriptor 查询 API 在当前 PA-220 配置下的可用性，并据此确定最终 helper 的实现方式；
-2. 追踪 TFTP/HTTP 上传后的镜像消费路径，尤其 bootm/bootelf 对上传 buffer 的缓存与 handoff 处理；
-3. 将 range validator 设计为 HTTP/TFTP 共用、写入前调用的单一入口；
+1. 追踪 OCTEON `load_elf64_image()` 的实际实现/来源、ELF segment 目标地址处理，以及目标入口前的 D/I-cache 同步；
+2. 进一步明确 PA-220 MIPS cache maintenance API 的具体语义，闭环 TFTP 写入后的 cache flush 与 bootm/bootelf 消费路径；
+3. 将 range validator 设计为 HTTP/TFTP 共用、写入前调用的单一入口，并覆盖 ELF segment 目的地址；
 4. 在上述静态证据闭环后，再完成 P1-A5 的最终板级初始化时序、功能矩阵、ROADMAP 和 P1 总结。
 
 以上源码结论不修改 PA-220 固定源码；本轮没有执行任何 EEPROM、SPI、eMMC 或其他持久化写入。
