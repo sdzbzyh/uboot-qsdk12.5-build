@@ -227,3 +227,13 @@
 - octwd test 会故意不喂狗并等待 NMI，不得开放 Web。
 - octeon_bootloader_shutdown() 在 OS handoff 调用 hw_watchdog_disable()，然后关闭网络/USB；该函数关闭 core0 watchdog，未调用 disable_all。
 - OCTEON CIU watchdog 与 CPLD reg d flash-failover watchdog 是两套独立硬件。
+
+
+## P1-A5 第四批板卡信息/DRAM 内存边界审计（2026-11-18）
+
+证据：`audit/P1-A5-BOARD-INFO-MEMORY.md`。
+
+- PA-220 board identity 来自 TLV EEPROM，CVMX sysinfo 提供 system_dram_size、cpu_clock_hz、board_type/revision/serial 等字段；checkboard() 默认 weak stub 不能作为完整信息接口。
+- Stage2 已完成 DRAM 初始化；RAM-resident Stage3 从 dram_size_mbytes 环境变量接收 DRAM 容量，gd->ram_size 最终由该值/已检测值设置；默认 8192 MiB 不是实机容量证据。
+- PA-220 内存配置包含 TEXT_BASE=0xC0000000、SDRAM_BASE=0x80000000、LOAD_ADDR 默认0x20000000、MALLOC_LEN=12MiB、BOOTMAPSZ=1MiB、mtest 0x22000000–0x2A000000；项目既有 TFTP 地址 0x81000000 与默认 LOAD_ADDR 不同。
+- PA-220 安全 RAM 上传区尚未完成地址图，必须按 MIPS64/n32、cached/uncached alias、Stage2 handoff、U-Boot/heap/stack/GD/FDT/bootmap/mtest 等边界重写检查；未确认前不开放上传。
