@@ -140,3 +140,13 @@
 - **DHCP Client/TFTP**：PA-220 已有旧版等价实现；DHCP Server 需重写并统一 NetLoop 调度。
 - **net_abort**：uBootKit 通过 autoboot.c 调用，默认 net_abort_en=true；UDP 37541 收到 UBOOT:ABORT 后可中断 autoboot 并进入 httpd/cli_loop。无认证，PA-220 不直接移植。
 - 本阶段所有新增网络服务均未在 PA-220 编译或实机验证。
+
+
+## P1-A4 第一批存储后端审计（2026-11-18）
+
+证据：`audit/P1-A4-EMMC-SPI-CORE.md`。P1-A4 整体进行中。
+
+- **eMMC**：PA-220 使用 OCTEON 专用 octeon_mmc.c，提供 block_read/block_write/block_erase；不要替换为 QCA MMC/SDHCI。mmc_bwrite 有容量检查但存在加法溢出审查点；mmc_berase 缺少容量和零长度检查，属于高风险路径。
+- **SPI NOR**：PA-220 启用 OCTEON SPI、SPI_FLASH、Winbond W25Q128、CONFIG_CMD_SF；板级注释明确 intended read-only。sf write/erase/update 命令虽存在，项目仍禁止执行。实际 bus/CS 与双 Flash/CPLD 选择关系尚未实测。
+- **EXT_CSD**：CONFIG_OCTEON_MMC_NO_RST_N=1 明确保护 RST_n_FUNCTION OTP；必须保留。boot/RPMB 配置类命令需独立审查。
+- 未执行任何 mmc/SF/saveenv/CPLD 写操作；GPT/文件系统/环境后端尚未完成。
