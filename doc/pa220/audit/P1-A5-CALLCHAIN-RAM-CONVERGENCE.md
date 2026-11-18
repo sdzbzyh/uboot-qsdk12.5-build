@@ -890,3 +890,17 @@ HTTP 接收过程由 TCP callback 将收到的 payload 通过 CPU `memcpy` 分�
 2. bootelf 读取 ELF header/program header 并将 segment 装载到目标地址时，必须验证每个 segment 的目标范围；仅验证上传 ELF 文件本身位于 `__tmp_load` 并不代表其声明的 segment 地址安全。
 3. Web/TFTP 上传缓冲区 cache maintenance 与 ELF segment 目的地址 cache maintenance 是两个不同问题，不能只 flush 原始上传 buffer 就认为整个 bootelf 路径已解决。
 4. 该项留作后续 bootelf/ELF loader 专项核查，不影响本轮当前阶段性构建；不得在未核查前宣称 bootelf 缓存一致性已闭环。
+
+
+## 22. named-block 查询 API 的实现与可编译性复核
+
+本轮继续读取 PA-220 固定源码的 `arch/mips/cpu/octeon/cvmx/cvmx-bootmem.c` 与 `arch/mips/cpu/octeon/cvmx/Makefile`：
+
+- `cvmx_bootmem_find_named_block()` 并非只有头文件声明；其实现调用 `__cvmx_bootmem_find_named_block_flags(name, 0)`，从 bootmem named-block table 查找并填充 descriptor。
+- `cvmx_bootmem_named_block_desc_t` 包含 `base_addr`、`size` 和 `name`。
+- `__cvmx_bootmem_find_named_block_flags()` 返回的是**函数内部 static descriptor** 的地址，不是 bootmem descriptor array 中原始条目的直接指针；注释明确该 API 非 re-entrant。
+- `arch/mips/cpu/octeon/cvmx/Makefile` 在 `CONFIG_OCTEON` 下编入 `cvmx-bootmem.o`，所以该函数属于 OCTEON 基础 CVMX 对象，不依赖可选 QLM/networking 子配置。
+
+**实现注意：**调用 `cvmx_bootmem_find_named_block()` 后，应立即把 `base_addr`、`size` 复制到调用方自己的局部结构/变量中，不要长期保存返回指针，也不要在仍依赖该 static descriptor 内容时嵌套调用同一 API。
+
+这进一步确认了该接口适合作为 PA-220 上传区运行时查询的首选接口；具体目标配置的最终链接符号仍可在构建 map/ELF 中复核，不需要为此阻塞当前阶段。
