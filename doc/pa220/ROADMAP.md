@@ -129,3 +129,14 @@ P4 计划及首批审计见 `P4-PLAN.md`、`reports/P4-NETWORK-BASELINE-AUDIT-20
 ## P3 历史证据审计覆盖（2026-11-19）
 
 此前 P3 CLI/只读诊断阶段 COMPLETE 是历史阶段记录。用户已要求对 P3 开始至今全部相关会话进行证据追溯和仓库查缺补漏；当前审计状态 **IN PROGRESS**。在 `P3-HISTORICAL-EVIDENCE-AUDIT-2026-11-19.md` 和 `P3-HISTORICAL-AUDIT-CHECKPOINT.md` 明确完成之前，不得开始 P4 实际开发。P4 计划与已有源码审计仅作为历史文档保留，执行状态以 `P4-PLAN.md` 的 PAUSED 标记为准。
+
+
+## P3 / P4 阶段状态更新（2026-11-19）
+
+**P3 CLI/只读诊断：COMPLETE。** 最终证据与未解决风险见 `reports/P3-COMPLETION-2026-11-19.md`。P3 的完成不关闭 P1 非阻断风险，也不解除 RAM 接收 validator 安全门。
+
+**P4 网络维护基础：IN PROGRESS。** P4-1 已完成两批 PA-220 固定源码静态审计：
+- DHCP/Ping/TFTP 首批协议和命令路径：`reports/P4-NETWORK-BASELINE-AUDIT-2026-11-19.md`。
+- MGT AGL 注册、配置条件、NetLoop/DHCP/Ping 生命周期：`reports/P4-1-NETWORK-DRIVER-NETLOOP-AUDIT-2026-11-19.md`。
+
+当前仍缺最终构建 `.config`/ `include/autoconf.mk` 证据及串口运行时环境/设备列表；DHCP 和 Ping 实机测试 NOT RUN。下一步复用既有构建目录只读检查配置，再进行受控串口检查。未确认 `autoload=n` 前不执行 DHCP。TFTP 接收、TFTP Server 与 TFTP PUT 暂不实测；统一 RAM validator 未实现前禁止接收。
