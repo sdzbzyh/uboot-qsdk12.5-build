@@ -5,7 +5,7 @@
 ## 当前状态
 
 - 任务：P3 全阶段历史证据追溯、仓库查缺补漏与最终归档。
-- 当前批次：Batch 1 — 远端基线；Batch 1b — 原始日志路径与 RAM/TLV 补充；Batch 2 — P3 Git 历史时间线及补丁/日志证据对照；Batch 3 — 0002 构建、TLV/时钟和继承 SPI 证据补录；Batch 4 — bootmem 区间算术复核与补丁错误追溯；Batch 5 — P3 阶段决策及 CLI/bootmem 历史补充；Batch 6 — EEPROM 容量边界与 System.map 证据补充；Batch 7 — 固定源码 clock 调用链与 DDR 测量语义复核；Batch 8 — P3 构建产物 GitHub tree 归档核验。
+- 当前批次：Batch 1 — 远端基线；Batch 1b — 原始日志路径与 RAM/TLV 补充；Batch 2 — P3 Git 历史时间线及补丁/日志证据对照；Batch 3 — 0002 构建、TLV/时钟和继承 SPI 证据补录；Batch 4 — bootmem 区间算术复核与补丁错误追溯；Batch 5 — P3 阶段决策及 CLI/bootmem 历史补充；Batch 6 — EEPROM 容量边界与 System.map 证据补充；Batch 7 — 固定源码 clock 调用链与 DDR 测量语义复核；Batch 8 — P3 构建产物 GitHub tree 归档核验；Batch 9 — 固定源码 DDR/clock 语义与 MAC provenance 交叉验证；Batch 10 — P4 并行提交冲突追踪及状态恢复；Batch 11 — 完整 37-commit 清单、历史会话索引与本地 worktree 证据限制。
 - 审计是否完成：**否**。
 - P3 COMPLETE 是否可判定：**否（审计未完成）**。
 - P4 实际开发：**禁止开始**。当前远端已有 P4 计划/源码审计文件，不代表本次获准开展 P4 开发。
@@ -14,7 +14,7 @@
 ## 本批审计范围
 
 - 历史上下文检索覆盖：检索结果包含 2026-11-18 项目 P0/P1/P2 会话索引，以及 2026-11-19 上午 P3/0002/TLV/SCLK/阶段决策的若干摘要。
-- 本批没有取得 P3 从首次开始到本次之前的完整会话清单，也没有完整逐字原始输出。
+- 已恢复 P3 相关会话时间索引和 P3 原始阶段 37 commits 清单；但没有取得账户中全部相关会话的完整清单，也没有完整逐字原始输出。个人历史检索对“全部会话”查询未返回完整列表，故不得声称会话遍历完成。
 - 因此本批只能建立首批证据账本与 GitHub 基线，不可声称历史范围已遍历。
 - 账本：`doc/pa220/reports/P3-HISTORICAL-EVIDENCE-AUDIT-2026-11-19.md`。
 
@@ -23,7 +23,7 @@
 - 仓库：`sdzbzyh/uboot-qsdk12.5-build`。
 - 分支：`feature/pa220-ubootkit-web`（分支存在）。
 - 审计开始时分支 HEAD：`0a6f080a58c9a93e3d4950f8898fc46528d55618`，commit message：`Reconcile final P3 TLV and SPI NOR test statuses`，时间：2026-11-19 09:41:36Z。首批审计账本与检查点已提交；当前 HEAD 以本检查点最后回读值为准。
-- 已回读 `doc/pa220/TEST-PLAN.md`、`P3-START-2026-11-19.md`、`P3-READONLY-AUDIT-2026-11-19.md`、`P3-COMPLETION-2026-11-19.md`、`P4-PLAN.md`、0001/0002 patch 正文。
+- 已回读 `doc/pa220/TEST-PLAN.md`、P3-START、P3-READONLY-AUDIT、P3-COMPLETION、P4-PLAN、0001/0002 patch、P3/P4 相关报告和所有已创建的 session-transcribed 记录。
 - 审计期间新增提交：账本首版 `37cd1f5`、检查点首版 `137dc6f`、账本补充 `a182e1c`、检查点更新 `e1aa5b7`、EEPROM transcript `b8fe267`、RAM validation transcript `7944920`、test-log README 规则 `41e0bc0`；均位于目标分支，未强推。
 - board/clock 原始日志的创建提交 `8873182` 已核验，原始文件 24 行；文件确实在仓库根目录 `reports/`。
 - `doc/pa220/test-logs/2026-11-19_P3_tlv_reader_001.txt` 的实际正文是源码摘录（TLV reader/print/dispatch/config），不是设备串口输出；保留原文件并在账本中纠正其证据属性。
@@ -146,13 +146,25 @@
 
 ## 本批最新远端状态
 
-- 检查点更新前 HEAD：`488f3fccf3f774b032d2b00b8e1a6442b4174106`；已新增完整 37 commits 清单及相关会话时间索引。
+- 检查点更新前 HEAD：`18e416bc867dfc04b01419399d517edfc58191ae`；已新增完整 37 commits 清单及相关会话时间索引。
 
 - 账本与阶段文档最新状态核验前 HEAD：`bcfc406228c30a44ad1e4aa2197d8f911d9a3e38`；本检查点提交后 HEAD 将再次推进。
 
 - 检查点更新前读取 HEAD：`c6164d3f7587873ffc20492628c2479b4fe95496`；本检查点提交后 HEAD 将再次推进。
 - 已确认所有新建/修改文件均在 `feature/pa220-ubootkit-web`；本批未修改 main、固定源码仓库或执行强推。
 - 本地 Debian 工作区仍未能通过 GitHub 远端接口检查；不能声称其 clean，也没有触碰用户本地未提交内容。
+
+## 当前未完成项目与审计门
+
+1. **历史会话遍历仍不完整**：已恢复的会话索引见账本；无法证明所有相关历史会话均已检索。不得宣布历史范围遍历完成。
+2. **P3 原始构建产物缺失**：P3 0001/0002 ELF、BIN、主 MAP、完整 build.log 未在 GitHub 找到；P2-3 旧产物不能冒充。若用户本地仍有原件，需在有权访问本地 Debian 工作区时只读核验并归档。
+3. **原始设备日志缺失**：完整 TLV print/display、CLI/bootmem、Stage2/TFTP 启动原始串口日志未恢复；当前 session-transcribed 记录明确非原始捕获。board/clock 24-line 原始日志存在。
+4. **0002 原 122 行本地修改**：历史用户报告存在，但原始 worktree diff/快照不可从 GitHub 远端恢复；当前本地工作区未访问，无法证明逐行保留。
+5. **P3-H050 FAIL**：0002 clock 命令统一 NOTE/DDR source 对 DDR 动态测量路径说明不准确。不能擅自修改已验证补丁或重建；需要另行授权新补丁及重新构建验证。
+6. **P3-H053 EVIDENCE MISSING**：P3 构建原件/完整 build log 未归档。
+7. **EEPROM 物理容量/寻址**：实际芯片型号、地址映射、物理容量未知；256-byte tuple cap 不等于物理容量或全设备软件窗口。
+8. **本地工作区状态**：NOT INSPECTED；本次只操作 GitHub 远端 feature 分支，没有执行本地清理/覆盖，也不能声称 local worktree clean。
+9. **P4**：当前 P4-PLAN/ROADMAP/TEST-PLAN 已标 PAUSED；既有 P4-1 内容仅为静态审计文件，不做实际开发。
 
 ## 上下文与继续规则
 
