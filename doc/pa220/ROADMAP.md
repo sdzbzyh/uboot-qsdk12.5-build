@@ -111,5 +111,11 @@ P2 未完成的 `__tmp_load` 运行时 descriptor、板级只读命令、TLV EEP
 
 ## P3 当前执行检查点（2026-11-19）
 
-P2 已收尾，当前进入 P3 CLI/只读诊断。首个增量已加入现有 PA-220 维护命令补丁：新增 `pa220 memory`，只读查询运行时 `__tmp_load` named-block descriptor，并立即复制 static descriptor 的 base/size 字段。该增量**尚未构建或实机验证**，下一步在全新 P3 checkout 上验证，保留 P2-3 构建目录及未提交文件不动。详细记录见 `reports/P3-START-2026-11-19.md`。
+P2 已收尾。P3 首个 CLI/内存只读诊断增量已完成构建、静态产物核验和 RAM 实机基础验证：
+- 新增 `pa220 memory` 已在最终 ELF 中链接，并在原厂 Stage2/TFTP RAM 启动的镜像中实机执行成功；
+- `pa220 status`、`pa220 env`、`pa220 memory` 均已实机通过；
+- `namedprint`、`freeprint`、`meminfo` 已执行，`__tmp_load` 与相邻 free-list/保留区的关键边界已按半开区间核算，当前列出的区间无重叠；
+- `bdinfo` 的 memstart 与 loadaddr/bootmem 地址域关系、TLV EEPROM 实际只读内容，以及其他板级/网络/存储只读诊断仍待收敛。
+
+**P3 整体仍进行中，不开放任意地址 RAM 上传。** 在 cached/uncached/physical address 语义和统一 pre-write validator 完成前，不进行任意地址接收测试。继续禁止持久化介质写入。详细证据见 `reports/P3-START-2026-11-19.md`。
 
