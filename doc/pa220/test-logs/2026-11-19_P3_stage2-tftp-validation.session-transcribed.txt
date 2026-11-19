@@ -1,0 +1,23 @@
+# PA-220 P3 Stage2/TFTP image validation — session-transcribed
+
+- Provenance: recovered from the user's historical message at 2026-11-19 08:59:07Z.
+- Evidence class: USER-OBSERVED (historical retrieval summary); **not a verbatim terminal transcript**.
+- The full original TFTP and validator console output was not recovered in the current audit batch.
+- This record must not be represented as a raw serial log.
+
+## Recovered user-provided facts
+
+- Original Stage2/TFTP RAM-only validation.
+- Image: `u-boot-octeon_pa220.bin`.
+- Load address: `0x81000000`.
+- Transferred bytes: `1,362,280`.
+- `bootloadervalidate`: reported PASS.
+- Header size: `192` bytes.
+- Data size: `1,362,088` bytes.
+- Header CRC: `0xdcc5dc0c`.
+- Data CRC: `0x0e351bbc` (one recovered summary rendered this as `0xe351bbc`; the zero-padded 8-digit form is used here).
+- Link address: `0xffffffffc0000000`.
+
+## Interpretation boundary
+
+This proves only the reported RAM transfer and image validation. It does not prove that executing/jumping to this image is safe, and it does not establish that `0x81000000` is a generally safe RAM upload destination. No `go`, `bootm`, or other image-start command is documented in this record.
