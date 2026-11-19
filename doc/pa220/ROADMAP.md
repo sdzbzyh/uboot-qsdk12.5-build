@@ -111,11 +111,11 @@ P2 未完成的 `__tmp_load` 运行时 descriptor、板级只读命令、TLV EEP
 
 ## P3 最终收尾与 P4 启动（2026-11-19）
 
-**P3 CLI/只读诊断完善：COMPLETE。** 已完成 0001/0002 只读命令补丁、构建、Stage2/TFTP RAM 启动和 `pa220 status/env/memory/board/clock` 实机验证；并完成 `bdinfo`、loadaddr、named/free bootmem、meminfo、TLV EEPROM tuple/checksum/END/终止偏移及 SPI NOR W25Q128BV 只读识别。证据索引见 `TEST-PLAN.md` 第 7 节、`reports/P3-COMPLETION-2026-11-19.md` 及 `reports/P3-READONLY-AUDIT-2026-11-19.md`。
+**历史阶段记录：P3 CLI/只读诊断曾标记 COMPLETE。** 该标签仅保留当日阶段决策，不代表当前 P3 全历史证据审计已完成；当前审计 IN PROGRESS，最终判定以 P3 历史证据账本/检查点为准。
 
-P3 COMPLETE 不等于所有候选诊断均通过。Ethernet 物理 link 仍 NOT VERIFIED；eMMC 初始化仍 BLOCKED；USB 枚举仍 NOT VERIFIED；MAC descriptor 来源未单独证明；时钟值不是独立频率测量。统一 `octeon_load_range_check(uint64_t addr, uint64_t len)` 尚未实现，任意地址 TFTP/HTTP/ELF 接收仍 BLOCKED。P1 的非阻断风险不因阶段完成而关闭。
+历史 P3 CLI/只读诊断完成标签不等于所有候选诊断均通过。Ethernet 物理 link 仍 NOT VERIFIED；eMMC 初始化仍 BLOCKED；USB 枚举仍 NOT VERIFIED；MAC descriptor 来源已由 EEPROM tuple 与运行时输出交叉验证（P3-H051）；CORE/SCLK 为 CSR multiplier 派生值，DDR gd->mem_clk 在 DRAM init 后可能由计数器测量（P3-H050）；统一 `octeon_load_range_check(uint64_t addr, uint64_t len)` 尚未实现，任意地址 TFTP/HTTP/ELF 接收仍 BLOCKED。P1 的非阻断风险不因历史阶段标签而关闭。
 
-### P4：网络维护基础（IN PROGRESS）
+### P4：网络维护基础（PAUSED — P3 历史证据审计未完成）
 
 本阶段主题：**DHCP Client、TFTP、Ping**。固定审计基线不变：
 - PA-220：`IronDemiGod/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
@@ -128,16 +128,16 @@ P4 计划及首批审计见 `P4-PLAN.md`、`reports/P4-NETWORK-BASELINE-AUDIT-20
 
 ## P3 历史证据审计状态更正（2026-11-19）
 
-此前记录的 P3 历史证据追溯 **IN PROGRESS** 及“不得开始 P4”的限制，属于已被后续阶段决策取代的历史检查点。按项目负责人最新明确指示，P3 CLI/只读诊断阶段以 `reports/P3-COMPLETION-2026-11-19.md` 和 `TEST-PLAN.md` 第 7 节为最终验收依据，状态为 **COMPLETE**；不再等待历史会话追溯任务，不再阻止 P4。当前执行状态以 `P4-PLAN.md` 为准：P4 **IN PROGRESS**。
+此前 10:19–10:22Z 提交中曾声明 P3 历史证据追溯不再阻止 P4；该声明属于后续并行会话的历史决策，现已被当前用户最新任务明确覆盖。当前 P3 全历史证据审计仍 IN PROGRESS，P4 实际开发/构建/实机测试 PAUSED。
 
 P3 未解决风险继续保留；阶段状态更正不等于风险关闭。
 
 
 ## P3 / P4 阶段状态更新（2026-11-19）
 
-**P3 CLI/只读诊断：COMPLETE。** 最终证据与未解决风险见 `reports/P3-COMPLETION-2026-11-19.md`。P3 的完成不关闭 P1 非阻断风险，也不解除 RAM 接收 validator 安全门。
+**P3 CLI/只读诊断：历史阶段曾标记 COMPLETE；当前全历史证据审计 IN PROGRESS。** 历史结果与未解决风险见 `reports/P3-COMPLETION-2026-11-19.md`。当前不得宣布 P3 COMPLETE。
 
-**P4 网络维护基础：IN PROGRESS。** P4-1 已完成两批 PA-220 固定源码静态审计：
+**P4 网络维护基础：PAUSED。** P4-1 已有两批 PA-220 固定源码静态审计，仅作为历史材料保留：
 - DHCP/Ping/TFTP 首批协议和命令路径：`reports/P4-NETWORK-BASELINE-AUDIT-2026-11-19.md`。
 - MGT AGL 注册、配置条件、NetLoop/DHCP/Ping 生命周期：`reports/P4-1-NETWORK-DRIVER-NETLOOP-AUDIT-2026-11-19.md`。
 
