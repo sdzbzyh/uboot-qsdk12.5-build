@@ -1,0 +1,12 @@
+# PA-220 SPI NOR probe — inherited session-transcribed evidence
+
+- Provenance: user's message in a prior PA-220 session dated 2026-11-18 10:10:39Z.
+- This observation predates the P3 start commits on 2026-11-19 and is recorded as inherited evidence, not as a P3-session test.
+- Evidence class: USER-OBSERVED; exact one-line output recovered from historical message.
+- This file is session-transcribed, not a complete terminal capture.
+
+```text
+SF: Detected W25Q128BV with page size 256 Bytes, erase size 4 KiB, total 16 MiB
+```
+
+No SPI write or erase is recorded. No re-probe was performed for this audit.
