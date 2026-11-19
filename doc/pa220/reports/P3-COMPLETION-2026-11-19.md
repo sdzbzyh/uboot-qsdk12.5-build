@@ -1,7 +1,7 @@
 # PA-220 P3 阶段完成报告（2026-11-19）
 
 - 阶段：P3 CLI / 只读诊断完善
-- 最终状态：**COMPLETE**
+- 历史阶段状态：**COMPLETE**（仅记录当日 CLI/只读诊断阶段决策）；当前 P3 全历史证据审计：**IN PROGRESS**；当前不得宣告 P3 COMPLETE
 - 集成分支：`feature/pa220-ubootkit-web`
 - 本报告创建时已核对基线 HEAD：`4675e6948a9fdd532adcdde036baf1597936c10a`
 - PA-220 固定源码：`IronDemiGod/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
@@ -9,7 +9,7 @@
 
 ## 1. 阶段结论
 
-P3 的 CLI/只读诊断实现范围已完成：维护命令补丁完成构建和 RAM 启动验证，新增 board/clock 命令通过实机检查；此前分批完成的内存/bootmem、TLV EEPROM 与 SPI NOR 只读检查均有记录。**P3 正式关闭为 COMPLETE，并将项目阶段推进至 P4。**
+当日曾将 P3 CLI/只读诊断实现范围标记为 COMPLETE，并推进至 P4；该内容是历史阶段决策。本次用户随后要求完整追溯 P3 全部历史会话、证据和仓库归档，当前全历史审计仍 IN PROGRESS，不得以本报告历史状态宣布 P3 COMPLETE。
 
 COMPLETE 不表示每个可选硬件诊断均已验证，也不关闭 P1 风险。未完成/不安全的项目继续明确标记，不能因阶段收尾改写为 PASS。
 
@@ -48,7 +48,7 @@ P3 初始构建、0001 与 RAM/bootmem 证据：`doc/pa220/reports/P3-START-2026
 | USB Mass Storage 枚举 | NOT VERIFIED | USB 电源 GPIO 默认拉低；初始化副作用尚未审完 |
 | 任意地址 RAM 接收 | BLOCKED | 统一 `octeon_load_range_check(uint64_t addr, uint64_t len)` 未实现 |
 
-P1 已记录的 cached/uncached/physical alias、RAM 边界、整数溢出/地址回绕、LOAD MemSiz 与 `uboot_end` 4-byte 差异、RAM 镜像 CRC 变化等问题继续保留。P3 COMPLETE 不表示这些问题已解决。
+P1 已记录的 cached/uncached/physical alias、RAM 边界、整数溢出/地址回绕、LOAD MemSiz 与 `uboot_end` 4-byte 差异、RAM 镜像 CRC 变化等问题继续保留。历史 P3 完成标签不表示这些问题已解决；当前全历史证据审计仍 IN PROGRESS。
 
 ## 4. 安全确认
 
@@ -83,7 +83,7 @@ P4 首批源码审计：`doc/pa220/reports/P4-NETWORK-BASELINE-AUDIT-2026-11-19.
 
 审计已发现并正在核对：TLV 完整原始 print/display 输出缺失；`test-logs/2026-11-19_P3_tlv_reader_001.txt` 实为源码摘录；SPI `sf probe` 原始用户输出尚未恢复；构建原始日志/产物归档仍需核对；0001/0002 hunk 修复时间线需要逐会话追溯。board/clock 串口日志已确认存在于仓库根目录 `reports/`，并非缺失。详见 `P3-HISTORICAL-EVIDENCE-AUDIT-2026-11-19.md` 与 `P3-HISTORICAL-AUDIT-CHECKPOINT.md`。
 
-上述证据补档不构成 P3 阶段阻断。P3 CLI/只读诊断阶段按本报告第 1～5 节和 TEST-PLAN 第 7 节正式保持 **COMPLETE**；P4 按 ROADMAP 与 P4-PLAN 正式 **IN PROGRESS**。未恢复的原始材料继续列为证据缺口，不因 P3 COMPLETE 而改写为 PASS。
+此前并行会话曾声明证据补档不阻断 P3 COMPLETE；该声明已被当前用户最新任务覆盖。当前 P3 全历史证据审计 IN PROGRESS，P4 PAUSED。未恢复的原始材料继续列为证据缺口，不得因历史阶段 COMPLETE 而改写为 PASS。
 
 
 ## 7. SPI NOR 证据来源补充
