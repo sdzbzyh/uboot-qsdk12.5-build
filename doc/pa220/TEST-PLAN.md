@@ -222,3 +222,25 @@
 
 
 - P3-START 的 bootmem 表格已由历史审计纠正：用户 namedprint 给出的 __boot_vector1__ base 0x0fff5c00、size 0x8000，对应终点为 0x0fffdc00，而非旧报告误写的 0x10003c00。修正见 P3-START 第 4.1 节及第 8 节勘误。
+
+
+## 8. P4-1 网络维护基础（2026-11-19）
+
+P3 已于 2026-11-19 正式 COMPLETE。P4 已开启；源码审计证据：
+- `reports/P4-NETWORK-BASELINE-AUDIT-2026-11-19.md`
+- `reports/P4-1-NETWORK-DRIVER-NETLOOP-AUDIT-2026-11-19.md`
+
+| 测试/审计项 | 结果 | 说明 |
+|---|---|---|
+| PA-220 DHCP 命令入口与状态机 | PASS（STATIC AUDIT） | 复用既有 BootpRequest/DhcpHandler；不移植 uBootKit 的另一代实现 |
+| PA-220 Ping 命令与 ARP/ICMP | PASS（STATIC AUDIT） | 复用既有 ping.c；10 秒超时调用 eth_halt |
+| MGT AGL 设备注册链 | PASS（STATIC AUDIT） | AGL 模式命名 octrgmii0；专用 management port 名称 octmgmt0 |
+| DHCP autoload=n 安全门 | PASS（STATIC AUDIT） | autoload 明确为 n 时 DHCP ACK 不进入 TFTP；必须实机 printenv 确认 |
+| DHCP/Ping RAM 环境及 NetLoop 退出路径 | PASS（STATIC AUDIT） | DHCP 成功后 setenv 更新 RAM 环境；NetLoop 清理 handler 并 halt 网卡；不 saveenv |
+| 最终构建 .config / include/autoconf.mk | EVIDENCE MISSING | 固定源码 GitHub 中无构建输出快照；需从已有构建目录只读提取 |
+| 运行时 autoload/ethact/ethprime/device list | NOT RUN | 待串口只读核验 |
+| DHCP-only 实机测试 | NOT RUN | 必须先确认 autoload=n |
+| Ping 成功/超时/接口恢复实机测试 | NOT RUN | 待 DHCP 阶段后执行 |
+| TFTP 接收 / Server / PUT 实机测试 | BLOCKED | validator 未实现；禁止执行 |
+
+本批仅进行固定源码只读审计和文档更新；未构建、未运行 DHCP/Ping/TFTP、未修改持久化环境或存储。下一步先从既有构建目录读取配置快照，再读取串口运行时网络环境。
