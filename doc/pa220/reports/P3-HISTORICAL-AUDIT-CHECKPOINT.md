@@ -5,7 +5,7 @@
 ## 当前状态
 
 - 任务：P3 全阶段历史证据追溯、仓库查缺补漏与最终归档。
-- 当前批次：Batch 1 — 远端基线；Batch 1b — 原始日志路径与 RAM/TLV 补充；Batch 2 — P3 Git 历史时间线及补丁/日志证据对照；Batch 3 — 0002 构建、TLV/时钟和继承 SPI 证据补录；Batch 4 — bootmem 区间算术复核与补丁错误追溯；Batch 5 — P3 阶段决策及 CLI/bootmem 历史补充；Batch 6 — EEPROM 容量边界与 System.map 证据补充。
+- 当前批次：Batch 1 — 远端基线；Batch 1b — 原始日志路径与 RAM/TLV 补充；Batch 2 — P3 Git 历史时间线及补丁/日志证据对照；Batch 3 — 0002 构建、TLV/时钟和继承 SPI 证据补录；Batch 4 — bootmem 区间算术复核与补丁错误追溯；Batch 5 — P3 阶段决策及 CLI/bootmem 历史补充；Batch 6 — EEPROM 容量边界与 System.map 证据补充；Batch 7 — 固定源码 clock 调用链与 DDR 测量语义复核。
 - 审计是否完成：**否**。
 - P3 COMPLETE 是否可判定：**否（审计未完成）**。
 - P4 实际开发：**禁止开始**。当前远端已有 P4 计划/源码审计文件，不代表本次获准开展 P4 开发。
@@ -37,7 +37,7 @@
 
 ## 本批证据统计（临时）
 
-- 已登记账本条目：49（其中若干仍是历史检索摘要或助手声明，证据等级未升级）。
+- 已登记账本条目：50（其中若干仍是历史检索摘要或助手声明，证据等级未升级）。
 - 已发现需要继续核验的事项：构建原始日志/ELF-MAP-BIN 归档、TLV print 原始输出、SPI sf probe 原始输出、RAM 地址覆盖与 alias 证据、0002 补丁修复全过程、阶段状态一致性、本地工作区状态未知。board/clock 日志路径已解决。
 - 已完成修复：审计账本与检查点已创建并回读；board/clock 日志路径误判已纠正；已创建 EEPROM 末端读取与 Stage2/TFTP 校验两份 session-transcribed 记录；test-logs README 已说明该类文件不是原始设备捕获。
 - 尚未修复：全部疑点。
@@ -87,6 +87,10 @@
 - `ceb58e77519091ebbe0e32c3eb3430a6a0fc6e9c`：TEST-PLAN 补充 MAP/EEPROM 容量限制。
 - `d98682ac27d162657f0b1d8a4454f3c89e8777c9`：board/clock 汇总报告增加历史审计覆盖说明。
 - `c6164d3f7587873ffc20492628c2479b4fe95496`：P3 源码审计报告增加历史审计覆盖说明。
+- `5b2731a41e599dba2ba32698ab1fb3b8e94c10ed`：补录固定源码 clock 语义证据。
+- `2ba63999bbce8aa6b1d9162d0a5e5334693a2a8f`：更正 DDR clock source 说明。
+- `40bcb51986c8ffe4a05fc8d991041eed2a9a1f49`：P3 完成报告记录 DDR 注释限制。
+- `e7c8ca9fbd09d443de13cf948e6fbafe41c5ff4f`：TEST-PLAN 登记 DDR clock note FAIL。
 - `f7dfde53ca4a5fbd7022112f7cf9e61d3ff7b2fb`：登记 P3 commit span、阶段决策、0001 apply 和 artifact 路径。
 
 ## Git 历史范围核对
@@ -99,6 +103,12 @@
 - P3-START 原先将 __boot_vector1__ base `0x0fff5c00` + size `0x8000` 的终点写成 `0x10003c00`；算术应为 `0x0fffdc00`。该处已按用户历史 namedprint 值更正，不重新运行设备命令。
 - P3 的 System-octeon_pa220.map 在 0001 构建中也曾为空；不得与有内容的主 MAP 混为一谈。
 - EEPROM 的 256-byte tuple 长度上限不是物理容量或全设备软件访问窗口；物理容量/寻址映射仍 UNKNOWN。
+
+## 本批新增源码核验结论
+
+- 固定源码 commit `801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8` 已回读 `board_octeon.c`、`cvmx-clock.c`、`octeon_dram.c`、`lib_octeon_shared.c`、`octeon_board_common.c`、`pa220_board.c` 和 `octeon_eeprom_types.h`。
+- `octeon_setup_clocks` 在 init_sequence index 1，早于 PA220 `early_board_init` index 12；SCLK 由 `CVMX_RST_BOOT.pnr_mul × 50 MHz` 写入 `gd->bus_clk`，不是 Stage2 handoff 直接传值。
+- DDR 在 `octeon_init_dram` 后可能由 CN70XX 的 IPD/DCLK counter ratio 动态测量后写回 `gd->mem_clk`。0002 的统一 NOTE/DDR source 说明不准确，列为 P3-H050 FAIL。该问题尚未修复；不擅自改已验证补丁或重建。
 
 ## 本批最新远端状态
 
