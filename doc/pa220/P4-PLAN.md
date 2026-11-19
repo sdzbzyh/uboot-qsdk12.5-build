@@ -27,6 +27,7 @@
 ### P4-1：现有 DHCP Client / Ping 收敛
 - 核实最终 PA-220 `.config` 对 `CONFIG_CMD_NET`、`CONFIG_CMD_DHCP`、`CONFIG_CMD_PING` 的实际启用状态。
 - 核实 MGT 设备 `octrgmii0` 的驱动注册、ethact/ethprime 选择与 NetLoop 初始化/退出路径。
+- 注意 `eth_initialize()` 会按 `ethprime` 选择设备并同步 `ethact`；若指定名称未注册，`ethact` 可能被改写为实际当前设备。旧版命令是否支持 `eth list` 不预设，优先读取启动枚举日志及 `printenv`。
 - DHCP 仅做客户端地址获取；测试前确认 `autoload=n`，避免 DHCP ACK 后自动启动 TFTP 下载。
 - 记录 DHCP 对 RAM 环境的更新（ipaddr/serverip/gatewayip/netmask/dnsip/bootfile）；不执行 `saveenv`。
 - Ping 使用已知可达的本地网关/维护主机；记录成功、失败和超时行为。Ping timeout 当前会调用 `eth_halt()`，需要观察接口是否正常恢复。
