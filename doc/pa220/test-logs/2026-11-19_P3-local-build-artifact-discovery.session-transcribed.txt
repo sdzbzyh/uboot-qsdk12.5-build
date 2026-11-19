@@ -1,0 +1,64 @@
+# PA-220 P3 local build-log and artifact availability — session-transcribed
+
+- Provenance: user-provided terminal output in the 2026-11-19 continuation session.
+- Evidence class: USER-OBSERVED (terminal listings and excerpts pasted by the user).
+- This is a transcript of selected output, **not** a copy of either complete build log or of any binary artifact.
+- No local filesystem access was performed by the assistant; no build, patch application, or hardware test was repeated.
+
+## P3 working directories reported by the user
+
+The user ran `ls -ld /home/debian/PA220_P3* 2>/dev/null` and showed:
+
+```text
+-rw-rw-r--  1 debian debian 2304930 11月19日 15:21 /home/debian/PA220_P3_build_20261119.log
+drwxrwxr-x 10 debian debian    4096 11月19日 15:19 /home/debian/PA220_P3_integration_20261119
+drwxrwxr-x  2 debian debian    4096 11月19日 16:50 /home/debian/PA220_P3_output_20261119
+drwxrwxr-x  4 debian debian    4096 11月19日 15:09 /home/debian/PA220_P3_source_20261119
+```
+
+## 0001 build log
+
+The user displayed the beginning and ending portions of `/home/debian/PA220_P3_build_20261119.log`.
+
+Observed beginning:
+- `Applied PA-220 patch: 0001-pa220-read-only-maintenance-command.patch`
+- `Configuring for octeon_pa220 - Board: octeon_pa220, Options: OCTEON_PA220,OCTEON_PCI_HOST=0,OCTEON_CN70XX`
+- Compiler include paths point to `/home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include`.
+- The output contains the U-Boot build commands and compiler diagnostics.
+
+Observed ending:
+- Link command creates `u-boot`, then objcopy creates `u-boot.bin`.
+- `update_octeon_header` reports data CRC `0x1c54a9b4`, length `1358120`, header CRC `0xea85a539`.
+- The build renames the outputs to `u-boot-octeon_pa220`, `u-boot-octeon_pa220.bin`, `u-boot-octeon_pa220.map`, `System-octeon_pa220.map`, and `u-boot-octeon_pa220.srec`.
+- The log reports the BIN output path as `/home/debian/PA220_P3_output_20261119/u-boot-octeon_pa220.bin`.
+
+This is direct user-observed evidence that the local 0001 build log exists and that the displayed log excerpt corresponds to the 0001 build. The full log bytes and SHA-256 were not supplied.
+
+## 0002 output directory and generated files
+
+The user showed the output directory listing:
+
+```text
+总计 3.2M
+-rw-rw-r-- 1 debian debian 1.9M 11月19日 16:51 0002-build.log
+-rwxrwxr-x 1 debian debian 1.3M 11月19日 15:21 u-boot-octeon_pa220.bin
+```
+
+The user then showed that the actual integration U-Boot build directory contains:
+- `include/config.h`, 331 bytes, timestamp 16:50;
+- `include/configs/octeon_pa220.h`, 7,780 bytes, timestamp 15:19;
+- `u-boot-octeon_pa220.map`, 564 KiB, timestamp 16:51;
+- main MAP SHA-256: `5764da78b816a2ef47e6796f1e307cdf8dccaeb5de74d2c5054052f06c10814c`.
+
+The MAP hash matches the previously recorded 0002 main-MAP hash in P3-H032 and the 0002 build transcript. The generated `config.h` includes `<configs/octeon_pa220.h>`; the board header defines SGMII, QSGMII and MGMT Ethernet macros and includes `octeon_cmd_conf.h`. This configuration observation belongs to the P3 0002 build worktree; it is not a substitute for preserving the full build log or binary files.
+
+The output-directory listing does not show an ELF or MAP there. The main MAP is in the integration U-Boot build directory, consistent with the earlier distinction between output BIN and build-tree ELF/MAP.
+
+## Evidence limits and archival status
+
+- The existence of the 0001 build log and 0002 build log is USER-OBSERVED.
+- The displayed excerpts and file listings do not provide complete log contents or log SHA-256 values.
+- The user has not supplied a complete listing or hashes for the 0002 ELF and BIN in this transcript.
+- The 0002 main MAP path, size and SHA-256 are directly user-observed in this session and corroborate the earlier H032 summary.
+- No files were uploaded to GitHub by this transcript. The remote GitHub artifact-archive gap therefore remains open.
+- Do not rebuild or repeat hardware tests to fill this archival gap.
