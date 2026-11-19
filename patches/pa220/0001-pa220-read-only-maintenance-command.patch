@@ -9,7 +9,7 @@ diff --git a/u-boot/board/octeon/pa220/pa220_board.c b/u-boot/board/octeon/pa220
  #include <asm/arch/cvmx-qlm.h>
  #include <asm/arch/octeon_qlm.h>
  
-@@ -267,7 +267,128 @@
+@@ -267,6 +267,127 @@
  U_BOOT_CMD(cpld, 5, 0, do_cpld,
  	   "read/write PA-220 CPLD registers",
  	   "[display]            - show registers 0-d\n"
