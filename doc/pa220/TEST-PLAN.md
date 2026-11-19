@@ -254,3 +254,6 @@ P3 已于 2026-11-19 正式 COMPLETE。P4 已开启；源码审计证据：
 
 
 - **Board/MAC provenance:** 历史 TLV 用户输出中的 BOARD_DESC 与 MAC_ADDR tuples 和 board/clock 原始日志运行时字段一致，固定源码确认 tuple 命中后复制到 global data；本设备本次运行的 descriptor/MAC 来源可交叉确认（账本 P3-H051）。通用 random-MAC fallback 仍存在。
+
+
+- **P3 artifact archive:** 历史 build/CRC/SHA 用户证据已记录，但当前 GitHub tree 未找到 P3 0001/0002 ELF、BIN、主 MAP 或完整 build log；根目录两个 build log 均为 0 bytes。P2-3 的 20261118 产物不得冒充 P3。详见 `reports/P3-BUILD-ARTIFACT-AUDIT-2026-11-19.md`。构建执行历史 PASS 与产物归档完整性分开判定。
