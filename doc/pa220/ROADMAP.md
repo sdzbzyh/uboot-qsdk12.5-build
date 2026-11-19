@@ -6,7 +6,7 @@
 |---|---|---|---|
 | P0 | 项目文档体系 | 章程、仓库基线、功能矩阵、决策记录、测试计划、节点报告 | 文档进入 GitHub，版本和分支边界清楚 |
 | P1 | uBootKit 功能源码审计 | 已完成 A0～A5 固定源码静态审计；明确适配结论、风险和运行时待验证项 | 所有目标功能均有适配结论和证据来源；未构建/未实机验证项单独标记 |
-| P2 | PA-220 基线与构建复核 | 固定源码、补丁叠加、工具链和构建可重复性 | 干净环境构建成功，产物头和哈希记录完整 |
+| P2 | PA-220 基线与构建复核 | 固定源码、补丁叠加、工具链、干净构建、关键对象静态核查和 RAM 启动 | **已完成（2026-11-19）**；未完成的只读硬件核查转入 P3，见 `reports/P2-COMPLETION-2026-11-19.md` |
 | P3 | CLI/只读诊断完善 | 板卡、内存、时钟、网络、存储、EEPROM、CPLD 只读信息 | 编译和 RAM 启动验证通过；无持久化写入 |
 | P4 | 网络维护基础 | MGT 网络配置、DHCP Client/Server 评估、下载服务 | 网络功能逐项可复现，退出服务后 CLI/autoboot 正常 |
 | P5 | HTTP/Web 只读管理 | 状态页、系统信息、网络与存储概览 | MGT 隔离网络访问；无写接口；压力/异常请求安全 |
@@ -88,18 +88,23 @@ P1-A0～A5 的固定源码静态审计已完成。P1 完成仅表示源码调用
 不影响阶段性构建且可在构建后通过只读命令确认的事项，不作为静态审计阻塞项；必须记录并在相应构建后提醒用户执行命令、反馈结果。任何 `saveenv`、EEPROM 写入、SPI/eMMC/NAND/flash 持久化写入仍然禁止，除非未来独立获得明确授权。
 
 
-## P2 当前执行检查点（2026-11-18）
+## P2 阶段收尾状态（2026-11-19）
 
-证据：`audit/P2-1-BUILD-INPUT-LOCK.md`。
+P2-1、P2-2、P2-3 干净构建与 RAM 启动、P2-4 关键对象/符号静态核查均已完成到足以进入下一阶段的程度。详细证据见 `reports/P2-COMPLETION-2026-11-19.md`。
 
-- **P2-1 已完成 GitHub 静态输入核查**：核查起点 HEAD 为 `4f9aaafaa5549adcf7b2042c19ed6621758e7639`；P2-1 记录提交后 HEAD 为 `06a844f158653463ccd2add3eeba4228d6c738bf`。PA-220 原始仓库与构建脚本使用的镜像仓库均可读取固定 commit `801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`；uBootKit 固定审计 commit `9ce315735ac88fd0a7c7697bc527a8616ed0a972` 可读取。当前仅有一项 PA-220 补丁。
-- **P2-2 已完成**：用户实际 Debian 13.7 x86_64 构建主机及 OCTEON SDK `tools-gcc-4.7` 已核查；Cavium GCC 4.7.0 / Binutils 2.23.52 已通过 MIPS64r2 OCTEON 大端目标文件编译和 `-nostdlib` 基本链接测试。宿主工具、sysroot 路径和交叉工具可用性有实际输出证据。完整 PA-220 U-Boot 构建、旧版 host tools 集成和 SDK 运行库完整性仍留待 P2-3/P2-4；详见 `audit/P2-2-HOST-TOOLCHAIN.md`。
-- **P2-3 已完成构建部分（2026-11-18）**：用户在全新源码目录检出固定 PA-220 commit、应用唯一只读维护补丁，并使用已核查的 OCTEON SDK 完成完整构建，退出码 0。BIN/ELF/linker map 已生成；ELF 入口 `0xC0000000`、OCTEON/MIPS64r2 属性和 `pa220` 命令表项已有静态证据。产物审计报告：`audit/P2-3-CLEAN-BUILD-ARTIFACT-AUDIT.md`。尚有 ELF LOAD MemSiz 与 `uboot_end` 4-byte 差异、原始 System.map 空文件、上传后哈希独立复核等待收敛项。
-- **P2-4 待完成**：按最终配置、map 和对象核查 OCTEON ELF loader、Cache API、named-block API 等关键对象/符号的实际编入情况；不得以配置宏存在推断对象已编入。
-- **实机 RAM 启动仍未执行**：后续仅通过原厂 Stage2/TFTP 将镜像加载到 RAM；不写入 SPI/eMMC/NAND/EEPROM/CPLD。
-- P2-2 已通过用户当前主机输出确认 `/home/debian/OCTEON-SDK/tools-gcc-4.7` 为本轮实际工具链路径；该路径只代表本轮主机环境，不应硬编码为所有构建环境的通用默认值。
+| 子项 | 内容 | 状态 |
+|---|---|---|
+| P2-1 | 固定源码、分支、补丁、构建脚本与输入核查 | **完成** |
+| P2-2 | Debian 构建主机与 OCTEON SDK 工具链核查 | **完成** |
+| P2-3 | 干净构建、ELF/BIN/map、哈希、原厂 Stage2/TFTP RAM 启动 | **完成**；RAM 镜像 CRC 变化作为非阻断疑点记录 |
+| P2-4 | ELF loader、Cache、named-block 对象/符号及链接布局核查 | **关键对象/符号核查完成**；4-byte 布局差异记录待后续处理 |
 
+P2 未完成的 `__tmp_load` 运行时 descriptor、板级只读命令、TLV EEPROM 只读检查转入 P3，不阻塞主线。任何存储写入仍禁止。
+
+## P2-3 构建与 RAM 启动记录（2026-11-18 至 2026-11-19）
+
+干净构建退出码为 0，产物哈希经再次计算与原始审计报告一致；新构建镜像通过原厂 Stage2/TFTP 从 RAM 启动并进入命令行。旧版 U-Boot 对照也可从 RAM 启动。新旧版本启动后均观察到加载镜像 RAM 数据 CRC 变化，现有证据不能将其归因于新增代码；不再重复扫描，详见 P2 收尾报告。
 
 ## P2-3 干净构建与产物审计（2026-11-18）
 
-P2-3 构建成功，退出码 `0`。完整构建与产物静态核查的证据见 `audit/P2-3-CLEAN-BUILD-ARTIFACT-AUDIT.md`。构建成功不等于 RAM 启动或硬件功能通过；P2-4 关键对象核查及实机 RAM 启动仍未完成。
+历史构建证据见 `audit/P2-3-CLEAN-BUILD-ARTIFACT-AUDIT.md`。后续已完成 RAM 启动与 P2-4 关键对象/符号核查；当前阶段状态以 `reports/P2-COMPLETION-2026-11-19.md` 为准。
