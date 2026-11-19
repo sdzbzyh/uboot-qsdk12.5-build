@@ -124,3 +124,8 @@ P3 COMPLETE 不等于所有候选诊断均通过。Ethernet 物理 link 仍 NOT 
 首批源码审计已确认 PA-220 已具备 DHCP Client、Ping、TFTP GET/PUT/Server 的旧版实现；DHCP Client 和 Ping 以验证现有实现为主，不直接移植另一代 U-Boot 代码。TFTP 接收路径直接 memcpy 到 `load_addr + offset`，尚无统一 RAM validator，禁止启用未经验证的任意地址接收。uBootKit 的 IPQ/FDT/TrustZone 地址限制不适用于 PA-220。
 
 P4 计划及首批审计见 `P4-PLAN.md`、`reports/P4-NETWORK-BASELINE-AUDIT-2026-11-19.md`。当前仅完成源码审计，尚未进行 P4 构建或网口实机验证。
+
+
+## P3 历史证据审计覆盖（2026-11-19）
+
+此前 P3 CLI/只读诊断阶段 COMPLETE 是历史阶段记录。用户已要求对 P3 开始至今全部相关会话进行证据追溯和仓库查缺补漏；当前审计状态 **IN PROGRESS**。在 `P3-HISTORICAL-EVIDENCE-AUDIT-2026-11-19.md` 和 `P3-HISTORICAL-AUDIT-CHECKPOINT.md` 明确完成之前，不得开始 P4 实际开发。P4 计划与已有源码审计仅作为历史文档保留，执行状态以 `P4-PLAN.md` 的 PAUSED 标记为准。
