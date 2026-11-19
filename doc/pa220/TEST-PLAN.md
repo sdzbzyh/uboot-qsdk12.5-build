@@ -193,3 +193,22 @@
 - TFTP GET/PUT/Server：PA-220 已有旧版实现，但 GET/Server 的接收路径会在 `store_block()` 中直接 memcpy 到 `load_addr + offset`，没有 PA-220 的统一 RAM 范围 validator。GET 与 Server 接收功能均不得用于未经验证的 RAM 写入。
 - uBootKit 新版 TFTP 的 IPQ/FDT/TrustZone 边界检查依赖 IPQ 平台常量，不可复制到 PA-220；必须先实现 PA-220 地址域规范化和 named-block 权威边界校验。
 - P4 首批源码审计与任务拆分见 `reports/P4-NETWORK-BASELINE-AUDIT-2026-11-19.md` 和 `P4-PLAN.md`。本节不代表 DHCP/Ping 已实机验证。
+
+
+## 9. P3 历史证据审计覆盖状态（2026-11-19）
+
+**历史审计状态：IN PROGRESS。** 本节是对既有 P3 COMPLETE 阶段记录的审计覆盖说明，不删除或改写当日历史记录。此前 P3 CLI/只读诊断 COMPLETE 是历史阶段决策；本次用户要求重新追溯 P3 全部历史会话、原始证据和 GitHub 归档，故在本次审计满足全部完成条件之前，不得将“P3 历史证据审计”或当前项目状态标记为 COMPLETE，也不得开展 P4 实际开发。
+
+当前已发现的证据限制/补录项：
+
+- board/clock 原始串口日志存在于仓库根目录 `reports/P3-BOARD-CLOCK-2026-11-19-serial.log`，已回读；不得误报为缺失。
+- `doc/pa220/test-logs/2026-11-19_P3_tlv_reader_001.txt` 实际是 TLV 源码摘录，不是设备串口输出；不能作为 TLV 实机原始日志引用。
+- EEPROM offset `0x9a` 的 `eeprom read` / `md.b` 用户原始输出已从历史消息恢复，并以 `session-transcribed` 文件补录；完整 `tlv_eeprom print/display` 的 tuple 原始全文仍为 EVIDENCE MISSING。
+- 0x81000000 Stage2/TFTP 镜像验证目前仅以 session-transcribed 摘要补录；完整原始传输/校验输出仍待恢复。
+- SPI NOR `sf probe` 的 W25Q128BV / 16 MiB / 4 KiB 结果目前只有报告/助手转述，尚未恢复用户原始串口输出；不得重新执行 probe 来补证。
+- 构建原始日志、ELF/MAP/BIN 产物文件是否归档仍待逐项核验；报告中的 SHA256/CRC 不自动等同于原始产物已归档。
+
+逐项账本：`reports/P3-HISTORICAL-EVIDENCE-AUDIT-2026-11-19.md`。
+持续检查点：`reports/P3-HISTORICAL-AUDIT-CHECKPOINT.md`。
+
+本节状态优先于此前 P3 完成声明，直到历史审计最终报告明确解除。P4-PLAN 和已有 P4 源码审计仅作为历史文档保留；P4 实际开发暂停。
