@@ -21,7 +21,7 @@
 | Serial | PASS | 012801031163 |
 | Board descriptor 状态 | PASS | 显示 from initialized descriptor |
 | MAC base/count 显示 | PASS | 08:30:6b:e1:be:00 / 255，格式正常 |
-| MAC descriptor 来源判定 | NOT RUN | 输出仅说明可能来自 EEPROM 或 generated fallback；没有单独显示 MAC fallback 标志，不能据此断言来源 |
+| MAC descriptor 来源判定 | 初始会话 NOT RUN；历史审计后 PASS | 后续恢复的 EEPROM MAC_ADDR tuple 与运行时 base/count 一致，固定源码确认 tuple 命中后复制；见 P3-H051 |
 | `pa220 clock` 命令执行 | PASS | 正常返回提示符，无崩溃或错误 |
 | CORE 单位换算 | PASS | 1,000,000,000 Hz = 1000 MHz |
 | SCLK 单位换算 | PASS | 500,000,000 Hz = 500 MHz |
@@ -56,11 +56,11 @@
 
 0002 新增的 `help pa220`、`pa220 board`、`pa220 clock` 在当前 RAM 启动镜像上完成实机验证，命令执行与显示结果均 PASS。MAC descriptor 的实际来源没有由当前输出单独证明，记为 NOT RUN；不影响命令基本功能通过。
 
-本报告覆盖 board/clock 的实机验证；与同日 P3 已完成的其他证据合并后，**P3 CLI/只读诊断阶段于 2026-11-19 正式 COMPLETE**。其他检查的状态不因本报告而改变：Ethernet 物理 link NOT VERIFIED，eMMC 初始化 BLOCKED，USB 枚举 NOT VERIFIED；统一 RAM 写入 validator 尚未实现，任意地址 TFTP/HTTP/ELF 接收继续 BLOCKED。
+本报告记录的是当日 board/clock 实机结果；当日曾将 P3 CLI/只读诊断阶段标记为 COMPLETE，但当前全历史证据审计仍 IN PROGRESS，不能据此宣布本次 P3 审计完成。其他检查的状态不因本报告而改变：Ethernet 物理 link NOT VERIFIED，eMMC 初始化 BLOCKED，USB 枚举 NOT VERIFIED；统一 RAM 写入 validator 尚未实现，任意地址 TFTP/HTTP/ELF 接收继续 BLOCKED。
 
 P3 全阶段证据还包括 `pa220 status/env/memory`、`bdinfo`、`printenv loadaddr`、named/free bootmem、TLV EEPROM 五个 tuple/checksum/END/终止偏移只读核查及 SPI NOR W25Q128BV 只读识别。详见集成仓库 `doc/pa220/TEST-PLAN.md` 第 7 节。原始 board/clock 串口日志为本仓库 `reports/P3-BOARD-CLOCK-2026-11-19-serial.log`。
 
-P3 COMPLETE 仅表示本阶段已实现范围和证据闭环，不表示所有可选硬件诊断均 PASS，也不表示 P1 非阻断风险已解决。
+历史 P3 COMPLETE 标签仅记录当日阶段判断，不代表当前全历史证据审计完成，也不表示所有可选硬件诊断均 PASS 或 P1 非阻断风险已解决。
 
 
 ## 6. 后续历史证据审计覆盖说明（2026-11-19）
