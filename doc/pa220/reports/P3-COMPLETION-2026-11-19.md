@@ -99,3 +99,10 @@ P4 首批源码审计：`doc/pa220/reports/P4-NETWORK-BASELINE-AUDIT-2026-11-19.
 ## 9. Board descriptor / MAC 来源交叉证据补充（2026-11-19）
 
 此前“MAC descriptor 来源未单独证明”是历史收尾时的保守状态。本次历史审计恢复了用户 TLV 输出：BOARD_DESC type 0x0002 的 board type 0x4e35、revision 1.1、serial 012801031163；MAC_ADDR type 0x0004 的 base 08:30:6b:e1:be:00、count 255。它们与原始 board/clock 串口日志的运行时字段逐项一致。固定源码也确认 board descriptor tuple 命中后复制到 global data 并清除 missing flag；MAC tuple 命中后复制 MAC descriptor，只有缺失时才生成随机 MAC。因此本板本次运行的 board descriptor/MAC 来源可由 EEPROM tuple 与运行时输出交叉支持。通用 fallback 路径仍存在。详见历史账本 P3-H051。
+
+
+## 10. 当前 P3 完成判定覆盖（2026-11-19 最新用户指令）
+
+本报告第 1–5 节记录的是此前 P3 CLI/只读诊断阶段的历史完成声明。随后 10:21–10:22Z 的并行提交曾将证据补档解释为不阻断 P3 COMPLETE；该状态与当前用户最新要求冲突。
+
+当前必须先完成 P3 全历史证据审计、逐项仓库对照和可恢复材料补录。现有证据仍包括 P3-H050 的 0002 DDR clock note FAIL、P3-H053 的 P3 原始 ELF/BIN/MAP/build log EVIDENCE MISSING，以及 TLV/CLI/Stage2 完整原始日志缺口。因此本次全历史审计 **不得标记 COMPLETE**，也不得以本报告原有历史状态覆盖当前任务。P4 实际开发保持 PAUSED。
