@@ -267,3 +267,20 @@
 当前 P3 全历史证据审计仍为 **IN PROGRESS**。此前 TEST-PLAN 第 7 节的 P3 CLI/只读诊断 PASS 及第 8 节的 P4-1 静态审计，是历史阶段记录；不能据此宣布本次全历史审计 COMPLETE。P3-HISTORICAL-EVIDENCE-AUDIT 和 CHECKPOINT 所列证据缺口、P3-H050 clock-note FAIL、P3-H053 构建原件缺失等仍须纳入最终判定。
 
 P4-1 两份网络报告仅为既有静态源码审计，没有构建或实机网络测试；当前不得继续读取 P4 构建目录、执行 DHCP/Ping 或开展 P4 开发。P4 执行状态以 P4-PLAN 的 PAUSED 为准。
+
+
+## 11. P4 当前执行恢复（2026-11-19）
+
+本节按用户最新明确指令覆盖此前第 8、9、10 节中“P4 PAUSED / 不得执行 P4”的历史控制语句。当前继续 P4，不重做 P1/P2/P3，也不重新开展 P3 历史证据审计。
+
+当前证据与状态：
+- 有效 PA-220 配置头已由用户提供：CONFIG_OCTEON_PA220=1、CONFIG_OCTEON_PCI_HOST=0、CONFIG_OCTEON_CN70XX=1、CONFIG_BOARDDIR=board/octeon/pa220。它确认目标板配置，但不独立证明最终网络 CONFIG 编译值。
+- 用户已提供运行时 autoload=n、ethact=octrgmii0、ethprime=octrgmii0；disable_networking、ipaddr、serverip、gatewayip、netmask、dnsip、bootfile 均未定义。不得重复索取。
+- DHCP/Ping/MGT AGL 注册链已有固定源码静态审计；不得把静态审计标记为实机通过。
+- 最终网络编译配置证据仍 PARTIAL；Ethernet 运行时设备枚举/注册证据仍 PARTIAL。
+- DHCP-only、Ping 成功、Ping 超时、Ping 后恢复均 NOT RUN。
+- TFTP 接收/Server/PUT 保持 BLOCKED；不执行任何 TFTP 命令。
+
+按 P4-1（最终构建配置）、P4-2（Ethernet 实际注册）、P4-3（DHCP-only）、P4-4（Ping 成功/超时/恢复）、P4-5（归档）的顺序推进。只复用已有构建资料，不重新构建；只在静态证据不足时索取最少的新实机输出。所有操作继续遵守 RAM-only 和禁止持久化写入约束。
+
+当前检查点：`reports/P4-CONTINUATION-2026-11-19.md`。
