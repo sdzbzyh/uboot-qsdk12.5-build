@@ -106,3 +106,6 @@
 
 
 | P3-H052 | 2026-11-19 06:03:36Z–06:30:00Z（P3 起点之前，P2/RAM 覆盖调查） | 继承的 RAM 镜像 CRC/字节变化风险 | 用户记录旧版 U-Boot 启动前 CRC 0x8d79d140、启动后 0xf6eefefd，长度 0x14b0a8；历史分段结果称唯一变化范围 0x810000c0–0x810040bf（16 KiB），其中 1-KiB 区间 0x81000cc0–0x810010bf CRC 由 0x78b86485 变为 0xfda9f7c3；其余已具备基线区间未变，若干后段缺少启动前基线 | USER-OBSERVED（P2 历史会话） | P2 风险证据；原因未确定，不得推断为 relocation/BSS | P2-COMPLETION-2026-11-19.md 与 P3-START 风险引用 | 已在 P2 记录；P3 不重复执行 | 此项发生在 P3 首次 commit 之前，不计入 P3 证据条目统计；作为 P3 继承风险保留，不重复扫描 |
+
+
+| P3-H053 | 2026-11-19 本次 GitHub tree audit | P3 构建原件归档状态 | 当前递归 Git tree（42,404 entries，truncated=false）中只有 artifacts/pa220/p2-3/20261118 的 P2-3 原始 build.log/ELF/BIN/MAP；P3 专属 artifacts/pa220/p3/20261119 不存在；根目录 pa220-build.log 与 pa220-maintenance-build.log 均为 0 bytes；P3-START 与 0002 transcript 中的 P3 ELF/BIN/MAP SHA/CRC 没有对应二进制原件；board/clock raw log 则存在 | FILE-VERIFIED（GitHub tree 与文件正文）+ USER-OBSERVED（历史构建结果） | **EVIDENCE MISSING（P3 原始 build log/ELF/BIN/MAP）**；历史构建执行仍为用户证据支持的 PASS | doc/pa220/reports/P3-BUILD-ARTIFACT-AUDIT-2026-11-19.md | 已创建专项归档核验报告；未伪造/复制产物 | P2-3 产物不能冒充 P3；不重建、不改名旧产物、不从哈希生成二进制 |
