@@ -40,6 +40,14 @@
 - PA-220 板级注释标注 MGT 为 AGL (`octrgmii0`)；板级环境默认 `ethact/ethprime=octrgmii0`。因此这两个默认名称对应的是 AGL 内置以太网扫描路径，不应误认成 `octmgmt0` 管理端口。
 - 静态源码只证明注册条件和命名规则；最终设备列表、实际 ethact 选择及 PHY/link 状态仍需串口实测确认。不得把 ethact 名称当作 carrier/link 证明。
 
+### 2.3 ethact / ethprime 的选择行为
+
+- `net/eth.c:eth_initialize()` 先调用板级或 CPU 网络初始化并枚举注册设备；若设备名匹配 `ethprime`，将其设为 `eth_current` 并打印 `[PRIME]`。
+- `eth_register()` 注册首个设备时会调用 `eth_current_changed()`，把实际首个设备名同步到 RAM 环境 `ethact`；全部设备注册后，`eth_initialize()` 再按 `ethprime` 选择当前设备，并再次同步 `ethact`。
+- `NetLoop()` 入口的 `eth_set_current()` 根据当前 `ethact` 查找设备；若环境中的名称不存在，最终会把 `ethact` 改成当前有效设备名。因此板级默认值不是“强制选中”保证；实际设备未注册时，运行时 `ethact` 可能被改写。
+- 设备枚举和 `[PRIME]` 标记来自 `eth_initialize()` 的启动输出；此旧版源码不应假定存在现代 U-Boot 的 `eth list` / `eth current` 子命令。串口核验优先读取 `printenv ethact`、`printenv ethprime`，并检查启动时 Ethernet device enumeration 原始日志。
+- 上述 `setenv()` 是 RAM 环境同步，不会自动持久化；仍禁止 `saveenv`。
+
 ## 3. NetLoop 与 DHCP-only 生命周期
 
 - `NetLoop()` 先执行 `net_init()`；对 DHCP/Ping 等非 NETCONS 协议，执行 `eth_halt()`、`eth_set_current()`、`eth_init(bd)`，再检查网络前置条件。
