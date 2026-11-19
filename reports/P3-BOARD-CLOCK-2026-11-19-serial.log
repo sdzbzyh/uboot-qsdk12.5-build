@@ -1,0 +1,24 @@
+pa-220# help pa220
+pa220 - PA-220 read-only maintenance information
+
+Usage:
+pa220 status  - show board, memory, network and CPLD status
+pa220 env     - show environment storage and write warning
+pa220 memory  - show load memory variables and __tmp_load block
+pa220 board   - show cached board descriptor and MAC information
+pa220 clock   - show initialized CORE, SCLK and DDR clock values
+pa-220# pa220 board
+Board type : 20021 (PA220)
+Revision   : 1.1
+Serial     : 012801031163
+Descriptor : from initialized descriptor
+MAC base   : 08:30:6b:e1:be:00
+MAC count  : 255
+Source note: MAC descriptor may be EEPROM data or generated fallback.
+pa-220# pa220 clock
+CORE clock : 1000000000 Hz (1000 MHz) [gd->cpu_clk]
+SCLK clock : 500000000 Hz (500 MHz) [gd->bus_clk]
+DDR clock  : 800000000 Hz (800 MHz base; 1600 MT/s DDR) [gd->mem_clk]
+NOTE       : initialized global-data/configuration values, not independent measurements.
+DDR source : valid EEPROM DDR clock descriptor, otherwise PA-220 fallback; source is not retained.
+pa-220#
