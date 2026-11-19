@@ -80,3 +80,23 @@
 - 是否触及持久化存储。
 
 无原始结果的口头判断不得作为实机通过证据。
+
+## 4. P2 实际结果（2026-11-19）
+
+详细证据：`reports/P2-COMPLETION-2026-11-19.md`。
+
+| 测试项 | 结果 | 说明 |
+|---|---|---|
+| 固定输入与工具链 | PASS | 固定源码/补丁/工具链已核对；最小 OCTEON 目标编译与链接通过 |
+| 干净构建 | PASS | 固定源码全新 checkout 构建退出码 0 |
+| ELF/BIN/map 产物 | PASS | 文件生成；大小、头信息、关键符号和 SHA256 已记录 |
+| ELF loader / Cache / named-block 编入 | PASS | 对象文件、linker map 和最终 ELF 符号表均有直接证据 |
+| 新版 Stage3 RAM 启动 | PASS | 原厂 Stage2/TFTP 加载后成功进入 U-Boot 命令行 |
+| 旧版 RAM 启动对照 | PASS | 旧版 U-Boot 同样可从 RAM 启动 |
+| `__tmp_load` 运行时 descriptor | NOT RUN | 转入 P3 只读诊断；未确认前不得开放任意地址上传 |
+| `pa220 status/env` 设备运行结果 | NOT RUN | 转入 P3 只读诊断 |
+| TLV EEPROM/I²C 只读窗口 | NOT RUN | 转入 P3；禁止任何写操作 |
+| RAM 镜像启动后 CRC 变化 | OBSERVATION | 新旧 U-Boot 均观察到变化；不是失败判据，原因未定，暂不追查 |
+| LOAD MemSiz 与 `uboot_end` 4-byte 差异 | DEFERRED | 非阻断性链接布局疑点，后续统一处理 |
+
+注：`OBSERVATION` 与 `DEFERRED` 是阶段问题记录，不替代第 2 节规定的测试结果状态。P2 已收尾；P3 继续补齐只读运行时诊断。任何持久化介质写入仍需独立阶段审查和明确授权。
