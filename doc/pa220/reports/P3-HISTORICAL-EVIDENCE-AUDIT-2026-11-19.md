@@ -184,3 +184,26 @@ GitHub compare：`47805be639ad39cb5f03f9e527b2727e74ee5ea9...0a6f080a58c9a93e3d4
 - `reports/P3-BOARD-CLOCK-2026-11-19-serial.log`
 
 以上 37 commits 的具体用户会话证据、补丁应用失败、源码摘要文件性质、原始日志与产物缺口均已在本账本其他条目中分别登记。此处仅作为完整提交清单。
+
+
+## P3 相关历史会话时间顺序索引（按当前可恢复记录）
+
+> 标题只在历史检索能确认时按原题记录；其余标为“标题未恢复”，不虚构会话标题。会话索引不等于完整逐字原文已恢复。
+
+| 时间（UTC） | 历史会话标题/索引 | 主要用户证据 | 当前归档状态 |
+|---|---|---|---|
+| 06:58–07:26 | P3 0001 patch/apply/build（完整标题未恢复） | 初次 include hunk line23 apply failure；后续 patch-check exit0；GCC4.7.0 构建、ELF/MAP/BIN SHA/CRC、System.map 空文件 | 0001 session-transcribed + P3-START；原始 build log/二进制缺失 |
+| 07:32–07:40 | 《排查RAM镜像覆盖》相关续接 / P3 CLI & bootmem（具体分段标题未完整恢复） | U-Boot 2013.07、board/env/memory、bdinfo、loadaddr、named/freeprint、meminfo、low-address 区间 | CLI/bootmem session-transcribed；完整 named/freeprint raw output 缺失 |
+| 07:43–08:05 | 《恢复TLV只读核查》 | 五个 TLV tuples、checksum、board descriptor/MAC values、END offset 0x9a、EEPROM read/md.b | TLV structure + EEPROM end-read session-transcribed；完整 print/display 原文缺失 |
+| 08:20–08:49 | 《推进补丁验证》相关会话（1） | 0002 文件丢失/恢复、122 行修改、blob/SHA、line88/line65 patch corruption、hunk 手工修改、最终应用和 reverse-check | 0002 patch-recovery session-transcribed；完整终端原文缺失 |
+| 08:36–08:55 | 《收敛 SCLK 语义》及续接 | CORE/SCLK/DDR gd 字段与单位、SCLK 初始化调用链、System.map/nm bus error、DDR 测量路径待核验 | 源码审计与账本补充；现已通过固定源码回读确认 SCLK/DDR 语义，并发现 DDR NOTE FAIL |
+| 08:51–09:08 | 《推进补丁验证》相关会话（2）/ Stage2 TFTP 校验 | 0002 build exit0、ELF/BIN/MAP hashes、System.map 状态变化、0x81000000 TFTP load、bootloadervalidate、用户确认 RAM 启动完成 | 0002 build + Stage2 session-transcribed；完整 build/boot serial logs 缺失 |
+| 09:08–09:13 | 《验证板卡时钟命令》 | 用户明确不重复已完成测试；help/board/clock 原始串口输出 | 根目录 board/clock 原始日志已存在并回读 |
+| 09:31–09:41 | 《完成P3开启P4》 | 用户要求核实 P3 完成并开启 P4；GitHub 提交标记 P3 COMPLETE/P4 开启 | 作为历史阶段决策保留，已被后续 09:50+ 用户审计任务覆盖 |
+| 09:50–09:56 | 《建立项目文档体系》相关历史会话及本次审计任务 | 用户明确要求 P3 全历史会话逐批审计、补齐仓库、审计完成前不标 P3 COMPLETE、不进入 P4 | 当前控制指令，审计 IN PROGRESS |
+| 10:19–10:22 | 并行提交对应会话标题未恢复 | GitHub 出现 P4 reactivation、P3 completion override、P4-1 static audit commits；历史检索未找到与“最新负责人指示”相匹配的新用户消息 | 仅 FILE-VERIFIED commit history；相关“最新指示”按 ASSISTANT-CLAIM 处理；当前已重新 PAUSE P4 |
+
+### 范围边界
+
+- 2026-11-19 06:03–06:30Z 的《排查RAM镜像覆盖》早期记录发生在本账本定义的 P3 首个提交 06:58Z 之前，作为 P2 继承风险单独记为 P3-H052，不计入 P3 会话证据数。
+- 本表覆盖当前可恢复的相关会话索引；仍未证明已遍历用户账户中所有未被检索返回的历史会话。该项保持 OPEN，不能宣称历史范围遍历完毕。
