@@ -111,7 +111,7 @@ P2 未完成的 `__tmp_load` 运行时 descriptor、板级只读命令、TLV EEP
 
 ## P3 最终收尾与 P4 启动（2026-11-19）
 
-**P3 CLI/只读诊断完善：COMPLETE。** 已完成 0001/0002 只读命令补丁、构建、Stage2/TFTP RAM 启动和 `pa220 status/env/memory/board/clock` 实机验证；并完成 `bdinfo`、loadaddr、named/free bootmem、meminfo、TLV EEPROM tuple/checksum/END/终止偏移及 SPI NOR W25Q128BV 只读识别。证据索引见 `TEST-PLAN.md` 第 7 节及 `reports/P3-READONLY-AUDIT-2026-11-19.md`。
+**P3 CLI/只读诊断完善：COMPLETE。** 已完成 0001/0002 只读命令补丁、构建、Stage2/TFTP RAM 启动和 `pa220 status/env/memory/board/clock` 实机验证；并完成 `bdinfo`、loadaddr、named/free bootmem、meminfo、TLV EEPROM tuple/checksum/END/终止偏移及 SPI NOR W25Q128BV 只读识别。证据索引见 `TEST-PLAN.md` 第 7 节、`reports/P3-COMPLETION-2026-11-19.md` 及 `reports/P3-READONLY-AUDIT-2026-11-19.md`。
 
 P3 COMPLETE 不等于所有候选诊断均通过。Ethernet 物理 link 仍 NOT VERIFIED；eMMC 初始化仍 BLOCKED；USB 枚举仍 NOT VERIFIED；MAC descriptor 来源未单独证明；时钟值不是独立频率测量。统一 `octeon_load_range_check(uint64_t addr, uint64_t len)` 尚未实现，任意地址 TFTP/HTTP/ELF 接收仍 BLOCKED。P1 的非阻断风险不因阶段完成而关闭。
 
