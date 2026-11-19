@@ -251,3 +251,6 @@ P3 已于 2026-11-19 正式 COMPLETE。P4 已开启；源码审计证据：
 
 
 - **P3 clock-note issue (FAIL / unresolved):** 固定源码复核表明 CORE/SCLK 是 reset CSR multiplier 派生值；但 DDR 的 gd->mem_clk 在 DRAM init 后可能由 CN70XX IPD/DCLK counter ratio 动态测量。0002 patch 的统一 NOTE 和 DDR source 行未准确表达该区别。原始 board/clock log 保留不改，已验证补丁未擅自修改；如要修复需另行生成补丁并重新构建验证。详情见 P3-READONLY-AUDIT 第 12 节及历史账本 P3-H050。
+
+
+- **Board/MAC provenance:** 历史 TLV 用户输出中的 BOARD_DESC 与 MAC_ADDR tuples 和 board/clock 原始日志运行时字段一致，固定源码确认 tuple 命中后复制到 global data；本设备本次运行的 descriptor/MAC 来源可交叉确认（账本 P3-H051）。通用 random-MAC fallback 仍存在。
