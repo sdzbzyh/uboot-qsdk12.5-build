@@ -203,3 +203,8 @@ P3 COMPLETE 不改变以下状态：MAC descriptor 来源未单独证明；时�
 ### Board descriptor / MAC 来源补充
 
 本次历史审计已恢复 BOARD_DESC type 0x0002 与 MAC_ADDR type 0x0004 的用户 TLV 值；它们与 2026-11-19 原始 board/clock log 的 board type/revision/serial/MAC base/count 完全一致。固定源码的 tuple 命中路径会将这两类 descriptor 复制到 global data；MAC tuple 不存在时才生成 random MAC。因此本板本次运行的 descriptor/MAC 来源可交叉确认。通用 fallback 逻辑仍需保留为其他设备/损坏 EEPROM 的边界。
+
+
+## 13. 当前历史审计状态覆盖（2026-11-19 最新用户指令）
+
+本文件的第 9 节及既有 P3 COMPLETE 声明属于历史阶段记录；当前用户最新指令要求 P3 全历史证据审计完成前不得宣布 P3 COMPLETE，也不得进入 P4 实际开发。此前 10:21–10:22Z 并行提交的“证据补档不阻断 P3 COMPLETE/P4 IN PROGRESS”不再作为当前状态。当前审计 **IN PROGRESS**，P4 **PAUSED**。
