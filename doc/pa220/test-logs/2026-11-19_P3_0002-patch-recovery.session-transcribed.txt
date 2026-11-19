@@ -1,0 +1,23 @@
+# PA-220 P3 0002 patch recovery/application — session-transcribed
+
+- Provenance: recovered from user messages dated 2026-11-19 08:20:35Z–08:49:11Z.
+- Evidence class: USER-OBSERVED (historical retrieval); not a verbatim terminal capture.
+- No patch application or build was repeated.
+
+## Recovery and failures
+
+- At HEAD `679a926f...`, user reported the 0002 patch file missing while `pa220_board.c` contained 122 lines of uncommitted modifications; 0001 was already applied.
+- Recovered 0002 patch Git blob: `f7427063c29cfa2fe39c17b9257d998ddc68b2f5`.
+- Recovered patch SHA-256: `f52158320ba71dff9434ed59aa71c67357329893f496bdce10b894e72dd3d49a`.
+- Initial `git apply --check` reported patch corruption at line 88.
+- A later attempt reported “补丁在第 65 行损坏”.
+- One intermediate user correction changed hunk counts from `@@ -381,5 +427,15 @@` to `@@ -381,6 +427,16 @@`; `git apply --check` then passed. This manual hunk editing is retained as a failure history, not a recommended process.
+- User explicitly required that future patch hunk counts must never be guessed or hand-edited; use an independent source copy, generate unified diff with Git, and run patch checks.
+- First application failed because the patch path omitted the `u-boot/` prefix. Applying with `--directory=external/pa220-openwrt` succeeded; user reported “0002 APPLIED”.
+- Reverse `git apply --check` passed; inner `pa220_board.c` showed +182 lines.
+
+## Limitations
+
+- Full raw terminal output and the complete intermediate damaged patch contents were not recovered.
+- The current final patch file is present and was independently read back from GitHub.
+- No source checkout, patch check, build, or RAM boot was repeated during this audit.
