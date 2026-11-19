@@ -117,7 +117,7 @@
 | `pa220 memory` | PASS | loadaddr 与 `__tmp_load` base 均为 0x20000000；size 为 0x10000000 |
 | `bdinfo` / `meminfo` | PASS | DRAM 容量均报告 8 GiB；memstart/address-domain 关系仍待解释 |
 | `namedprint` / `freeprint` | PASS | 13 个 named blocks、两个 free blocks；关键相邻边界经半开区间核算一致 |
-| TLV EEPROM/I2C 只读内容 | NOT RUN | 下一批只读检查；先确认命令语义和有效访问窗口 |
+| TLV EEPROM/I2C 只读内容 | PASS | 五个 tuple、checksum、END `0xffff`、终止偏移 `0x9a` 已完成只读核查；无写入 |
 | 网络/存储扩展只读诊断 | NOT RUN | P3 后续工作 |
 | 任意地址 RAM 上传安全性 | BLOCKED | cached/uncached/physical alias 与统一 pre-write validator 尚未完成；不得开放上传 |
 
