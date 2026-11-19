@@ -1,0 +1,88 @@
+diff --git a/u-boot/board/octeon/pa220/pa220_board.c b/u-boot/board/octeon/pa220/pa220_board.c
+--- a/u-boot/board/octeon/pa220/pa220_board.c
++++ b/u-boot/board/octeon/pa220/pa220_board.c
+@@ -20,6 +20,8 @@
+ #include <environment.h>
+ #include <libfdt.h>
+ #include <asm/arch/cvmx-bootmem.h>
++#include <asm/arch/cvmx-clock.h>
++#include <asm/arch/octeon_eeprom_types.h>
+ #include <asm/arch/cvmx-qlm.h>
+ #include <asm/arch/octeon_qlm.h>
+
+@@ -365,6 +367,44 @@ static void pa220_print_memory_info(void)
+ 	       (unsigned long long)size);
+ }
+
++/*
++ * Board descriptor and MAC descriptor were populated during early board
++ * initialization. Read the cached global-data copies; do not rescan EEPROM.
++ */
++static void pa220_print_board_info(void)
++{
++	printf("Board type : %lu (%s)\n", gd->board_type,
++	       cvmx_board_type_to_string(gd->board_type));
++	printf("Revision   : %u.%u\n",
++	       gd->arch.board_desc.rev_major,
++	       gd->arch.board_desc.rev_minor);
++	printf("Serial     : %.*s\n", OCTEON_SERIAL_LEN,
++	       gd->arch.board_desc.serial_str);
++	printf("Descriptor : %s\n",
++	       (gd->flags & GD_FLG_BOARD_DESC_MISSING) ?
++	       "missing; fallback board identity in use" : "from initialized descriptor");
++	printf("MAC base   : %pM\n", gd->arch.mac_desc.mac_addr_base);
++	printf("MAC count  : %u\n", gd->arch.mac_desc.count);
++	puts("Source note: MAC descriptor may be EEPROM data or generated fallback.\n");
++}
++
++/*
++ * cvmx_clock_get_rate() in this U-Boot build returns global-data values.
++ * These are initialized/configured values, not an independent frequency
++ * counter measurement.
++ */
++static void pa220_print_clock_info(void)
++{
++	uint64_t core_hz = cvmx_clock_get_rate(CVMX_CLOCK_CORE);
++	uint64_t sclk_hz = cvmx_clock_get_rate(CVMX_CLOCK_SCLK);
++	uint64_t ddr_hz = cvmx_clock_get_rate(CVMX_CLOCK_DDR);
++
++	printf("CORE clock : %llu Hz (%llu MHz) [gd->cpu_clk]\n",
++	       (unsigned long long)core_hz,
++	       (unsigned long long)(core_hz / 1000000));
++	printf("SCLK clock : %llu Hz (%llu MHz) [gd->bus_clk]\n",
++	       (unsigned long long)sclk_hz,
++	       (unsigned long long)(sclk_hz / 1000000));
++	printf("DDR clock  : %llu Hz (%llu MHz base; %lu MT/s DDR) [gd->mem_clk]\n",
++	       (unsigned long long)ddr_hz,
++	       (unsigned long long)(ddr_hz / 1000000),
++	       gd->mem_clk * 2);
++	puts("NOTE       : initialized global-data/configuration values, not independent measurements.\n");
++	puts("DDR source : valid EEPROM DDR clock descriptor, otherwise PA-220 fallback; source is not retained.\n");
++}
++
+ static int do_pa220(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+ {
+@@ -381,6 +421,16 @@ static int do_pa220(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+ 		return CMD_RET_SUCCESS;
+ 	}
+
++	if (argc == 2 && !strcmp(argv[1], "board")) {
++		pa220_print_board_info();
++		return CMD_RET_SUCCESS;
++	}
++
++	if (argc == 2 && !strcmp(argv[1], "clock")) {
++		pa220_print_clock_info();
++		return CMD_RET_SUCCESS;
++	}
++
+ 	return CMD_RET_USAGE;
+ }
+
+@@ -389,4 +439,6 @@ U_BOOT_CMD(pa220, 2, 1, do_pa220,
+ 	   "status  - show board, memory, network and CPLD status\n"
+ 	   "pa220 env     - show environment storage and write warning\n"
+-	   "pa220 memory  - show load memory variables and __tmp_load block");
++	   "pa220 memory  - show load memory variables and __tmp_load block\n"
++	   "pa220 board   - show cached board descriptor and MAC information\n"
++	   "pa220 clock   - show initialized CORE, SCLK and DDR clock values");
