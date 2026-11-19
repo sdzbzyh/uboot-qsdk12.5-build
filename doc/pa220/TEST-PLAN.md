@@ -131,14 +131,14 @@
 |---|---|---|
 | 板级 descriptor/MAC 缓存 API | PASS（源码审计） | 可读 global data；无需重新访问 EEPROM |
 | 板级初始化副作用边界 | PASS（源码审计） | CPLD LED、USB GPIO、QLM 等初始化写路径已识别 |
-| CORE/IO/DDR 时钟 API | PASS（源码审计） | API 返回 global data 值，不是独立频率测量 |
+| CORE/IO/DDR 时钟 API | PASS（源码映射）；DDR 注释 FAIL | CORE/SCLK 由 CSR multiplier 派生；DDR gd->mem_clk 在 DRAM init 后可能由 IPD/DCLK counter ratio 测量；无独立外部频率计测试 |
 | 网络环境配置 | PASS（既有实机结果） | ethact/ethprime/IP 配置已显示 |
 | 网络物理 link 状态 | NOT VERIFIED | cvmx_helper_link_get() 会更新 link LED 并检查 SFP，不作为纯只读查询 |
 | SPI NOR probe | NOT RUN | Winbond W25Q128 配置下 sf probe 仅列为后续只读候选 |
 | eMMC 初始化/信息查询 | BLOCKED | mmc_init/startup 可能通过 CMD6 修改 EXT_CSD 配置字段 |
 | USB Mass Storage 枚举 | NOT RUN | USB 电源 GPIO 默认拉低；usb start 初始化副作用尚未审完 |
 | 新增 board/clock 命令 | PASS | 0002 已构建并 RAM 启动；`help pa220`、`pa220 board`、`pa220 clock` 实机验证通过，详见 `reports/P3-READONLY-AUDIT-2026-11-19.md` |
-| P3 整体 | **COMPLETE** | 0001/0002、实机 CLI、board/clock、TLV 与 SPI NOR 只读证据已归档；未验证项及 P1 风险保留 |
+| P3 整体 | **IN PROGRESS（历史证据审计）** | CLI/只读诊断历史阶段曾标记完成；全历史证据追溯、构建原件归档及 DDR clock note 缺陷仍未闭环 |
 
 源码审计与实机验证分阶段完成。0002 新增命令已在 RAM 启动镜像上验证；本轮没有访问或修改持久化介质。
 
@@ -163,7 +163,7 @@
 
 ## 7. P3 最终收尾与阶段交接（2026-11-19）
 
-**P3 CLI/只读诊断阶段：COMPLETE。** 完整收尾报告：`reports/P3-COMPLETION-2026-11-19.md`。完成判据是已实现的只读诊断增量具备构建、RAM 启动和实机证据，既有只读检查有对应记录；不是宣称所有外设或后续接收能力均已验证。
+**历史阶段状态：P3 CLI/只读诊断曾标记 COMPLETE。当前全历史证据审计：IN PROGRESS。** `reports/P3-COMPLETION-2026-11-19.md` 保留当日阶段决策，但不得覆盖当前审计任务；构建产物缺失和 P3-H050 clock-note FAIL 尚未解决。
 
 已完成并有证据的项目：
 - 0001/0002 只读维护补丁已应用、构建；0002 镜像已由原厂 Stage2/TFTP RAM 启动。
@@ -175,7 +175,7 @@
 
 保留为未验证/阻断的事项：
 - MAC descriptor 的 EEPROM/fallback 来源没有单独证明。
-- CORE/SCLK/DDR 是初始化 global-data/configuration 值，不是独立频率测量。
+- CORE/SCLK 是 reset CSR multiplier 派生值；DDR 的 gd->mem_clk 在 DRAM init 后可能由 CN70XX IPD/DCLK counter ratio 动态测量。0002 patch 统一 NOTE 不准确，见 P3-H050。
 - Ethernet 物理 link 状态 NOT VERIFIED；不将 ethact 当作 carrier 状态。
 - eMMC 初始化/信息查询仍 BLOCKED；USB 枚举 NOT VERIFIED。
 - 统一 RAM 写入 validator `octeon_load_range_check(uint64_t addr, uint64_t len)` 尚未实现；cached/uncached/physical alias、RAM 边界、整数溢出/地址回绕仍未收敛。TFTP/HTTP/ELF 接收安全性保持 BLOCKED。
@@ -185,7 +185,7 @@
 
 ## 8. P4 网络维护基础：首批源码审计（2026-11-19）
 
-**P4 状态：IN PROGRESS。** 固定输入仍为 PA-220 `801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8` 与 uBootKit `9ce315735ac88fd0a7c7697bc527a8616ed0a972`。
+**P4 状态：PAUSED（等待 P3 历史证据审计完成）。** 固定输入仍为 PA-220 `801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8` 与 uBootKit `9ce315735ac88fd0a7c7697bc527a8616ed0a972`。
 
 首批审计结果：
 - DHCP Client：PA-220 已有 `CONFIG_CMD_DHCP`、`DhcpRequest/DhcpHandler` 与 `dhcp` 命令，不移植 uBootKit 的 bootp.c；优先验证既有实现。
@@ -226,7 +226,7 @@
 
 ## 8. P4-1 网络维护基础（2026-11-19）
 
-P3 已于 2026-11-19 正式 COMPLETE。P4 已开启；源码审计证据：
+历史阶段决策曾于 2026-11-19 将 P3 标记 COMPLETE 并开启 P4；该状态已被当前用户最新审计任务覆盖。P4-1 既有源码审计仅作为历史文档，当前 P4 PAUSED；源码审计证据：
 - `reports/P4-NETWORK-BASELINE-AUDIT-2026-11-19.md`
 - `reports/P4-1-NETWORK-DRIVER-NETLOOP-AUDIT-2026-11-19.md`
 
