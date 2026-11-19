@@ -5,7 +5,7 @@
 ## 当前状态
 
 - 任务：P3 全阶段历史证据追溯、仓库查缺补漏与最终归档。
-- 当前批次：Batch 1 — 远端基线；Batch 1b — 原始日志路径与 RAM/TLV 补充；Batch 2 — P3 Git 历史时间线及补丁/日志证据对照；Batch 3 — 0002 构建、TLV/时钟和继承 SPI 证据补录；Batch 4 — bootmem 区间算术复核与补丁错误追溯；Batch 5 — P3 阶段决策及 CLI/bootmem 历史补充。
+- 当前批次：Batch 1 — 远端基线；Batch 1b — 原始日志路径与 RAM/TLV 补充；Batch 2 — P3 Git 历史时间线及补丁/日志证据对照；Batch 3 — 0002 构建、TLV/时钟和继承 SPI 证据补录；Batch 4 — bootmem 区间算术复核与补丁错误追溯；Batch 5 — P3 阶段决策及 CLI/bootmem 历史补充；Batch 6 — EEPROM 容量边界与 System.map 证据补充。
 - 审计是否完成：**否**。
 - P3 COMPLETE 是否可判定：**否（审计未完成）**。
 - P4 实际开发：**禁止开始**。当前远端已有 P4 计划/源码审计文件，不代表本次获准开展 P4 开发。
@@ -37,7 +37,7 @@
 
 ## 本批证据统计（临时）
 
-- 已登记账本条目：47（其中若干仍是历史检索摘要或助手声明，证据等级未升级）。
+- 已登记账本条目：49（其中若干仍是历史检索摘要或助手声明，证据等级未升级）。
 - 已发现需要继续核验的事项：构建原始日志/ELF-MAP-BIN 归档、TLV print 原始输出、SPI sf probe 原始输出、RAM 地址覆盖与 alias 证据、0002 补丁修复全过程、阶段状态一致性、本地工作区状态未知。board/clock 日志路径已解决。
 - 已完成修复：审计账本与检查点已创建并回读；board/clock 日志路径误判已纠正；已创建 EEPROM 末端读取与 Stage2/TFTP 校验两份 session-transcribed 记录；test-logs README 已说明该类文件不是原始设备捕获。
 - 尚未修复：全部疑点。
@@ -81,6 +81,8 @@
 - `ac5036174e6b283d524f5efe43c16fa289bae6e8`：补录 0002 line 88/line 65 hunk 损坏与用户纠正。
 - `2323b6fe612455fecd7efd2ca9326c2b418a60f7`：TEST-PLAN 引用 bootmem 算术勘误。
 - `ef4eab9c4015fdc099ab7888c8c2637cbd2d05fc`：补充 CLI/bootmem session-transcribed 细节。
+- `42f3f05218f69e8d84e712b2f07bfe8bd961cc99`：补充 TLV 地址/容量限制说明。
+- `ea628bfa854a15ac3bc649ab51d825b365048a0d`：登记 0001 System.map 空文件及 EEPROM 容量证据。
 - `f7dfde53ca4a5fbd7022112f7cf9e61d3ff7b2fb`：登记 P3 commit span、阶段决策、0001 apply 和 artifact 路径。
 
 ## Git 历史范围核对
@@ -91,6 +93,8 @@
 ## 新发现的仓库内容错误
 
 - P3-START 原先将 __boot_vector1__ base `0x0fff5c00` + size `0x8000` 的终点写成 `0x10003c00`；算术应为 `0x0fffdc00`。该处已按用户历史 namedprint 值更正，不重新运行设备命令。
+- P3 的 System-octeon_pa220.map 在 0001 构建中也曾为空；不得与有内容的主 MAP 混为一谈。
+- EEPROM 的 256-byte tuple 长度上限不是物理容量或全设备软件访问窗口；物理容量/寻址映射仍 UNKNOWN。
 
 ## 上下文与继续规则
 
