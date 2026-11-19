@@ -198,3 +198,8 @@ P3 COMPLETE 不改变以下状态：MAC descriptor 来源未单独证明；时�
 - 0002 patch 的 NOTE 和 DDR source 行与此运行时路径不完全相符；本次保留已验证补丁和原始串口日志不变，不擅自修改补丁或重建。该解释性缺陷列为 P3 未解决项，若修复必须另行生成补丁并重新构建/验证。
 
 固定源码回读 blob：`board_octeon.c` 2b9c543be18358f4e5fefb7a164b3f4f9c9e6c5c；`cvmx-clock.c` e4c20272150da015b73e6bfe81e35a0c46f59f28；`octeon_dram.c` a33ea9b514e6c09084611ab50399c197a589173e；`lib_octeon_shared.c` 24fecf0bbd9094ca137025a2d1949e8dd2e06eb8；`octeon_board_common.c` da0a8270878030f375ce6b556013e69deec84b1d；`octeon_eeprom_types.h` bc4ae9f49fd8f1937637ac98c35aea25ac0fb955。
+
+
+### Board descriptor / MAC 来源补充
+
+本次历史审计已恢复 BOARD_DESC type 0x0002 与 MAC_ADDR type 0x0004 的用户 TLV 值；它们与 2026-11-19 原始 board/clock log 的 board type/revision/serial/MAC base/count 完全一致。固定源码的 tuple 命中路径会将这两类 descriptor 复制到 global data；MAC tuple 不存在时才生成 random MAC。因此本板本次运行的 descriptor/MAC 来源可交叉确认。通用 fallback 逻辑仍需保留为其他设备/损坏 EEPROM 的边界。
