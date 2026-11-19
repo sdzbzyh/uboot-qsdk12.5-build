@@ -13,6 +13,9 @@
 - Board type: 20021.
 - DRAM: 8192 MiB.
 - CPU clock: 1000 MHz.
+- CPLD version: 7.
+- Ethernet active interface: `octrgmii0`.
+- PHY reset was reported asserted.
 - `pa220 status`, `pa220 env`, and `pa220 memory` were reported working.
 
 ## Memory/bootmem facts
@@ -21,12 +24,15 @@
 - `octeon_reserved_mem_load_base` and `octeon_reserved_mem_load_size` were unset.
 - `__tmp_load`: base `0x20000000`, size `0x10000000` (256 MiB), half-open interval `[0x20000000,0x30000000)`.
 - `__uboot_code_data`: base `0x20f000000`, size `0x01000000`.
+- `__mac_meminfo`: base `0x0fff55a0`, size `0x610`; `__int_4_link_info` at `0x0fff5bb0`, `__int_1_link_info` at `0x0fff5bc0`, `__int_0_link_info` at `0x0fff5be0`.
+- Exact recovered namedprint entry: `__boot_vector1__`, address `0x0fff5c00`, size `0x00008000`, index 3.
 - `freeprint` reported:
   - base `0x0f100000`, size `0x00ef55a0`;
   - base `0x30000000`, size `0x1df000000`.
 - `namedprint` reported 13 named blocks.
 - `meminfo` reported 8 GiB DRAM.
 - `bdinfo`: memstart `0x80000000`, memsize `0x200000000`.
+- `pa220 env` reported SPI NOR environment offsets: primary `0x00e00000`, redundant `0x00e10000`; the output warned that `saveenv` writes SPI NOR.
 
 ## Interpretation limits
 
