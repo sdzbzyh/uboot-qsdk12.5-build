@@ -126,9 +126,11 @@ P3 COMPLETE 不等于所有候选诊断均通过。Ethernet 物理 link 仍 NOT 
 P4 计划及首批审计见 `P4-PLAN.md`、`reports/P4-NETWORK-BASELINE-AUDIT-2026-11-19.md`。当前仅完成源码审计，尚未进行 P4 构建或网口实机验证。
 
 
-## P3 历史证据审计覆盖（2026-11-19）
+## P3 历史证据审计状态更正（2026-11-19）
 
-此前 P3 CLI/只读诊断阶段 COMPLETE 是历史阶段记录。用户已要求对 P3 开始至今全部相关会话进行证据追溯和仓库查缺补漏；当前审计状态 **IN PROGRESS**。在 `P3-HISTORICAL-EVIDENCE-AUDIT-2026-11-19.md` 和 `P3-HISTORICAL-AUDIT-CHECKPOINT.md` 明确完成之前，不得开始 P4 实际开发。P4 计划与已有源码审计仅作为历史文档保留，执行状态以 `P4-PLAN.md` 的 PAUSED 标记为准。
+此前记录的 P3 历史证据追溯 **IN PROGRESS** 及“不得开始 P4”的限制，属于已被后续阶段决策取代的历史检查点。按项目负责人最新明确指示，P3 CLI/只读诊断阶段以 `reports/P3-COMPLETION-2026-11-19.md` 和 `TEST-PLAN.md` 第 7 节为最终验收依据，状态为 **COMPLETE**；不再等待历史会话追溯任务，不再阻止 P4。当前执行状态以 `P4-PLAN.md` 为准：P4 **IN PROGRESS**。
+
+P3 未解决风险继续保留；阶段状态更正不等于风险关闭。
 
 
 ## P3 / P4 阶段状态更新（2026-11-19）
