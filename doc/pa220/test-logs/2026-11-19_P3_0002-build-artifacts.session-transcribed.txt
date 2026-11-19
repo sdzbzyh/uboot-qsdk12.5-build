@@ -1,0 +1,36 @@
+# PA-220 P3 0002 build/artifact results — session-transcribed
+
+- Provenance: recovered from user messages dated 2026-11-19 08:49:11Z–08:55:17Z.
+- Evidence class: USER-OBSERVED (historical retrieval); **not a verbatim build log**.
+- Full build log and exact complete command transcript were not recovered in this batch.
+- No rebuild was performed for this record.
+
+## 0002 application/build
+
+- Source baseline: `801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`.
+- 0001 was already applied.
+- User reported 0002 applied; reverse `git apply --check` passed.
+- `pa220_board.c` showed +182 lines in the inner source repository.
+- Build exit code: 0.
+- Outputs reported: ELF `u-boot-octeon_pa220`, BIN `u-boot-octeon_pa220.bin`, main MAP `u-boot-octeon_pa220.map`, `System-octeon_pa220.map`, and SREC.
+- BIN size: 1,362,280 bytes.
+- Text/data/BSS: 1,332,156 / 30,108 / 1,671,340 bytes.
+- Image data CRC: `0x0e351bbc`.
+- Header CRC: `0xdcc5dc0c`.
+- Text/link base: `0xc0000000`.
+
+## Recovered SHA-256 values
+
+- ELF: `e3f2d4799f9de0d71d0d25f411953ea62ef67993cdc0a2378c0fbddd5f68ef08`
+- BIN: `643b1bf60d31550efee2efe3a95c6cc9d5318b5ee75b32b526f00a966042bf28`
+- Main MAP: `5764da78b816a2ef47e6796f1e307cdf8dccaeb5de74d2c5054052f06c10814c`
+- `System-octeon_pa220.map` initially had 0 bytes and SHA-256 `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`.
+
+## Symbol/map follow-up and limitations
+
+- ELF readelf: ELF32 big-endian MIPS EXEC, Octeon/MIPS64r2, entry `0xc0000000`, 2 program headers, 21 sections.
+- User reported cross `nm` emitted “总线错误”, exit 135, with no output.
+- A later user message reported host `/usr/bin/nm` generated a 3,426-line / 100,700-byte System.map with SHA-256 `e1c6ef977b712160c515892de421a820245d3a1b08b5de550da8a182c9cd8751`.
+- A subsequent history item again records an empty regenerated System.map (0 bytes, empty-file SHA-256). These are time-specific observations and are not reconciled here.
+- Main MAP was reported as 10,561 lines / 576,978 bytes.
+- Full raw build output and all intermediate artifact listings remain EVIDENCE MISSING; this transcript is not a substitute.
