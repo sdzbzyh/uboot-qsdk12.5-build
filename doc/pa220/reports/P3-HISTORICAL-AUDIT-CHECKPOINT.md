@@ -37,7 +37,7 @@
 
 ## 本批证据统计（临时）
 
-- 已登记账本条目：53（其中 52 条为 P3 证据/审计事项，1 条为 P3 起点前的 P2 继承风险引用；若干仍是历史检索摘要或助手声明，证据等级未升级）。
+- 已登记账本条目：55（其中 54 条为 P3 证据/审计事项，1 条为 P3 起点前的 P2 继承风险引用；若干仍是历史检索摘要或助手声明，证据等级未升级）。
 - 已发现需要继续核验的事项：构建原始日志/ELF-MAP-BIN 归档、TLV print 原始输出、SPI sf probe 原始输出、RAM 地址覆盖与 alias 证据、0002 补丁修复全过程、阶段状态一致性、本地工作区状态未知。board/clock 日志路径已解决。
 - 已完成修复：审计账本与检查点已创建并回读；board/clock 日志路径误判已纠正；已创建 EEPROM 末端读取与 Stage2/TFTP 校验两份 session-transcribed 记录；test-logs README 已说明该类文件不是原始设备捕获。
 - 尚未修复：全部疑点。
@@ -100,6 +100,10 @@
 - `727e45a4f99b5ceca2cfca4542c343afba4ffe7b`：登记 P3 构建原件缺失。
 - `a40fe1794cfb68ad2e23f2db827070d31402bbb8`：TEST-PLAN 记录 P3 artifact archive status。
 - `1c7c87479b04b10471a3e76ac74f8749879fcc19`：P3-START 链接构建产物审计。
+- `7938a550ae19d075074dc47bfa53d6e799446652`：0001 build session-transcribed。
+- `d2f22d75000913d90fb40353aa176240460ad852`：0002 patch recovery session-transcribed。
+- `8ae9fd2d487aea550dd7b77aa4b9894d74fcae31`：账本索引 0001/0002 transcript。
+- `91ff56ec29b98f50b25a1aa6126541a7252bf900`：TEST-PLAN 引用 0001/0002 transcript。
 - `f7dfde53ca4a5fbd7022112f7cf9e61d3ff7b2fb`：登记 P3 commit span、阶段决策、0001 apply 和 artifact 路径。
 
 ## Git 历史范围核对
