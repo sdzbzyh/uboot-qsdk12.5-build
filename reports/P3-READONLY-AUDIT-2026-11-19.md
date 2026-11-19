@@ -56,4 +56,8 @@
 
 0002 新增的 `help pa220`、`pa220 board`、`pa220 clock` 在当前 RAM 启动镜像上完成实机验证，命令执行与显示结果均 PASS。MAC descriptor 的实际来源没有由当前输出单独证明，记为 NOT RUN；不影响命令基本功能通过。
 
-P3 仍在进行中。网络/存储扩展诊断及任意地址 RAM 上传安全性不因本轮结果而改变状态。
+本报告覆盖 board/clock 的实机验证；与同日 P3 已完成的其他证据合并后，**P3 CLI/只读诊断阶段于 2026-11-19 正式 COMPLETE**。其他检查的状态不因本报告而改变：Ethernet 物理 link NOT VERIFIED，eMMC 初始化 BLOCKED，USB 枚举 NOT VERIFIED；统一 RAM 写入 validator 尚未实现，任意地址 TFTP/HTTP/ELF 接收继续 BLOCKED。
+
+P3 全阶段证据还包括 `pa220 status/env/memory`、`bdinfo`、`printenv loadaddr`、named/free bootmem、TLV EEPROM 五个 tuple/checksum/END/终止偏移只读核查及 SPI NOR W25Q128BV 只读识别。详见集成仓库 `doc/pa220/TEST-PLAN.md` 第 7 节。原始 board/clock 串口日志为本仓库 `reports/P3-BOARD-CLOCK-2026-11-19-serial.log`。
+
+P3 COMPLETE 仅表示本阶段已实现范围和证据闭环，不表示所有可选硬件诊断均 PASS，也不表示 P1 非阻断风险已解决。
