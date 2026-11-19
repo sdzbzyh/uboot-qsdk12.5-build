@@ -18,3 +18,11 @@
 - A separate exact user-provided EEPROM read at offset 0x9a is preserved in `2026-11-19_P3_tlv-eeprom-end-read.session-transcribed.txt`.
 - EEPROM address: `0x57`; TLV on I²C Bus 0; 1-byte internal offset.
 - This does not establish physical EEPROM capacity. The software access window and physical device capacity remain distinct.
+
+
+## Addressing/capacity distinction
+
+- PA-220 fixed configuration records EEPROM address 0x57 and CONFIG_SYS_I2C_EEPROM_ADDR_LEN=1; the P1-A5 source audit notes that this selects the 8-bit EEPROM page/bank-address path in common/cmd_eeprom.c.
+- The board comment describes a 24C256 with 64-byte pages, but 24C256 devices normally use a 16-bit word address. The actual device identity, addressing map and physical capacity were not independently verified.
+- OCTEON_EEPROM_MAX_TUPLE_LENGTH=256 is the parser's maximum individual tuple length; it is not proof that the physical EEPROM is 256 bytes or that the full device has a 256-byte software access window.
+- The recovered read at offset 0x9a only confirms the returned eight bytes at that offset. Physical capacity remains UNKNOWN.
