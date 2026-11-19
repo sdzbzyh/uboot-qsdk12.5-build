@@ -121,7 +121,7 @@
 | 网络/存储扩展只读诊断 | NOT RUN | P3 后续工作 |
 | 任意地址 RAM 上传安全性 | BLOCKED | cached/uncached/physical alias 与统一 pre-write validator 尚未完成；不得开放上传 |
 
-本轮没有执行任何持久化介质写入、named block 分配/释放或 DRAM 测试。P3 整体仍进行中。
+本轮没有执行任何持久化介质写入、named block 分配/释放或 DRAM 测试。（历史检查点）当时 P3 仍进行中；最终收尾以第 7 节为准。
 
 ## 6. P3 只读诊断源码审计（2026-11-19）
 
@@ -138,7 +138,7 @@
 | eMMC 初始化/信息查询 | BLOCKED | mmc_init/startup 可能通过 CMD6 修改 EXT_CSD 配置字段 |
 | USB Mass Storage 枚举 | NOT RUN | USB 电源 GPIO 默认拉低；usb start 初始化副作用尚未审完 |
 | 新增 board/clock 命令 | PASS | 0002 已构建并 RAM 启动；`help pa220`、`pa220 board`、`pa220 clock` 实机验证通过，详见 `reports/P3-READONLY-AUDIT-2026-11-19.md` |
-| P3 整体 | IN PROGRESS | 不重复既有 status/env/memory 和 bootmem 测试 |
+| P3 整体 | **COMPLETE** | 0001/0002、实机 CLI、board/clock、TLV 与 SPI NOR 只读证据已归档；未验证项及 P1 风险保留 |
 
 源码审计与实机验证分阶段完成。0002 新增命令已在 RAM 启动镜像上验证；本轮没有访问或修改持久化介质。
 
@@ -159,3 +159,37 @@
 - 本轮未执行持久化介质写入。任意地址 RAM 上传安全性仍为 **BLOCKED**；本轮命令通过不构成上传安全性证明。
 - 不重复既有 status/env/memory/bootmem/TLV 测试。
 
+
+
+## 7. P3 最终收尾与阶段交接（2026-11-19）
+
+**P3 CLI/只读诊断阶段：COMPLETE。** 完成判据是已实现的只读诊断增量具备构建、RAM 启动和实机证据，既有只读检查有对应记录；不是宣称所有外设或后续接收能力均已验证。
+
+已完成并有证据的项目：
+- 0001/0002 只读维护补丁已应用、构建；0002 镜像已由原厂 Stage2/TFTP RAM 启动。
+- `help pa220`、`pa220 status/env/memory/board/clock` 实机验证通过。
+- `bdinfo`、`printenv loadaddr`、`namedprint`、`freeprint`、`meminfo` 已完成。
+- TLV EEPROM 五个 tuple、checksum、END `0xffff`、终止偏移 `0x9a` 已只读核查；没有 EEPROM/TLV 写入。
+- SPI NOR `sf probe` 已识别 W25Q128BV、16 MiB、4 KiB erase granularity；没有执行写入/擦除。
+- board/clock 原始串口证据：`reports/P3-BOARD-CLOCK-2026-11-19-serial.log`；实机结果报告：`reports/P3-READONLY-AUDIT-2026-11-19.md`。
+
+保留为未验证/阻断的事项：
+- MAC descriptor 的 EEPROM/fallback 来源没有单独证明。
+- CORE/SCLK/DDR 是初始化 global-data/configuration 值，不是独立频率测量。
+- Ethernet 物理 link 状态 NOT VERIFIED；不将 ethact 当作 carrier 状态。
+- eMMC 初始化/信息查询仍 BLOCKED；USB 枚举 NOT VERIFIED。
+- 统一 RAM 写入 validator `octeon_load_range_check(uint64_t addr, uint64_t len)` 尚未实现；cached/uncached/physical alias、RAM 边界、整数溢出/地址回绕仍未收敛。TFTP/HTTP/ELF 接收安全性保持 BLOCKED。
+- P1 中 LOAD MemSiz 与 `uboot_end` 4-byte 差异、RAM 镜像 CRC 变化等非阻断风险继续保留，P3 完成不代表这些风险已解决。
+
+本阶段没有执行 `saveenv`、EEPROM/TLV 写入、CPLD 写入、SPI/eMMC/NAND/USB block 写入/擦除、`bootloaderupdate`、`namedalloc`、`namedfree` 或 `mtest`。
+
+## 8. P4 网络维护基础：首批源码审计（2026-11-19）
+
+**P4 状态：IN PROGRESS。** 固定输入仍为 PA-220 `801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8` 与 uBootKit `9ce315735ac88fd0a7c7697bc527a8616ed0a972`。
+
+首批审计结果：
+- DHCP Client：PA-220 已有 `CONFIG_CMD_DHCP`、`DhcpRequest/DhcpHandler` 与 `dhcp` 命令，不移植 uBootKit 的 bootp.c；优先验证既有实现。
+- Ping：PA-220 已有 `CONFIG_CMD_PING`、`ping.o` 和 `ping` 命令，不移植 uBootKit 的 ping.c；优先验证既有实现。
+- TFTP GET/PUT/Server：PA-220 已有旧版实现，但 GET/Server 的接收路径会在 `store_block()` 中直接 memcpy 到 `load_addr + offset`，没有 PA-220 的统一 RAM 范围 validator。GET 与 Server 接收功能均不得用于未经验证的 RAM 写入。
+- uBootKit 新版 TFTP 的 IPQ/FDT/TrustZone 边界检查依赖 IPQ 平台常量，不可复制到 PA-220；必须先实现 PA-220 地址域规范化和 named-block 权威边界校验。
+- P4 首批源码审计与任务拆分见 `reports/P4-NETWORK-BASELINE-AUDIT-2026-11-19.md` 和 `P4-PLAN.md`。本节不代表 DHCP/Ping 已实机验证。
