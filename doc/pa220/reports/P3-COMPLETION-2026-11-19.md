@@ -89,3 +89,8 @@ P4 首批源码审计：`doc/pa220/reports/P4-NETWORK-BASELINE-AUDIT-2026-11-19.
 ## 7. SPI NOR 证据来源补充
 
 本报告中的 W25Q128BV / 16 MiB / 4 KiB erase 识别结果，来源于用户在 2026-11-18 10:10:39Z 提供的先前 `sf probe` 输出，早于 P3 首次进入时间（2026-11-19）。因此它是 P3 收尾时引用的继承只读证据，不是 P3 当日新执行的测试。P3 源码审计报告所记 `NOT RUN` 指该源码审计批次未再次执行 probe，与先前观察不矛盾。逐字可恢复的一行输出见 `../test-logs/2026-11-18_SPI-NOR-probe.session-transcribed.txt`。本次不重复 probe。
+
+
+## 8. DDR clock explanatory-note correction（2026-11-19）
+
+本报告引用的原始 board/clock 输出仍保留原文，但其统一 NOTE 将 CORE/SCLK/DDR 一概描述为非独立测量值，后来固定源码复核发现这对 DDR 不准确：CORE/SCLK 来自 reset CSR multiplier；DDR 的 `gd->mem_clk` 在 DRAM 初始化后可能由 CN70XX 的 IPD/DCLK counter ratio 动态测量。0002 patch 中的 DDR source 行也没有体现该后续测量路径。该解释性缺陷已登记为 P3 未解决项，详见 `P3-HISTORICAL-EVIDENCE-AUDIT-2026-11-19.md` 的 P3-H050 和 `P3-READONLY-AUDIT-2026-11-19.md` 第 12 节。原始日志不改写，已验证补丁不在本次审计中擅自修改或重建。
