@@ -139,3 +139,19 @@ PA-220 定义 `CONFIG_OCTEON_USB_OCTEON3`；公共配置由此启用 `CONFIG_CMD
 ## 7. 持续安全边界
 
 不执行 `saveenv`、EEPROM/TLV 写入、CPLD 写入、SPI NOR/eMMC/NAND/USB block 写入、擦除、分区、格式化或固件安装；不执行 `bootloaderupdate`、`namedalloc`、`namedfree`、`mtest`。不开放任意地址 RAM 上传。统一 cached/uncached/physical alias 及 pre-write validator 尚未完成。
+
+
+## 8. 第二个只读诊断补丁（源码变更候选）
+
+新增补丁：`patches/pa220/0002-pa220-board-clock-readonly-diagnostics.patch`。
+
+新增：
+- `pa220 board`：读取早期初始化后缓存的 board descriptor、revision、serial、MAC base/count 和 descriptor-missing 标志；不重扫 EEPROM。
+- `pa220 clock`：读取 `cvmx_clock_get_rate(CORE/SCLK/DDR)`，并明确显示这些值来自 global data/初始化配置，不是独立频率测量。
+
+补丁顺序：
+- `build-pa220.sh` 按 `patches/pa220/*.patch` 字典序应用补丁；
+- 因而 0001 先应用，0002 再应用；
+- 已对固定源码文件按 0001 -> 0002 顺序执行 unified-hunk 上下文和行数核对，所有 hunk 均可顺序匹配。
+
+尚未在 Debian 构建目录实际执行 `git apply --check`、构建或设备测试；因此 0002 状态仍为 **NOT BUILT / NOT VERIFIED**。下一步由用户在原固定 checkout 执行正式构建前的 patch check，再决定构建。
