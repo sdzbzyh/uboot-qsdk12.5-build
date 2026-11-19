@@ -1,0 +1,20 @@
+# PA-220 P3 TLV EEPROM structure — session-transcribed
+
+- Provenance: recovered from user's historical message dated 2026-11-19 07:43:46Z.
+- Evidence class: USER-OBSERVED (historical retrieval); **not a verbatim full `tlv_eeprom print/display` capture**.
+- Full tuple payloads and complete raw command output are unavailable in this transcript.
+- No EEPROM operation was repeated.
+
+| Offset | Type/name | Length | Checksum | Recovered fields |
+|---|---|---:|---:|---|
+| 0x00 | BOARD_DESC / type 0x0002 | 0x24 | 0x03aa | Board type 0x4e35 (PA220), revision 1.1, serial 012801031163 |
+| 0x24 | MAC_ADDR / type 0x0004 | 0x10 | 0x0356 | MAC base 08:30:6b:e1:be:00, count 255 |
+| 0x34 | customer tuple 0xf002 | 0x1c | 0x04fe | Payload not reconstructed |
+| 0x50 | customer tuple 0xf017 | 0x32 | 0x076e | Payload not reconstructed |
+| 0x82 | customer tuple 0xf007 | 0x18 | 0x0437 | Payload not reconstructed |
+
+- Five tuple boundaries end at offset `0x9a`.
+- Historical assistant summaries state END type `0xffff` and all five checksums passed; the full user-provided print/display text did not survive retrieval, and the recovered user summary did not independently expose the END line.
+- A separate exact user-provided EEPROM read at offset 0x9a is preserved in `2026-11-19_P3_tlv-eeprom-end-read.session-transcribed.txt`.
+- EEPROM address: `0x57`; TLV on I²C Bus 0; 1-byte internal offset.
+- This does not establish physical EEPROM capacity. The software access window and physical device capacity remain distinct.
