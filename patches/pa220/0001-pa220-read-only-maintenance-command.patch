@@ -1,4 +1,8 @@
 diff --git a/u-boot/board/octeon/pa220/pa220_board.c b/u-boot/board/octeon/pa220/pa220_board.c
+@@ -20,6 +20,7 @@
+ #include <asm/arch/cvmx-qlm.h>
+ #include <asm/arch/octeon_qlm.h>
++#include <asm/arch/cvmx-bootmem.h>
 --- a/u-boot/board/octeon/pa220/pa220_board.c
 +++ b/u-boot/board/octeon/pa220/pa220_board.c
 @@ -272,1 +272,87 @@
@@ -70,6 +74,35 @@ diff --git a/u-boot/board/octeon/pa220/pa220_board.c b/u-boot/board/octeon/pa220
 +	puts("RAM test   : do not run saveenv or sf erase/write/update.\n");
 +}
 +
++/*
++ * cvmx_bootmem_find_named_block() returns a pointer to a static descriptor.
++ * Copy the fields immediately; do not retain the pointer across another
++ * named-block lookup.
++ */
++static void pa220_print_memory_info(void)
++{
++	const cvmx_bootmem_named_block_desc_t *desc;
++	uint64_t base, size;
++
++	printf("loadaddr  : %s\n", pa220_env_value("loadaddr"));
++	printf("load base : %s\n",
++	       pa220_env_value("octeon_reserved_mem_load_base"));
++	printf("load size : %s\n",
++	       pa220_env_value("octeon_reserved_mem_load_size"));
++
++	desc = cvmx_bootmem_find_named_block("__tmp_load");
++	if (!desc) {
++		puts("__tmp_load: not found\n");
++		return;
++	}
++
++	base = desc->base_addr;
++	size = desc->size;
++	printf("__tmp_load: base=0x%llx size=0x%llx\n",
++	       (unsigned long long)base,
++	       (unsigned long long)size);
++}
++
 +static int do_pa220(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 +{
 +	if (argc == 1 || !strcmp(argv[1], "status")) {
@@ -82,10 +115,16 @@ diff --git a/u-boot/board/octeon/pa220/pa220_board.c b/u-boot/board/octeon/pa220
 +		return CMD_RET_SUCCESS;
 +	}
 +
++	if (argc == 2 && !strcmp(argv[1], "memory")) {
++		pa220_print_memory_info();
++		return CMD_RET_SUCCESS;
++	}
++
 +	return CMD_RET_USAGE;
 +}
 +
 +U_BOOT_CMD(pa220, 2, 1, do_pa220,
 +	   "PA-220 read-only maintenance information",
 +	   "status  - show board, memory, network and CPLD status\n"
-+	   "pa220 env     - show environment storage and write warning");
++	   "pa220 env     - show environment storage and write warning\n"
++	   "pa220 memory  - show load memory variables and __tmp_load block");
