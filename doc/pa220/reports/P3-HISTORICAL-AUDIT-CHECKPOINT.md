@@ -5,7 +5,7 @@
 ## 当前状态
 
 - 任务：P3 全阶段历史证据追溯、仓库查缺补漏与最终归档。
-- 当前批次：Batch 1 — 远端基线；Batch 1b — 原始日志路径与 RAM/TLV 补充；Batch 2 — P3 Git 历史时间线及补丁/日志证据对照。
+- 当前批次：Batch 1 — 远端基线；Batch 1b — 原始日志路径与 RAM/TLV 补充；Batch 2 — P3 Git 历史时间线及补丁/日志证据对照；Batch 3 — 0002 构建、TLV/时钟和继承 SPI 证据补录。
 - 审计是否完成：**否**。
 - P3 COMPLETE 是否可判定：**否（审计未完成）**。
 - P4 实际开发：**禁止开始**。当前远端已有 P4 计划/源码审计文件，不代表本次获准开展 P4 开发。
@@ -37,7 +37,7 @@
 
 ## 本批证据统计（临时）
 
-- 已登记账本条目：30（其中若干仍是历史检索摘要或助手声明，证据等级未升级）。
+- 已登记账本条目：41（其中若干仍是历史检索摘要或助手声明，证据等级未升级）。
 - 已发现需要继续核验的事项：构建原始日志/ELF-MAP-BIN 归档、TLV print 原始输出、SPI sf probe 原始输出、RAM 地址覆盖与 alias 证据、0002 补丁修复全过程、阶段状态一致性、本地工作区状态未知。board/clock 日志路径已解决。
 - 已完成修复：审计账本与检查点已创建并回读；board/clock 日志路径误判已纠正；已创建 EEPROM 末端读取与 Stage2/TFTP 校验两份 session-transcribed 记录；test-logs README 已说明该类文件不是原始设备捕获。
 - 尚未修复：全部疑点。
@@ -66,6 +66,16 @@
 - `ea8f035415eca179d4e9b4d2d2c2b23673a5c340`：TEST-PLAN 第 9 节审计覆盖说明。
 - `4edfb54835be763bd9eb71c7c4d6bd7da23be13b`：P4-PLAN 暂停。
 - `4923a37e70c3f0bd2e746b0d969f237451250ecf`：P3 completion 历史审计附录。
+- `8848f8bf823f83ee3da82dd640469fd39631143c`：CLI/bootmem session-transcribed。
+- `e31d482c58d971d6b3f01ee7ec00af09c54b84e0`：0002 构建产物 session-transcribed。
+- `1cb71bace99ac5335832d890528c51bbb5a286a2`：TLV tuple 结构 session-transcribed。
+- `f281e8077990aa86f0484fe9ba00454794e1d32c`：继承 SPI probe session-transcribed。
+- `7d3a43d7ff3c83f774ac4a1453e2171ab56dcdfa`：更正 SPI 证据来源。
+- `8b1010865e9e936aff18fb1319984ac7321b3f85`：TEST-PLAN 更正 SPI 来源。
+- `f1813a61b168b4134fa0b91b44ddb0182ca67cde`：P3 completion 补充 SPI 来源。
+- `e76d4a51c5af3a3e801b471fbd596edb5920d107`：P3 source audit 补充 SPI 来源。
+- `0d5073ed766837e2939180f19081cb4eff1b3c3f`：ROADMAP 标记 P3 历史审计 hold。
+- `5aa0024a42d84b72c57762872da396d9be26eea3`：追加 bootmem 纠错、SCLK 与 no-repeat 证据。
 
 ## 上下文与继续规则
 
