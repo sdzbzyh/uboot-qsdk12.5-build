@@ -143,12 +143,19 @@
 源码审计与实机验证分阶段完成。0002 新增命令已在 RAM 启动镜像上验证；本轮没有访问或修改持久化介质。
 
 
-### 6.1 P3 第二个命令增量候选
+### 6.1 P3 第二个命令增量实机验证结果
 
 补丁：`patches/pa220/0002-pa220-board-clock-readonly-diagnostics.patch`。
 
-- `pa220 board`：仅读取已缓存的 board descriptor/MAC descriptor。
-- `pa220 clock`：仅读取 CORE/SCLK/DDR global-data clock 值，并显示其非独立测量属性。
-- 补丁按 0001 -> 0002 顺序与固定源码上下文完成顺序匹配核对。
-- 尚未在用户构建目录运行实际 `git apply --check`、构建或 RAM 实机验证；状态 **NOT BUILT / NOT VERIFIED**。
-- 不要求重跑既有 status/env/memory/bootmem 测试。新镜像只验证 `help pa220`、`pa220 board`、`pa220 clock`；只有新功能所需的测试，不重复旧用例。
+- **PASS**：0002 已应用、构建并通过原厂 Stage2/TFTP RAM 启动；本轮直接在已启动镜像中验证，没有重新构建或重新启动。
+- **PASS**：`help pa220` 正常列出 status/env/memory/board/clock 五个子命令。
+- **PASS**：`pa220 board` 正常显示 Board type 20021 (PA220)、revision 1.1、serial 012801031163、MAC base 08:30:6b:e1:be:00、MAC count 255；board descriptor 显示 from initialized descriptor。
+- **NOT RUN**：MAC descriptor 的 EEPROM/fallback 实际来源未单独标识；输出只说明可能来自 EEPROM 或 generated fallback，不能据此断言来源。
+- **PASS**：`pa220 clock` 显示 CORE 1000 MHz、SCLK 500 MHz、DDR 800 MHz base / 1600 MT/s；单位换算正确。
+- **PASS**：时钟输出明确限定为 initialized global-data/configuration values，而非 independent measurements。
+- **PASS（观察范围内）**：三个命令均正常返回 CLI，输出格式正常，未观察到异常；这不构成全面内存安全证明。
+- 完整原始串口日志：`reports/P3-BOARD-CLOCK-2026-11-19-serial.log`。
+- 实机验证报告：`reports/P3-READONLY-AUDIT-2026-11-19.md`。
+- 本轮未执行持久化介质写入。任意地址 RAM 上传安全性仍为 **BLOCKED**；本轮命令通过不构成上传安全性证明。
+- 不重复既有 status/env/memory/bootmem/TLV 测试。
+
