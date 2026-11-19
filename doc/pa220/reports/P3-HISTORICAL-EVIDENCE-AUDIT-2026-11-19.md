@@ -121,3 +121,66 @@
 
 
 | P3-H059 | 2026-11-19 本次审计后续修订 | 阶段状态一致性恢复 | 在发现 10:19–10:22Z 并行提交重新激活 P4 后，本批再次修订 ROADMAP、TEST-PLAN、P3-COMPLETION、P3-READONLY-AUDIT、根目录 board/clock 报告、P3-START、P4-PLAN 与两份 P4-1 静态审计，明确历史 COMPLETE/IN PROGRESS 声明的时间属性，并统一当前状态为 P3 历史审计 IN PROGRESS、P4 PAUSED | FILE-VERIFIED（最新 HEAD 文件正文回读）+ USER-OBSERVED（当前任务指令） | PASS（当前状态字段已逐项回读一致）；历史文本仍保留并明确标为历史决策 | 上述 8 份阶段/报告文件 | 已提交并按 HEAD 6499f373… 回读 | 继续监控后续并行提交是否再次改变状态；最终审计完成前不得移除当前审计门 |
+
+
+## P3 原始阶段 Git 提交清单（P2 收尾至 P3 完成 HEAD）
+
+GitHub compare：`47805be639ad39cb5f03f9e527b2727e74ee5ea9...0a6f080a58c9a93e3d4950f8898fc46528d55618`。共 37 commits，时间 2026-11-19 06:58:00Z–09:41:36Z。下表按提交时间排序；此清单是仓库变更索引，不替代逐会话用户证据审计。
+
+| # | UTC 时间 | Commit | Commit message |
+|---:|---|---|---|
+| 1 | 06:58:00 | `794b6d8d07098637179fce0c482ee05997bf3fb8` | feat(pa220): add read-only named load block diagnostics |
+| 2 | 06:58:27 | `2118ad4229073ec185d176fb4c958b7e6de0e0c6` | fix(pa220): correct diagnostic patch hunk headers |
+| 3 | 06:59:18 | `3e5251fbfafb277222b709bab836971ae56625be` | fix(pa220): account for include hunk offset in patch |
+| 4 | 06:59:34 | `a5b42170d692d22dc7cdaf491eddd3c9222dde38` | docs(pa220): record P3 start and first diagnostic increment |
+| 5 | 06:59:43 | `401961b731cef732102a394e219505c35a42925d` | docs(pa220): mark P3 active and record first diagnostic task |
+| 6 | 07:12:09 | `74eddbacf61d0853840ed5f077afc41cde60ff7c` | fix(pa220): anchor maintenance patch to stable source lines |
+| 7 | 07:12:18 | `f3a144e20728888abb1e1999f29344a7b9a463a9` | fix(pa220): correct maintenance patch insertion offset |
+| 8 | 07:17:53 | `6db6a251b9cac9659606c01086d3cc465754225b` | Fix PA-220 maintenance patch context for git apply |
+| 9 | 07:18:08 | `679a926f96aecca0849822c8780449b1c97220e4` | Correct PA-220 maintenance patch hunk counts |
+| 10 | 07:40:12 | `4d71f988ea9f6b6c44f209d3f6827a98e244ce5c` | Document P3 CLI and bootmem runtime validation |
+| 11 | 07:40:32 | `e9ce0b89e401a17fe35b030914d1c521d61d7720` | Update P3 runtime validation checkpoint |
+| 12 | 07:40:34 | `33cfdf1016306ecac49294be44b0315cb100bc86` | Record P3 CLI and bootmem runtime test results |
+| 13 | 07:51:14 | `7aaa81499d42bd32cc2e7fb14e920fe109a52e14` | Add PA-220 command test log directory |
+| 14 | 07:52:31 | `5a7e78bcb067f570d44d7816bf9e98bb1f6dc941` | Add files via upload |
+| 15 | 08:09:56 | `cfbb5bf857394f0647f44d3a3682520a19d6aa39` | Document P3 read-only board clock network storage audit |
+| 16 | 08:10:03 | `414b3a3d1ee46d1fbfdf4bdcf81ccb6c057ade58` | Record P3 read-only diagnostics source audit |
+| 17 | 08:10:29 | `32e4dbe06778850e0a200e3730345fe9d9bdfc9c` | Add PA-220 cached board and clock diagnostics patch |
+| 18 | 08:10:56 | `aa718c6b1b27744439a4d9d6271cacc95a67e8ab` | Fix unified diff hunk counts in PA-220 board clock patch |
+| 19 | 08:11:18 | `5be99f3232bb90baec3f65c1a492eeb0c0b93177` | Normalize unified diff context and hunk counts |
+| 20 | 08:11:55 | `cf5a927cb48fe7c7595a1026a30a2364df868507` | Correct final help hunk context in PA-220 diagnostics patch |
+| 21 | 08:12:39 | `7178a393bc1f5921de86e89b104b2d8f6211bc00` | Record PA-220 board clock diagnostics patch candidate |
+| 22 | 08:12:46 | `23141cdcc56b47223064800dda3d4fd335617bf7` | Track PA-220 board clock diagnostics patch candidate |
+| 23 | 09:12:43 | `905b502bce40e97af7a3d8e35f4c11c7d73f6aa7` | Document PA-220 P3 board and clock runtime verification |
+| 24 | 09:12:46 | `887318275f69d24e9c4ecb2410b0b21fda9c2651` | Archive PA-220 P3 board and clock serial output |
+| 25 | 09:12:59 | `e6f40877904b5a01eac67d82cb1c9d772d91d192` | Record PA-220 P3 board and clock runtime test results |
+| 26 | 09:13:16 | `72981b6817b64f6093355275dbdd8fcbbdeecc73` | Finalize PA-220 P3 board clock test plan entries |
+| 27 | 09:13:32 | `87bb79b897c29ff2ff221c7a6cb14b495e5e7973` | Correct stale P3 board clock test plan status |
+| 28 | 09:39:09 | `65776879ea2260a401962b16fdf0c0ff075aa964` | Close PA-220 P3 and record P4 network baseline audit |
+| 29 | 09:39:14 | `51125d40c248ccb5fee068d4525d14073fda930e` | Finalize PA-220 P3 read-only diagnostics evidence |
+| 30 | 09:39:18 | `091cd6feae59151b8b7697d819559368c1669c6b` | Supersede stale P3 source-audit status with verified completion |
+| 31 | 09:39:21 | `a12f0b6c9f91af508eb87cd575713ce989433378` | Mark P3 complete and open P4 network maintenance |
+| 32 | 09:39:25 | `20682f21da8bda67fd27c9004c47fc85855392a1` | Add PA-220 P4 network maintenance plan |
+| 33 | 09:39:28 | `4675e6948a9fdd532adcdde036baf1597936c10a` | Record PA-220 P4 DHCP ping TFTP source audit |
+| 34 | 09:40:42 | `85751cfa6737fe5ac99962728619ed5def3968aa` | Add consolidated PA-220 P3 completion report |
+| 35 | 09:41:01 | `38a2a910eff544928166a38219cc02d6283aa4d3` | Link consolidated P3 completion report from test plan |
+| 36 | 09:41:04 | `ae791bf4d22a3497613359bc9cd6906cfd308f97` | Link P3 completion report from roadmap |
+| 37 | 09:41:36 | `0a6f080a58c9a93e3d4950f8898fc46528d55618` | Reconcile final P3 TLV and SPI NOR test statuses |
+
+## Git 文件变更范围（compare 汇总）
+
+- `ROADMAP.md`
+- `TEST-PLAN.md`
+- `patches/pa220/0001-pa220-read-only-maintenance-command.patch`
+- `patches/pa220/0002-pa220-board-clock-readonly-diagnostics.patch`
+- `doc/pa220/reports/P3-START-2026-11-19.md`
+- `doc/pa220/reports/P3-READONLY-AUDIT-2026-11-19.md`
+- `doc/pa220/reports/P3-COMPLETION-2026-11-19.md`
+- `doc/pa220/P4-PLAN.md`
+- `doc/pa220/reports/P4-NETWORK-BASELINE-AUDIT-2026-11-19.md`
+- `doc/pa220/test-logs/README.md`
+- `doc/pa220/test-logs/2026-11-19_P3_tlv_reader_001.txt`
+- `reports/P3-READONLY-AUDIT-2026-11-19.md`
+- `reports/P3-BOARD-CLOCK-2026-11-19-serial.log`
+
+以上 37 commits 的具体用户会话证据、补丁应用失败、源码摘要文件性质、原始日志与产物缺口均已在本账本其他条目中分别登记。此处仅作为完整提交清单。
