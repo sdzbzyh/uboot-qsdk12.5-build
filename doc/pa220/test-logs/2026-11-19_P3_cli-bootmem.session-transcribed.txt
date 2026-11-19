@@ -1,0 +1,33 @@
+# PA-220 P3 CLI and bootmem observations — session-transcribed
+
+- Provenance: recovered from user messages dated 2026-11-19 07:32:38Z, 07:35:07Z and 07:36:31Z.
+- Evidence class: USER-OBSERVED (historical retrieval); **not a verbatim full serial capture**.
+- The complete prompt/command output blocks were not recovered in this audit batch; only the following user-provided facts are transcribed.
+- No command is being re-run to reconstruct this record.
+
+## Runtime identification
+
+- U-Boot: 2013.07 development build.
+- Build timestamp: Nov 19 2026 15:20:46.
+- Toolchain: Cavium SDK build 52 / GCC 4.7.0.
+- Board type: 20021.
+- DRAM: 8192 MiB.
+- CPU clock: 1000 MHz.
+- `pa220 status`, `pa220 env`, and `pa220 memory` were reported working.
+
+## Memory/bootmem facts
+
+- `loadaddr=0x20000000`.
+- `octeon_reserved_mem_load_base` and `octeon_reserved_mem_load_size` were unset.
+- `__tmp_load`: base `0x20000000`, size `0x10000000` (256 MiB), half-open interval `[0x20000000,0x30000000)`.
+- `__uboot_code_data`: base `0x20f000000`, size `0x01000000`.
+- `freeprint` reported:
+  - base `0x0f100000`, size `0x00ef55a0`;
+  - base `0x30000000`, size `0x1df000000`.
+- `namedprint` reported 13 named blocks.
+- `meminfo` reported 8 GiB DRAM.
+- `bdinfo`: memstart `0x80000000`, memsize `0x200000000`.
+
+## Interpretation limits
+
+The listed free-list and named-block intervals can be arithmetically checked as recorded in `P3-START-2026-11-19.md`; this does not prove all cached/uncached/physical aliases or authorize writes to arbitrary RAM addresses. The complete original namedprint/freeprint output remains EVIDENCE MISSING.
