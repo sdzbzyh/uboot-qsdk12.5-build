@@ -1,0 +1,59 @@
+# PA-220 P3 board/clock 只读诊断实机验证（2026-11-19）
+
+## 1. 验证范围与前提
+
+- 项目阶段：P3 CLI / 只读诊断完善。
+- 补丁：`patches/pa220/0002-pa220-board-clock-readonly-diagnostics.patch`。
+- 固定 PA-220 源码：`IronDemiGod/pa220-openwrt` commit `801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`。
+- 集成仓库分支：`feature/pa220-ubootkit-web`。
+- 本轮开始时，0002 已应用、已构建，新镜像已通过原厂 Stage2/TFTP 成功 RAM 启动。
+- 本轮不重新构建、不重新 RAM 启动，不重复 status/env/memory、bootmem、TLV 等既有测试。
+- 本轮仅执行 `help pa220`、`pa220 board`、`pa220 clock`。
+
+## 2. 实机结果
+
+| 测试项 | 结果 | 证据/说明 |
+|---|---|---|
+| `help pa220` | PASS | 正常列出 status/env/memory/board/clock 五个子命令 |
+| `pa220 board` 命令执行 | PASS | 正常返回提示符，无崩溃或错误 |
+| Board type | PASS | 20021（PA220） |
+| Revision | PASS | 1.1 |
+| Serial | PASS | 012801031163 |
+| Board descriptor 状态 | PASS | 显示 from initialized descriptor |
+| MAC base/count 显示 | PASS | 08:30:6b:e1:be:00 / 255，格式正常 |
+| MAC descriptor 来源判定 | NOT RUN | 输出仅说明可能来自 EEPROM 或 generated fallback；没有单独显示 MAC fallback 标志，不能据此断言来源 |
+| `pa220 clock` 命令执行 | PASS | 正常返回提示符，无崩溃或错误 |
+| CORE 单位换算 | PASS | 1,000,000,000 Hz = 1000 MHz |
+| SCLK 单位换算 | PASS | 500,000,000 Hz = 500 MHz |
+| DDR 单位换算 | PASS | 800,000,000 Hz = 800 MHz base |
+| DDR 数据速率换算 | PASS | 800 MHz × 2 = 1600 MT/s |
+| 时钟数据语义提示 | PASS | 明确标注 initialized global-data/configuration values, not independent measurements |
+| DDR 来源提示 | PASS | 显示 valid EEPROM DDR clock descriptor, otherwise PA-220 fallback; source is not retained |
+| 异常/越界/格式化问题 | PASS（观察范围内） | 三条命令输出完整、格式正常并返回 CLI；本次黑盒输出不能替代全面内存安全证明 |
+
+## 3. 完整原始串口输出
+
+完整逐字记录另存于：
+
+`reports/P3-BOARD-CLOCK-2026-11-19-serial.log`
+
+## 4. 只读与安全边界
+
+本轮执行的三个命令为诊断显示命令。根据补丁实现，board 命令读取初始化期间缓存于 global data 的 board/MAC descriptor；clock 命令读取 global-data clock 值。没有要求重新扫描 EEPROM，也没有执行任何持久化写入。
+
+本轮没有执行：
+- `saveenv`；
+- EEPROM/TLV、CPLD 写入；
+- SPI NOR/eMMC/NAND 写入或擦除；
+- `bootloaderupdate`；
+- `namedalloc` / `namedfree`；
+- `mtest`；
+- 任意地址 RAM 上传。
+
+本轮验证不构成任意地址 TFTP/HTTP/ELF 接收安全性证明。该能力仍保持 BLOCKED，直到地址别名、边界及统一 pre-write validator 完成独立审计。
+
+## 5. 结论
+
+0002 新增的 `help pa220`、`pa220 board`、`pa220 clock` 在当前 RAM 启动镜像上完成实机验证，命令执行与显示结果均 PASS。MAC descriptor 的实际来源没有由当前输出单独证明，记为 NOT RUN；不影响命令基本功能通过。
+
+P3 仍在进行中。网络/存储扩展诊断及任意地址 RAM 上传安全性不因本轮结果而改变状态。
