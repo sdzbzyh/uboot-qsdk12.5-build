@@ -103,3 +103,6 @@
 
 
 | P3-H051 | 2026-11-19 07:43:46Z TLV output + 09:12:01Z board/clock serial + fixed source | Board descriptor 与 MAC 来源交叉验证 | 用户 TLV 记录包含 BOARD_DESC type 0x0002：board 0x4e35、rev1.1、serial 012801031163；MAC_ADDR type 0x0004：base 08:30:6b:e1:be:00、count255。原始 board/clock log 显示相同 board/rev/serial/MAC/count，Descriptor 为 from initialized descriptor。固定源码 octeon_board_get_descriptor() 找到 type2 后复制 descriptor 并清除 GD_FLG_BOARD_DESC_MISSING；octeon_board_get_mac_addr() 找到 type4 后复制 MAC descriptor，只有未找到才生成 random MAC | USER-OBSERVED（TLV 与 serial）+ FILE-VERIFIED（固定源码 blob da0a827...） | PASS（本板本次运行时值与 EEPROM tuples 匹配）；通用 fallback 路径仍保留 | TLV transcript、reports/P3-BOARD-CLOCK-2026-11-19-serial.log、P1-A5 source audit | 已补录交叉证据 | 修正先前“MAC 来源未单独证明”的保守状态；本设备的 board descriptor/MAC 可由已观察 tuple 与 runtime 值交叉支持 |
+
+
+| P3-H052 | 2026-11-19 06:03:36Z–06:30:00Z（P3 起点之前，P2/RAM 覆盖调查） | 继承的 RAM 镜像 CRC/字节变化风险 | 用户记录旧版 U-Boot 启动前 CRC 0x8d79d140、启动后 0xf6eefefd，长度 0x14b0a8；历史分段结果称唯一变化范围 0x810000c0–0x810040bf（16 KiB），其中 1-KiB 区间 0x81000cc0–0x810010bf CRC 由 0x78b86485 变为 0xfda9f7c3；其余已具备基线区间未变，若干后段缺少启动前基线 | USER-OBSERVED（P2 历史会话） | P2 风险证据；原因未确定，不得推断为 relocation/BSS | P2-COMPLETION-2026-11-19.md 与 P3-START 风险引用 | 已在 P2 记录；P3 不重复执行 | 此项发生在 P3 首次 commit 之前，不计入 P3 证据条目统计；作为 P3 继承风险保留，不重复扫描 |
