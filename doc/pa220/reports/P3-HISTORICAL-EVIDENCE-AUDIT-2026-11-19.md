@@ -109,3 +109,7 @@
 
 
 | P3-H053 | 2026-11-19 本次 GitHub tree audit | P3 构建原件归档状态 | 当前递归 Git tree（42,404 entries，truncated=false）中只有 artifacts/pa220/p2-3/20261118 的 P2-3 原始 build.log/ELF/BIN/MAP；P3 专属 artifacts/pa220/p3/20261119 不存在；根目录 pa220-build.log 与 pa220-maintenance-build.log 均为 0 bytes；P3-START 与 0002 transcript 中的 P3 ELF/BIN/MAP SHA/CRC 没有对应二进制原件；board/clock raw log 则存在 | FILE-VERIFIED（GitHub tree 与文件正文）+ USER-OBSERVED（历史构建结果） | **EVIDENCE MISSING（P3 原始 build log/ELF/BIN/MAP）**；历史构建执行仍为用户证据支持的 PASS | doc/pa220/reports/P3-BUILD-ARTIFACT-AUDIT-2026-11-19.md | 已创建专项归档核验报告；未伪造/复制产物 | P2-3 产物不能冒充 P3；不重建、不改名旧产物、不从哈希生成二进制 |
+
+
+| P3-H054 | 2026-11-19 07:09:48Z–07:26:31Z | 0001 patch/build 证据转录 | 已创建 0001 session-transcribed 记录，含首次 include hunk line23 apply failure、后续 patch-check exit0、Cavium SDK/GCC4.7.0 构建、ELF/MAP/BIN 大小/SHA、CRC、entry/LOAD、System.map 空文件和 artifact path 区别 | USER-OBSERVED（历史检索）+ FILE-VERIFIED（P3-START） | 历史构建 PASS；原始 build log/二进制 EVIDENCE MISSING | doc/pa220/test-logs/2026-11-19_P3_0001-build-artifacts.session-transcribed.txt | 已补录 session-transcribed | 不伪装为 raw log；不重建 |
+| P3-H055 | 2026-11-19 08:20:35Z–08:49:11Z | 0002 patch recovery/application 证据转录 | 已创建 0002 patch recovery session-transcribed 记录，含缺失文件、122 行未提交修改、blob/SHA256、line88/line65 损坏、手工 hunk count 修复、路径前缀错误、--directory 应用成功、reverse check PASS 和用户禁止手工猜测 hunk 的规则 | USER-OBSERVED（历史检索）+ FILE-VERIFIED（最终 patch blob） | 最终应用 PASS；中间版本 FAIL 均保留 | doc/pa220/test-logs/2026-11-19_P3_0002-patch-recovery.session-transcribed.txt | 已补录 session-transcribed | 不重做 patch-check/build；保留原始失败过程 |
