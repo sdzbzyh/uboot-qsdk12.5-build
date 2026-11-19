@@ -1,0 +1,20 @@
+# PA-220 P3 EEPROM end-offset read — session-transcribed
+
+- Provenance: recovered from the user's message in the historical session at 2026-11-19 07:55:44Z.
+- Evidence class: USER-OBSERVED, reconstructed verbatim from recovered message text.
+- This is not a raw terminal capture file exported by the device. Only the exact recovered command/output lines are included.
+- Purpose: inspect eight bytes beginning at TLV termination offset 0x9a.
+- No EEPROM write was performed.
+
+```text
+pa-220# eeprom read 0x31000000 0x9a 8
+EEPROM @0x57 read: addr 31000000  off 009a  count 8 ... done
+pa-220# md.b 0x31000000 8
+31000000: ff ff ff ff ff ff ff ff                            ........
+pa-220#
+```
+
+Limitations:
+- This output confirms the read result at offset 0x9a only.
+- It does not establish physical EEPROM capacity.
+- It does not replace the unavailable full original `tlv_eeprom print/display` output.
