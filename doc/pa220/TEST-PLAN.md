@@ -205,10 +205,17 @@
 - `doc/pa220/test-logs/2026-11-19_P3_tlv_reader_001.txt` 实际是 TLV 源码摘录，不是设备串口输出；不能作为 TLV 实机原始日志引用。
 - EEPROM offset `0x9a` 的 `eeprom read` / `md.b` 用户原始输出已从历史消息恢复，并以 `session-transcribed` 文件补录；完整 `tlv_eeprom print/display` 的 tuple 原始全文仍为 EVIDENCE MISSING。
 - 0x81000000 Stage2/TFTP 镜像验证目前仅以 session-transcribed 摘要补录；完整原始传输/校验输出仍待恢复。
-- SPI NOR `sf probe` 的 W25Q128BV / 16 MiB / 4 KiB 结果目前只有报告/助手转述，尚未恢复用户原始串口输出；不得重新执行 probe 来补证。
+- SPI NOR `sf probe` 的一行用户原始结果已恢复，但来源是 2026-11-18（P3 开始前）的继承证据：W25Q128BV、page 256 Bytes、erase 4 KiB、total 16 MiB；已另存 session-transcribed 记录，不代表 P3 当日重新执行。
 - 构建原始日志、ELF/MAP/BIN 产物文件是否归档仍待逐项核验；报告中的 SHA256/CRC 不自动等同于原始产物已归档。
 
 逐项账本：`reports/P3-HISTORICAL-EVIDENCE-AUDIT-2026-11-19.md`。
 持续检查点：`reports/P3-HISTORICAL-AUDIT-CHECKPOINT.md`。
 
 本节状态优先于此前 P3 完成声明，直到历史审计最终报告明确解除。P4-PLAN 和已有 P4 源码审计仅作为历史文档保留；P4 实际开发暂停。
+
+
+补充证据索引：
+- CLI/bootmem 历史摘要：`test-logs/2026-11-19_P3_cli-bootmem.session-transcribed.txt`。
+- 0002 构建产物历史摘要：`test-logs/2026-11-19_P3_0002-build-artifacts.session-transcribed.txt`。
+- TLV 结构历史摘要：`test-logs/2026-11-19_P3_tlv-structure.session-transcribed.txt`。
+- SPI NOR 继承证据（2026-11-18）：`test-logs/2026-11-18_SPI-NOR-probe.session-transcribed.txt`。
