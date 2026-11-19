@@ -1,0 +1,37 @@
+# PA-220 P3 0001 patch/build/artifacts — session-transcribed
+
+- Provenance: recovered from user messages dated 2026-11-19 07:09:48Z–07:26:31Z.
+- Evidence class: USER-OBSERVED (historical retrieval) + FILE-VERIFIED (P3-START report).
+- This is not a verbatim build log. The complete build output and binary artifacts were not recovered from GitHub.
+- No patch application, build, or hardware test was repeated.
+
+## Patch application
+
+- Initial patch application failed at the include hunk (line 23); this was a patch-context/apply failure, not a compiler failure.
+- The patch was repaired through multiple hunk/context commits (see ledger P3-H024).
+- On the fixed source baseline, user reported `git apply --check` passed with exit code 0; second hunk had a one-line offset.
+
+## Build
+
+- Fixed source commit: `801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`.
+- Toolchain: Cavium SDK build 52 / GCC 4.7.0.
+- Build succeeded; image data CRC `0x1c54a9b4`; header CRC `0xea85a539`.
+- BIN: 1,358,312 bytes.
+
+## Artifacts and SHA-256
+
+| Artifact | Size | SHA-256 |
+|---|---:|---|
+| ELF `u-boot-octeon_pa220` | 7,739,990 | `96bc39ca233c8374b0dbbfbe50428a9d2b4701a49f330ab8ddcec6bd05b3c00f` |
+| Main MAP `u-boot-octeon_pa220.map` | 576,978 | `d2b48f73f67562bf80fdb4d3cbe5bb6d06377e5686f507620c46743d2f9c0944` |
+| BIN `u-boot-octeon_pa220.bin` | 1,358,312 | `f8738a4c92e748e37462ab560bff3f33360f4b03269b372b06f6563a18037f73` |
+
+- ELF entry and LOAD virtual/physical address: `0xc0000000`.
+- LOAD FileSiz `0x14b9e8`; MemSiz `0x2e3aac`.
+- Output directory contained BIN only; ELF/MAP were in the U-Boot build directory. The BIN output copy and source-tree BIN were reported identical by size and SHA-256.
+- Auxiliary `System-octeon_pa220.map`: 0 bytes, empty-file SHA-256. It is not the main MAP above.
+- Symbol audit confirmed `_u_boot_list_2_cmd_2_pa220`; `pa220_print_memory_info()` was inlined into `do_pa220()`.
+
+## Archival limit
+
+The P3 artifact audit found no matching P3 ELF/BIN/main MAP or full build log in the current GitHub tree. This transcript preserves historical facts only; it does not create or imply possession of those binary artifacts.
