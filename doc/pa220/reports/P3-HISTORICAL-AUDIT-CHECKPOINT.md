@@ -37,7 +37,7 @@
 
 ## 本批证据统计（临时）
 
-- 已登记账本条目：58（其中 57 条为 P3 证据/审计事项，1 条为 P3 起点前的 P2 继承风险引用；若干仍是历史检索摘要或助手声明，证据等级未升级）。
+- 已登记账本条目：59（其中 58 条为 P3 证据/审计事项，1 条为 P3 起点前的 P2 继承风险引用；若干仍是历史检索摘要或助手声明，证据等级未升级）。
 - 已发现需要继续核验的事项：构建原始日志/ELF-MAP-BIN 归档、TLV print 原始输出、SPI sf probe 原始输出、RAM 地址覆盖与 alias 证据、0002 补丁修复全过程、阶段状态一致性、本地工作区状态未知。board/clock 日志路径已解决。
 - 已完成修复：审计账本与检查点已创建并回读；board/clock 日志路径误判已纠正；已创建 EEPROM 末端读取与 Stage2/TFTP 校验两份 session-transcribed 记录；test-logs README 已说明该类文件不是原始设备捕获。
 - 尚未修复：全部疑点。
@@ -141,10 +141,12 @@
 
 ## 当前阶段冲突处理
 
-- P4 在 10:19–10:22Z 的后续提交中被重新激活；P3 完成声明被重申。当前用户最新指令要求先完成全历史审计，故已在最新提交中恢复 P4 PAUSED，并在 ROADMAP/TEST-PLAN/P3 reports/P4 reports 添加覆盖说明。
+- P4 在 10:19–10:22Z 的后续提交中被重新激活；P3 完成声明被重申。当前用户最新指令要求先完成全历史审计，故已在最新提交中恢复 P4 PAUSED，并在 ROADMAP/TEST-PLAN/P3 reports/P4 reports 添加覆盖说明。最新 HEAD 已逐项回读：P4-PLAN PAUSED、ROADMAP P4 PAUSED、TEST-PLAN P4 PAUSED、P3 current audit IN PROGRESS。
 - P4-1 既有内容仅是固定源码静态审计，报告明确没有构建或网口实机测试；保留为历史材料，不继续扩展。
 
 ## 本批最新远端状态
+
+- 账本与阶段文档最新状态核验前 HEAD：`bcfc406228c30a44ad1e4aa2197d8f911d9a3e38`；本检查点提交后 HEAD 将再次推进。
 
 - 检查点更新前读取 HEAD：`c6164d3f7587873ffc20492628c2479b4fe95496`；本检查点提交后 HEAD 将再次推进。
 - 已确认所有新建/修改文件均在 `feature/pa220-ubootkit-web`；本批未修改 main、固定源码仓库或执行强推。
