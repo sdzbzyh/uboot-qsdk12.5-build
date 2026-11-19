@@ -1,11 +1,11 @@
 diff --git a/u-boot/board/octeon/pa220/pa220_board.c b/u-boot/board/octeon/pa220/pa220_board.c
-@@ -20,6 +20,7 @@
+--- a/u-boot/board/octeon/pa220/pa220_board.c
++++ b/u-boot/board/octeon/pa220/pa220_board.c
+@@ -23,2 +23,3 @@
  #include <asm/arch/cvmx-qlm.h>
  #include <asm/arch/octeon_qlm.h>
 +#include <asm/arch/cvmx-bootmem.h>
---- a/u-boot/board/octeon/pa220/pa220_board.c
-+++ b/u-boot/board/octeon/pa220/pa220_board.c
-@@ -272,1 +272,87 @@
+@@ -272,1 +272,121 @@
  	   "cpld write -f d <val>     - write reg d (flash select/reboot!)");
 +/*
 + * Read-only maintenance summary. Keep this command safe to run while
