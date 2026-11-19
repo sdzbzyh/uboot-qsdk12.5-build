@@ -84,3 +84,6 @@
 
 
 | P3-H042 | 2026-11-19 07:36:31Z 历史 namedprint + 本次仓库回读 | P3-START boot-vector 区间算术勘误 | 用户提供 namedprint：__boot_vector1__ base 0x0fff5c00、size 0x00008000；P3-START 旧表格终点误写为 0x10003c00。正确相加为 0x0fff5c00 + 0x8000 = 0x0fffdc00 | USER-OBSERVED（base/size）+ FILE-VERIFIED（旧报告） | FAIL（旧报告算术不一致）；已更正为 [0x0fff5c00,0x0fffdc00) | doc/pa220/reports/P3-START-2026-11-19.md | 已修复并追加勘误说明 | 不重跑 namedprint；需检查其他报告是否复制了旧终点 |
+
+
+| P3-H043 | 2026-11-19 08:23:39Z–08:34:24Z | 0002 unified-diff 损坏修复与用户纠正 | 用户报告 0002 在第 88 行损坏；后续又报告“错误：补丁在第 65 行损坏”；08:30:58Z 用户报告将 hunk 从 @@ -381,5 +427,15 @@ 改为 @@ -381,6 +427,16 @@ 后，git apply --check 无输出并正常返回；08:34:04Z 用户明确要求后续禁止手工修改 unified diff 的 hunk 行数，必须由 Git 从源码差异自动生成并验证 | USER-OBSERVED（历史检索恢复） | 中间补丁 FAIL；手工改 hunk 后 check PASS；未来补丁规则已明确 | 0002 patch 历史提交及本账本 | 最终 patch 已提交；失败过程已记录 | 最终报告保留损坏/修复弯路；不得把一次 check 通过说成生成过程可靠 |
