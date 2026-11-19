@@ -93,3 +93,30 @@
 此前 10:19–10:22Z 的提交重新将 P4 标记 IN PROGRESS，并记录两批 P4-1 固定源码静态审计；这些文件保留为历史文档，但不构成 P4 实际功能移植/构建/网口实测。
 
 当前任务最新明确要求：P3 全历史会话审计、证据补录、仓库对照和最终归档完成之前，不得宣布 P3 COMPLETE，也不得开展 P4 实际开发。故本计划当前状态重新设为 **PAUSED**。P4-1 既有静态审计结果不删除、不扩展；不执行读取本地构建目录、DHCP/Ping 或任何 P4 后续步骤，除非未来用户明确重新授权。
+
+
+## 9. P4 执行恢复与当前工作分解（2026-11-19）
+
+本节按用户 2026-11-19 最新明确指令更新，优先于本文件第 8 节此前的 PAUSED 状态。用户已明确决定不重做 P3 历史审计，直接按 P4 既有进度继续；因此当前 P4 状态恢复为 **IN PROGRESS**。这不修改 P3 历史记录，也不代表 P4 实测已通过。
+
+当前执行顺序：
+1. **P4-1 最终构建配置证据**：复用已有构建目录/日志，确认最终网络 CONFIG 选项及 Ethernet、DHCP、Ping、TFTP 编译条件；不重新构建。
+2. **P4-2 Ethernet 实际注册证据**：区分驱动源码存在、对象/命令实际编入、运行时设备注册成功；确认设备名称、ethact/ethprime 选择、多个设备及初始化错误/降级。
+3. **P4-3 DHCP-only 实机验证**：仅在 P4-1/P4-2 前置条件满足且再次确认 autoload=n 后执行；记录 RAM 环境前后差异，不执行 TFTP。
+4. **P4-4 Ping 实机验证**：依次覆盖成功、超时及超时后接口恢复；保留完整串口输出。
+5. **P4-5 最终归档**：更新阶段报告、实机日志、证据等级、未解决问题和下一阶段入口。
+
+已由用户提供、不得重复索取的证据：
+- 有效配置头：CONFIG_OCTEON_PA220=1、CONFIG_OCTEON_PCI_HOST=0、CONFIG_OCTEON_CN70XX=1、CONFIG_BOARDDIR=board/octeon/pa220。
+- RAM 环境：autoload=n、ethact=octrgmii0、ethprime=octrgmii0。
+- 未定义变量：disable_networking、ipaddr、serverip、gatewayip、netmask、dnsip、bootfile。
+
+当前仍缺：
+- 最终构建产物/日志中 CONFIG_CMD_NET、CONFIG_CMD_DHCP、CONFIG_CMD_PING、CONFIG_SYS_DIRECT_FLASH_TFTP 等实际编译值的证据；板级头文件宏不能替代最终配置证据。
+- Ethernet 启动枚举/注册日志或该版本确实支持的只读设备列表。ethact 的环境值不能单独证明设备注册成功，也不能证明物理 link-up。
+
+当前工作检查点：`reports/P4-CONTINUATION-2026-11-19.md`。
+
+安全边界继续有效：禁止 saveenv 和任何持久化写入；禁止 tftpboot/tftpsrv/tftpput；TFTP 接收/上传保持 BLOCKED。除非发现阻断性问题并获得用户明确同意，不重新构建镜像。
+
+注：本计划原第 3 节的 TFTP 安全审计/validator 内容仍是独立安全门，不因当前 P4-1 至 P4-5 编号调整而解除；未完成 validator 前不得开放任何 TFTP 接收路径。
