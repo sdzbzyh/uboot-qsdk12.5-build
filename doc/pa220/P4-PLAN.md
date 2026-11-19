@@ -1,11 +1,11 @@
 # PA-220 P4 计划：网络维护基础
 
-- 状态：**PAUSED — P3 历史证据审计未完成**
+- 状态：**IN PROGRESS**
 - 启动日期：2026-11-19
 - 集成分支：`feature/pa220-ubootkit-web`
 - PA-220 固定源码：`IronDemiGod/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
 - uBootKit 固定审计基线：`chenxin527/uboot-qsdk12.5-build@9ce315735ac88fd0a7c7697bc527a8616ed0a972`
-- 前置阶段：P3 CLI/只读诊断的历史阶段记录为 COMPLETE；P3 历史证据审计当前 **IN PROGRESS**，审计完成前不得开始本计划中的实际开发/构建/实机验证。
+- 前置阶段：P3 CLI/只读诊断 **COMPLETE**（最终证据与风险边界见 `reports/P3-COMPLETION-2026-11-19.md`）。P4 已正式开启。
 
 ## 1. 目标
 
@@ -67,3 +67,21 @@
 
 - 本计划创建时仅完成 P4-1/P4-2 的首轮源码审计；未构建新代码、未执行 DHCP/Ping 网口实测。
 - TFTP validator 未实现；任何 TFTP 接收/上传测试均禁止。
+
+
+## 7. P4-1 第二批源码审计（2026-11-19）
+
+第二批静态审计已完成，详细证据见 `reports/P4-1-NETWORK-DRIVER-NETLOOP-AUDIT-2026-11-19.md`。
+
+已确认：
+- 板级头文件启用 `CONFIG_OCTEON_SGMII_ENET`、`CONFIG_OCTEON_QSGMII_ENET`、`CONFIG_OCTEON_MGMT_ENET`；`octeon_cmd_conf.h` 在未定义网络禁用宏时启用 `CONFIG_CMD_NET`、`CONFIG_CMD_DHCP`、`CONFIG_CMD_PING`。
+- `cpu_eth_init()` 的 AGL/SGMII 内置接口注册链和 `octrgmii0` 命名条件已定位。专用 management-port 初始化路径创建的是 `octmgmt0`，不可与 AGL 的 `octrgmii0` 混淆。
+- DHCP ACK 在 `autoload=n` 时只完成客户端配置；NetLoop 结束时停止网卡，命令层将协商参数写入 RAM 环境，不调用 `saveenv`。
+- Ping 成功路径和 10 秒超时路径都会停止网卡；超时显式调用 `eth_halt()`。后续实测必须验证下一次命令能否重新初始化接口。
+
+尚缺证据：
+- GitHub 固定源码中没有最终构建目录的 `.config` / `include/autoconf.mk` 快照，故最终编译配置状态标记 **EVIDENCE MISSING**，不能仅凭头文件宏声称最终构建配置已实证。
+- 运行时 `autoload`、`ethact`、`ethprime`、`disable_networking` 和实际设备列表尚未串口只读确认。
+- DHCP/Ping 尚未在网口实机验证。
+
+下一步从已有构建目录只读提取配置快照（不重新构建），随后串口读取网络环境和设备列表；只有明确确认 `autoload=n` 后才进行 DHCP-only 测试。TFTP GET/Server/PUT 仍不执行。
