@@ -61,3 +61,8 @@
 P3 全阶段证据还包括 `pa220 status/env/memory`、`bdinfo`、`printenv loadaddr`、named/free bootmem、TLV EEPROM 五个 tuple/checksum/END/终止偏移只读核查及 SPI NOR W25Q128BV 只读识别。详见集成仓库 `doc/pa220/TEST-PLAN.md` 第 7 节。原始 board/clock 串口日志为本仓库 `reports/P3-BOARD-CLOCK-2026-11-19-serial.log`。
 
 P3 COMPLETE 仅表示本阶段已实现范围和证据闭环，不表示所有可选硬件诊断均 PASS，也不表示 P1 非阻断风险已解决。
+
+
+## 6. 后续历史证据审计覆盖说明（2026-11-19）
+
+本报告仅记录 0002 board/clock 三条命令的实机结果和其 24 行原始串口日志；它不单独证明 P3 其他测试的原始证据均已归档。此前报告中的 P3 COMPLETE 是当日阶段判断。P3 全历史证据审计目前 **IN PROGRESS**，在账本与最终审计报告明确完成前，不得将本次历史审计标记 COMPLETE，也不得开始 P4 实际开发。详见 `doc/pa220/reports/P3-HISTORICAL-EVIDENCE-AUDIT-2026-11-19.md` 与 `P3-HISTORICAL-AUDIT-CHECKPOINT.md`。
