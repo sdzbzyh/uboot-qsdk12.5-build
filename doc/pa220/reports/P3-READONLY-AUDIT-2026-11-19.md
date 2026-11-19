@@ -155,3 +155,18 @@ PA-220 定义 `CONFIG_OCTEON_USB_OCTEON3`；公共配置由此启用 `CONFIG_CMD
 - 已对固定源码文件按 0001 -> 0002 顺序执行 unified-hunk 上下文和行数核对，所有 hunk 均可顺序匹配。
 
 尚未在 Debian 构建目录实际执行 `git apply --check`、构建或设备测试；因此 0002 状态仍为 **NOT BUILT / NOT VERIFIED**。下一步由用户在原固定 checkout 执行正式构建前的 patch check，再决定构建。
+
+
+## 9. 最终状态更正与阶段交接（2026-11-19）
+
+本文件第 6、8 节中的 `NOT BUILT / NOT VERIFIED` 是 board/clock 补丁实施前的历史源码审计状态，已被后续构建和实机证据取代，不再代表当前状态。
+
+- **P3 CLI/只读诊断：COMPLETE。**
+- 0002 已构建并通过原厂 Stage2/TFTP RAM 启动；`help pa220`、`pa220 board`、`pa220 clock` 已实机验证。
+- 完整 board/clock 串口日志：集成仓库根目录 `reports/P3-BOARD-CLOCK-2026-11-19-serial.log`。
+- board/clock 实机结果汇总：集成仓库根目录 `reports/P3-READONLY-AUDIT-2026-11-19.md`。
+- P3 全阶段收尾表及 P4 交接见 `doc/pa220/TEST-PLAN.md` 第 7、8 节。
+
+P3 COMPLETE 不改变以下状态：MAC descriptor 来源未单独证明；时钟是 global-data/configuration 值而非独立测量；Ethernet 物理 link NOT VERIFIED；eMMC 初始化 BLOCKED；USB 枚举 NOT VERIFIED；统一 RAM 写入 validator 未实现，TFTP/HTTP/ELF 任意接收保持 BLOCKED。P1 非阻断风险继续保留。
+
+本文件早期关于通用 link API、eMMC/USB 初始化副作用和只读探测边界的审计结论仍有效；本次只更正历史阶段状态，不撤销风险约束。
