@@ -79,11 +79,11 @@ P4 首批源码审计：`doc/pa220/reports/P4-NETWORK-BASELINE-AUDIT-2026-11-19.
 
 ## 6. 后续历史证据审计覆盖说明（2026-11-19）
 
-本报告记录的是当日 P3 CLI/只读诊断阶段的历史完成判定，不替代 2026-11-19 用户随后提出的 P3 全历史证据审计。该审计目前为 **IN PROGRESS**，尚未满足“P3 历史证据审计 COMPLETE”的条件。
+本报告记录的是当日 P3 CLI/只读诊断阶段的历史完成判定，不替代 2026-11-19 用户随后提出的 P3 全历史证据审计。后续历史会话补充追溯属于证据补档，不改变 P3 CLI/只读诊断阶段的完成判定。未恢复的原始材料必须明确标记 EVIDENCE GAP，不得推断或补造。
 
 审计已发现并正在核对：TLV 完整原始 print/display 输出缺失；`test-logs/2026-11-19_P3_tlv_reader_001.txt` 实为源码摘录；SPI `sf probe` 原始用户输出尚未恢复；构建原始日志/产物归档仍需核对；0001/0002 hunk 修复时间线需要逐会话追溯。board/clock 串口日志已确认存在于仓库根目录 `reports/`，并非缺失。详见 `P3-HISTORICAL-EVIDENCE-AUDIT-2026-11-19.md` 与 `P3-HISTORICAL-AUDIT-CHECKPOINT.md`。
 
-在该历史审计完成前，不得将本次审计标记为 COMPLETE，不得开始 P4 实际开发；既有 P4 计划与源码审计仅作为历史材料保留。
+上述证据补档不构成 P3 阶段阻断。P3 CLI/只读诊断阶段按本报告第 1～5 节和 TEST-PLAN 第 7 节正式保持 **COMPLETE**；P4 按 ROADMAP 与 P4-PLAN 正式 **IN PROGRESS**。未恢复的原始材料继续列为证据缺口，不因 P3 COMPLETE 而改写为 PASS。
 
 
 ## 7. SPI NOR 证据来源补充
