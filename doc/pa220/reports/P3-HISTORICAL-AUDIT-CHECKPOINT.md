@@ -5,7 +5,7 @@
 ## 当前状态
 
 - 任务：P3 全阶段历史证据追溯、仓库查缺补漏与最终归档。
-- 当前批次：Batch 1 — 远端基线；Batch 1b — 原始日志路径与 RAM/TLV 补充；Batch 2 — P3 Git 历史时间线及补丁/日志证据对照；Batch 3 — 0002 构建、TLV/时钟和继承 SPI 证据补录；Batch 4 — bootmem 区间算术复核与补丁错误追溯。
+- 当前批次：Batch 1 — 远端基线；Batch 1b — 原始日志路径与 RAM/TLV 补充；Batch 2 — P3 Git 历史时间线及补丁/日志证据对照；Batch 3 — 0002 构建、TLV/时钟和继承 SPI 证据补录；Batch 4 — bootmem 区间算术复核与补丁错误追溯；Batch 5 — P3 阶段决策及 CLI/bootmem 历史补充。
 - 审计是否完成：**否**。
 - P3 COMPLETE 是否可判定：**否（审计未完成）**。
 - P4 实际开发：**禁止开始**。当前远端已有 P4 计划/源码审计文件，不代表本次获准开展 P4 开发。
@@ -37,7 +37,7 @@
 
 ## 本批证据统计（临时）
 
-- 已登记账本条目：43（其中若干仍是历史检索摘要或助手声明，证据等级未升级）。
+- 已登记账本条目：47（其中若干仍是历史检索摘要或助手声明，证据等级未升级）。
 - 已发现需要继续核验的事项：构建原始日志/ELF-MAP-BIN 归档、TLV print 原始输出、SPI sf probe 原始输出、RAM 地址覆盖与 alias 证据、0002 补丁修复全过程、阶段状态一致性、本地工作区状态未知。board/clock 日志路径已解决。
 - 已完成修复：审计账本与检查点已创建并回读；board/clock 日志路径误判已纠正；已创建 EEPROM 末端读取与 Stage2/TFTP 校验两份 session-transcribed 记录；test-logs README 已说明该类文件不是原始设备捕获。
 - 尚未修复：全部疑点。
@@ -80,6 +80,13 @@
 - `65e77d1ddbbb4d0d0a4d71444a6bcc5860d860ae`：记录该算术勘误。
 - `ac5036174e6b283d524f5efe43c16fa289bae6e8`：补录 0002 line 88/line 65 hunk 损坏与用户纠正。
 - `2323b6fe612455fecd7efd2ca9326c2b418a60f7`：TEST-PLAN 引用 bootmem 算术勘误。
+- `ef4eab9c4015fdc099ab7888c8c2637cbd2d05fc`：补充 CLI/bootmem session-transcribed 细节。
+- `f7dfde53ca4a5fbd7022112f7cf9e61d3ff7b2fb`：登记 P3 commit span、阶段决策、0001 apply 和 artifact 路径。
+
+## Git 历史范围核对
+
+- P2 收尾提交 `47805be639ad39cb5f03f9e527b2727e74ee5ea9` 到原 P3 完成 HEAD `0a6f080a58c9a93e3d4950f8898fc46528d55618`，GitHub compare 返回 37 commits，时间范围 2026-11-19 06:58:00Z–09:41:36Z，改动 13 个文件。
+- 该 Git 历史范围已完成仓库层面的初步核对；并不代表所有历史会话已逐条审完。
 
 ## 新发现的仓库内容错误
 
