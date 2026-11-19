@@ -83,6 +83,10 @@
 - `ef4eab9c4015fdc099ab7888c8c2637cbd2d05fc`：补充 CLI/bootmem session-transcribed 细节。
 - `42f3f05218f69e8d84e712b2f07bfe8bd961cc99`：补充 TLV 地址/容量限制说明。
 - `ea628bfa854a15ac3bc649ab51d825b365048a0d`：登记 0001 System.map 空文件及 EEPROM 容量证据。
+- `b9aec5d43882225dd826a8f30448bde49ee435bc`：P3-START 区分主 MAP 与空 System.map。
+- `ceb58e77519091ebbe0e32c3eb3430a6a0fc6e9c`：TEST-PLAN 补充 MAP/EEPROM 容量限制。
+- `d98682ac27d162657f0b1d8a4454f3c89e8777c9`：board/clock 汇总报告增加历史审计覆盖说明。
+- `c6164d3f7587873ffc20492628c2479b4fe95496`：P3 源码审计报告增加历史审计覆盖说明。
 - `f7dfde53ca4a5fbd7022112f7cf9e61d3ff7b2fb`：登记 P3 commit span、阶段决策、0001 apply 和 artifact 路径。
 
 ## Git 历史范围核对
@@ -95,6 +99,12 @@
 - P3-START 原先将 __boot_vector1__ base `0x0fff5c00` + size `0x8000` 的终点写成 `0x10003c00`；算术应为 `0x0fffdc00`。该处已按用户历史 namedprint 值更正，不重新运行设备命令。
 - P3 的 System-octeon_pa220.map 在 0001 构建中也曾为空；不得与有内容的主 MAP 混为一谈。
 - EEPROM 的 256-byte tuple 长度上限不是物理容量或全设备软件访问窗口；物理容量/寻址映射仍 UNKNOWN。
+
+## 本批最新远端状态
+
+- 检查点更新前读取 HEAD：`c6164d3f7587873ffc20492628c2479b4fe95496`；本检查点提交后 HEAD 将再次推进。
+- 已确认所有新建/修改文件均在 `feature/pa220-ubootkit-web`；本批未修改 main、固定源码仓库或执行强推。
+- 本地 Debian 工作区仍未能通过 GitHub 远端接口检查；不能声称其 clean，也没有触碰用户本地未提交内容。
 
 ## 上下文与继续规则
 
