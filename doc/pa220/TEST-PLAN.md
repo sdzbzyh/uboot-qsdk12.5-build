@@ -248,3 +248,6 @@ P3 已于 2026-11-19 正式 COMPLETE。P4 已开启；源码审计证据：
 
 - P3 构建产物需区分主 MAP 与辅助 System.map：0001 构建中主 MAP 576,978 bytes；用户报告 System-octeon_pa220.map 为 0 bytes。0002 后续存在 host nm 生成非空 System.map 的历史观察，但后续又出现空文件结果；最终状态不得在未核对具体构建目录/时间点时统一标为 PASS。
 - EEPROM：CONFIG_SYS_I2C_EEPROM_ADDR_LEN=1 与板级 24C256 注释之间的寻址关系、物理器件容量仍 NOT VERIFIED；OCTEON_EEPROM_MAX_TUPLE_LENGTH=256 仅是单 tuple 上限，不等于物理容量或整个 EEPROM 的有效访问窗口。
+
+
+- **P3 clock-note issue (FAIL / unresolved):** 固定源码复核表明 CORE/SCLK 是 reset CSR multiplier 派生值；但 DDR 的 gd->mem_clk 在 DRAM init 后可能由 CN70XX IPD/DCLK counter ratio 动态测量。0002 patch 的统一 NOTE 和 DDR source 行未准确表达该区别。原始 board/clock log 保留不改，已验证补丁未擅自修改；如要修复需另行生成补丁并重新构建验证。详情见 P3-READONLY-AUDIT 第 12 节及历史账本 P3-H050。
