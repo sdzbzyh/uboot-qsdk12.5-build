@@ -75,3 +75,12 @@ P4 计划：`doc/pa220/P4-PLAN.md`。
 P4 首批源码审计：`doc/pa220/reports/P4-NETWORK-BASELINE-AUDIT-2026-11-19.md`。
 
 下一步先核实最终构建配置及 MGT 网络主循环，再在确认 `autoload=n` 的条件下验证 DHCP-only 和 Ping；不运行 `tftpboot`、`tftpsrv` 或 `tftpput`，直至 validator 完成并审查。
+
+
+## 6. 后续历史证据审计覆盖说明（2026-11-19）
+
+本报告记录的是当日 P3 CLI/只读诊断阶段的历史完成判定，不替代 2026-11-19 用户随后提出的 P3 全历史证据审计。该审计目前为 **IN PROGRESS**，尚未满足“P3 历史证据审计 COMPLETE”的条件。
+
+审计已发现并正在核对：TLV 完整原始 print/display 输出缺失；`test-logs/2026-11-19_P3_tlv_reader_001.txt` 实为源码摘录；SPI `sf probe` 原始用户输出尚未恢复；构建原始日志/产物归档仍需核对；0001/0002 hunk 修复时间线需要逐会话追溯。board/clock 串口日志已确认存在于仓库根目录 `reports/`，并非缺失。详见 `P3-HISTORICAL-EVIDENCE-AUDIT-2026-11-19.md` 与 `P3-HISTORICAL-AUDIT-CHECKPOINT.md`。
+
+在该历史审计完成前，不得将本次审计标记为 COMPLETE，不得开始 P4 实际开发；既有 P4 计划与源码审计仅作为历史材料保留。
