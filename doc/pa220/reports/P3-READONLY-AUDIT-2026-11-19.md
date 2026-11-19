@@ -185,3 +185,16 @@ P3 COMPLETE 不改变以下状态：MAC descriptor 来源未单独证明；时�
 - `P3-HISTORICAL-AUDIT-CHECKPOINT.md`
 
 审计完成前不开始 P4 实际开发。已完成的 board/clock 原始日志仍是仓库根目录 `reports/P3-BOARD-CLOCK-2026-11-19-serial.log`；其他 P3 项目的原始证据必须分别核验，不得由本报告的 PASS 推广。
+
+
+## 12. DDR 时钟来源语义勘误（固定源码复核，2026-11-19）
+
+本文件第 2.1/2.2 节和后续 board/clock 汇总中“CORE/SCLK/DDR 均为初始化 global-data/configuration 值、不是独立测量”的表述对 DDR 过于笼统，现作如下更正：
+
+- 固定源码 commit `801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8` 的 `board_octeon.c`：`init_sequence[1]` 调用 `octeon_setup_clocks`，早于 `init_sequence[12]` 的 PA220 `early_board_init`。OCTEON3 路径从 `CVMX_RST_BOOT` 读取 `c_mul`/`pnr_mul`，按 50 MHz reference 初始化 `gd->cpu_clk`/`gd->bus_clk`；PA220 `early_board_init` 随后再次按 CPU multiplier 设置 `gd->cpu_clk`。因此 CORE/SCLK 是 CSR multiplier 派生值，不是独立频率计数器测量。
+- PA220 `early_board_init` 调用 `octeon_board_get_clock_info(667)`，先设置默认 `gd->mem_clk=667 MHz)，再查找 EEPROM type 7（`EEPROM_DDR_CLOCK_DESC_TYPE`）。已恢复的五个 TLV tuple 中没有 type 7。
+- 但 `octeon_init_dram` 后续会测量并写回 `gd->mem_clk`。RAM-resident 且存在 `dram_size_mbytes` 时，`get_memclk_speed` 调用 `measure_octeon_ddr_clock`；CN70XX 路径读取 `CVMX_IPD_CLK_COUNT` 和 `CVMX_LMCX_DCLK_CNT`，按两者计数差及 IPD/SCLK 频率比计算 DDR Hz。非该分支也会在 DRAM 初始化后将 `measured_ddr_hertz` 转换为 MHz 写入 `gd->mem_clk`。
+- 因此 `CVMX_CLOCK_DDR` 虽然返回 `gd->mem_clk * 1000000`，该字段在初始化后可能是硬件计数器动态测量值，不应和 CORE/SCLK 一概称为“非独立测量”。
+- 0002 patch 的 NOTE 和 DDR source 行与此运行时路径不完全相符；本次保留已验证补丁和原始串口日志不变，不擅自修改补丁或重建。该解释性缺陷列为 P3 未解决项，若修复必须另行生成补丁并重新构建/验证。
+
+固定源码回读 blob：`board_octeon.c` 2b9c543be18358f4e5fefb7a164b3f4f9c9e6c5c；`cvmx-clock.c` e4c20272150da015b73e6bfe81e35a0c46f59f28；`octeon_dram.c` a33ea9b514e6c09084611ab50399c197a589173e；`lib_octeon_shared.c` 24fecf0bbd9094ca137025a2d1949e8dd2e06eb8；`octeon_board_common.c` da0a8270878030f375ce6b556013e69deec84b1d；`octeon_eeprom_types.h` bc4ae9f49fd8f1937637ac98c35aea25ac0fb955。
