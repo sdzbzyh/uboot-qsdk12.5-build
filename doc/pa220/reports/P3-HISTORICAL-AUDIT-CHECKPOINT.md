@@ -31,7 +31,9 @@
 - 当前 HEAD 中 0001 blob：`8cbca887ee554b94e1ea51d73a8adf36d3f49c36`；0002 blob：`f7427063c29cfa2fe39c17b9257d998ddc68b2f5`。
 - 原始 board/clock 串口日志已在仓库根目录 `reports/P3-BOARD-CLOCK-2026-11-19-serial.log` 找到并回读，blob `1db8f7cbcfedcda5dfbd302308728504b6c76be1`；此前 `doc/pa220/reports/` 的 404 是错误路径探测，不是文件缺失。
 - 本地工作区状态：NOT INSPECTED；远端 GitHub API 无法证明本地是否存在未提交修改。
-- 远端 `TEST-PLAN.md` 当前已标 P3 COMPLETE、P4 IN PROGRESS；这是待审计的历史声明，不作为本次审计完成状态。
+- 远端 `TEST-PLAN.md` 已新增第 9 节，明确 P3 历史证据审计 IN PROGRESS，并规定在审计完成前不得开始 P4 实际开发。
+- `P4-PLAN.md` 已改为 PAUSED（仅暂停执行，不删除历史计划/源码审计）。
+- `P3-COMPLETION-2026-11-19.md` 已追加历史审计覆盖说明，保留当日历史 COMPLETE 决策但明确本次审计尚未完成。
 
 ## 本批证据统计（临时）
 
@@ -53,6 +55,17 @@
 8. 检查 P3-START 的构建产物、ELF/MAP/BIN 哈希、原始 build log 是否实际归档；确认 P3-START 中各项 PASS 的原始证据级别。
 9. 核对 `TEST-PLAN.md`、P3-READONLY-AUDIT、P3-COMPLETION、ROADMAP 的状态和交叉引用；添加历史审计期间的状态覆盖说明，避免误入 P4 开发。
 10. 每完成一个小批次，追加账本并更新本检查点；若无法确认原始输出，明确保留 EVIDENCE MISSING。
+
+## 最近维护提交
+
+- `70641513a869fc9f033382ac708aa75837101b80`：扩充 P3 历史证据账本至 30 条。
+- `bf47ff66a15650e217672096dba016b00ac40532`：记录 P3 历史时间线第二批检查点。
+- `b8fe2676ee4ff04b9964a8192304a16189255d4d`：EEPROM 末端读取 session-transcribed 记录。
+- `79449201ce2eaf754832ad5b609ee47097fbcec5`：Stage2/TFTP 校验 session-transcribed 记录。
+- `41e0bc08695194181cca12706c0b913eb67af985`：test-logs README 增加 session-transcribed 规则。
+- `ea8f035415eca179d4e9b4d2d2c2b23673a5c340`：TEST-PLAN 第 9 节审计覆盖说明。
+- `4edfb54835be763bd9eb71c7c4d6bd7da23be13b`：P4-PLAN 暂停。
+- `4923a37e70c3f0bd2e746b0d969f237451250ecf`：P3 completion 历史审计附录。
 
 ## 上下文与继续规则
 
