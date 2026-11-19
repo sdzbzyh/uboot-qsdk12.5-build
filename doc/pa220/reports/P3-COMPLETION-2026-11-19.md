@@ -84,3 +84,8 @@ P4 首批源码审计：`doc/pa220/reports/P4-NETWORK-BASELINE-AUDIT-2026-11-19.
 审计已发现并正在核对：TLV 完整原始 print/display 输出缺失；`test-logs/2026-11-19_P3_tlv_reader_001.txt` 实为源码摘录；SPI `sf probe` 原始用户输出尚未恢复；构建原始日志/产物归档仍需核对；0001/0002 hunk 修复时间线需要逐会话追溯。board/clock 串口日志已确认存在于仓库根目录 `reports/`，并非缺失。详见 `P3-HISTORICAL-EVIDENCE-AUDIT-2026-11-19.md` 与 `P3-HISTORICAL-AUDIT-CHECKPOINT.md`。
 
 在该历史审计完成前，不得将本次审计标记为 COMPLETE，不得开始 P4 实际开发；既有 P4 计划与源码审计仅作为历史材料保留。
+
+
+## 7. SPI NOR 证据来源补充
+
+本报告中的 W25Q128BV / 16 MiB / 4 KiB erase 识别结果，来源于用户在 2026-11-18 10:10:39Z 提供的先前 `sf probe` 输出，早于 P3 首次进入时间（2026-11-19）。因此它是 P3 收尾时引用的继承只读证据，不是 P3 当日新执行的测试。P3 源码审计报告所记 `NOT RUN` 指该源码审计批次未再次执行 probe，与先前观察不矛盾。逐字可恢复的一行输出见 `../test-logs/2026-11-18_SPI-NOR-probe.session-transcribed.txt`。本次不重复 probe。
