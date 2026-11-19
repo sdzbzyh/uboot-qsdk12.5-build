@@ -94,3 +94,8 @@ P4 首批源码审计：`doc/pa220/reports/P4-NETWORK-BASELINE-AUDIT-2026-11-19.
 ## 8. DDR clock explanatory-note correction（2026-11-19）
 
 本报告引用的原始 board/clock 输出仍保留原文，但其统一 NOTE 将 CORE/SCLK/DDR 一概描述为非独立测量值，后来固定源码复核发现这对 DDR 不准确：CORE/SCLK 来自 reset CSR multiplier；DDR 的 `gd->mem_clk` 在 DRAM 初始化后可能由 CN70XX 的 IPD/DCLK counter ratio 动态测量。0002 patch 中的 DDR source 行也没有体现该后续测量路径。该解释性缺陷已登记为 P3 未解决项，详见 `P3-HISTORICAL-EVIDENCE-AUDIT-2026-11-19.md` 的 P3-H050 和 `P3-READONLY-AUDIT-2026-11-19.md` 第 12 节。原始日志不改写，已验证补丁不在本次审计中擅自修改或重建。
+
+
+## 9. Board descriptor / MAC 来源交叉证据补充（2026-11-19）
+
+此前“MAC descriptor 来源未单独证明”是历史收尾时的保守状态。本次历史审计恢复了用户 TLV 输出：BOARD_DESC type 0x0002 的 board type 0x4e35、revision 1.1、serial 012801031163；MAC_ADDR type 0x0004 的 base 08:30:6b:e1:be:00、count 255。它们与原始 board/clock 串口日志的运行时字段逐项一致。固定源码也确认 board descriptor tuple 命中后复制到 global data 并清除 missing flag；MAC tuple 命中后复制 MAC descriptor，只有缺失时才生成随机 MAC。因此本板本次运行的 board descriptor/MAC 来源可由 EEPROM tuple 与运行时输出交叉支持。通用 fallback 路径仍存在。详见历史账本 P3-H051。
