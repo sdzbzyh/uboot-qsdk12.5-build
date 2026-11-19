@@ -5,7 +5,7 @@
 ## 当前状态
 
 - 任务：P3 全阶段历史证据追溯、仓库查缺补漏与最终归档。
-- 当前批次：Batch 1 — 远端基线；Batch 1b — 原始日志路径与 RAM/TLV 补充；Batch 2 — P3 Git 历史时间线及补丁/日志证据对照；Batch 3 — 0002 构建、TLV/时钟和继承 SPI 证据补录。
+- 当前批次：Batch 1 — 远端基线；Batch 1b — 原始日志路径与 RAM/TLV 补充；Batch 2 — P3 Git 历史时间线及补丁/日志证据对照；Batch 3 — 0002 构建、TLV/时钟和继承 SPI 证据补录；Batch 4 — bootmem 区间算术复核与补丁错误追溯。
 - 审计是否完成：**否**。
 - P3 COMPLETE 是否可判定：**否（审计未完成）**。
 - P4 实际开发：**禁止开始**。当前远端已有 P4 计划/源码审计文件，不代表本次获准开展 P4 开发。
@@ -37,7 +37,7 @@
 
 ## 本批证据统计（临时）
 
-- 已登记账本条目：41（其中若干仍是历史检索摘要或助手声明，证据等级未升级）。
+- 已登记账本条目：43（其中若干仍是历史检索摘要或助手声明，证据等级未升级）。
 - 已发现需要继续核验的事项：构建原始日志/ELF-MAP-BIN 归档、TLV print 原始输出、SPI sf probe 原始输出、RAM 地址覆盖与 alias 证据、0002 补丁修复全过程、阶段状态一致性、本地工作区状态未知。board/clock 日志路径已解决。
 - 已完成修复：审计账本与检查点已创建并回读；board/clock 日志路径误判已纠正；已创建 EEPROM 末端读取与 Stage2/TFTP 校验两份 session-transcribed 记录；test-logs README 已说明该类文件不是原始设备捕获。
 - 尚未修复：全部疑点。
@@ -76,6 +76,14 @@
 - `e76d4a51c5af3a3e801b471fbd596edb5920d107`：P3 source audit 补充 SPI 来源。
 - `0d5073ed766837e2939180f19081cb4eff1b3c3f`：ROADMAP 标记 P3 历史审计 hold。
 - `5aa0024a42d84b72c57762872da396d9be26eea3`：追加 bootmem 纠错、SCLK 与 no-repeat 证据。
+- `bd2ac814a00e07b6bb8a7016c7141ad2b7f89c2c`：修正 P3-START 的 __boot_vector1__ 区间终点。
+- `65e77d1ddbbb4d0d0a4d71444a6bcc5860d860ae`：记录该算术勘误。
+- `ac5036174e6b283d524f5efe43c16fa289bae6e8`：补录 0002 line 88/line 65 hunk 损坏与用户纠正。
+- `2323b6fe612455fecd7efd2ca9326c2b418a60f7`：TEST-PLAN 引用 bootmem 算术勘误。
+
+## 新发现的仓库内容错误
+
+- P3-START 原先将 __boot_vector1__ base `0x0fff5c00` + size `0x8000` 的终点写成 `0x10003c00`；算术应为 `0x0fffdc00`。该处已按用户历史 namedprint 值更正，不重新运行设备命令。
 
 ## 上下文与继续规则
 
