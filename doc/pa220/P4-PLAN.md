@@ -1,11 +1,11 @@
 # PA-220 P4 计划：网络维护基础
 
-- 状态：**PAUSED — 当前 P3 历史证据审计未完成**
+- 状态：**IN PROGRESS — 按用户 2026-11-19 最新指令恢复 P4**
 - 启动日期：2026-11-19
 - 集成分支：`feature/pa220-ubootkit-web`
 - PA-220 固定源码：`IronDemiGod/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
 - uBootKit 固定审计基线：`chenxin527/uboot-qsdk12.5-build@9ce315735ac88fd0a7c7697bc527a8616ed0a972`
-- 前置阶段：P3 CLI/只读诊断的历史阶段记录曾标记 COMPLETE；但当前用户要求先完成 P3 全历史证据审计。该审计状态 **IN PROGRESS**，未完成前不得开展 P4 实际开发、构建或实机测试。
+- 前置阶段：P1/P2/P3 按用户本次明确指令视为已完成；本次不重做 P3 历史证据审计，直接推进 P4。
 
 ## 1. 目标
 
