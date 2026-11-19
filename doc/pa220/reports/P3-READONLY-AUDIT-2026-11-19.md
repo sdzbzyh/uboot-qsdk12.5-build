@@ -172,6 +172,6 @@ P3 COMPLETE 不改变以下状态：MAC descriptor 来源未单独证明；时�
 本文件早期关于通用 link API、eMMC/USB 初始化副作用和只读探测边界的审计结论仍有效；本次只更正历史阶段状态，不撤销风险约束。
 
 
-## 9. SPI probe 历史时间来源补充（2026-11-19 审计）
+## 10. SPI probe 历史时间来源补充（2026-11-19 审计）
 
 本报告中该次源码审计的 `sf probe` 状态为 NOT RUN，含义是当时未执行新的 probe。历史用户消息中另有 2026-11-18 10:10:39Z 的先前只读输出：`SF: Detected W25Q128BV with page size 256 Bytes, erase size 4 KiB, total 16 MiB`。该观察早于 P3 开始，作为继承证据供 P3 汇总引用；不应描述为 P3 当日实测。详见 `../test-logs/2026-11-18_SPI-NOR-probe.session-transcribed.txt`。
