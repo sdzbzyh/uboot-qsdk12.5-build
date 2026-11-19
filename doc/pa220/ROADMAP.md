@@ -142,3 +142,13 @@ P3 未解决风险继续保留；阶段状态更正不等于风险关闭。
 - MGT AGL 注册、配置条件、NetLoop/DHCP/Ping 生命周期：`reports/P4-1-NETWORK-DRIVER-NETLOOP-AUDIT-2026-11-19.md`。
 
 当前仍缺最终构建 `.config`/ `include/autoconf.mk` 证据及串口运行时环境/设备列表；DHCP 和 Ping 实机测试 NOT RUN。下一步复用既有构建目录只读检查配置，再进行受控串口检查。未确认 `autoload=n` 前不执行 DHCP。TFTP 接收、TFTP Server 与 TFTP PUT 暂不实测；统一 RAM validator 未实现前禁止接收。
+
+
+## 当前阶段控制覆盖（2026-11-19 最新用户指令）
+
+10:19–10:22Z 的并行提交曾将 P4 重新激活，并声明历史证据补档不阻断 P3 COMPLETE。该决定早于/不符合当前用户本轮明确任务要求。当前控制状态为：
+
+- P3 全历史证据审计：**IN PROGRESS**；不得提前标记 P3 COMPLETE。
+- P4 实际开发/构建/实机测试：**PAUSED**。
+- 已有 P4-1 固定源码静态审计报告保留为历史材料，不代表本次继续执行 P4。
+- 当前状态以本节、P4-PLAN 第 8 节、TEST-PLAN 第 10 节及 P3 历史审计检查点为准。
