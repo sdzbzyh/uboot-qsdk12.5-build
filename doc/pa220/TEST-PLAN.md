@@ -122,3 +122,22 @@
 | 任意地址 RAM 上传安全性 | BLOCKED | cached/uncached/physical alias 与统一 pre-write validator 尚未完成；不得开放上传 |
 
 本轮没有执行任何持久化介质写入、named block 分配/释放或 DRAM 测试。P3 整体仍进行中。
+
+## 6. P3 只读诊断源码审计（2026-11-19）
+
+详细记录：`reports/P3-READONLY-AUDIT-2026-11-19.md`。
+
+| 测试/审计项 | 结果 | 说明 |
+|---|---|---|
+| 板级 descriptor/MAC 缓存 API | PASS（源码审计） | 可读 global data；无需重新访问 EEPROM |
+| 板级初始化副作用边界 | PASS（源码审计） | CPLD LED、USB GPIO、QLM 等初始化写路径已识别 |
+| CORE/IO/DDR 时钟 API | PASS（源码审计） | API 返回 global data 值，不是独立频率测量 |
+| 网络环境配置 | PASS（既有实机结果） | ethact/ethprime/IP 配置已显示 |
+| 网络物理 link 状态 | NOT VERIFIED | cvmx_helper_link_get() 会更新 link LED 并检查 SFP，不作为纯只读查询 |
+| SPI NOR probe | NOT RUN | Winbond W25Q128 配置下 sf probe 仅列为后续只读候选 |
+| eMMC 初始化/信息查询 | BLOCKED | mmc_init/startup 可能通过 CMD6 修改 EXT_CSD 配置字段 |
+| USB Mass Storage 枚举 | NOT RUN | USB 电源 GPIO 默认拉低；usb start 初始化副作用尚未审完 |
+| 新增 board/clock 命令 | NOT BUILT | 下一增量候选 |
+| P3 整体 | IN PROGRESS | 不重复既有 status/env/memory 和 bootmem 测试 |
+
+本轮仅源码审计和文档记录；未构建、未运行新设备命令、未访问或修改持久化介质。
