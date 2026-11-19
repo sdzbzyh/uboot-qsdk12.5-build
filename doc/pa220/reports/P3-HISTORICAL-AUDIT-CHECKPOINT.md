@@ -37,7 +37,7 @@
 
 ## 本批证据统计（临时）
 
-- 已登记账本条目：50（其中若干仍是历史检索摘要或助手声明，证据等级未升级）。
+- 已登记账本条目：52（其中 51 条为 P3 证据/审计事项，1 条为 P3 起点前的 P2 继承风险引用；若干仍是历史检索摘要或助手声明，证据等级未升级）。
 - 已发现需要继续核验的事项：构建原始日志/ELF-MAP-BIN 归档、TLV print 原始输出、SPI sf probe 原始输出、RAM 地址覆盖与 alias 证据、0002 补丁修复全过程、阶段状态一致性、本地工作区状态未知。board/clock 日志路径已解决。
 - 已完成修复：审计账本与检查点已创建并回读；board/clock 日志路径误判已纠正；已创建 EEPROM 末端读取与 Stage2/TFTP 校验两份 session-transcribed 记录；test-logs README 已说明该类文件不是原始设备捕获。
 - 尚未修复：全部疑点。
@@ -91,6 +91,11 @@
 - `2ba63999bbce8aa6b1d9162d0a5e5334693a2a8f`：更正 DDR clock source 说明。
 - `40bcb51986c8ffe4a05fc8d991041eed2a9a1f49`：P3 完成报告记录 DDR 注释限制。
 - `e7c8ca9fbd09d443de13cf948e6fbafe41c5ff4f`：TEST-PLAN 登记 DDR clock note FAIL。
+- `0e5c81256bf479b1a1c51ba5d3cc85eeeda55868`：账本记录 EEPROM board/MAC 来源交叉验证。
+- `cb618b4c0fcd15d775ef8ff45ac0a104af91ac5a`：P3 完成报告更正 board/MAC 来源。
+- `06ad3773f6daee988734e553f2ee029249f223b2`：P3 源码审计报告补充 board/MAC 来源。
+- `2a9ea9319beec6a0c74a8e812701f102e64e52c6`：TEST-PLAN 更新 board/MAC 来源。
+- `1d0bfb8566fd68e345d55d9ffa10217359f3cc8a`：记录 P3 起点前 P2 RAM CRC 风险引用。
 - `f7dfde53ca4a5fbd7022112f7cf9e61d3ff7b2fb`：登记 P3 commit span、阶段决策、0001 apply 和 artifact 路径。
 
 ## Git 历史范围核对
