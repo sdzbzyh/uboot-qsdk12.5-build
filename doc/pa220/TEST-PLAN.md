@@ -219,3 +219,6 @@
 - 0002 构建产物历史摘要：`test-logs/2026-11-19_P3_0002-build-artifacts.session-transcribed.txt`。
 - TLV 结构历史摘要：`test-logs/2026-11-19_P3_tlv-structure.session-transcribed.txt`。
 - SPI NOR 继承证据（2026-11-18）：`test-logs/2026-11-18_SPI-NOR-probe.session-transcribed.txt`。
+
+
+- P3-START 的 bootmem 表格已由历史审计纠正：用户 namedprint 给出的 __boot_vector1__ base 0x0fff5c00、size 0x8000，对应终点为 0x0fffdc00，而非旧报告误写的 0x10003c00。修正见 P3-START 第 4.1 节及第 8 节勘误。
