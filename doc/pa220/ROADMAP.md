@@ -108,3 +108,8 @@ P2 未完成的 `__tmp_load` 运行时 descriptor、板级只读命令、TLV EEP
 ## P2-3 干净构建与产物审计（2026-11-18）
 
 历史构建证据见 `audit/P2-3-CLEAN-BUILD-ARTIFACT-AUDIT.md`。后续已完成 RAM 启动与 P2-4 关键对象/符号核查；当前阶段状态以 `reports/P2-COMPLETION-2026-11-19.md` 为准。
+
+## P3 当前执行检查点（2026-11-19）
+
+P2 已收尾，当前进入 P3 CLI/只读诊断。首个增量已加入现有 PA-220 维护命令补丁：新增 `pa220 memory`，只读查询运行时 `__tmp_load` named-block descriptor，并立即复制 static descriptor 的 base/size 字段。该增量**尚未构建或实机验证**，下一步在全新 P3 checkout 上验证，保留 P2-3 构建目录及未提交文件不动。详细记录见 `reports/P3-START-2026-11-19.md`。
+
