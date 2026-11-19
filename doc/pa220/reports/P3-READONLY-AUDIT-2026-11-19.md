@@ -50,13 +50,13 @@ Board descriptor 与 MAC descriptor 的填充逻辑位于 `board/octeon/common/o
 - `CVMX_CLOCK_SCLK` / `CVMX_CLOCK_TIM` / `CVMX_CLOCK_IPD` -> `gd->bus_clk`
 - `CVMX_CLOCK_DDR` -> `gd->mem_clk * 1000000`
 
-因此它是已初始化的时钟值，不是独立频率计数器测量值。
+CORE/SCLK 由 reset CSR multiplier 派生；DDR 返回 gd->mem_clk，该字段在 DRAM 初始化后可能由 CN70XX IPD/DCLK counter ratio 动态测量。没有执行独立外部频率计测试。
 
 ### 2.2 PA-220 值的来源
 
 - CPU：`early_board_init()` 以 `octeon_get_cpu_multiplier()` 读取 CN70xx `CVMX_RST_BOOT.c_mul`，乘以 `DEFAULT_CPU_REF_FREQUENCY_MHZ` 后写入 `gd->cpu_clk`。
 - IO：`gd->bus_clk` 由 U-Boot/Stage2 初始化路径提供；本轮尚未取得该字段在本次 Stage2 handoff 下的独立原始串口值。
-- DDR：`gd->mem_clk` 优先来自 TLV DDR clock descriptor；未找到有效 tuple 时使用 `PA220_DEF_DRAM_FREQ` 默认值。板级显示代码以 `gd->mem_clk` 作为 DDR 时钟，并显示双倍数据率。
+- DDR：early_board_init 先从 EEPROM type 7 descriptor 或 `PA220_DEF_DRAM_FREQ` 默认值初始化 `gd->mem_clk`；但 `octeon_init_dram` 后续可能用 `measure_octeon_ddr_clock()` 的硬件计数结果覆盖该字段。板级显示以最终 `gd->mem_clk` 作为 DDR base clock，并显示双倍数据率。
 
 后续 `pa220 clock` 若新增，应明确标注 core/io 为 global-data 计算/传入值，DDR 为 EEPROM descriptor 或 fallback 配置值；不得称为独立实测值。DDR 实际 PLL/DFM 频率若要输出，需要单独审计对应 CSR 的型号语义。
 
@@ -147,7 +147,7 @@ PA-220 定义 `CONFIG_OCTEON_USB_OCTEON3`；公共配置由此启用 `CONFIG_CMD
 
 新增：
 - `pa220 board`：读取早期初始化后缓存的 board descriptor、revision、serial、MAC base/count 和 descriptor-missing 标志；不重扫 EEPROM。
-- `pa220 clock`：读取 `cvmx_clock_get_rate(CORE/SCLK/DDR)`，并明确显示这些值来自 global data/初始化配置，不是独立频率测量。
+- `pa220 clock`：读取 `cvmx_clock_get_rate(CORE/SCLK/DDR)`；CORE/SCLK 来自 CSR multiplier 派生的 global data，DDR 的 gd->mem_clk 在 DRAM init 后可能是硬件计数器测量值。无独立外部频率计测试。
 
 补丁顺序：
 - `build-pa220.sh` 按 `patches/pa220/*.patch` 字典序应用补丁；
@@ -157,17 +157,17 @@ PA-220 定义 `CONFIG_OCTEON_USB_OCTEON3`；公共配置由此启用 `CONFIG_CMD
 尚未在 Debian 构建目录实际执行 `git apply --check`、构建或设备测试；因此 0002 状态仍为 **NOT BUILT / NOT VERIFIED**。下一步由用户在原固定 checkout 执行正式构建前的 patch check，再决定构建。
 
 
-## 9. 最终状态更正与阶段交接（2026-11-19）
+## 9. 历史阶段状态更正（2026-11-19；当前审计覆盖见第 13 节）
 
 本文件第 6、8 节中的 `NOT BUILT / NOT VERIFIED` 是 board/clock 补丁实施前的历史源码审计状态，已被后续构建和实机证据取代，不再代表当前状态。
 
-- **P3 CLI/只读诊断：COMPLETE。**
+- **历史阶段标签：P3 CLI/只读诊断曾标记 COMPLETE；当前全历史证据审计 IN PROGRESS。**
 - 0002 已构建并通过原厂 Stage2/TFTP RAM 启动；`help pa220`、`pa220 board`、`pa220 clock` 已实机验证。
 - 完整 board/clock 串口日志：集成仓库根目录 `reports/P3-BOARD-CLOCK-2026-11-19-serial.log`。
 - board/clock 实机结果汇总：集成仓库根目录 `reports/P3-READONLY-AUDIT-2026-11-19.md`。
 - P3 全阶段收尾表及 P4 交接见 `doc/pa220/TEST-PLAN.md` 第 7、8 节。
 
-P3 COMPLETE 不改变以下状态：MAC descriptor 来源未单独证明；时钟是 global-data/configuration 值而非独立测量；Ethernet 物理 link NOT VERIFIED；eMMC 初始化 BLOCKED；USB 枚举 NOT VERIFIED；统一 RAM 写入 validator 未实现，TFTP/HTTP/ELF 任意接收保持 BLOCKED。P1 非阻断风险继续保留。
+当前 unresolved 状态：Ethernet 物理 link NOT VERIFIED；eMMC 初始化 BLOCKED；USB 枚举 NOT VERIFIED；统一 RAM 写入 validator 未实现，TFTP/HTTP/ELF 任意接收保持 BLOCKED。MAC descriptor 来源已由 P3-H051 交叉验证；DDR clock note 的不准确性由 P3-H050 记录。P1 非阻断风险继续保留。
 
 本文件早期关于通用 link API、eMMC/USB 初始化副作用和只读探测边界的审计结论仍有效；本次只更正历史阶段状态，不撤销风险约束。
 
