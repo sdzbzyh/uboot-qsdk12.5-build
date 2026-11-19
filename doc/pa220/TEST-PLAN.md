@@ -100,3 +100,25 @@
 | LOAD MemSiz 与 `uboot_end` 4-byte 差异 | DEFERRED | 非阻断性链接布局疑点，后续统一处理 |
 
 注：`OBSERVATION` 与 `DEFERRED` 是阶段问题记录，不替代第 2 节规定的测试结果状态。P2 已收尾；P3 继续补齐只读运行时诊断。任何持久化介质写入仍需独立阶段审查和明确授权。
+
+## 5. P3 实际结果（2026-11-19）
+
+详细原始输出、构建产物和地址区间核算见 `reports/P3-START-2026-11-19.md`。
+
+| 测试项 | 结果 | 说明 |
+|---|---|---|
+| P3 补丁应用 | PASS | 固定 PA-220 commit 上 `git apply --check` 成功；两个 hunk 行数已核验 |
+| P3 构建 | PASS | OCTEON SDK GCC 4.7.0 构建成功，镜像头 CRC/长度及 ELF/MAP/BIN SHA256 已记录 |
+| P3 ELF/MAP | PASS | 新命令已进入最终 ELF；入口和 LOAD 起点保持 0xc0000000 |
+| P3 Stage3 RAM 启动 | PASS | 原厂 Stage2/TFTP 加载 P3 镜像后成功进入 U-Boot CLI |
+| `help pa220` | PASS | 正常列出 status/env/memory |
+| `pa220 status` | PASS | 板型、DRAM、CPU clock、Ethernet、CPLD/PHY/LED 只读状态正常显示 |
+| `pa220 env` | PASS | SPI NOR 环境后端和布局信息正常显示；未执行 saveenv |
+| `pa220 memory` | PASS | loadaddr 与 `__tmp_load` base 均为 0x20000000；size 为 0x10000000 |
+| `bdinfo` / `meminfo` | PASS | DRAM 容量均报告 8 GiB；memstart/address-domain 关系仍待解释 |
+| `namedprint` / `freeprint` | PASS | 13 个 named blocks、两个 free blocks；关键相邻边界经半开区间核算一致 |
+| TLV EEPROM/I2C 只读内容 | NOT RUN | 下一批只读检查；先确认命令语义和有效访问窗口 |
+| 网络/存储扩展只读诊断 | NOT RUN | P3 后续工作 |
+| 任意地址 RAM 上传安全性 | BLOCKED | cached/uncached/physical alias 与统一 pre-write validator 尚未完成；不得开放上传 |
+
+本轮没有执行任何持久化介质写入、named block 分配/释放或 DRAM 测试。P3 整体仍进行中。
