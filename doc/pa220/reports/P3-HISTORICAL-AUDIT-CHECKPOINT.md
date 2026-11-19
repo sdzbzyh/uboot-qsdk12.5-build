@@ -5,7 +5,7 @@
 ## 当前状态
 
 - 任务：P3 全阶段历史证据追溯、仓库查缺补漏与最终归档。
-- 当前批次：Batch 1 — 远端基线；Batch 1b — 原始日志路径与 RAM/TLV 补充；Batch 2 — P3 Git 历史时间线及补丁/日志证据对照；Batch 3 — 0002 构建、TLV/时钟和继承 SPI 证据补录；Batch 4 — bootmem 区间算术复核与补丁错误追溯；Batch 5 — P3 阶段决策及 CLI/bootmem 历史补充；Batch 6 — EEPROM 容量边界与 System.map 证据补充；Batch 7 — 固定源码 clock 调用链与 DDR 测量语义复核。
+- 当前批次：Batch 1 — 远端基线；Batch 1b — 原始日志路径与 RAM/TLV 补充；Batch 2 — P3 Git 历史时间线及补丁/日志证据对照；Batch 3 — 0002 构建、TLV/时钟和继承 SPI 证据补录；Batch 4 — bootmem 区间算术复核与补丁错误追溯；Batch 5 — P3 阶段决策及 CLI/bootmem 历史补充；Batch 6 — EEPROM 容量边界与 System.map 证据补充；Batch 7 — 固定源码 clock 调用链与 DDR 测量语义复核；Batch 8 — P3 构建产物 GitHub tree 归档核验。
 - 审计是否完成：**否**。
 - P3 COMPLETE 是否可判定：**否（审计未完成）**。
 - P4 实际开发：**禁止开始**。当前远端已有 P4 计划/源码审计文件，不代表本次获准开展 P4 开发。
@@ -37,7 +37,7 @@
 
 ## 本批证据统计（临时）
 
-- 已登记账本条目：52（其中 51 条为 P3 证据/审计事项，1 条为 P3 起点前的 P2 继承风险引用；若干仍是历史检索摘要或助手声明，证据等级未升级）。
+- 已登记账本条目：53（其中 52 条为 P3 证据/审计事项，1 条为 P3 起点前的 P2 继承风险引用；若干仍是历史检索摘要或助手声明，证据等级未升级）。
 - 已发现需要继续核验的事项：构建原始日志/ELF-MAP-BIN 归档、TLV print 原始输出、SPI sf probe 原始输出、RAM 地址覆盖与 alias 证据、0002 补丁修复全过程、阶段状态一致性、本地工作区状态未知。board/clock 日志路径已解决。
 - 已完成修复：审计账本与检查点已创建并回读；board/clock 日志路径误判已纠正；已创建 EEPROM 末端读取与 Stage2/TFTP 校验两份 session-transcribed 记录；test-logs README 已说明该类文件不是原始设备捕获。
 - 尚未修复：全部疑点。
@@ -96,6 +96,10 @@
 - `06ad3773f6daee988734e553f2ee029249f223b2`：P3 源码审计报告补充 board/MAC 来源。
 - `2a9ea9319beec6a0c74a8e812701f102e64e52c6`：TEST-PLAN 更新 board/MAC 来源。
 - `1d0bfb8566fd68e345d55d9ffa10217359f3cc8a`：记录 P3 起点前 P2 RAM CRC 风险引用。
+- `959c78511930e2bb9395d7adac9bfb617a90fc27`：P3 build artifact tree audit 报告。
+- `727e45a4f99b5ceca2cfca4542c343afba4ffe7b`：登记 P3 构建原件缺失。
+- `a40fe1794cfb68ad2e23f2db827070d31402bbb8`：TEST-PLAN 记录 P3 artifact archive status。
+- `1c7c87479b04b10471a3e76ac74f8749879fcc19`：P3-START 链接构建产物审计。
 - `f7dfde53ca4a5fbd7022112f7cf9e61d3ff7b2fb`：登记 P3 commit span、阶段决策、0001 apply 和 artifact 路径。
 
 ## Git 历史范围核对
@@ -114,6 +118,14 @@
 - 固定源码 commit `801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8` 已回读 `board_octeon.c`、`cvmx-clock.c`、`octeon_dram.c`、`lib_octeon_shared.c`、`octeon_board_common.c`、`pa220_board.c` 和 `octeon_eeprom_types.h`。
 - `octeon_setup_clocks` 在 init_sequence index 1，早于 PA220 `early_board_init` index 12；SCLK 由 `CVMX_RST_BOOT.pnr_mul × 50 MHz` 写入 `gd->bus_clk`，不是 Stage2 handoff 直接传值。
 - DDR 在 `octeon_init_dram` 后可能由 CN70XX 的 IPD/DCLK counter ratio 动态测量后写回 `gd->mem_clk`。0002 的统一 NOTE/DDR source 说明不准确，列为 P3-H050 FAIL。该问题尚未修复；不擅自改已验证补丁或重建。
+
+## 本批新增构建归档核验结论
+
+- GitHub recursive tree：42,404 entries，truncated=false。
+- P3 专属 artifacts 目录不存在；P3 0001/0002 ELF、BIN、主 MAP、完整 build log 均未找到。
+- P2-3 artifacts/pa220/p2-3/20261118 存在，但属于 11/18 P2-3，BIN 大小与 P3 不同，不可冒充。
+- 根目录 pa220-build.log 和 pa220-maintenance-build.log 均为 0 bytes。
+- board/clock 原始串口日志存在；其余 CLI/TLV/Stage2 记录多为 session-transcribed。
 
 ## 本批最新远端状态
 
