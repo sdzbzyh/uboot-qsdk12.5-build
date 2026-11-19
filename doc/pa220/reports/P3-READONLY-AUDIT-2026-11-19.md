@@ -175,3 +175,13 @@ P3 COMPLETE 不改变以下状态：MAC descriptor 来源未单独证明；时�
 ## 10. SPI probe 历史时间来源补充（2026-11-19 审计）
 
 本报告中该次源码审计的 `sf probe` 状态为 NOT RUN，含义是当时未执行新的 probe。历史用户消息中另有 2026-11-18 10:10:39Z 的先前只读输出：`SF: Detected W25Q128BV with page size 256 Bytes, erase size 4 KiB, total 16 MiB`。该观察早于 P3 开始，作为继承证据供 P3 汇总引用；不应描述为 P3 当日实测。详见 `../test-logs/2026-11-18_SPI-NOR-probe.session-transcribed.txt`。
+
+
+## 11. P3 历史证据审计覆盖状态（2026-11-19）
+
+本文件第 9 节记录的是当日 board/clock 补丁最终完成后的历史阶段状态；它不代表随后要求的全历史证据审计已经完成。该历史审计当前 **IN PROGRESS**，账本与检查点为：
+
+- `P3-HISTORICAL-EVIDENCE-AUDIT-2026-11-19.md`
+- `P3-HISTORICAL-AUDIT-CHECKPOINT.md`
+
+审计完成前不开始 P4 实际开发。已完成的 board/clock 原始日志仍是仓库根目录 `reports/P3-BOARD-CLOCK-2026-11-19-serial.log`；其他 P3 项目的原始证据必须分别核验，不得由本报告的 PASS 推广。
