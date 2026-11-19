@@ -1,10 +1,20 @@
 diff --git a/u-boot/board/octeon/pa220/pa220_board.c b/u-boot/board/octeon/pa220/pa220_board.c
 --- a/u-boot/board/octeon/pa220/pa220_board.c
 +++ b/u-boot/board/octeon/pa220/pa220_board.c
-@@ -22,1 +22,2 @@
+@@ -20,6 +20,7 @@
+ #include <asm/arch/octeon_boot_bus.h>
+ #include <environment.h>
  #include <libfdt.h>
 +#include <asm/arch/cvmx-bootmem.h>
-@@ -272,1 +273,122 @@
+ #include <asm/arch/cvmx-qlm.h>
+ #include <asm/arch/octeon_qlm.h>
+ 
+@@ -267,7 +267,128 @@
+ U_BOOT_CMD(cpld, 5, 0, do_cpld,
+ 	   "read/write PA-220 CPLD registers",
+ 	   "[display]            - show registers 0-d\n"
+ 	   "cpld read <reg>           - read one register (hex)\n"
+ 	   "cpld write <reg> <val>    - write one register (hex)\n"
  	   "cpld write -f d <val>     - write reg d (flash select/reboot!)");
 +/*
 + * Read-only maintenance summary. Keep this command safe to run while
