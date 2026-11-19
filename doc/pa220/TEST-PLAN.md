@@ -260,3 +260,10 @@ P3 已于 2026-11-19 正式 COMPLETE。P4 已开启；源码审计证据：
 
 
 - P3 0001/0002 历史命令与结果摘要已分别保存为 session-transcribed 文件：`test-logs/2026-11-19_P3_0001-build-artifacts.session-transcribed.txt`、`test-logs/2026-11-19_P3_0002-patch-recovery.session-transcribed.txt`。两者均非原始 build/terminal log；原始产物缺失见 P3-BUILD-ARTIFACT-AUDIT。
+
+
+## 10. 当前阶段控制覆盖（2026-11-19 最新用户指令）
+
+当前 P3 全历史证据审计仍为 **IN PROGRESS**。此前 TEST-PLAN 第 7 节的 P3 CLI/只读诊断 PASS 及第 8 节的 P4-1 静态审计，是历史阶段记录；不能据此宣布本次全历史审计 COMPLETE。P3-HISTORICAL-EVIDENCE-AUDIT 和 CHECKPOINT 所列证据缺口、P3-H050 clock-note FAIL、P3-H053 构建原件缺失等仍须纳入最终判定。
+
+P4-1 两份网络报告仅为既有静态源码审计，没有构建或实机网络测试；当前不得继续读取 P4 构建目录、执行 DHCP/Ping 或开展 P4 开发。P4 执行状态以 P4-PLAN 的 PAUSED 为准。
