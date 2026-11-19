@@ -210,3 +210,6 @@ GitHub compare：`47805be639ad39cb5f03f9e527b2727e74ee5ea9...0a6f080a58c9a93e3d4
 
 
 | P3-H060 | 2026-11-19 08:20:35Z–08:49:11Z + 本次远端审计 | 0002 丢失时 122 行本地修改的保护/保存状态 | 用户曾报告 pa220_board.c 有 122 行未提交修改；当前 GitHub 远端仅有最终 0002 patch 和固定源码基线，无法访问当时 Debian 本地 worktree，也没有该 122 行原始 diff/文件快照；最终 patch 对 pa220_board.c 增加 182 行，但这不能单独证明 122 行原始修改逐字完整保留 | USER-OBSERVED（当时状态）+ FILE-VERIFIED（最终 patch） | UNVERIFIED（原 122 行是否逐项保留）；本次没有触碰本地 worktree | 0002 patch 与历史会话；本地 worktree 未访问 | 远端文档记录限制；无本地文件修改 | 不声称原始 122 行已完整保留；当前审计未对用户本地目录执行任何覆盖/清理操作 |
+
+
+| P3-H061 | 2026-11-19 本次 GitHub 最终核验 | main 分支保护核验 | 远端 main HEAD 为 f9784439e935a32953738b58444c5954ee1888e9；通过 main 最近 100 commits 检查，未发现本次审计创建的账本/检查点/状态覆盖提交（例如 37cd1f5、137dc6f、fdb48e5、4edfb54）进入 main。当前审计提交均在 feature/pa220-ubootkit-web。 | FILE-VERIFIED（GitHub branch refs/commit history） | PASS（本次审计提交未进入 main）；不代表 main 以外所有远端历史均已审计 | GitHub main 与 feature 分支历史 | 已核验 | 不修改 main；后续所有 P3 维护继续仅限目标 feature 分支 |
