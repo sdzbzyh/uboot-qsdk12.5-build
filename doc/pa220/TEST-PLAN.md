@@ -137,7 +137,7 @@
 | SPI NOR probe | NOT RUN | Winbond W25Q128 配置下 sf probe 仅列为后续只读候选 |
 | eMMC 初始化/信息查询 | BLOCKED | mmc_init/startup 可能通过 CMD6 修改 EXT_CSD 配置字段 |
 | USB Mass Storage 枚举 | NOT RUN | USB 电源 GPIO 默认拉低；usb start 初始化副作用尚未审完 |
-| 新增 board/clock 命令 | NOT BUILT | 补丁 `0002-pa220-board-clock-readonly-diagnostics.patch` 已提交；待本地 `git apply --check`、构建和新增命令实机验证 |
+| 新增 board/clock 命令 | PASS | 0002 已构建并 RAM 启动；`help pa220`、`pa220 board`、`pa220 clock` 实机验证通过，详见 `reports/P3-READONLY-AUDIT-2026-11-19.md` |
 | P3 整体 | IN PROGRESS | 不重复既有 status/env/memory 和 bootmem 测试 |
 
 本轮仅源码审计和文档记录；未构建、未运行新设备命令、未访问或修改持久化介质。
