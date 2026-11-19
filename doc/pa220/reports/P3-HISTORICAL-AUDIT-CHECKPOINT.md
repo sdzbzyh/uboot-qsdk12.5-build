@@ -37,7 +37,7 @@
 
 ## 本批证据统计（临时）
 
-- 已登记账本条目：55（其中 54 条为 P3 证据/审计事项，1 条为 P3 起点前的 P2 继承风险引用；若干仍是历史检索摘要或助手声明，证据等级未升级）。
+- 已登记账本条目：58（其中 57 条为 P3 证据/审计事项，1 条为 P3 起点前的 P2 继承风险引用；若干仍是历史检索摘要或助手声明，证据等级未升级）。
 - 已发现需要继续核验的事项：构建原始日志/ELF-MAP-BIN 归档、TLV print 原始输出、SPI sf probe 原始输出、RAM 地址覆盖与 alias 证据、0002 补丁修复全过程、阶段状态一致性、本地工作区状态未知。board/clock 日志路径已解决。
 - 已完成修复：审计账本与检查点已创建并回读；board/clock 日志路径误判已纠正；已创建 EEPROM 末端读取与 Stage2/TFTP 校验两份 session-transcribed 记录；test-logs README 已说明该类文件不是原始设备捕获。
 - 尚未修复：全部疑点。
@@ -96,6 +96,14 @@
 - `06ad3773f6daee988734e553f2ee029249f223b2`：P3 源码审计报告补充 board/MAC 来源。
 - `2a9ea9319beec6a0c74a8e812701f102e64e52c6`：TEST-PLAN 更新 board/MAC 来源。
 - `1d0bfb8566fd68e345d55d9ffa10217359f3cc8a`：记录 P3 起点前 P2 RAM CRC 风险引用。
+- `32dffea2571998f0a8a966d257cbafdb9bf6bcc3`：记录 P4 reactivation/历史审计门冲突。
+- `9f3743d023f5a847f392f2eb0787fb1ed3e18585`：P4-PLAN 再次暂停。
+- `61668975377f0bc83ec21b02e8c86e75603dee93`：ROADMAP 恢复 P3 审计门。
+- `685ca4b7da25474bc48dafc7c555ff87ba0ba91f`：TEST-PLAN 恢复 P3 审计门。
+- `9a4a1cb8191aad92b12bfa959f7247d5c06178b6`：P3-COMPLETION 当前状态覆盖。
+- `4a1942ba78c020b6a645a08e82c69b3ac8c4fae5`：P3 source audit 当前状态覆盖。
+- `48322a289b07ced6979ffee67c488082a860e76c`：P3-START 当前状态覆盖。
+- `40428b73be6a33d0807f36accbb2feb6e8538244`、`7e84eddeef0a02a496eaf8f0626eec1e5fbb084a`：既有 P4-1 静态审计标记为历史材料/暂停。
 - `959c78511930e2bb9395d7adac9bfb617a90fc27`：P3 build artifact tree audit 报告。
 - `727e45a4f99b5ceca2cfca4542c343afba4ffe7b`：登记 P3 构建原件缺失。
 - `a40fe1794cfb68ad2e23f2db827070d31402bbb8`：TEST-PLAN 记录 P3 artifact archive status。
@@ -130,6 +138,11 @@
 - P2-3 artifacts/pa220/p2-3/20261118 存在，但属于 11/18 P2-3，BIN 大小与 P3 不同，不可冒充。
 - 根目录 pa220-build.log 和 pa220-maintenance-build.log 均为 0 bytes。
 - board/clock 原始串口日志存在；其余 CLI/TLV/Stage2 记录多为 session-transcribed。
+
+## 当前阶段冲突处理
+
+- P4 在 10:19–10:22Z 的后续提交中被重新激活；P3 完成声明被重申。当前用户最新指令要求先完成全历史审计，故已在最新提交中恢复 P4 PAUSED，并在 ROADMAP/TEST-PLAN/P3 reports/P4 reports 添加覆盖说明。
+- P4-1 既有内容仅是固定源码静态审计，报告明确没有构建或网口实机测试；保留为历史材料，不继续扩展。
 
 ## 本批最新远端状态
 
