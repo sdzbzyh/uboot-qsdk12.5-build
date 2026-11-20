@@ -272,3 +272,15 @@ PA-220 固定源码在独立干净 checkout 上完成完整构建，退出码为
 - 板卡/内存/时钟/网络/CPLD 只读诊断：**已编译-待验证**；构建证据见 `audit/P2-3-CLEAN-BUILD-ARTIFACT-AUDIT.md`。
 - EEPROM/TLV、named block、Cache 一致性、ELF64 loader：**尚未完成最终对象编入核查或实机只读验证**；不得由配置宏或 P1 静态审计直接标记为已编译/实机通过。
 - 所有存储写入路径继续保持禁止；P2-3 未执行设备写入。
+
+
+## P5-1 原生 TCP / HTTP 适配审计（2026-11-20）
+
+专项证据：`audit/P5-1-PA220-NATIVE-TCP-HTTP-ADAPTATION.md`。
+
+- PA-220 固定 U-Boot 2013.07 的 `NetReceive()` 目前只处理 ICMP/UDP，IPv4 TCP protocol 6 被丢弃；`net/Makefile` 无 TCP/HTTPD 对象。
+- 现有 `NetLoop()` 是阻塞式协议状态机，使用单一 UDP/ARP handler 和单一 timeout callback；不应直接让 HTTPD 占用/覆盖这些全局状态。
+- Ethernet `eth_rx()/eth_send()/eth_init()/eth_halt()` 与原始帧组装接口可复用。TCP 必须新增独立分派入口、TCP 校验和/连接状态/重传管理，并严格遵守 RX buffer 只在当前收包回调内有效的生命周期。
+- 建议以显式前台 `pa220 web` 命令管理服务，独立轮询 `eth_rx()`、TCP 定时处理和 watchdog；Ctrl-C 与统一 cleanup 负责退出，禁止自动进入 Web 或后台驻留。
+- 首版只允许有界 GET/HEAD、固定 URI allowlist、静态只读 handler；禁止任意命令执行、环境写入、saveenv、存储/CPLD 写入、上传、安装和重启。
+- 本批仅完成静态源码审计与设计收敛；TCP/HTTP 实现、编译、RAM 启动和 MGT 实机访问均 NOT VERIFIED。
