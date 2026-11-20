@@ -1,0 +1,67 @@
+========== PA-220 HOST TCP PROTOCOL VERIFICATION ==========
+2026-11-20T17:01:26+08:00
+========== SOURCE IDENTITY ==========
+2be12d49f0e5d80e6980b649d6148b90a474d287  /tmp/pa220-p5-validation/src/net/tcp.c
+db4752ce1c9589c9579069e40476279c0eabda75  /tmp/pa220-p5-validation/src/include/net/tcp.h
+b191b27a972a1c4b9f1a5ca66a53e15b642c71ecb77dcfbbfc2ec15a5d5d080a  /tmp/pa220-p5-validation/host/test_tcp.c
+========== HOST COMPILE ==========
+BUILD_RC=0
+========== HOST TCP TEST ==========
+PA-220 TCP HOST PROTOCOL TEST
+TCP source SHA1 expected: 2be12d49f0e5d80e6980b649d6148b90a474d287
+
+[DATA AND CUMULATIVE ACK]
+FAIL line=115: input(&c, 5001, 1001, TCP_FLAG_ACK | TCP_FLAG_PSH, (const u8 *)"abc", 3, 3) == 1
+FAIL line=133: input(&c, 5004, 1006, TCP_FLAG_ACK, NULL, 0, 5) == 1
+
+[RETRANSMISSION]
+
+[CLOSE-WAIT AFTER FIN]
+FAIL line=173: input(&c, 5001, 1001, TCP_FLAG_FIN | TCP_FLAG_ACK, NULL, 0, 10) == 1
+FAIL line=179: input(&c, 5002, 1001, TCP_FLAG_ACK | TCP_FLAG_PSH, (const u8 *)"X", 1, 11) == 1
+OBSERVE_CLOSE_WAIT_DATA: state=6 rx_len=1 rcv_nxt=5003
+CONFIRMED: data accepted after peer FIN
+
+[TIME-WAIT DUPLICATE FIN]
+FAIL line=204: input(&c, 5001, 1002, TCP_FLAG_ACK, NULL, 0, 11) == 1
+FAIL line=208: input(&c, 5001, 1002, TCP_FLAG_FIN | TCP_FLAG_ACK, NULL, 0, 12) == 1
+FAIL line=216: input(&c, 5001, 1002, TCP_FLAG_FIN | TCP_FLAG_ACK, NULL, 0, 20000) == 1
+ORIGINAL_DEADLINE=60012
+AFTER_DUPLICATE_FIN=60012
+CONFIRMED: duplicate FIN did not restart TIME-WAIT
+
+[PASSIVE CLOSE AND IDLE TIMEOUT]
+FAIL line=240: input(&c, 5001, 1001, TCP_FLAG_FIN | TCP_FLAG_ACK, NULL, 0, 10) == 1
+
+[TIME-WAIT EXPIRY]
+FAIL line=264: input(&c, 5001, 1002, TCP_FLAG_ACK, NULL, 0, 11) == 1
+FAIL line=266: input(&c, 5001, 1002, TCP_FLAG_FIN | TCP_FLAG_ACK, NULL, 0, 12) == 1
+
+[TUPLE SEQUENCE ACK AND INVALID FLAGS]
+FAIL line=294: input(&c, 5002, 1001, TCP_FLAG_ACK | TCP_FLAG_PSH, (const u8 *)"Z", 1, 11) == 1
+
+[RX BUFFER BOUNDARY AND MALFORMED INPUT]
+FAIL line=323: input(&c, 5001 + i * 512, 1001, TCP_FLAG_ACK | TCP_FLAG_PSH, data, sizeof(data), 20 + i) == 1
+FAIL line=323: input(&c, 5001 + i * 512, 1001, TCP_FLAG_ACK | TCP_FLAG_PSH, data, sizeof(data), 20 + i) == 1
+FAIL line=323: input(&c, 5001 + i * 512, 1001, TCP_FLAG_ACK | TCP_FLAG_PSH, data, sizeof(data), 20 + i) == 1
+FAIL line=323: input(&c, 5001 + i * 512, 1001, TCP_FLAG_ACK | TCP_FLAG_PSH, data, sizeof(data), 20 + i) == 1
+FAIL line=323: input(&c, 5001 + i * 512, 1001, TCP_FLAG_ACK | TCP_FLAG_PSH, data, sizeof(data), 20 + i) == 1
+FAIL line=323: input(&c, 5001 + i * 512, 1001, TCP_FLAG_ACK | TCP_FLAG_PSH, data, sizeof(data), 20 + i) == 1
+FAIL line=323: input(&c, 5001 + i * 512, 1001, TCP_FLAG_ACK | TCP_FLAG_PSH, data, sizeof(data), 20 + i) == 1
+FAIL line=323: input(&c, 5001 + i * 512, 1001, TCP_FLAG_ACK | TCP_FLAG_PSH, data, sizeof(data), 20 + i) == 1
+FAIL line=330: input(&c, c.rcv_nxt, 1001, TCP_FLAG_ACK | TCP_FLAG_PSH, (const u8 *)"Q", 1, 40) == 1
+
+========== SUMMARY ==========
+ASSERTIONS_PASSED=152
+ASSERTIONS_FAILED=20
+========== FINAL RESULTS ==========
+BUILD_RC=0
+TEST_RC=1
+========== SOURCE IDENTITY AFTER TEST ==========
+2be12d49f0e5d80e6980b649d6148b90a474d287  /tmp/pa220-p5-validation/src/net/tcp.c
+db4752ce1c9589c9579069e40476279c0eabda75  /tmp/pa220-p5-validation/src/include/net/tcp.h
+b191b27a972a1c4b9f1a5ca66a53e15b642c71ecb77dcfbbfc2ec15a5d5d080a  /tmp/pa220-p5-validation/host/test_tcp.c
+========== LOG ==========
+/home/debian/PA220_P3_integration_20261119/reports/pa220/P5-1A.3/16-host-protocol-verification.txt
+========== END ==========
+结果已保存。按回车键结束本次操作（不会关闭终端）...
