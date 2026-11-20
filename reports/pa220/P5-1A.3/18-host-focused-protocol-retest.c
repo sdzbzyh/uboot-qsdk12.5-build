@@ -108,9 +108,9 @@ static void test_close_wait_post_fin_data(void)
     rc = input(&c, 5001, 1001,
                TCP_FLAG_FIN | TCP_FLAG_ACK, NULL, 0, 10);
     CHECK(rc == 0);
-    CHECK(c->state == TCP_CORE_CLOSE_WAIT);
-    CHECK(c->fin_received == 1);
-    CHECK(c->rcv_nxt == 5002);
+    CHECK(c.state == TCP_CORE_CLOSE_WAIT);
+    CHECK(c.fin_received == 1);
+    CHECK(c.rcv_nxt == 5002);
 
     rc = input(&c, 5002, 1001,
                TCP_FLAG_ACK | TCP_FLAG_PSH,
