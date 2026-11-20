@@ -1,0 +1,3104 @@
+========== P5-1A.3 HOST AUDIT ==========
+2026-11-20T16:28:06+08:00
+REPO=/home/debian/PA220_P3_integration_20261119
+SDK=/home/debian/OCTEON-SDK/tools-gcc-4.7
+WORK=/tmp/pa220-p5-validation
+========== GIT FETCH ==========
+来自 https://github.com/sdzbzyh/uboot-qsdk12.5-build
+   db50a062..1f9f527e  feature/pa220-ubootkit-web -> origin/feature/pa220-ubootkit-web
+FETCH_RC=0
+REMOTE_HEAD=1f9f527ef6f3436ddd04ab48d45f7dd530fe545d
+REMOTE_TCP_COMMIT:
+commit 5c33f6c4496cdc08a1cab66facf2c03b3bcc6754
+Author:     sdzbzyh <38564065+sdzbzyh@users.noreply.github.com>
+AuthorDate: Fri Nov 20 15:27:41 2026 +0800
+Commit:     sdzbzyh <38564065+sdzbzyh@users.noreply.github.com>
+CommitDate: Fri Nov 20 15:27:41 2026 +0800
+
+    fix(pa220): require ACK on established TCP segments
+========== WORKTREE PRESERVATION CHECK ==========
+?? patches/pa220/0002-pa220-board-clock-readonly-diagnostics.patch
+?? patches/pa220/0002-pa220-board-clock-readonly-diagnostics.patch.before-hunk-fix
+========== EXPORT REMOTE TCP SOURCES ==========
+TCP_C_EXPORT_RC=0
+TCP_H_EXPORT_RC=0
+========== SOURCE SHA1 ==========
+2be12d49f0e5d80e6980b649d6148b90a474d287  /tmp/pa220-p5-validation/src/net/tcp.c
+db4752ce1c9589c9579069e40476279c0eabda75  /tmp/pa220-p5-validation/src/include/net/tcp.h
+========== PREVIOUS SOURCE SHA1 COMPARISON ==========
+2be12d49f0e5d80e6980b649d6148b90a474d287  /tmp/pa220-p5-validation/src/net/tcp.c
+db4752ce1c9589c9579069e40476279c0eabda75  /tmp/pa220-p5-validation/src/include/net/tcp.h
+========== TOOLCHAIN VERSION ==========
+mips64-octeon-linux-gnu-gcc (Cavium Inc. Version: SDK_BUILD build 52) 4.7.0
+Copyright (C) 2012 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+mips64-octeon-linux-gnu
+Using built-in specs.
+COLLECT_GCC=/home/debian/OCTEON-SDK/tools-gcc-4.7/bin/mips64-octeon-linux-gnu-gcc
+COLLECT_LTO_WRAPPER=/home/debian/OCTEON-SDK/tools-gcc-4.7/bin/../libexec/gcc/mips64-octeon-linux-gnu/4.7.0/lto-wrapper
+Target: mips64-octeon-linux-gnu
+Configured with: /usr/local/Cavium_Networks/octsw/toolchain/scripts/../src/configure --disable-fixed-point --without-ppl --without-python --disable-werror --with-lto-plugin-source=/usr/local/Cavium_Networks/octsw/toolchain/scripts/../gits/gcc/lto-plugin --enable-64-bit-bfb --enable-plugins --with-sysroot --with-local-prefix=/usr/local/Cavium_Networks/octsw/toolchain/scripts/../tools/mips64-octeon-linux-gnu/sys-root --disable-sim --enable-symvers=gnu --enable-__cxa_atexit --enable-symvers=gnu --enable-__cxa_atexit --with-mips-plt --disable-sim --target=mips64-octeon-linux-gnu --enable-languages=c,c++ --prefix=/usr/local/Cavium_Networks/octsw/toolchain/scripts/../tools --with-pkgversion='Cavium Inc. Version: SDK_BUILD build 52' --with-bugurl=http://www.cavium.com/support.html --with-libexpat-prefix=/usr/local/Cavium_Networks/octsw/toolchain/scripts/../libs
+Thread model: posix
+gcc version 4.7.0 (Cavium Inc. Version: SDK_BUILD build 52) 
+========== TOOL AVAILABILITY ==========
+readelf=/home/debian/OCTEON-SDK/tools-gcc-4.7/bin/mips64-octeon-linux-gnu-readelf
+GNU readelf (Cavium Inc. Version: SDK_BUILD build 52) 2.23.52
+Copyright 2012 Free Software Foundation, Inc.
+objdump=/home/debian/OCTEON-SDK/tools-gcc-4.7/bin/mips64-octeon-linux-gnu-objdump
+GNU objdump (Cavium Inc. Version: SDK_BUILD build 52) 2.23.52
+Copyright 2012 Free Software Foundation, Inc.
+nm=/home/debian/OCTEON-SDK/tools-gcc-4.7/bin/mips64-octeon-linux-gnu-nm
+GNU nm (Cavium Inc. Version: SDK_BUILD build 52) 2.23.52
+Copyright 2012 Free Software Foundation, Inc.
+size=/home/debian/OCTEON-SDK/tools-gcc-4.7/bin/mips64-octeon-linux-gnu-size
+GNU size (Cavium Inc. Version: SDK_BUILD build 52) 2.23.52
+Copyright 2012 Free Software Foundation, Inc.
+========== OLD OBJECT SOURCE MATCH ==========
+-rw-rw-r-- 1 debian debian 46292 11月20日 16:13 /tmp/pa220-p5-validation/obj/tcp.o
+/tmp/pa220-p5-validation/obj/tcp.o: ELF 32-bit MSB relocatable, MIPS, N32 MIPS64 rel2 version 1 (SYSV), with debug_info, not stripped
+58c1d9616500a208a8675be2102644ac8799a6c96f4e12dce84f7a8cb9314451  /tmp/pa220-p5-validation/obj/tcp.o
+ELF Header:
+  Magic:   7f 45 4c 46 01 02 01 00 00 00 00 00 00 00 00 00 
+  Class:                             ELF32
+  Data:                              2's complement, big endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              REL (Relocatable file)
+  Machine:                           MIPS R3000
+  Version:                           0x1
+  Entry point address:               0x0
+  Start of program headers:          0 (bytes into file)
+  Start of section headers:          25348 (bytes into file)
+  Flags:                             0x808b0025, noreorder, cpic, abi2, octeon, mips64r2
+  Size of this header:               52 (bytes)
+  Size of program headers:           0 (bytes)
+  Number of program headers:         0
+  Size of section headers:           40 (bytes)
+  Number of section headers:         31
+  Section header string table index: 28
+Attribute Section: gnu
+File Attributes
+  Tag_GNU_MIPS_ABI_FP: Soft float
+There are 31 section headers, starting at offset 0x6304:
+
+Section Headers:
+  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+  [ 0]                   NULL            00000000 000000 000000 00      0   0  0
+  [ 1] .text             PROGBITS        00000000 000040 001140 00  AX  0   0 16
+  [ 2] .rela.text        RELA            00000000 006bcc 000330 0c     29   1  4
+  [ 3] .data             PROGBITS        00000000 001180 000000 00  WA  0   0 16
+  [ 4] .bss              NOBITS          00000000 001180 000000 00  WA  0   0 16
+  [ 5] .reginfo          MIPS_REGINFO    00000000 001180 000018 18   A  0   0  8
+  [ 6] .pdr              PROGBITS        00000000 001198 000240 00      0   0  4
+  [ 7] .rela.pdr         RELA            00000000 006efc 0000d8 0c     29   6  4
+  [ 8] .mdebug.abiN32    PROGBITS        00000000 0013d8 000000 00      0   0  1
+  [ 9] .text.unlikely    PROGBITS        00000000 0013d8 0000c8 00  AX  0   0  4
+  [10] .rela.text.unlike RELA            00000000 006fd4 000030 0c     29   9  4
+  [11] .debug_info       MIPS_DWARF      00000000 0014a0 001aa5 00      0   0  1
+  [12] .rela.debug_info  RELA            00000000 007004 001824 0c     29  11  4
+  [13] .debug_abbrev     MIPS_DWARF      00000000 002f45 0003de 00      0   0  1
+  [14] .debug_loc        MIPS_DWARF      00000000 003323 001b8c 00      0   0  1
+  [15] .rela.debug_loc   RELA            00000000 008828 002928 0c     29  14  4
+  [16] .debug_aranges    MIPS_DWARF      00000000 004eaf 000028 00      0   0  1
+  [17] .rela.debug_arang RELA            00000000 00b150 000024 0c     29  16  4
+  [18] .debug_ranges     MIPS_DWARF      00000000 004ed7 000128 00      0   0  1
+  [19] .rela.debug_range RELA            00000000 00b174 000270 0c     29  18  4
+  [20] .debug_line       MIPS_DWARF      00000000 004fff 00069e 00      0   0  1
+  [21] .rela.debug_line  RELA            00000000 00b3e4 000018 0c     29  20  4
+  [22] .debug_str        MIPS_DWARF      00000000 00569d 000852 01  MS  0   0  1
+  [23] .comment          PROGBITS        00000000 005eef 000036 01  MS  0   0  1
+  [24] .note.GNU-stack   PROGBITS        00000000 005f25 000000 00      0   0  1
+  [25] .gnu.attributes   LOOS+ffffff5    00000000 005f25 000010 00      0   0  1
+  [26] .eh_frame         PROGBITS        00000000 005f38 0002b8 00   A  0   0  4
+  [27] .rela.eh_frame    RELA            00000000 00b3fc 0000d8 0c     29  26  4
+  [28] .shstrtab         STRTAB          00000000 0061f0 000111 00      0   0  1
+  [29] .symtab           SYMTAB          00000000 0067dc 000290 10     30  26  4
+  [30] .strtab           STRTAB          00000000 006a6c 00015f 00      0   0  1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings)
+  I (info), L (link order), G (group), T (TLS), E (exclude), x (unknown)
+  O (extra OS processing required) o (OS specific), p (processor specific)
+
+Relocation section '.rela.text' at offset 0x6bcc contains 68 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name + Addend
+0000006c  00001a04 R_MIPS_26         00000000   memcpy + 0
+00000090  00001b04 R_MIPS_26         00000000   memset + 0
+000000a0  00001a04 R_MIPS_26         00000000   memcpy + 0
+0000014c  00001b04 R_MIPS_26         00000000   memset + 0
+00000238  00000204 R_MIPS_26         00000000   .text + 2cc
+00000254  00000204 R_MIPS_26         00000000   .text + 2c8
+000002d8  00000204 R_MIPS_26         00000000   .text + 2e4
+000003c4  00000204 R_MIPS_26         00000000   .text + 3f8
+0000042c  00000204 R_MIPS_26         00000000   .text + 438
+000004ec  00001b04 R_MIPS_26         00000000   memset + 0
+000005b4  00001a04 R_MIPS_26         00000000   memcpy + 0
+000005d0  00001e04 R_MIPS_26         00000300   tcp_checksum_ipv4 + 0
+000006b8  00000204 R_MIPS_26         00000000   .text + 458
+000006d8  00001a04 R_MIPS_26         00000000   memcpy + 0
+00000704  00000204 R_MIPS_26         00000000   .text + 710
+0000075c  00000204 R_MIPS_26         00000000   .text + 458
+0000079c  00001e04 R_MIPS_26         00000300   tcp_checksum_ipv4 + 0
+000007a4  00000204 R_MIPS_26         00000000   .text + 7b4
+000007e0  00001b04 R_MIPS_26         00000000   memset + 0
+00000824  00002204 R_MIPS_26         000007d8   tcp_core_init + 0
+00000834  00001a04 R_MIPS_26         00000000   memcpy + 0
+00000854  00000204 R_MIPS_26         00000000   .text + 860
+000008e4  00001d04 R_MIPS_26         000000dc   tcp_segment_parse + 0
+000008fc  00001f04 R_MIPS_26         00000770   tcp_checksum_ipv4_vali + 0
+00000968  00001a04 R_MIPS_26         00000000   memcpy + 0
+0000097c  00000204 R_MIPS_26         00000000   .text + 0
+0000098c  00000204 R_MIPS_26         00000000   .text + d84
+000009c8  00000204 R_MIPS_26         00000000   .text + 9d4
+00000a0c  00000204 R_MIPS_26         00000000   .text + 660
+00000a20  00000204 R_MIPS_26         00000000   .text + d6c
+00000a44  00000204 R_MIPS_26         00000000   .text + 0
+00000a58  00000204 R_MIPS_26         00000000   .text + 0
+00000a68  00000204 R_MIPS_26         00000000   .text + d88
+00000a80  00000204 R_MIPS_26         00000000   .text + 44
+00000a88  00000204 R_MIPS_26         00000000   .text + d84
+00000ad8  00000204 R_MIPS_26         00000000   .text + 458
+00000ae0  00000204 R_MIPS_26         00000000   .text + d88
+00000b30  00000804 R_MIPS_26         00000000   .text.unlikely + 0
+00000b4c  00000204 R_MIPS_26         00000000   .text + d84
+00000b84  00000204 R_MIPS_26         00000000   .text + d5c
+00000bb8  00000804 R_MIPS_26         00000000   .text.unlikely + 0
+00000bf0  00000204 R_MIPS_26         00000000   .text + c10
+00000c10  00000204 R_MIPS_26         00000000   .text + c2c
+00000c58  00000204 R_MIPS_26         00000000   .text + d5c
+00000c78  00000204 R_MIPS_26         00000000   .text + d58
+00000c88  00001a04 R_MIPS_26         00000000   memcpy + 0
+00000cd0  00000204 R_MIPS_26         00000000   .text + d58
+00000cf0  00000204 R_MIPS_26         00000000   .text + d24
+00000d10  00000204 R_MIPS_26         00000000   .text + d24
+00000d5c  00000204 R_MIPS_26         00000000   .text + 734
+00000d64  00000204 R_MIPS_26         00000000   .text + d84
+00000d6c  00000204 R_MIPS_26         00000000   .text + d84
+00000d7c  00000204 R_MIPS_26         00000000   .text + a90
+00000df8  00000204 R_MIPS_26         00000000   .text + 44
+00000e00  00000204 R_MIPS_26         00000000   .text + eac
+00000e1c  00000204 R_MIPS_26         00000000   .text + 44
+00000e24  00000204 R_MIPS_26         00000000   .text + ea8
+00000e74  00000204 R_MIPS_26         00000000   .text + 458
+00000e94  00000204 R_MIPS_26         00000000   .text + ea8
+00000e9c  00000204 R_MIPS_26         00000000   .text + ea8
+00000f1c  00001a04 R_MIPS_26         00000000   memcpy + 0
+00000f34  00001c04 R_MIPS_26         00000000   memmove + 0
+00000f48  00000204 R_MIPS_26         00000000   .text + f54
+0000101c  00001a04 R_MIPS_26         00000000   memcpy + 0
+00001044  00000204 R_MIPS_26         00000000   .text + 660
+00001064  00000204 R_MIPS_26         00000000   .text + 1070
+000010fc  00000204 R_MIPS_26         00000000   .text + 660
+0000111c  00000204 R_MIPS_26         00000000   .text + 1128
+
+Relocation section '.rela.pdr' at offset 0x6efc contains 18 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name + Addend
+00000000  00000202 R_MIPS_32         00000000   .text + 0
+00000020  00000202 R_MIPS_32         00000000   .text + 44
+00000040  00000802 R_MIPS_32         00000000   .text.unlikely + 0
+00000060  00001d02 R_MIPS_32         000000dc   tcp_segment_parse + 0
+00000080  00001e02 R_MIPS_32         00000300   tcp_checksum_ipv4 + 0
+000000a0  00000202 R_MIPS_32         00000000   .text + 458
+000000c0  00000202 R_MIPS_32         00000000   .text + 660
+000000e0  00000202 R_MIPS_32         00000000   .text + 734
+00000100  00001f02 R_MIPS_32         00000770   tcp_checksum_ipv4_vali + 0
+00000120  00002002 R_MIPS_32         000007c0   tcp_seq_before + 0
+00000140  00002102 R_MIPS_32         000007cc   tcp_seq_after + 0
+00000160  00002202 R_MIPS_32         000007d8   tcp_core_init + 0
+00000180  00002302 R_MIPS_32         000007f0   tcp_core_listen + 0
+000001a0  00002402 R_MIPS_32         00000878   tcp_core_input + 0
+000001c0  00002502 R_MIPS_32         00000db4   tcp_core_poll + 0
+000001e0  00002602 R_MIPS_32         00000ec4   tcp_core_read + 0
+00000200  00002702 R_MIPS_32         00000f6c   tcp_core_write + 0
+00000220  00002802 R_MIPS_32         00001094   tcp_core_close + 0
+
+Relocation section '.rela.text.unlikely' at offset 0x6fd4 contains 4 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name + Addend
+00000044  00000804 R_MIPS_26         00000000   .text.unlikely + 70
+00000054  00000804 R_MIPS_26         00000000   .text.unlikely + 70
+00000074  00000804 R_MIPS_26         00000000   .text.unlikely + a8
+00000090  00001c04 R_MIPS_26         00000000   memmove + 0
+
+Relocation section '.rela.debug_info' at offset 0x7004 contains 515 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name + Addend
+00000006  00000e02 R_MIPS_32         00000000   .debug_abbrev + 0
+0000000c  00001302 R_MIPS_32         00000000   .debug_str + 471
+00000011  00001302 R_MIPS_32         00000000   .debug_str + 48
+00000015  00001102 R_MIPS_32         00000000   .debug_ranges + 110
+00000021  00001202 R_MIPS_32         00000000   .debug_line + 0
+00000026  00001302 R_MIPS_32         00000000   .debug_str + 203
+00000033  00001302 R_MIPS_32         00000000   .debug_str + 525
+0000003a  00001302 R_MIPS_32         00000000   .debug_str + 2ea
+00000041  00001302 R_MIPS_32         00000000   .debug_str + 6a8
+00000048  00001302 R_MIPS_32         00000000   .debug_str + 1b0
+0000004f  00001302 R_MIPS_32         00000000   .debug_str + 637
+0000005b  00001302 R_MIPS_32         00000000   .debug_str + 2fc
+00000068  00001302 R_MIPS_32         00000000   .debug_str + 2ba
+0000006f  00001302 R_MIPS_32         00000000   .debug_str + 1a2
+00000074  00001302 R_MIPS_32         00000000   .debug_str + 5da
+00000081  00001302 R_MIPS_32         00000000   .debug_str + 123
+000000bc  00001302 R_MIPS_32         00000000   .debug_str + 74d
+000000c9  00001302 R_MIPS_32         00000000   .debug_str + 41b
+000000d0  00001302 R_MIPS_32         00000000   .debug_str + 1f5
+000000d5  00001302 R_MIPS_32         00000000   .debug_str + 311
+000000e2  00001302 R_MIPS_32         00000000   .debug_str + 5f7
+000000e7  00001302 R_MIPS_32         00000000   .debug_str + 22
+000000f2  00001302 R_MIPS_32         00000000   .debug_str + 5b1
+000000fd  00001302 R_MIPS_32         00000000   .debug_str + 468
+00000111  00001302 R_MIPS_32         00000000   .debug_str + 44f
+0000011d  00001302 R_MIPS_32         00000000   .debug_str + 429
+0000012b  00001302 R_MIPS_32         00000000   .debug_str + 47d
+00000139  00001302 R_MIPS_32         00000000   .debug_str + 1da
+00000147  00001302 R_MIPS_32         00000000   .debug_str + cb
+00000155  00001302 R_MIPS_32         00000000   .debug_str + 7f5
+00000163  00001302 R_MIPS_32         00000000   .debug_str + 6f
+00000171  00001302 R_MIPS_32         00000000   .debug_str + 2a6
+0000017f  00001302 R_MIPS_32         00000000   .debug_str + 61f
+0000018d  00001302 R_MIPS_32         00000000   .debug_str + 843
+0000019b  00001302 R_MIPS_32         00000000   .debug_str + 7a9
+000001a9  00001302 R_MIPS_32         00000000   .debug_str + 7d0
+000001b7  00001302 R_MIPS_32         00000000   .debug_str + 154
+000001c5  00001302 R_MIPS_32         00000000   .debug_str + 386
+000001d3  00001302 R_MIPS_32         00000000   .debug_str + 340
+000001f2  00001302 R_MIPS_32         00000000   .debug_str + 2dd
+00000203  00001302 R_MIPS_32         00000000   .debug_str + 231
+0000020f  00001302 R_MIPS_32         00000000   .debug_str + 30c
+0000021d  00001302 R_MIPS_32         00000000   .debug_str + 13a
+0000022b  00001302 R_MIPS_32         00000000   .debug_str + 714
+00000239  00001302 R_MIPS_32         00000000   .debug_str + 1ef
+00000247  00001302 R_MIPS_32         00000000   .debug_str + 114
+00000255  00001302 R_MIPS_32         00000000   .debug_str + 442
+00000263  00001302 R_MIPS_32         00000000   .debug_str + 21a
+00000271  00001302 R_MIPS_32         00000000   .debug_str + 424
+0000027f  00001302 R_MIPS_32         00000000   .debug_str + 7be
+0000028d  00001302 R_MIPS_32         00000000   .debug_str + 188
+0000029b  00001302 R_MIPS_32         00000000   .debug_str + 62c
+000002a9  00001302 R_MIPS_32         00000000   .debug_str + 49c
+00000341  00001302 R_MIPS_32         00000000   .debug_str + 28
+0000034e  00001302 R_MIPS_32         00000000   .debug_str + 1d4
+00000354  00001302 R_MIPS_32         00000000   .debug_str + 501
+00000360  00001302 R_MIPS_32         00000000   .debug_str + 280
+00000366  00001302 R_MIPS_32         00000000   .debug_str + 7cb
+0000036c  00001302 R_MIPS_32         00000000   .debug_str + 632
+00000384  00001302 R_MIPS_32         00000000   .debug_str + 641
+0000038a  00001302 R_MIPS_32         00000000   .debug_str + 398
+00000390  00001302 R_MIPS_32         00000000   .debug_str + 578
+00000396  00001302 R_MIPS_32         00000000   .debug_str + 4e5
+0000039c  00001302 R_MIPS_32         00000000   .debug_str + 288
+000003a3  00001302 R_MIPS_32         00000000   .debug_str + 3b7
+000003b0  00001302 R_MIPS_32         00000000   .debug_str + 71b
+000003b6  00001302 R_MIPS_32         00000000   .debug_str + 104
+000003bc  00001302 R_MIPS_32         00000000   .debug_str + 25f
+000003c2  00001302 R_MIPS_32         00000000   .debug_str + 3b
+000003c9  00001302 R_MIPS_32         00000000   .debug_str + 652
+000003d5  00001302 R_MIPS_32         00000000   .debug_str + 4af
+000003e3  00001302 R_MIPS_32         00000000   .debug_str + 119
+000003f1  00001302 R_MIPS_32         00000000   .debug_str + 376
+000003ff  00001302 R_MIPS_32         00000000   .debug_str + 54a
+0000040d  00001302 R_MIPS_32         00000000   .debug_str + 37f
+0000041b  00001302 R_MIPS_32         00000000   .debug_str + 88
+00000429  00001302 R_MIPS_32         00000000   .debug_str + 29a
+00000437  00001302 R_MIPS_32         00000000   .debug_str + 81e
+00000445  00001302 R_MIPS_32         00000000   .debug_str + 6ca
+00000461  00001302 R_MIPS_32         00000000   .debug_str + 7a3
+0000046f  00001302 R_MIPS_32         00000000   .debug_str + 321
+0000047d  00001302 R_MIPS_32         00000000   .debug_str + 447
+00000497  00001302 R_MIPS_32         00000000   .debug_str + 559
+000004a3  00001302 R_MIPS_32         00000000   .debug_str + 833
+000004a9  00001302 R_MIPS_32         00000000   .debug_str + 765
+000004af  00001302 R_MIPS_32         00000000   .debug_str + 6ed
+000004b5  00001302 R_MIPS_32         00000000   .debug_str + 23c
+000004bb  00001302 R_MIPS_32         00000000   .debug_str + 72c
+000004c1  00001302 R_MIPS_32         00000000   .debug_str + 59d
+000004c7  00001302 R_MIPS_32         00000000   .debug_str + a0
+000004cd  00001302 R_MIPS_32         00000000   .debug_str + 457
+000004d3  00001302 R_MIPS_32         00000000   .debug_str + b9
+000004d9  00001302 R_MIPS_32         00000000   .debug_str + 5ba
+000004e0  00001302 R_MIPS_32         00000000   .debug_str + 2cc
+00000515  00001302 R_MIPS_32         00000000   .debug_str + 506
+00000522  00001302 R_MIPS_32         00000000   .debug_str + 1ef
+00000530  00001302 R_MIPS_32         00000000   .debug_str + 541
+0000053e  00001302 R_MIPS_32         00000000   .debug_str + 829
+0000054c  00001302 R_MIPS_32         00000000   .debug_str + 30
+0000055a  00001302 R_MIPS_32         00000000   .debug_str + 759
+00000576  00001302 R_MIPS_32         00000000   .debug_str + 568
+00000584  00001302 R_MIPS_32         00000000   .debug_str + 570
+000005a0  00001302 R_MIPS_32         00000000   .debug_str + 77d
+000005ae  00001302 R_MIPS_32         00000000   .debug_str + 488
+000005bc  00001302 R_MIPS_32         00000000   .debug_str + 616
+000005ca  00001302 R_MIPS_32         00000000   .debug_str + 6a1
+000005d8  00001302 R_MIPS_32         00000000   .debug_str + 2e2
+000005e6  00001302 R_MIPS_32         00000000   .debug_str + fd
+000005f5  00001302 R_MIPS_32         00000000   .debug_str + 1cc
+00000604  00001302 R_MIPS_32         00000000   .debug_str + 533
+00000613  00001302 R_MIPS_32         00000000   .debug_str + 34d
+00000622  00001302 R_MIPS_32         00000000   .debug_str + 3e2
+00000631  00001302 R_MIPS_32         00000000   .debug_str + 435
+00000640  00001302 R_MIPS_32         00000000   .debug_str + 91
+0000064f  00001302 R_MIPS_32         00000000   .debug_str + 35c
+0000065e  00001302 R_MIPS_32         00000000   .debug_str + 0
+0000066d  00001302 R_MIPS_32         00000000   .debug_str + 494
+0000067c  00001302 R_MIPS_32         00000000   .debug_str + 60b
+0000068b  00001302 R_MIPS_32         00000000   .debug_str + 6e3
+0000069a  00001302 R_MIPS_32         00000000   .debug_str + 3d6
+000006a9  00001302 R_MIPS_32         00000000   .debug_str + 209
+000006fc  00001302 R_MIPS_32         00000000   .debug_str + 3f9
+00000717  00001302 R_MIPS_32         00000000   .debug_str + 143
+00000733  00001302 R_MIPS_32         00000000   .debug_str + 2b4
+00000740  00001302 R_MIPS_32         00000000   .debug_str + 21f
+00000767  00001302 R_MIPS_32         00000000   .debug_str + 292
+00000772  00001302 R_MIPS_32         00000000   .debug_str + 797
+00000792  00001302 R_MIPS_32         00000000   .debug_str + 4d8
+000007b8  00001302 R_MIPS_32         00000000   .debug_str + 32d
+000007df  00001302 R_MIPS_32         00000000   .debug_str + 810
+00000803  00001302 R_MIPS_32         00000000   .debug_str + 785
+00000820  00001302 R_MIPS_32         00000000   .debug_str + 1bc
+00000841  00001302 R_MIPS_32         00000000   .debug_str + 7ed
+0000084f  00001302 R_MIPS_32         00000000   .debug_str + 5fc
+00000873  00001302 R_MIPS_32         00000000   .debug_str + 703
+0000088f  00001302 R_MIPS_32         00000000   .debug_str + 649
+0000089b  00001302 R_MIPS_32         00000000   .debug_str + 6d6
+000008a6  00000202 R_MIPS_32         00000000   .text + 0
+000008aa  00000202 R_MIPS_32         00000000   .text + 44
+000008ce  00001302 R_MIPS_32         00000000   .debug_str + 406
+000008d5  00000202 R_MIPS_32         00000000   .text + 44
+000008d9  00000202 R_MIPS_32         00000000   .text + dc
+000008dd  00000f02 R_MIPS_32         00000000   .debug_loc + 0
+000008ef  00000f02 R_MIPS_32         00000000   .debug_loc + 2d
+000008f4  00001302 R_MIPS_32         00000000   .debug_str + 1e9
+00000902  00001302 R_MIPS_32         00000000   .debug_str + 2a1
+0000090c  00000f02 R_MIPS_32         00000000   .debug_loc + 59
+00000911  00001302 R_MIPS_32         00000000   .debug_str + 3c6
+0000091b  00000f02 R_MIPS_32         00000000   .debug_loc + 78
+00000920  00000202 R_MIPS_32         00000000   .text + 74
+0000093f  00000202 R_MIPS_32         00000000   .text + 98
+0000095f  00000202 R_MIPS_32         00000000   .text + a8
+0000097f  00000802 R_MIPS_32         00000000   .text.unlikely + 0
+00000983  00000802 R_MIPS_32         00000000   .text.unlikely + c8
+00000987  00000f02 R_MIPS_32         00000000   .debug_loc + a6
+00000995  00000f02 R_MIPS_32         00000000   .debug_loc + d2
+0000099e  00000f02 R_MIPS_32         00000000   .debug_loc + fe
+000009a7  00000f02 R_MIPS_32         00000000   .debug_loc + 12a
+000009b0  00000802 R_MIPS_32         00000000   .text.unlikely + 8
+000009b4  00001102 R_MIPS_32         00000000   .debug_ranges + 0
+000009c4  00000f02 R_MIPS_32         00000000   .debug_loc + 13d
+000009cd  00000f02 R_MIPS_32         00000000   .debug_loc + fe
+000009d7  00000802 R_MIPS_32         00000000   .text.unlikely + 28
+000009db  00000802 R_MIPS_32         00000000   .text.unlikely + 30
+000009eb  00000f02 R_MIPS_32         00000000   .debug_loc + 15d
+000009f4  00000f02 R_MIPS_32         00000000   .debug_loc + 17d
+000009fe  00000802 R_MIPS_32         00000000   .text.unlikely + 6c
+00000a02  00000802 R_MIPS_32         00000000   .text.unlikely + 7c
+00000a12  00000f02 R_MIPS_32         00000000   .debug_loc + 19b
+00000a18  00000802 R_MIPS_32         00000000   .text.unlikely + 98
+00000a36  00001302 R_MIPS_32         00000000   .debug_str + 5cd
+00000a52  00001302 R_MIPS_32         00000000   .debug_str + 68f
+00000a5d  00000202 R_MIPS_32         00000000   .text + dc
+00000a61  00000202 R_MIPS_32         00000000   .text + 300
+00000a65  00000f02 R_MIPS_32         00000000   .debug_loc + 1ae
+00000a6f  00001302 R_MIPS_32         00000000   .debug_str + 292
+00000a79  00000f02 R_MIPS_32         00000000   .debug_loc + 1da
+00000a7e  00001302 R_MIPS_32         00000000   .debug_str + 797
+00000a88  00000f02 R_MIPS_32         00000000   .debug_loc + 206
+00000a8d  00001302 R_MIPS_32         00000000   .debug_str + 2c7
+00000a97  00000f02 R_MIPS_32         00000000   .debug_loc + 227
+00000a9c  00001302 R_MIPS_32         00000000   .debug_str + 81e
+00000aa6  00000f02 R_MIPS_32         00000000   .debug_loc + 25e
+00000aab  00001302 R_MIPS_32         00000000   .debug_str + 683
+00000ab5  00000f02 R_MIPS_32         00000000   .debug_loc + 271
+00000aba  00001302 R_MIPS_32         00000000   .debug_str + 18d
+00000ac4  00000f02 R_MIPS_32         00000000   .debug_loc + 2b3
+00000ac9  00001302 R_MIPS_32         00000000   .debug_str + 33b
+00000ad3  00000f02 R_MIPS_32         00000000   .debug_loc + 2e8
+00000ad8  00001302 R_MIPS_32         00000000   .debug_str + 580
+00000ae2  00000f02 R_MIPS_32         00000000   .debug_loc + 30b
+00000aeb  00000202 R_MIPS_32         00000000   .text + 154
+00000aef  00001102 R_MIPS_32         00000000   .debug_ranges + 18
+00000afe  00000f02 R_MIPS_32         00000000   .debug_loc + 324
+00000b08  00000202 R_MIPS_32         00000000   .text + 178
+00000b0c  00000202 R_MIPS_32         00000000   .text + 188
+00000b1b  00000f02 R_MIPS_32         00000000   .debug_loc + 337
+00000b25  00000202 R_MIPS_32         00000000   .text + 18c
+00000b29  00000202 R_MIPS_32         00000000   .text + 1b4
+00000b38  00000f02 R_MIPS_32         00000000   .debug_loc + 34c
+00000b42  00000202 R_MIPS_32         00000000   .text + 1b8
+00000b46  00000202 R_MIPS_32         00000000   .text + 1e0
+00000b55  00000f02 R_MIPS_32         00000000   .debug_loc + 361
+00000b5f  00000202 R_MIPS_32         00000000   .text + 1ec
+00000b63  00000202 R_MIPS_32         00000000   .text + 1fc
+00000b72  00000f02 R_MIPS_32         00000000   .debug_loc + 376
+00000b7c  00000202 R_MIPS_32         00000000   .text + 200
+00000b80  00000202 R_MIPS_32         00000000   .text + 210
+00000b8f  00000f02 R_MIPS_32         00000000   .debug_loc + 38b
+00000b99  00000202 R_MIPS_32         00000000   .text + 214
+00000b9d  00001102 R_MIPS_32         00000000   .debug_ranges + 38
+00000bac  00000f02 R_MIPS_32         00000000   .debug_loc + 3a0
+00000bb6  00000202 R_MIPS_32         00000000   .text + 2a4
+00000bba  00000202 R_MIPS_32         00000000   .text + 2b8
+00000bc9  00000f02 R_MIPS_32         00000000   .debug_loc + 3b5
+00000bcf  00000202 R_MIPS_32         00000000   .text + 154
+00000bf1  00001302 R_MIPS_32         00000000   .debug_str + 39d
+00000c12  00000202 R_MIPS_32         00000000   .text + 300
+00000c16  00000202 R_MIPS_32         00000000   .text + 458
+00000c27  00000f02 R_MIPS_32         00000000   .debug_loc + 3da
+00000c30  00000f02 R_MIPS_32         00000000   .debug_loc + 406
+00000c40  00000f02 R_MIPS_32         00000000   .debug_loc + 432
+00000c54  00000202 R_MIPS_32         00000000   .text + 324
+00000c58  00000202 R_MIPS_32         00000000   .text + 450
+00000c63  00000f02 R_MIPS_32         00000000   .debug_loc + 45e
+00000c6c  00000f02 R_MIPS_32         00000000   .debug_loc + 471
+00000c75  00000f02 R_MIPS_32         00000000   .debug_loc + 484
+00000c7e  00000f02 R_MIPS_32         00000000   .debug_loc + 4a5
+00000c83  00000202 R_MIPS_32         00000000   .text + 324
+00000c87  00000202 R_MIPS_32         00000000   .text + 450
+00000c90  00000f02 R_MIPS_32         00000000   .debug_loc + 4c6
+00000c99  00000f02 R_MIPS_32         00000000   .debug_loc + 575
+00000ca2  00000202 R_MIPS_32         00000000   .text + 338
+00000ca6  00001102 R_MIPS_32         00000000   .debug_ranges + 50
+00000cb5  00000f02 R_MIPS_32         00000000   .debug_loc + 5dc
+00000cbe  00000f02 R_MIPS_32         00000000   .debug_loc + 633
+00000cc8  00000202 R_MIPS_32         00000000   .text + 36c
+00000ccc  00001102 R_MIPS_32         00000000   .debug_ranges + 68
+00000cdb  00000f02 R_MIPS_32         00000000   .debug_loc + 679
+00000ce4  00000f02 R_MIPS_32         00000000   .debug_loc + 6ad
+00000cee  00000202 R_MIPS_32         00000000   .text + 3a4
+00000cf2  00000202 R_MIPS_32         00000000   .text + 3b4
+00000d01  00000f02 R_MIPS_32         00000000   .debug_loc + 70f
+00000d0a  00000f02 R_MIPS_32         00000000   .debug_loc + 738
+00000d14  00000202 R_MIPS_32         00000000   .text + 3b4
+00000d18  00000202 R_MIPS_32         00000000   .text + 3cc
+00000d27  00000f02 R_MIPS_32         00000000   .debug_loc + 74c
+00000d30  00000f02 R_MIPS_32         00000000   .debug_loc + 775
+00000d3a  00000202 R_MIPS_32         00000000   .text + 3e4
+00000d3e  00000202 R_MIPS_32         00000000   .text + 3f8
+00000d4d  00000f02 R_MIPS_32         00000000   .debug_loc + 788
+00000d56  00000f02 R_MIPS_32         00000000   .debug_loc + 79b
+00000d60  00000202 R_MIPS_32         00000000   .text + 41c
+00000d64  00000202 R_MIPS_32         00000000   .text + 434
+00000d73  00000f02 R_MIPS_32         00000000   .debug_loc + 7ff
+00000d7c  00000f02 R_MIPS_32         00000000   .debug_loc + 812
+00000d86  00000202 R_MIPS_32         00000000   .text + 434
+00000d8a  00000202 R_MIPS_32         00000000   .text + 450
+00000d95  00000f02 R_MIPS_32         00000000   .debug_loc + 835
+00000d9e  00001302 R_MIPS_32         00000000   .debug_str + 740
+00000dbe  00001302 R_MIPS_32         00000000   .debug_str + 199
+00000dc9  00000202 R_MIPS_32         00000000   .text + 458
+00000dcd  00000202 R_MIPS_32         00000000   .text + 660
+00000dd1  00000f02 R_MIPS_32         00000000   .debug_loc + 848
+00000de3  00000f02 R_MIPS_32         00000000   .debug_loc + 875
+00000de8  00001302 R_MIPS_32         00000000   .debug_str + 7a3
+00000df2  00000f02 R_MIPS_32         00000000   .debug_loc + 8c7
+00000e01  00000f02 R_MIPS_32         00000000   .debug_loc + 8f3
+00000e10  00000f02 R_MIPS_32         00000000   .debug_loc + 92a
+00000e15  00001302 R_MIPS_32         00000000   .debug_str + 447
+00000e1f  00000f02 R_MIPS_32         00000000   .debug_loc + 961
+00000e24  00001302 R_MIPS_32         00000000   .debug_str + 6ca
+00000e2e  00000f02 R_MIPS_32         00000000   .debug_loc + 98d
+00000e33  00001302 R_MIPS_32         00000000   .debug_str + 4bb
+00000e3d  00000f02 R_MIPS_32         00000000   .debug_loc + 9b9
+00000e42  00001302 R_MIPS_32         00000000   .debug_str + 58b
+00000e4c  00000f02 R_MIPS_32         00000000   .debug_loc + 9e5
+00000e67  00000f02 R_MIPS_32         00000000   .debug_loc + a27
+00000e6c  00001302 R_MIPS_32         00000000   .debug_str + b4
+00000e76  00000f02 R_MIPS_32         00000000   .debug_loc + a80
+00000e7b  00001302 R_MIPS_32         00000000   .debug_str + 3b1
+00000e85  00000f02 R_MIPS_32         00000000   .debug_loc + acc
+00000e94  00000f02 R_MIPS_32         00000000   .debug_loc + b1f
+00000e9d  00000202 R_MIPS_32         00000000   .text + 500
+00000ea1  00001102 R_MIPS_32         00000000   .debug_ranges + 88
+00000eb0  00000f02 R_MIPS_32         00000000   .debug_loc + b32
+00000eb9  00000f02 R_MIPS_32         00000000   .debug_loc + b46
+00000ec3  00000202 R_MIPS_32         00000000   .text + 510
+00000ec7  00001102 R_MIPS_32         00000000   .debug_ranges + a0
+00000ed6  00000f02 R_MIPS_32         00000000   .debug_loc + b75
+00000edf  00000f02 R_MIPS_32         00000000   .debug_loc + b96
+00000ee9  00000202 R_MIPS_32         00000000   .text + 514
+00000eed  00000202 R_MIPS_32         00000000   .text + 520
+00000efc  00000f02 R_MIPS_32         00000000   .debug_loc + bcb
+00000f05  00000f02 R_MIPS_32         00000000   .debug_loc + bdf
+00000f0f  00000202 R_MIPS_32         00000000   .text + 538
+00000f13  00001102 R_MIPS_32         00000000   .debug_ranges + b8
+00000f22  00000f02 R_MIPS_32         00000000   .debug_loc + c14
+00000f2b  00000f02 R_MIPS_32         00000000   .debug_loc + c35
+00000f35  00000202 R_MIPS_32         00000000   .text + 558
+00000f39  00001102 R_MIPS_32         00000000   .debug_ranges + d0
+00000f48  00000f02 R_MIPS_32         00000000   .debug_loc + c6a
+00000f52  00000202 R_MIPS_32         00000000   .text + 578
+00000f56  00000202 R_MIPS_32         00000000   .text + 580
+00000f65  00000f02 R_MIPS_32         00000000   .debug_loc + c98
+00000f6e  00000f02 R_MIPS_32         00000000   .debug_loc + cc2
+00000f78  00000202 R_MIPS_32         00000000   .text + 598
+00000f7c  00000202 R_MIPS_32         00000000   .text + 5a0
+00000f8b  00000f02 R_MIPS_32         00000000   .debug_loc + cf7
+00000f94  00000f02 R_MIPS_32         00000000   .debug_loc + d0d
+00000f9e  00000202 R_MIPS_32         00000000   .text + 5e8
+00000fa2  00001102 R_MIPS_32         00000000   .debug_ranges + f0
+00000fb1  00000f02 R_MIPS_32         00000000   .debug_loc + b1f
+00000fba  00000f02 R_MIPS_32         00000000   .debug_loc + d23
+00000fc0  00000202 R_MIPS_32         00000000   .text + 4f4
+00000fdf  00000202 R_MIPS_32         00000000   .text + 5bc
+00000fff  00000202 R_MIPS_32         00000000   .text + 5d8
+00001025  00000202 R_MIPS_32         00000000   .text + 62c
+0000104d  00001302 R_MIPS_32         00000000   .debug_str + da
+00001058  00000202 R_MIPS_32         00000000   .text + 660
+0000105c  00000202 R_MIPS_32         00000000   .text + 734
+00001060  00000f02 R_MIPS_32         00000000   .debug_loc + d58
+00001072  00000f02 R_MIPS_32         00000000   .debug_loc + d85
+00001077  00001302 R_MIPS_32         00000000   .debug_str + 7a3
+00001081  00000f02 R_MIPS_32         00000000   .debug_loc + db1
+00001090  00000f02 R_MIPS_32         00000000   .debug_loc + dd2
+00001095  00001302 R_MIPS_32         00000000   .debug_str + 68a
+0000109f  00000f02 R_MIPS_32         00000000   .debug_loc + dfe
+000010ae  00000f02 R_MIPS_32         00000000   .debug_loc + e2a
+000010bd  00000f02 R_MIPS_32         00000000   .debug_loc + e4b
+000010c2  00001302 R_MIPS_32         00000000   .debug_str + 4bb
+000010cc  00000f02 R_MIPS_32         00000000   .debug_loc + e85
+000010d1  00001302 R_MIPS_32         00000000   .debug_str + 58b
+000010db  00000f02 R_MIPS_32         00000000   .debug_loc + ea6
+000010ee  00000202 R_MIPS_32         00000000   .text + 6c0
+00001130  00000202 R_MIPS_32         00000000   .text + 6e0
+0000114e  00001302 R_MIPS_32         00000000   .debug_str + 590
+00001159  00000202 R_MIPS_32         00000000   .text + 734
+0000115d  00000202 R_MIPS_32         00000000   .text + 770
+00001161  00000f02 R_MIPS_32         00000000   .debug_loc + ec7
+00001173  00000f02 R_MIPS_32         00000000   .debug_loc + ef3
+00001178  00001302 R_MIPS_32         00000000   .debug_str + 58b
+00001182  00000f02 R_MIPS_32         00000000   .debug_loc + f14
+00001191  00000f02 R_MIPS_32         00000000   .debug_loc + f40
+00001196  00000202 R_MIPS_32         00000000   .text + 764
+000011cc  00001302 R_MIPS_32         00000000   .debug_str + 66b
+000011d7  00000202 R_MIPS_32         00000000   .text + 770
+000011db  00000202 R_MIPS_32         00000000   .text + 7c0
+000011df  00000f02 R_MIPS_32         00000000   .debug_loc + f6d
+000011f3  00000f02 R_MIPS_32         00000000   .debug_loc + fb1
+00001202  00000f02 R_MIPS_32         00000000   .debug_loc + feb
+00001207  00001302 R_MIPS_32         00000000   .debug_str + 292
+00001211  00000f02 R_MIPS_32         00000000   .debug_loc + 1025
+00001216  00001302 R_MIPS_32         00000000   .debug_str + 797
+00001220  00000f02 R_MIPS_32         00000000   .debug_loc + 105f
+00001225  00000202 R_MIPS_32         00000000   .text + 7a4
+00001249  00000202 R_MIPS_32         00000000   .text + 7c0
+0000124d  00000202 R_MIPS_32         00000000   .text + 7cc
+0000126d  00000202 R_MIPS_32         00000000   .text + 7cc
+00001271  00000202 R_MIPS_32         00000000   .text + 7d8
+0000128e  00001302 R_MIPS_32         00000000   .debug_str + 7a
+00001296  00000202 R_MIPS_32         00000000   .text + 7d8
+0000129a  00000202 R_MIPS_32         00000000   .text + 7f0
+000012a7  00001302 R_MIPS_32         00000000   .debug_str + 1fe
+000012b2  00000f02 R_MIPS_32         00000000   .debug_loc + 1099
+000012b7  00000202 R_MIPS_32         00000000   .text + 7e8
+000012d7  00001302 R_MIPS_32         00000000   .debug_str + 5e7
+000012e3  00000202 R_MIPS_32         00000000   .text + 7f0
+000012e7  00000202 R_MIPS_32         00000000   .text + 878
+000012eb  00000f02 R_MIPS_32         00000000   .debug_loc + 10c5
+000012f5  00001302 R_MIPS_32         00000000   .debug_str + 1fe
+00001300  00000f02 R_MIPS_32         00000000   .debug_loc + 10f1
+00001305  00001302 R_MIPS_32         00000000   .debug_str + 541
+00001310  00000f02 R_MIPS_32         00000000   .debug_loc + 1133
+00001315  00001302 R_MIPS_32         00000000   .debug_str + 30
+00001320  00000f02 R_MIPS_32         00000000   .debug_loc + 116d
+00001325  00001302 R_MIPS_32         00000000   .debug_str + ec
+00001330  00000f02 R_MIPS_32         00000000   .debug_loc + 11a7
+00001335  00000202 R_MIPS_32         00000000   .text + 82c
+00001349  00000202 R_MIPS_32         00000000   .text + 83c
+00001360  00001302 R_MIPS_32         00000000   .debug_str + 3ea
+0000136c  00000202 R_MIPS_32         00000000   .text + 878
+00001370  00000202 R_MIPS_32         00000000   .text + db4
+00001374  00000f02 R_MIPS_32         00000000   .debug_loc + 11de
+00001387  00000f02 R_MIPS_32         00000000   .debug_loc + 120b
+0000138c  00001302 R_MIPS_32         00000000   .debug_str + 4d1
+00001397  00000f02 R_MIPS_32         00000000   .debug_loc + 1237
+0000139c  00001302 R_MIPS_32         00000000   .debug_str + 355
+000013a7  00000f02 R_MIPS_32         00000000   .debug_loc + 127c
+000013ac  00001302 R_MIPS_32         00000000   .debug_str + 292
+000013b7  00000f02 R_MIPS_32         00000000   .debug_loc + 12c1
+000013bc  00001302 R_MIPS_32         00000000   .debug_str + 797
+000013c7  00000f02 R_MIPS_32         00000000   .debug_loc + 12ed
+000013d7  00000f02 R_MIPS_32         00000000   .debug_loc + 130e
+000013dc  00001302 R_MIPS_32         00000000   .debug_str + 58b
+000013e7  00000f02 R_MIPS_32         00000000   .debug_loc + 1362
+000013f7  00000f02 R_MIPS_32         00000000   .debug_loc + 13a7
+0000140a  00001302 R_MIPS_32         00000000   .debug_str + 663
+00001415  00000f02 R_MIPS_32         00000000   .debug_loc + 13ec
+0000141a  00001302 R_MIPS_32         00000000   .debug_str + 51a
+00001426  00001302 R_MIPS_32         00000000   .debug_str + 7b5
+00001431  00000f02 R_MIPS_32         00000000   .debug_loc + 1426
+00001436  00001302 R_MIPS_32         00000000   .debug_str + 4ed
+00001441  00000f02 R_MIPS_32         00000000   .debug_loc + 1439
+0000144a  00000202 R_MIPS_32         00000000   .text + b24
+0000144e  00000202 R_MIPS_32         00000000   .text + b38
+0000145e  00000f02 R_MIPS_32         00000000   .debug_loc + 1459
+00001467  00000f02 R_MIPS_32         00000000   .debug_loc + 146c
+0000146c  00000202 R_MIPS_32         00000000   .text + b24
+00001470  00000202 R_MIPS_32         00000000   .text + b38
+00001480  00000202 R_MIPS_32         00000000   .text + b8c
+00001484  00000202 R_MIPS_32         00000000   .text + b94
+00001494  00000f02 R_MIPS_32         00000000   .debug_loc + 147f
+0000149d  00000f02 R_MIPS_32         00000000   .debug_loc + 1493
+000014a7  00000202 R_MIPS_32         00000000   .text + b9c
+000014ab  00000202 R_MIPS_32         00000000   .text + ba4
+000014bb  00000f02 R_MIPS_32         00000000   .debug_loc + 14a6
+000014c4  00000f02 R_MIPS_32         00000000   .debug_loc + 14ba
+000014ce  00000202 R_MIPS_32         00000000   .text + bac
+000014d2  00000202 R_MIPS_32         00000000   .text + bc0
+000014e2  00000f02 R_MIPS_32         00000000   .debug_loc + 14cd
+000014eb  00000f02 R_MIPS_32         00000000   .debug_loc + 14e0
+000014f0  00000202 R_MIPS_32         00000000   .text + bac
+000014f4  00000202 R_MIPS_32         00000000   .text + bc0
+00001504  00000202 R_MIPS_32         00000000   .text + c60
+00001508  00000202 R_MIPS_32         00000000   .text + c68
+00001518  00000f02 R_MIPS_32         00000000   .debug_loc + 14f3
+0000151e  00000202 R_MIPS_32         00000000   .text + 8ec
+0000153f  00000202 R_MIPS_32         00000000   .text + 904
+00001565  00000202 R_MIPS_32         00000000   .text + 970
+00001584  00000202 R_MIPS_32         00000000   .text + 984
+0000159e  00000202 R_MIPS_32         00000000   .text + a14
+000015db  00000202 R_MIPS_32         00000000   .text + a4c
+000015f5  00000202 R_MIPS_32         00000000   .text + a60
+0000160f  00000202 R_MIPS_32         00000000   .text + a88
+00001623  00000202 R_MIPS_32         00000000   .text + ae0
+00001654  00000202 R_MIPS_32         00000000   .text + b38
+00001668  00000202 R_MIPS_32         00000000   .text + bc0
+0000167c  00000202 R_MIPS_32         00000000   .text + c90
+00001690  00000202 R_MIPS_32         00000000   .text + d64
+000016ae  00001302 R_MIPS_32         00000000   .debug_str + 251
+000016ba  00000202 R_MIPS_32         00000000   .text + db4
+000016be  00000202 R_MIPS_32         00000000   .text + ec4
+000016c2  00000f02 R_MIPS_32         00000000   .debug_loc + 1506
+000016d5  00000f02 R_MIPS_32         00000000   .debug_loc + 1532
+000016e5  00000f02 R_MIPS_32         00000000   .debug_loc + 15a0
+000016ea  00001302 R_MIPS_32         00000000   .debug_str + 58b
+000016f5  00000f02 R_MIPS_32         00000000   .debug_loc + 1622
+00001705  00000f02 R_MIPS_32         00000000   .debug_loc + 1699
+0000170e  00000202 R_MIPS_32         00000000   .text + de8
+00001712  00000202 R_MIPS_32         00000000   .text + df0
+00001722  00000f02 R_MIPS_32         00000000   .debug_loc + 1711
+0000172b  00000f02 R_MIPS_32         00000000   .debug_loc + 1726
+00001735  00000202 R_MIPS_32         00000000   .text + e10
+00001739  00000202 R_MIPS_32         00000000   .text + e14
+00001749  00000f02 R_MIPS_32         00000000   .debug_loc + 1747
+00001752  00000f02 R_MIPS_32         00000000   .debug_loc + 1788
+0000175c  00000202 R_MIPS_32         00000000   .text + e34
+00001760  00000202 R_MIPS_32         00000000   .text + e3c
+00001770  00000f02 R_MIPS_32         00000000   .debug_loc + 17d8
+00001779  00000f02 R_MIPS_32         00000000   .debug_loc + 17ed
+0000177f  00000202 R_MIPS_32         00000000   .text + e00
+00001793  00000202 R_MIPS_32         00000000   .text + e24
+000017a7  00000202 R_MIPS_32         00000000   .text + e7c
+000017c8  00001302 R_MIPS_32         00000000   .debug_str + 4a1
+000017d4  00000202 R_MIPS_32         00000000   .text + ec4
+000017d8  00000202 R_MIPS_32         00000000   .text + f6c
+000017dc  00000f02 R_MIPS_32         00000000   .debug_loc + 1819
+000017ef  00000f02 R_MIPS_32         00000000   .debug_loc + 1845
+000017ff  00000f02 R_MIPS_32         00000000   .debug_loc + 1871
+00001804  00001302 R_MIPS_32         00000000   .debug_str + 19
+0000180f  00000f02 R_MIPS_32         00000000   .debug_loc + 18b6
+00001814  00001302 R_MIPS_32         00000000   .debug_str + 13
+0000181f  00000f02 R_MIPS_32         00000000   .debug_loc + 18fb
+00001824  00000202 R_MIPS_32         00000000   .text + f24
+0000183e  00000202 R_MIPS_32         00000000   .text + f3c
+0000185b  00001302 R_MIPS_32         00000000   .debug_str + 801
+00001867  00000202 R_MIPS_32         00000000   .text + f6c
+0000186b  00000202 R_MIPS_32         00000000   .text + 1094
+0000186f  00000f02 R_MIPS_32         00000000   .debug_loc + 190e
+00001882  00000f02 R_MIPS_32         00000000   .debug_loc + 193b
+00001887  00001302 R_MIPS_32         00000000   .debug_str + 68a
+00001892  00000f02 R_MIPS_32         00000000   .debug_loc + 1967
+00001897  00001302 R_MIPS_32         00000000   .debug_str + 5e0
+000018a2  00000f02 R_MIPS_32         00000000   .debug_loc + 1988
+000018b2  00000f02 R_MIPS_32         00000000   .debug_loc + 19a9
+000018b7  00001302 R_MIPS_32         00000000   .debug_str + 58b
+000018c2  00000f02 R_MIPS_32         00000000   .debug_loc + 19d5
+000018d2  00000f02 R_MIPS_32         00000000   .debug_loc + 1a01
+000018d7  00001302 R_MIPS_32         00000000   .debug_str + 182
+000018e2  00000f02 R_MIPS_32         00000000   .debug_loc + 1a2d
+000018e7  00000202 R_MIPS_32         00000000   .text + 1024
+00001901  00000202 R_MIPS_32         00000000   .text + 104c
+0000193c  00001302 R_MIPS_32         00000000   .debug_str + 6bb
+00001948  00000202 R_MIPS_32         00000000   .text + 1094
+0000194c  00000202 R_MIPS_32         00000000   .text + 113c
+00001950  00000f02 R_MIPS_32         00000000   .debug_loc + 1a9c
+00001963  00000f02 R_MIPS_32         00000000   .debug_loc + 1ac8
+00001973  00000f02 R_MIPS_32         00000000   .debug_loc + 1af4
+00001978  00001302 R_MIPS_32         00000000   .debug_str + 58b
+00001983  00000f02 R_MIPS_32         00000000   .debug_loc + 1b20
+00001993  00000f02 R_MIPS_32         00000000   .debug_loc + 1b4c
+00001998  00001302 R_MIPS_32         00000000   .debug_str + 188
+000019a3  00000f02 R_MIPS_32         00000000   .debug_loc + 1b79
+000019a8  00000202 R_MIPS_32         00000000   .text + 1104
+000019e0  00001302 R_MIPS_32         00000000   .debug_str + 36a
+000019ed  00001302 R_MIPS_32         00000000   .debug_str + 302
+000019fa  00001302 R_MIPS_32         00000000   .debug_str + 26f
+00001a07  00001302 R_MIPS_32         00000000   .debug_str + 4f5
+00001a14  00001302 R_MIPS_32         00000000   .debug_str + 7e2
+00001a27  00001302 R_MIPS_32         00000000   .debug_str + 4c7
+00001a35  00001302 R_MIPS_32         00000000   .debug_str + 16b
+00001a44  00001302 R_MIPS_32         00000000   .debug_str + 213
+00001a66  00001302 R_MIPS_32         00000000   .debug_str + 3cf
+00001a88  00001302 R_MIPS_32         00000000   .debug_str + 775
+
+Relocation section '.rela.debug_loc' at offset 0x8828 contains 878 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name + Addend
+00000000  00000202 R_MIPS_32         00000000   .text + 44
+00000004  00000202 R_MIPS_32         00000000   .text + 48
+0000000c  00000202 R_MIPS_32         00000000   .text + 48
+00000010  00000202 R_MIPS_32         00000000   .text + dc
+00000019  00000202 R_MIPS_32         00000000   .text + dc
+0000001d  00000202 R_MIPS_32         00000000   .text + dc
+0000002d  00000202 R_MIPS_32         00000000   .text + 44
+00000031  00000202 R_MIPS_32         00000000   .text + 6c
+00000038  00000202 R_MIPS_32         00000000   .text + 6c
+0000003c  00000202 R_MIPS_32         00000000   .text + d4
+00000043  00000202 R_MIPS_32         00000000   .text + d4
+00000047  00000202 R_MIPS_32         00000000   .text + dc
+00000059  00000202 R_MIPS_32         00000000   .text + 80
+0000005d  00000202 R_MIPS_32         00000000   .text + 97
+00000065  00000202 R_MIPS_32         00000000   .text + 97
+00000069  00000202 R_MIPS_32         00000000   .text + b4
+00000078  00000202 R_MIPS_32         00000000   .text + 90
+0000007c  00000202 R_MIPS_32         00000000   .text + d0
+00000083  00000202 R_MIPS_32         00000000   .text + d0
+00000087  00000202 R_MIPS_32         00000000   .text + d4
+0000008f  00000202 R_MIPS_32         00000000   .text + d4
+00000093  00000202 R_MIPS_32         00000000   .text + dc
+000000a6  00000802 R_MIPS_32         00000000   .text.unlikely + 0
+000000aa  00000802 R_MIPS_32         00000000   .text.unlikely + 4
+000000b2  00000802 R_MIPS_32         00000000   .text.unlikely + 4
+000000b6  00000802 R_MIPS_32         00000000   .text.unlikely + c8
+000000be  00000802 R_MIPS_32         00000000   .text.unlikely + c8
+000000c2  00000802 R_MIPS_32         00000000   .text.unlikely + c8
+000000d2  00000802 R_MIPS_32         00000000   .text.unlikely + 0
+000000d6  00000802 R_MIPS_32         00000000   .text.unlikely + 90
+000000dd  00000802 R_MIPS_32         00000000   .text.unlikely + 90
+000000e1  00000802 R_MIPS_32         00000000   .text.unlikely + c0
+000000e8  00000802 R_MIPS_32         00000000   .text.unlikely + c0
+000000ec  00000802 R_MIPS_32         00000000   .text.unlikely + c8
+000000fe  00000802 R_MIPS_32         00000000   .text.unlikely + 0
+00000102  00000802 R_MIPS_32         00000000   .text.unlikely + 88
+00000109  00000802 R_MIPS_32         00000000   .text.unlikely + 88
+0000010d  00000802 R_MIPS_32         00000000   .text.unlikely + b8
+00000114  00000802 R_MIPS_32         00000000   .text.unlikely + b8
+00000118  00000802 R_MIPS_32         00000000   .text.unlikely + c8
+0000012a  00000802 R_MIPS_32         00000000   .text.unlikely + 38
+0000012e  00000802 R_MIPS_32         00000000   .text.unlikely + a4
+0000013d  00000802 R_MIPS_32         00000000   .text.unlikely + 0
+00000141  00000802 R_MIPS_32         00000000   .text.unlikely + 90
+00000149  00000802 R_MIPS_32         00000000   .text.unlikely + 90
+0000014d  00000802 R_MIPS_32         00000000   .text.unlikely + 97
+0000015d  00000802 R_MIPS_32         00000000   .text.unlikely + 28
+00000161  00000802 R_MIPS_32         00000000   .text.unlikely + 90
+00000169  00000802 R_MIPS_32         00000000   .text.unlikely + 90
+0000016d  00000802 R_MIPS_32         00000000   .text.unlikely + 97
+0000017d  00000802 R_MIPS_32         00000000   .text.unlikely + 28
+00000181  00000802 R_MIPS_32         00000000   .text.unlikely + 88
+00000188  00000802 R_MIPS_32         00000000   .text.unlikely + 88
+0000018c  00000802 R_MIPS_32         00000000   .text.unlikely + b0
+0000019b  00000802 R_MIPS_32         00000000   .text.unlikely + 6c
+0000019f  00000802 R_MIPS_32         00000000   .text.unlikely + 7c
+000001ae  00000202 R_MIPS_32         00000000   .text + dc
+000001b2  00000202 R_MIPS_32         00000000   .text + e8
+000001ba  00000202 R_MIPS_32         00000000   .text + e8
+000001be  00000202 R_MIPS_32         00000000   .text + 300
+000001c6  00000202 R_MIPS_32         00000000   .text + 300
+000001ca  00000202 R_MIPS_32         00000000   .text + 300
+000001da  00000202 R_MIPS_32         00000000   .text + dc
+000001de  00000202 R_MIPS_32         00000000   .text + 144
+000001e5  00000202 R_MIPS_32         00000000   .text + 144
+000001e9  00000202 R_MIPS_32         00000000   .text + 2f8
+000001f0  00000202 R_MIPS_32         00000000   .text + 2f8
+000001f4  00000202 R_MIPS_32         00000000   .text + 300
+00000206  00000202 R_MIPS_32         00000000   .text + dc
+0000020a  00000202 R_MIPS_32         00000000   .text + 148
+00000211  00000202 R_MIPS_32         00000000   .text + 148
+00000215  00000202 R_MIPS_32         00000000   .text + 300
+00000227  00000202 R_MIPS_32         00000000   .text + dc
+0000022b  00000202 R_MIPS_32         00000000   .text + 14c
+00000232  00000202 R_MIPS_32         00000000   .text + 14c
+00000236  00000202 R_MIPS_32         00000000   .text + 153
+0000023d  00000202 R_MIPS_32         00000000   .text + 153
+00000241  00000202 R_MIPS_32         00000000   .text + 2f4
+00000248  00000202 R_MIPS_32         00000000   .text + 2f4
+0000024c  00000202 R_MIPS_32         00000000   .text + 300
+0000025e  00000202 R_MIPS_32         00000000   .text + 138
+00000262  00000202 R_MIPS_32         00000000   .text + 2e0
+00000271  00000202 R_MIPS_32         00000000   .text + 224
+00000275  00000202 R_MIPS_32         00000000   .text + 240
+0000027d  00000202 R_MIPS_32         00000000   .text + 240
+00000281  00000202 R_MIPS_32         00000000   .text + 254
+00000288  00000202 R_MIPS_32         00000000   .text + 254
+0000028c  00000202 R_MIPS_32         00000000   .text + 25c
+00000295  00000202 R_MIPS_32         00000000   .text + 25c
+00000299  00000202 R_MIPS_32         00000000   .text + 2c8
+000002a0  00000202 R_MIPS_32         00000000   .text + 2cc
+000002a4  00000202 R_MIPS_32         00000000   .text + 2d8
+000002b3  00000202 R_MIPS_32         00000000   .text + 120
+000002b7  00000202 R_MIPS_32         00000000   .text + 138
+000002be  00000202 R_MIPS_32         00000000   .text + 138
+000002c2  00000202 R_MIPS_32         00000000   .text + 144
+000002cf  00000202 R_MIPS_32         00000000   .text + 144
+000002d3  00000202 R_MIPS_32         00000000   .text + 153
+000002e8  00000202 R_MIPS_32         00000000   .text + 244
+000002ec  00000202 R_MIPS_32         00000000   .text + 270
+000002f4  00000202 R_MIPS_32         00000000   .text + 270
+000002f8  00000202 R_MIPS_32         00000000   .text + 2c8
+0000030b  00000202 R_MIPS_32         00000000   .text + 270
+0000030f  00000202 R_MIPS_32         00000000   .text + 2c8
+00000324  00000202 R_MIPS_32         00000000   .text + 15c
+00000328  00000202 R_MIPS_32         00000000   .text + 2e0
+00000337  00000202 R_MIPS_32         00000000   .text + 178
+0000033b  00000202 R_MIPS_32         00000000   .text + 2e0
+0000034c  00000202 R_MIPS_32         00000000   .text + 18c
+00000350  00000202 R_MIPS_32         00000000   .text + 2e0
+00000361  00000202 R_MIPS_32         00000000   .text + 1b8
+00000365  00000202 R_MIPS_32         00000000   .text + 2e0
+00000376  00000202 R_MIPS_32         00000000   .text + 1ec
+0000037a  00000202 R_MIPS_32         00000000   .text + 2e0
+0000038b  00000202 R_MIPS_32         00000000   .text + 200
+0000038f  00000202 R_MIPS_32         00000000   .text + 2e0
+000003a0  00000202 R_MIPS_32         00000000   .text + 214
+000003a4  00000202 R_MIPS_32         00000000   .text + 2e0
+000003b5  00000202 R_MIPS_32         00000000   .text + 2a4
+000003b9  00000202 R_MIPS_32         00000000   .text + 2ac
+000003c0  00000202 R_MIPS_32         00000000   .text + 2ac
+000003c4  00000202 R_MIPS_32         00000000   .text + 2c4
+000003da  00000202 R_MIPS_32         00000000   .text + 300
+000003de  00000202 R_MIPS_32         00000000   .text + 340
+000003e5  00000202 R_MIPS_32         00000000   .text + 340
+000003e9  00000202 R_MIPS_32         00000000   .text + 450
+000003f3  00000202 R_MIPS_32         00000000   .text + 450
+000003f7  00000202 R_MIPS_32         00000000   .text + 458
+00000406  00000202 R_MIPS_32         00000000   .text + 300
+0000040a  00000202 R_MIPS_32         00000000   .text + 3cc
+00000411  00000202 R_MIPS_32         00000000   .text + 3cc
+00000415  00000202 R_MIPS_32         00000000   .text + 450
+0000041f  00000202 R_MIPS_32         00000000   .text + 450
+00000423  00000202 R_MIPS_32         00000000   .text + 458
+00000432  00000202 R_MIPS_32         00000000   .text + 300
+00000436  00000202 R_MIPS_32         00000000   .text + 40c
+0000043d  00000202 R_MIPS_32         00000000   .text + 40c
+00000441  00000202 R_MIPS_32         00000000   .text + 450
+0000044b  00000202 R_MIPS_32         00000000   .text + 450
+0000044f  00000202 R_MIPS_32         00000000   .text + 458
+0000045e  00000202 R_MIPS_32         00000000   .text + 324
+00000462  00000202 R_MIPS_32         00000000   .text + 40c
+00000471  00000202 R_MIPS_32         00000000   .text + 324
+00000475  00000202 R_MIPS_32         00000000   .text + 450
+00000484  00000202 R_MIPS_32         00000000   .text + 324
+00000488  00000202 R_MIPS_32         00000000   .text + 3cc
+0000048f  00000202 R_MIPS_32         00000000   .text + 3cc
+00000493  00000202 R_MIPS_32         00000000   .text + 450
+000004a5  00000202 R_MIPS_32         00000000   .text + 324
+000004a9  00000202 R_MIPS_32         00000000   .text + 340
+000004b0  00000202 R_MIPS_32         00000000   .text + 340
+000004b4  00000202 R_MIPS_32         00000000   .text + 450
+000004c6  00000202 R_MIPS_32         00000000   .text + 324
+000004ca  00000202 R_MIPS_32         00000000   .text + 340
+000004e6  00000202 R_MIPS_32         00000000   .text + 340
+000004ea  00000202 R_MIPS_32         00000000   .text + 354
+0000050a  00000202 R_MIPS_32         00000000   .text + 354
+0000050e  00000202 R_MIPS_32         00000000   .text + 35c
+00000520  00000202 R_MIPS_32         00000000   .text + 360
+00000524  00000202 R_MIPS_32         00000000   .text + 374
+0000052b  00000202 R_MIPS_32         00000000   .text + 384
+0000052f  00000202 R_MIPS_32         00000000   .text + 398
+00000536  00000202 R_MIPS_32         00000000   .text + 398
+0000053a  00000202 R_MIPS_32         00000000   .text + 3a0
+0000054c  00000202 R_MIPS_32         00000000   .text + 3a4
+00000550  00000202 R_MIPS_32         00000000   .text + 3a8
+00000557  00000202 R_MIPS_32         00000000   .text + 3cc
+0000055b  00000202 R_MIPS_32         00000000   .text + 3ec
+00000562  00000202 R_MIPS_32         00000000   .text + 3f8
+00000566  00000202 R_MIPS_32         00000000   .text + 424
+00000575  00000202 R_MIPS_32         00000000   .text + 324
+00000579  00000202 R_MIPS_32         00000000   .text + 354
+00000581  00000202 R_MIPS_32         00000000   .text + 354
+00000585  00000202 R_MIPS_32         00000000   .text + 384
+0000058d  00000202 R_MIPS_32         00000000   .text + 384
+00000591  00000202 R_MIPS_32         00000000   .text + 398
+00000599  00000202 R_MIPS_32         00000000   .text + 398
+0000059d  00000202 R_MIPS_32         00000000   .text + 3c4
+000005a5  00000202 R_MIPS_32         00000000   .text + 3c4
+000005a9  00000202 R_MIPS_32         00000000   .text + 3cc
+000005b1  00000202 R_MIPS_32         00000000   .text + 3cc
+000005b5  00000202 R_MIPS_32         00000000   .text + 3d0
+000005bc  00000202 R_MIPS_32         00000000   .text + 3d0
+000005c0  00000202 R_MIPS_32         00000000   .text + 3d8
+000005c9  00000202 R_MIPS_32         00000000   .text + 3f8
+000005cd  00000202 R_MIPS_32         00000000   .text + 418
+000005dc  00000202 R_MIPS_32         00000000   .text + 324
+000005e0  00000202 R_MIPS_32         00000000   .text + 340
+000005fc  00000202 R_MIPS_32         00000000   .text + 340
+00000600  00000202 R_MIPS_32         00000000   .text + 354
+00000620  00000202 R_MIPS_32         00000000   .text + 354
+00000624  00000202 R_MIPS_32         00000000   .text + 35c
+00000633  00000202 R_MIPS_32         00000000   .text + 324
+00000637  00000202 R_MIPS_32         00000000   .text + 340
+0000064f  00000202 R_MIPS_32         00000000   .text + 340
+00000653  00000202 R_MIPS_32         00000000   .text + 450
+00000679  00000202 R_MIPS_32         00000000   .text + 354
+0000067d  00000202 R_MIPS_32         00000000   .text + 35c
+0000068f  00000202 R_MIPS_32         00000000   .text + 360
+00000693  00000202 R_MIPS_32         00000000   .text + 380
+0000069a  00000202 R_MIPS_32         00000000   .text + 384
+0000069e  00000202 R_MIPS_32         00000000   .text + 3a0
+000006ad  00000202 R_MIPS_32         00000000   .text + 354
+000006b1  00000202 R_MIPS_32         00000000   .text + 384
+000006c9  00000202 R_MIPS_32         00000000   .text + 384
+000006cd  00000202 R_MIPS_32         00000000   .text + 3cc
+000006e5  00000202 R_MIPS_32         00000000   .text + 3cc
+000006e9  00000202 R_MIPS_32         00000000   .text + 450
+0000070f  00000202 R_MIPS_32         00000000   .text + 398
+00000713  00000202 R_MIPS_32         00000000   .text + 3a0
+00000725  00000202 R_MIPS_32         00000000   .text + 3a4
+00000729  00000202 R_MIPS_32         00000000   .text + 3b0
+00000738  00000202 R_MIPS_32         00000000   .text + 398
+0000073c  00000202 R_MIPS_32         00000000   .text + 450
+0000074c  00000202 R_MIPS_32         00000000   .text + 3a8
+00000750  00000202 R_MIPS_32         00000000   .text + 3b0
+00000762  00000202 R_MIPS_32         00000000   .text + 3b4
+00000766  00000202 R_MIPS_32         00000000   .text + 3c0
+00000775  00000202 R_MIPS_32         00000000   .text + 3a8
+00000779  00000202 R_MIPS_32         00000000   .text + 40c
+00000788  00000202 R_MIPS_32         00000000   .text + 3cc
+0000078c  00000202 R_MIPS_32         00000000   .text + 3f4
+0000079b  00000202 R_MIPS_32         00000000   .text + 3cc
+0000079f  00000202 R_MIPS_32         00000000   .text + 3d0
+000007bc  00000202 R_MIPS_32         00000000   .text + 3d0
+000007c0  00000202 R_MIPS_32         00000000   .text + 3d8
+000007dd  00000202 R_MIPS_32         00000000   .text + 3dc
+000007e1  00000202 R_MIPS_32         00000000   .text + 3e4
+000007ff  00000202 R_MIPS_32         00000000   .text + 414
+00000803  00000202 R_MIPS_32         00000000   .text + 42c
+00000812  00000202 R_MIPS_32         00000000   .text + 414
+00000816  00000202 R_MIPS_32         00000000   .text + 418
+00000835  00000202 R_MIPS_32         00000000   .text + 438
+00000839  00000202 R_MIPS_32         00000000   .text + 448
+00000848  00000202 R_MIPS_32         00000000   .text + 458
+0000084c  00000202 R_MIPS_32         00000000   .text + 45c
+00000854  00000202 R_MIPS_32         00000000   .text + 45c
+00000858  00000202 R_MIPS_32         00000000   .text + 660
+00000861  00000202 R_MIPS_32         00000000   .text + 660
+00000865  00000202 R_MIPS_32         00000000   .text + 660
+00000875  00000202 R_MIPS_32         00000000   .text + 458
+00000879  00000202 R_MIPS_32         00000000   .text + 4b8
+00000880  00000202 R_MIPS_32         00000000   .text + 4b8
+00000884  00000202 R_MIPS_32         00000000   .text + 624
+0000088b  00000202 R_MIPS_32         00000000   .text + 624
+0000088f  00000202 R_MIPS_32         00000000   .text + 62b
+00000898  00000202 R_MIPS_32         00000000   .text + 62b
+0000089c  00000202 R_MIPS_32         00000000   .text + 62c
+000008a6  00000202 R_MIPS_32         00000000   .text + 62c
+000008aa  00000202 R_MIPS_32         00000000   .text + 658
+000008b1  00000202 R_MIPS_32         00000000   .text + 658
+000008b5  00000202 R_MIPS_32         00000000   .text + 660
+000008c7  00000202 R_MIPS_32         00000000   .text + 458
+000008cb  00000202 R_MIPS_32         00000000   .text + 4d8
+000008d2  00000202 R_MIPS_32         00000000   .text + 4d8
+000008d6  00000202 R_MIPS_32         00000000   .text + 62c
+000008e0  00000202 R_MIPS_32         00000000   .text + 62c
+000008e4  00000202 R_MIPS_32         00000000   .text + 660
+000008f3  00000202 R_MIPS_32         00000000   .text + 458
+000008f7  00000202 R_MIPS_32         00000000   .text + 4e0
+000008fe  00000202 R_MIPS_32         00000000   .text + 4e0
+00000902  00000202 R_MIPS_32         00000000   .text + 5c0
+00000909  00000202 R_MIPS_32         00000000   .text + 5c0
+0000090d  00000202 R_MIPS_32         00000000   .text + 62c
+00000917  00000202 R_MIPS_32         00000000   .text + 62c
+0000091b  00000202 R_MIPS_32         00000000   .text + 660
+0000092a  00000202 R_MIPS_32         00000000   .text + 458
+0000092e  00000202 R_MIPS_32         00000000   .text + 4f3
+00000935  00000202 R_MIPS_32         00000000   .text + 4f3
+00000939  00000202 R_MIPS_32         00000000   .text + 5e8
+00000940  00000202 R_MIPS_32         00000000   .text + 5e8
+00000944  00000202 R_MIPS_32         00000000   .text + 62c
+0000094e  00000202 R_MIPS_32         00000000   .text + 62c
+00000952  00000202 R_MIPS_32         00000000   .text + 660
+00000961  00000202 R_MIPS_32         00000000   .text + 458
+00000965  00000202 R_MIPS_32         00000000   .text + 4f3
+0000096c  00000202 R_MIPS_32         00000000   .text + 4f3
+00000970  00000202 R_MIPS_32         00000000   .text + 62c
+0000097a  00000202 R_MIPS_32         00000000   .text + 62c
+0000097e  00000202 R_MIPS_32         00000000   .text + 660
+0000098d  00000202 R_MIPS_32         00000000   .text + 458
+00000991  00000202 R_MIPS_32         00000000   .text + 4f3
+00000998  00000202 R_MIPS_32         00000000   .text + 4f3
+0000099c  00000202 R_MIPS_32         00000000   .text + 62c
+000009a6  00000202 R_MIPS_32         00000000   .text + 62c
+000009aa  00000202 R_MIPS_32         00000000   .text + 660
+000009b9  00000202 R_MIPS_32         00000000   .text + 458
+000009bd  00000202 R_MIPS_32         00000000   .text + 4f3
+000009c4  00000202 R_MIPS_32         00000000   .text + 4f3
+000009c8  00000202 R_MIPS_32         00000000   .text + 62c
+000009d2  00000202 R_MIPS_32         00000000   .text + 62c
+000009d6  00000202 R_MIPS_32         00000000   .text + 660
+000009e5  00000202 R_MIPS_32         00000000   .text + 458
+000009e9  00000202 R_MIPS_32         00000000   .text + 4f3
+000009f0  00000202 R_MIPS_32         00000000   .text + 4f3
+000009f4  00000202 R_MIPS_32         00000000   .text + 61c
+000009fb  00000202 R_MIPS_32         00000000   .text + 61c
+000009ff  00000202 R_MIPS_32         00000000   .text + 62b
+00000a06  00000202 R_MIPS_32         00000000   .text + 62b
+00000a0a  00000202 R_MIPS_32         00000000   .text + 62c
+00000a14  00000202 R_MIPS_32         00000000   .text + 62c
+00000a18  00000202 R_MIPS_32         00000000   .text + 660
+00000a27  00000202 R_MIPS_32         00000000   .text + 47c
+00000a2b  00000202 R_MIPS_32         00000000   .text + 610
+00000a32  00000202 R_MIPS_32         00000000   .text + 610
+00000a36  00000202 R_MIPS_32         00000000   .text + 62b
+00000a3d  00000202 R_MIPS_32         00000000   .text + 62b
+00000a41  00000202 R_MIPS_32         00000000   .text + 62c
+00000a4e  00000202 R_MIPS_32         00000000   .text + 62c
+00000a52  00000202 R_MIPS_32         00000000   .text + 640
+00000a59  00000202 R_MIPS_32         00000000   .text + 640
+00000a5d  00000202 R_MIPS_32         00000000   .text + 658
+00000a67  00000202 R_MIPS_32         00000000   .text + 658
+00000a6b  00000202 R_MIPS_32         00000000   .text + 660
+00000a80  00000202 R_MIPS_32         00000000   .text + 47c
+00000a84  00000202 R_MIPS_32         00000000   .text + 5c4
+00000a8b  00000202 R_MIPS_32         00000000   .text + 5c4
+00000a8f  00000202 R_MIPS_32         00000000   .text + 62c
+00000aa2  00000202 R_MIPS_32         00000000   .text + 62c
+00000aa6  00000202 R_MIPS_32         00000000   .text + 654
+00000aad  00000202 R_MIPS_32         00000000   .text + 654
+00000ab1  00000202 R_MIPS_32         00000000   .text + 660
+00000acc  00000202 R_MIPS_32         00000000   .text + 48c
+00000ad0  00000202 R_MIPS_32         00000000   .text + 618
+00000ad7  00000202 R_MIPS_32         00000000   .text + 618
+00000adb  00000202 R_MIPS_32         00000000   .text + 62b
+00000ae2  00000202 R_MIPS_32         00000000   .text + 62c
+00000ae6  00000202 R_MIPS_32         00000000   .text + 650
+00000aed  00000202 R_MIPS_32         00000000   .text + 650
+00000af1  00000202 R_MIPS_32         00000000   .text + 654
+00000afd  00000202 R_MIPS_32         00000000   .text + 654
+00000b01  00000202 R_MIPS_32         00000000   .text + 660
+00000b1f  00000202 R_MIPS_32         00000000   .text + 618
+00000b23  00000202 R_MIPS_32         00000000   .text + 62b
+00000b32  00000202 R_MIPS_32         00000000   .text + 4f8
+00000b36  00000202 R_MIPS_32         00000000   .text + 5bb
+00000b46  00000202 R_MIPS_32         00000000   .text + 4f8
+00000b4a  00000202 R_MIPS_32         00000000   .text + 610
+00000b51  00000202 R_MIPS_32         00000000   .text + 610
+00000b55  00000202 R_MIPS_32         00000000   .text + 62b
+00000b5c  00000202 R_MIPS_32         00000000   .text + 62b
+00000b60  00000202 R_MIPS_32         00000000   .text + 62c
+00000b75  00000202 R_MIPS_32         00000000   .text + 518
+00000b79  00000202 R_MIPS_32         00000000   .text + 5c0
+00000b80  00000202 R_MIPS_32         00000000   .text + 5c0
+00000b84  00000202 R_MIPS_32         00000000   .text + 62c
+00000b96  00000202 R_MIPS_32         00000000   .text + 518
+00000b9a  00000202 R_MIPS_32         00000000   .text + 624
+00000ba4  00000202 R_MIPS_32         00000000   .text + 624
+00000ba8  00000202 R_MIPS_32         00000000   .text + 62b
+00000bb2  00000202 R_MIPS_32         00000000   .text + 62b
+00000bb6  00000202 R_MIPS_32         00000000   .text + 62c
+00000bcb  00000202 R_MIPS_32         00000000   .text + 50c
+00000bcf  00000202 R_MIPS_32         00000000   .text + 5bb
+00000bdf  00000202 R_MIPS_32         00000000   .text + 50c
+00000be3  00000202 R_MIPS_32         00000000   .text + 624
+00000bed  00000202 R_MIPS_32         00000000   .text + 624
+00000bf1  00000202 R_MIPS_32         00000000   .text + 62b
+00000bfb  00000202 R_MIPS_32         00000000   .text + 62b
+00000bff  00000202 R_MIPS_32         00000000   .text + 62c
+00000c14  00000202 R_MIPS_32         00000000   .text + 518
+00000c18  00000202 R_MIPS_32         00000000   .text + 5e8
+00000c1f  00000202 R_MIPS_32         00000000   .text + 5e8
+00000c23  00000202 R_MIPS_32         00000000   .text + 62c
+00000c35  00000202 R_MIPS_32         00000000   .text + 518
+00000c39  00000202 R_MIPS_32         00000000   .text + 624
+00000c43  00000202 R_MIPS_32         00000000   .text + 624
+00000c47  00000202 R_MIPS_32         00000000   .text + 62b
+00000c51  00000202 R_MIPS_32         00000000   .text + 62b
+00000c55  00000202 R_MIPS_32         00000000   .text + 62c
+00000c6a  00000202 R_MIPS_32         00000000   .text + 568
+00000c6e  00000202 R_MIPS_32         00000000   .text + 624
+00000c75  00000202 R_MIPS_32         00000000   .text + 624
+00000c79  00000202 R_MIPS_32         00000000   .text + 62b
+00000c82  00000202 R_MIPS_32         00000000   .text + 62b
+00000c86  00000202 R_MIPS_32         00000000   .text + 62c
+00000c98  00000202 R_MIPS_32         00000000   .text + 578
+00000c9c  00000202 R_MIPS_32         00000000   .text + 58c
+00000ca3  00000202 R_MIPS_32         00000000   .text + 58c
+00000ca7  00000202 R_MIPS_32         00000000   .text + 5bb
+00000cc2  00000202 R_MIPS_32         00000000   .text + 578
+00000cc6  00000202 R_MIPS_32         00000000   .text + 624
+00000cd0  00000202 R_MIPS_32         00000000   .text + 624
+00000cd4  00000202 R_MIPS_32         00000000   .text + 62b
+00000cde  00000202 R_MIPS_32         00000000   .text + 62b
+00000ce2  00000202 R_MIPS_32         00000000   .text + 62c
+00000cf7  00000202 R_MIPS_32         00000000   .text + 598
+00000cfb  00000202 R_MIPS_32         00000000   .text + 5a0
+00000d0d  00000202 R_MIPS_32         00000000   .text + 598
+00000d11  00000202 R_MIPS_32         00000000   .text + 5a0
+00000d23  00000202 R_MIPS_32         00000000   .text + 618
+00000d27  00000202 R_MIPS_32         00000000   .text + 624
+00000d31  00000202 R_MIPS_32         00000000   .text + 624
+00000d35  00000202 R_MIPS_32         00000000   .text + 62b
+00000d3f  00000202 R_MIPS_32         00000000   .text + 62b
+00000d43  00000202 R_MIPS_32         00000000   .text + 62c
+00000d58  00000202 R_MIPS_32         00000000   .text + 660
+00000d5c  00000202 R_MIPS_32         00000000   .text + 664
+00000d64  00000202 R_MIPS_32         00000000   .text + 664
+00000d68  00000202 R_MIPS_32         00000000   .text + 734
+00000d71  00000202 R_MIPS_32         00000000   .text + 734
+00000d75  00000202 R_MIPS_32         00000000   .text + 734
+00000d85  00000202 R_MIPS_32         00000000   .text + 660
+00000d89  00000202 R_MIPS_32         00000000   .text + 6bf
+00000d90  00000202 R_MIPS_32         00000000   .text + 6bf
+00000d94  00000202 R_MIPS_32         00000000   .text + 70c
+00000d9b  00000202 R_MIPS_32         00000000   .text + 70c
+00000d9f  00000202 R_MIPS_32         00000000   .text + 734
+00000db1  00000202 R_MIPS_32         00000000   .text + 660
+00000db5  00000202 R_MIPS_32         00000000   .text + 6bf
+00000dbc  00000202 R_MIPS_32         00000000   .text + 6bf
+00000dc0  00000202 R_MIPS_32         00000000   .text + 734
+00000dd2  00000202 R_MIPS_32         00000000   .text + 660
+00000dd6  00000202 R_MIPS_32         00000000   .text + 6bf
+00000ddd  00000202 R_MIPS_32         00000000   .text + 6bf
+00000de1  00000202 R_MIPS_32         00000000   .text + 70c
+00000de8  00000202 R_MIPS_32         00000000   .text + 70c
+00000dec  00000202 R_MIPS_32         00000000   .text + 734
+00000dfe  00000202 R_MIPS_32         00000000   .text + 660
+00000e02  00000202 R_MIPS_32         00000000   .text + 6a4
+00000e09  00000202 R_MIPS_32         00000000   .text + 6a4
+00000e0d  00000202 R_MIPS_32         00000000   .text + 70c
+00000e14  00000202 R_MIPS_32         00000000   .text + 70c
+00000e18  00000202 R_MIPS_32         00000000   .text + 734
+00000e2a  00000202 R_MIPS_32         00000000   .text + 660
+00000e2e  00000202 R_MIPS_32         00000000   .text + 6ac
+00000e35  00000202 R_MIPS_32         00000000   .text + 6ac
+00000e39  00000202 R_MIPS_32         00000000   .text + 734
+00000e4b  00000202 R_MIPS_32         00000000   .text + 660
+00000e4f  00000202 R_MIPS_32         00000000   .text + 6b0
+00000e56  00000202 R_MIPS_32         00000000   .text + 6b0
+00000e5a  00000202 R_MIPS_32         00000000   .text + 6e8
+00000e61  00000202 R_MIPS_32         00000000   .text + 6e8
+00000e65  00000202 R_MIPS_32         00000000   .text + 70c
+00000e6f  00000202 R_MIPS_32         00000000   .text + 70c
+00000e73  00000202 R_MIPS_32         00000000   .text + 734
+00000e85  00000202 R_MIPS_32         00000000   .text + 660
+00000e89  00000202 R_MIPS_32         00000000   .text + 6bf
+00000e90  00000202 R_MIPS_32         00000000   .text + 6bf
+00000e94  00000202 R_MIPS_32         00000000   .text + 734
+00000ea6  00000202 R_MIPS_32         00000000   .text + 660
+00000eaa  00000202 R_MIPS_32         00000000   .text + 6bf
+00000eb1  00000202 R_MIPS_32         00000000   .text + 6bf
+00000eb5  00000202 R_MIPS_32         00000000   .text + 734
+00000ec7  00000202 R_MIPS_32         00000000   .text + 734
+00000ecb  00000202 R_MIPS_32         00000000   .text + 73c
+00000ed3  00000202 R_MIPS_32         00000000   .text + 73c
+00000ed7  00000202 R_MIPS_32         00000000   .text + 770
+00000edf  00000202 R_MIPS_32         00000000   .text + 770
+00000ee3  00000202 R_MIPS_32         00000000   .text + 770
+00000ef3  00000202 R_MIPS_32         00000000   .text + 734
+00000ef7  00000202 R_MIPS_32         00000000   .text + 763
+00000efe  00000202 R_MIPS_32         00000000   .text + 763
+00000f02  00000202 R_MIPS_32         00000000   .text + 770
+00000f14  00000202 R_MIPS_32         00000000   .text + 734
+00000f18  00000202 R_MIPS_32         00000000   .text + 74c
+00000f1f  00000202 R_MIPS_32         00000000   .text + 74c
+00000f23  00000202 R_MIPS_32         00000000   .text + 763
+00000f2a  00000202 R_MIPS_32         00000000   .text + 763
+00000f2e  00000202 R_MIPS_32         00000000   .text + 770
+00000f40  00000202 R_MIPS_32         00000000   .text + 734
+00000f44  00000202 R_MIPS_32         00000000   .text + 754
+00000f4b  00000202 R_MIPS_32         00000000   .text + 754
+00000f4f  00000202 R_MIPS_32         00000000   .text + 763
+00000f57  00000202 R_MIPS_32         00000000   .text + 763
+00000f5b  00000202 R_MIPS_32         00000000   .text + 770
+00000f6d  00000202 R_MIPS_32         00000000   .text + 770
+00000f71  00000202 R_MIPS_32         00000000   .text + 798
+00000f79  00000202 R_MIPS_32         00000000   .text + 798
+00000f7d  00000202 R_MIPS_32         00000000   .text + 7ac
+00000f85  00000202 R_MIPS_32         00000000   .text + 7ac
+00000f89  00000202 R_MIPS_32         00000000   .text + 7b4
+00000f91  00000202 R_MIPS_32         00000000   .text + 7b4
+00000f95  00000202 R_MIPS_32         00000000   .text + 7c0
+00000f9d  00000202 R_MIPS_32         00000000   .text + 7c0
+00000fa1  00000202 R_MIPS_32         00000000   .text + 7c0
+00000fb1  00000202 R_MIPS_32         00000000   .text + 770
+00000fb5  00000202 R_MIPS_32         00000000   .text + 7a3
+00000fbc  00000202 R_MIPS_32         00000000   .text + 7a3
+00000fc0  00000202 R_MIPS_32         00000000   .text + 7ac
+00000fca  00000202 R_MIPS_32         00000000   .text + 7ac
+00000fce  00000202 R_MIPS_32         00000000   .text + 7b4
+00000fd5  00000202 R_MIPS_32         00000000   .text + 7b4
+00000fd9  00000202 R_MIPS_32         00000000   .text + 7c0
+00000feb  00000202 R_MIPS_32         00000000   .text + 770
+00000fef  00000202 R_MIPS_32         00000000   .text + 7a3
+00000ff6  00000202 R_MIPS_32         00000000   .text + 7a3
+00000ffa  00000202 R_MIPS_32         00000000   .text + 7ac
+00001004  00000202 R_MIPS_32         00000000   .text + 7ac
+00001008  00000202 R_MIPS_32         00000000   .text + 7b4
+0000100f  00000202 R_MIPS_32         00000000   .text + 7b4
+00001013  00000202 R_MIPS_32         00000000   .text + 7c0
+00001025  00000202 R_MIPS_32         00000000   .text + 770
+00001029  00000202 R_MIPS_32         00000000   .text + 7a3
+00001030  00000202 R_MIPS_32         00000000   .text + 7a3
+00001034  00000202 R_MIPS_32         00000000   .text + 7ac
+0000103e  00000202 R_MIPS_32         00000000   .text + 7ac
+00001042  00000202 R_MIPS_32         00000000   .text + 7b4
+00001049  00000202 R_MIPS_32         00000000   .text + 7b4
+0000104d  00000202 R_MIPS_32         00000000   .text + 7c0
+0000105f  00000202 R_MIPS_32         00000000   .text + 770
+00001063  00000202 R_MIPS_32         00000000   .text + 7a3
+0000106a  00000202 R_MIPS_32         00000000   .text + 7a3
+0000106e  00000202 R_MIPS_32         00000000   .text + 7ac
+00001078  00000202 R_MIPS_32         00000000   .text + 7ac
+0000107c  00000202 R_MIPS_32         00000000   .text + 7b4
+00001083  00000202 R_MIPS_32         00000000   .text + 7b4
+00001087  00000202 R_MIPS_32         00000000   .text + 7c0
+00001099  00000202 R_MIPS_32         00000000   .text + 7d8
+0000109d  00000202 R_MIPS_32         00000000   .text + 7e7
+000010a4  00000202 R_MIPS_32         00000000   .text + 7e7
+000010a8  00000202 R_MIPS_32         00000000   .text + 7e8
+000010b2  00000202 R_MIPS_32         00000000   .text + 7e8
+000010b6  00000202 R_MIPS_32         00000000   .text + 7f0
+000010c5  00000202 R_MIPS_32         00000000   .text + 7f0
+000010c9  00000202 R_MIPS_32         00000000   .text + 7fc
+000010d1  00000202 R_MIPS_32         00000000   .text + 7fc
+000010d5  00000202 R_MIPS_32         00000000   .text + 878
+000010dd  00000202 R_MIPS_32         00000000   .text + 878
+000010e1  00000202 R_MIPS_32         00000000   .text + 878
+000010f1  00000202 R_MIPS_32         00000000   .text + 7f0
+000010f5  00000202 R_MIPS_32         00000000   .text + 82b
+000010fc  00000202 R_MIPS_32         00000000   .text + 82b
+00001100  00000202 R_MIPS_32         00000000   .text + 85c
+00001107  00000202 R_MIPS_32         00000000   .text + 85c
+0000110b  00000202 R_MIPS_32         00000000   .text + 860
+00001112  00000202 R_MIPS_32         00000000   .text + 860
+00001116  00000202 R_MIPS_32         00000000   .text + 870
+0000111d  00000202 R_MIPS_32         00000000   .text + 870
+00001121  00000202 R_MIPS_32         00000000   .text + 878
+00001133  00000202 R_MIPS_32         00000000   .text + 7f0
+00001137  00000202 R_MIPS_32         00000000   .text + 82b
+0000113e  00000202 R_MIPS_32         00000000   .text + 82b
+00001142  00000202 R_MIPS_32         00000000   .text + 85c
+0000114c  00000202 R_MIPS_32         00000000   .text + 85c
+00001150  00000202 R_MIPS_32         00000000   .text + 860
+00001157  00000202 R_MIPS_32         00000000   .text + 860
+0000115b  00000202 R_MIPS_32         00000000   .text + 878
+0000116d  00000202 R_MIPS_32         00000000   .text + 7f0
+00001171  00000202 R_MIPS_32         00000000   .text + 82b
+00001178  00000202 R_MIPS_32         00000000   .text + 82b
+0000117c  00000202 R_MIPS_32         00000000   .text + 85c
+00001186  00000202 R_MIPS_32         00000000   .text + 85c
+0000118a  00000202 R_MIPS_32         00000000   .text + 860
+00001191  00000202 R_MIPS_32         00000000   .text + 860
+00001195  00000202 R_MIPS_32         00000000   .text + 878
+000011a7  00000202 R_MIPS_32         00000000   .text + 7f0
+000011ab  00000202 R_MIPS_32         00000000   .text + 82b
+000011b2  00000202 R_MIPS_32         00000000   .text + 82b
+000011b6  00000202 R_MIPS_32         00000000   .text + 85c
+000011bd  00000202 R_MIPS_32         00000000   .text + 85c
+000011c1  00000202 R_MIPS_32         00000000   .text + 860
+000011c8  00000202 R_MIPS_32         00000000   .text + 860
+000011cc  00000202 R_MIPS_32         00000000   .text + 878
+000011de  00000202 R_MIPS_32         00000000   .text + 878
+000011e2  00000202 R_MIPS_32         00000000   .text + 87c
+000011ea  00000202 R_MIPS_32         00000000   .text + 87c
+000011ee  00000202 R_MIPS_32         00000000   .text + db4
+000011f7  00000202 R_MIPS_32         00000000   .text + db4
+000011fb  00000202 R_MIPS_32         00000000   .text + db4
+0000120b  00000202 R_MIPS_32         00000000   .text + 878
+0000120f  00000202 R_MIPS_32         00000000   .text + 8d4
+00001216  00000202 R_MIPS_32         00000000   .text + 8d4
+0000121a  00000202 R_MIPS_32         00000000   .text + dac
+00001221  00000202 R_MIPS_32         00000000   .text + dac
+00001225  00000202 R_MIPS_32         00000000   .text + db4
+00001237  00000202 R_MIPS_32         00000000   .text + 878
+0000123b  00000202 R_MIPS_32         00000000   .text + 8d8
+00001242  00000202 R_MIPS_32         00000000   .text + 8d8
+00001246  00000202 R_MIPS_32         00000000   .text + c38
+0000124d  00000202 R_MIPS_32         00000000   .text + c38
+00001251  00000202 R_MIPS_32         00000000   .text + d74
+0000125b  00000202 R_MIPS_32         00000000   .text + d74
+0000125f  00000202 R_MIPS_32         00000000   .text + d84
+00001266  00000202 R_MIPS_32         00000000   .text + d84
+0000126a  00000202 R_MIPS_32         00000000   .text + db4
+0000127c  00000202 R_MIPS_32         00000000   .text + 878
+00001280  00000202 R_MIPS_32         00000000   .text + 8dc
+00001287  00000202 R_MIPS_32         00000000   .text + 8dc
+0000128b  00000202 R_MIPS_32         00000000   .text + c38
+00001292  00000202 R_MIPS_32         00000000   .text + c38
+00001296  00000202 R_MIPS_32         00000000   .text + d74
+000012a0  00000202 R_MIPS_32         00000000   .text + d74
+000012a4  00000202 R_MIPS_32         00000000   .text + d84
+000012ab  00000202 R_MIPS_32         00000000   .text + d84
+000012af  00000202 R_MIPS_32         00000000   .text + db4
+000012c1  00000202 R_MIPS_32         00000000   .text + 878
+000012c5  00000202 R_MIPS_32         00000000   .text + 8eb
+000012cc  00000202 R_MIPS_32         00000000   .text + 8eb
+000012d0  00000202 R_MIPS_32         00000000   .text + 910
+000012d7  00000202 R_MIPS_32         00000000   .text + 910
+000012db  00000202 R_MIPS_32         00000000   .text + db4
+000012ed  00000202 R_MIPS_32         00000000   .text + 878
+000012f1  00000202 R_MIPS_32         00000000   .text + 8eb
+000012f8  00000202 R_MIPS_32         00000000   .text + 8eb
+000012fc  00000202 R_MIPS_32         00000000   .text + db4
+0000130e  00000202 R_MIPS_32         00000000   .text + 878
+00001312  00000202 R_MIPS_32         00000000   .text + 8eb
+00001319  00000202 R_MIPS_32         00000000   .text + 8eb
+0000131d  00000202 R_MIPS_32         00000000   .text + d3c
+00001324  00000202 R_MIPS_32         00000000   .text + d3c
+00001328  00000202 R_MIPS_32         00000000   .text + d40
+00001333  00000202 R_MIPS_32         00000000   .text + d40
+00001337  00000202 R_MIPS_32         00000000   .text + d74
+00001341  00000202 R_MIPS_32         00000000   .text + d74
+00001345  00000202 R_MIPS_32         00000000   .text + d84
+0000134c  00000202 R_MIPS_32         00000000   .text + d84
+00001350  00000202 R_MIPS_32         00000000   .text + db4
+00001362  00000202 R_MIPS_32         00000000   .text + 878
+00001366  00000202 R_MIPS_32         00000000   .text + 8eb
+0000136d  00000202 R_MIPS_32         00000000   .text + 8eb
+00001371  00000202 R_MIPS_32         00000000   .text + d6c
+00001378  00000202 R_MIPS_32         00000000   .text + d6c
+0000137c  00000202 R_MIPS_32         00000000   .text + d74
+00001386  00000202 R_MIPS_32         00000000   .text + d74
+0000138a  00000202 R_MIPS_32         00000000   .text + d84
+00001391  00000202 R_MIPS_32         00000000   .text + d84
+00001395  00000202 R_MIPS_32         00000000   .text + db4
+000013a7  00000202 R_MIPS_32         00000000   .text + 878
+000013ab  00000202 R_MIPS_32         00000000   .text + 8eb
+000013b2  00000202 R_MIPS_32         00000000   .text + 8eb
+000013b6  00000202 R_MIPS_32         00000000   .text + d6c
+000013bd  00000202 R_MIPS_32         00000000   .text + d6c
+000013c1  00000202 R_MIPS_32         00000000   .text + d74
+000013cb  00000202 R_MIPS_32         00000000   .text + d74
+000013cf  00000202 R_MIPS_32         00000000   .text + d84
+000013d6  00000202 R_MIPS_32         00000000   .text + d84
+000013da  00000202 R_MIPS_32         00000000   .text + db4
+000013ec  00000202 R_MIPS_32         00000000   .text + c38
+000013f0  00000202 R_MIPS_32         00000000   .text + cbc
+00001404  00000202 R_MIPS_32         00000000   .text + cbc
+00001408  00000202 R_MIPS_32         00000000   .text + cc0
+00001426  00000202 R_MIPS_32         00000000   .text + c60
+0000142a  00000202 R_MIPS_32         00000000   .text + ca8
+00001439  00000202 R_MIPS_32         00000000   .text + a70
+0000143d  00000202 R_MIPS_32         00000000   .text + d6c
+00001445  00000202 R_MIPS_32         00000000   .text + d74
+00001449  00000202 R_MIPS_32         00000000   .text + d84
+00001459  00000202 R_MIPS_32         00000000   .text + b24
+0000145d  00000202 R_MIPS_32         00000000   .text + b37
+0000146c  00000202 R_MIPS_32         00000000   .text + b24
+00001470  00000202 R_MIPS_32         00000000   .text + b4c
+0000147f  00000202 R_MIPS_32         00000000   .text + b8c
+00001483  00000202 R_MIPS_32         00000000   .text + bbf
+00001493  00000202 R_MIPS_32         00000000   .text + b8c
+00001497  00000202 R_MIPS_32         00000000   .text + bbf
+000014a6  00000202 R_MIPS_32         00000000   .text + b9c
+000014aa  00000202 R_MIPS_32         00000000   .text + bbf
+000014ba  00000202 R_MIPS_32         00000000   .text + b9c
+000014be  00000202 R_MIPS_32         00000000   .text + bbf
+000014cd  00000202 R_MIPS_32         00000000   .text + bac
+000014d1  00000202 R_MIPS_32         00000000   .text + bbf
+000014e0  00000202 R_MIPS_32         00000000   .text + bac
+000014e4  00000202 R_MIPS_32         00000000   .text + d54
+000014f3  00000202 R_MIPS_32         00000000   .text + c60
+000014f7  00000202 R_MIPS_32         00000000   .text + ca8
+00001506  00000202 R_MIPS_32         00000000   .text + db4
+0000150a  00000202 R_MIPS_32         00000000   .text + db8
+00001512  00000202 R_MIPS_32         00000000   .text + db8
+00001516  00000202 R_MIPS_32         00000000   .text + ec4
+0000151e  00000202 R_MIPS_32         00000000   .text + ec4
+00001522  00000202 R_MIPS_32         00000000   .text + ec4
+00001532  00000202 R_MIPS_32         00000000   .text + db4
+00001536  00000202 R_MIPS_32         00000000   .text + dff
+0000153d  00000202 R_MIPS_32         00000000   .text + dff
+00001541  00000202 R_MIPS_32         00000000   .text + e08
+00001548  00000202 R_MIPS_32         00000000   .text + e08
+0000154c  00000202 R_MIPS_32         00000000   .text + e1c
+00001553  00000202 R_MIPS_32         00000000   .text + e1c
+00001557  00000202 R_MIPS_32         00000000   .text + e2c
+0000155e  00000202 R_MIPS_32         00000000   .text + e2c
+00001562  00000202 R_MIPS_32         00000000   .text + e7b
+00001569  00000202 R_MIPS_32         00000000   .text + e7b
+0000156d  00000202 R_MIPS_32         00000000   .text + e9c
+00001574  00000202 R_MIPS_32         00000000   .text + e9c
+00001578  00000202 R_MIPS_32         00000000   .text + ea4
+0000157f  00000202 R_MIPS_32         00000000   .text + ea4
+00001583  00000202 R_MIPS_32         00000000   .text + ebc
+0000158a  00000202 R_MIPS_32         00000000   .text + ebc
+0000158e  00000202 R_MIPS_32         00000000   .text + ec4
+000015a0  00000202 R_MIPS_32         00000000   .text + db4
+000015a4  00000202 R_MIPS_32         00000000   .text + dff
+000015ab  00000202 R_MIPS_32         00000000   .text + dff
+000015af  00000202 R_MIPS_32         00000000   .text + e08
+000015b9  00000202 R_MIPS_32         00000000   .text + e08
+000015bd  00000202 R_MIPS_32         00000000   .text + e23
+000015c4  00000202 R_MIPS_32         00000000   .text + e23
+000015c8  00000202 R_MIPS_32         00000000   .text + e2c
+000015cf  00000202 R_MIPS_32         00000000   .text + e2c
+000015d3  00000202 R_MIPS_32         00000000   .text + e64
+000015da  00000202 R_MIPS_32         00000000   .text + e64
+000015de  00000202 R_MIPS_32         00000000   .text + e88
+000015e5  00000202 R_MIPS_32         00000000   .text + e88
+000015e9  00000202 R_MIPS_32         00000000   .text + e94
+000015f3  00000202 R_MIPS_32         00000000   .text + e94
+000015f7  00000202 R_MIPS_32         00000000   .text + e9c
+00001601  00000202 R_MIPS_32         00000000   .text + e9c
+00001605  00000202 R_MIPS_32         00000000   .text + ea4
+0000160c  00000202 R_MIPS_32         00000000   .text + ea4
+00001610  00000202 R_MIPS_32         00000000   .text + ec4
+00001622  00000202 R_MIPS_32         00000000   .text + db4
+00001626  00000202 R_MIPS_32         00000000   .text + dff
+0000162d  00000202 R_MIPS_32         00000000   .text + dff
+00001631  00000202 R_MIPS_32         00000000   .text + e08
+0000163b  00000202 R_MIPS_32         00000000   .text + e08
+0000163f  00000202 R_MIPS_32         00000000   .text + e23
+00001646  00000202 R_MIPS_32         00000000   .text + e23
+0000164a  00000202 R_MIPS_32         00000000   .text + e2c
+00001654  00000202 R_MIPS_32         00000000   .text + e2c
+00001658  00000202 R_MIPS_32         00000000   .text + e68
+0000165f  00000202 R_MIPS_32         00000000   .text + e68
+00001663  00000202 R_MIPS_32         00000000   .text + e7b
+0000166a  00000202 R_MIPS_32         00000000   .text + e7b
+0000166e  00000202 R_MIPS_32         00000000   .text + e9c
+00001678  00000202 R_MIPS_32         00000000   .text + e9c
+0000167c  00000202 R_MIPS_32         00000000   .text + ea4
+00001683  00000202 R_MIPS_32         00000000   .text + ea4
+00001687  00000202 R_MIPS_32         00000000   .text + ec4
+00001699  00000202 R_MIPS_32         00000000   .text + db4
+0000169d  00000202 R_MIPS_32         00000000   .text + dff
+000016a4  00000202 R_MIPS_32         00000000   .text + dff
+000016a8  00000202 R_MIPS_32         00000000   .text + e08
+000016b2  00000202 R_MIPS_32         00000000   .text + e08
+000016b6  00000202 R_MIPS_32         00000000   .text + e23
+000016bd  00000202 R_MIPS_32         00000000   .text + e23
+000016c1  00000202 R_MIPS_32         00000000   .text + e2c
+000016cb  00000202 R_MIPS_32         00000000   .text + e2c
+000016cf  00000202 R_MIPS_32         00000000   .text + e74
+000016d6  00000202 R_MIPS_32         00000000   .text + e74
+000016da  00000202 R_MIPS_32         00000000   .text + e7b
+000016e2  00000202 R_MIPS_32         00000000   .text + e7b
+000016e6  00000202 R_MIPS_32         00000000   .text + e9c
+000016f0  00000202 R_MIPS_32         00000000   .text + e9c
+000016f4  00000202 R_MIPS_32         00000000   .text + ea4
+000016fb  00000202 R_MIPS_32         00000000   .text + ea4
+000016ff  00000202 R_MIPS_32         00000000   .text + ec4
+00001711  00000202 R_MIPS_32         00000000   .text + de8
+00001715  00000202 R_MIPS_32         00000000   .text + dff
+00001726  00000202 R_MIPS_32         00000000   .text + de8
+0000172a  00000202 R_MIPS_32         00000000   .text + dff
+00001731  00000202 R_MIPS_32         00000000   .text + dff
+00001735  00000202 R_MIPS_32         00000000   .text + e08
+00001747  00000202 R_MIPS_32         00000000   .text + e08
+0000174b  00000202 R_MIPS_32         00000000   .text + e1c
+0000175a  00000202 R_MIPS_32         00000000   .text + e1c
+0000175e  00000202 R_MIPS_32         00000000   .text + e23
+0000176d  00000202 R_MIPS_32         00000000   .text + e2c
+00001771  00000202 R_MIPS_32         00000000   .text + e7b
+00001788  00000202 R_MIPS_32         00000000   .text + e08
+0000178c  00000202 R_MIPS_32         00000000   .text + e23
+00001793  00000202 R_MIPS_32         00000000   .text + e23
+00001797  00000202 R_MIPS_32         00000000   .text + e2c
+0000179e  00000202 R_MIPS_32         00000000   .text + e2c
+000017a2  00000202 R_MIPS_32         00000000   .text + e64
+000017a9  00000202 R_MIPS_32         00000000   .text + e64
+000017ad  00000202 R_MIPS_32         00000000   .text + e88
+000017b4  00000202 R_MIPS_32         00000000   .text + e88
+000017b8  00000202 R_MIPS_32         00000000   .text + e94
+000017c2  00000202 R_MIPS_32         00000000   .text + e94
+000017c6  00000202 R_MIPS_32         00000000   .text + e9c
+000017d8  00000202 R_MIPS_32         00000000   .text + e34
+000017dc  00000202 R_MIPS_32         00000000   .text + e7b
+000017ed  00000202 R_MIPS_32         00000000   .text + e34
+000017f1  00000202 R_MIPS_32         00000000   .text + e64
+000017f8  00000202 R_MIPS_32         00000000   .text + e64
+000017fc  00000202 R_MIPS_32         00000000   .text + e88
+00001803  00000202 R_MIPS_32         00000000   .text + e88
+00001807  00000202 R_MIPS_32         00000000   .text + e94
+00001819  00000202 R_MIPS_32         00000000   .text + ec4
+0000181d  00000202 R_MIPS_32         00000000   .text + ec8
+00001825  00000202 R_MIPS_32         00000000   .text + ec8
+00001829  00000202 R_MIPS_32         00000000   .text + f6c
+00001831  00000202 R_MIPS_32         00000000   .text + f6c
+00001835  00000202 R_MIPS_32         00000000   .text + f6c
+00001845  00000202 R_MIPS_32         00000000   .text + ec4
+00001849  00000202 R_MIPS_32         00000000   .text + ee0
+00001850  00000202 R_MIPS_32         00000000   .text + ee0
+00001854  00000202 R_MIPS_32         00000000   .text + f64
+0000185b  00000202 R_MIPS_32         00000000   .text + f64
+0000185f  00000202 R_MIPS_32         00000000   .text + f6c
+00001871  00000202 R_MIPS_32         00000000   .text + ec4
+00001875  00000202 R_MIPS_32         00000000   .text + f1c
+0000187c  00000202 R_MIPS_32         00000000   .text + f1c
+00001880  00000202 R_MIPS_32         00000000   .text + f23
+00001887  00000202 R_MIPS_32         00000000   .text + f23
+0000188b  00000202 R_MIPS_32         00000000   .text + f50
+00001895  00000202 R_MIPS_32         00000000   .text + f50
+00001899  00000202 R_MIPS_32         00000000   .text + f54
+000018a0  00000202 R_MIPS_32         00000000   .text + f54
+000018a4  00000202 R_MIPS_32         00000000   .text + f6c
+000018b6  00000202 R_MIPS_32         00000000   .text + ec4
+000018ba  00000202 R_MIPS_32         00000000   .text + f00
+000018c1  00000202 R_MIPS_32         00000000   .text + f00
+000018c5  00000202 R_MIPS_32         00000000   .text + f08
+000018cc  00000202 R_MIPS_32         00000000   .text + f08
+000018d0  00000202 R_MIPS_32         00000000   .text + f50
+000018da  00000202 R_MIPS_32         00000000   .text + f50
+000018de  00000202 R_MIPS_32         00000000   .text + f54
+000018e5  00000202 R_MIPS_32         00000000   .text + f54
+000018e9  00000202 R_MIPS_32         00000000   .text + f6c
+000018fb  00000202 R_MIPS_32         00000000   .text + f0c
+000018ff  00000202 R_MIPS_32         00000000   .text + f50
+0000190e  00000202 R_MIPS_32         00000000   .text + f6c
+00001912  00000202 R_MIPS_32         00000000   .text + f78
+0000191a  00000202 R_MIPS_32         00000000   .text + f78
+0000191e  00000202 R_MIPS_32         00000000   .text + 1094
+00001927  00000202 R_MIPS_32         00000000   .text + 1094
+0000192b  00000202 R_MIPS_32         00000000   .text + 1094
+0000193b  00000202 R_MIPS_32         00000000   .text + f6c
+0000193f  00000202 R_MIPS_32         00000000   .text + 101c
+00001946  00000202 R_MIPS_32         00000000   .text + 101c
+0000194a  00000202 R_MIPS_32         00000000   .text + 108c
+00001951  00000202 R_MIPS_32         00000000   .text + 108c
+00001955  00000202 R_MIPS_32         00000000   .text + 1094
+00001967  00000202 R_MIPS_32         00000000   .text + f6c
+0000196b  00000202 R_MIPS_32         00000000   .text + 1023
+00001972  00000202 R_MIPS_32         00000000   .text + 1023
+00001976  00000202 R_MIPS_32         00000000   .text + 1094
+00001988  00000202 R_MIPS_32         00000000   .text + f6c
+0000198c  00000202 R_MIPS_32         00000000   .text + 101c
+00001993  00000202 R_MIPS_32         00000000   .text + 101c
+00001997  00000202 R_MIPS_32         00000000   .text + 1094
+000019a9  00000202 R_MIPS_32         00000000   .text + f6c
+000019ad  00000202 R_MIPS_32         00000000   .text + 1023
+000019b4  00000202 R_MIPS_32         00000000   .text + 1023
+000019b8  00000202 R_MIPS_32         00000000   .text + 106c
+000019bf  00000202 R_MIPS_32         00000000   .text + 106c
+000019c3  00000202 R_MIPS_32         00000000   .text + 1094
+000019d5  00000202 R_MIPS_32         00000000   .text + f6c
+000019d9  00000202 R_MIPS_32         00000000   .text + 1023
+000019e0  00000202 R_MIPS_32         00000000   .text + 1023
+000019e4  00000202 R_MIPS_32         00000000   .text + 106c
+000019eb  00000202 R_MIPS_32         00000000   .text + 106c
+000019ef  00000202 R_MIPS_32         00000000   .text + 1094
+00001a01  00000202 R_MIPS_32         00000000   .text + f6c
+00001a05  00000202 R_MIPS_32         00000000   .text + 1023
+00001a0c  00000202 R_MIPS_32         00000000   .text + 1023
+00001a10  00000202 R_MIPS_32         00000000   .text + 106c
+00001a17  00000202 R_MIPS_32         00000000   .text + 106c
+00001a1b  00000202 R_MIPS_32         00000000   .text + 1094
+00001a2d  00000202 R_MIPS_32         00000000   .text + fdc
+00001a31  00000202 R_MIPS_32         00000000   .text + fe4
+00001a4e  00000202 R_MIPS_32         00000000   .text + fe4
+00001a52  00000202 R_MIPS_32         00000000   .text + 101c
+00001a71  00000202 R_MIPS_32         00000000   .text + 101c
+00001a75  00000202 R_MIPS_32         00000000   .text + 1023
+00001a9c  00000202 R_MIPS_32         00000000   .text + 1094
+00001aa0  00000202 R_MIPS_32         00000000   .text + 1098
+00001aa8  00000202 R_MIPS_32         00000000   .text + 1098
+00001aac  00000202 R_MIPS_32         00000000   .text + 113c
+00001ab4  00000202 R_MIPS_32         00000000   .text + 113c
+00001ab8  00000202 R_MIPS_32         00000000   .text + 113c
+00001ac8  00000202 R_MIPS_32         00000000   .text + 1094
+00001acc  00000202 R_MIPS_32         00000000   .text + 10ec
+00001ad3  00000202 R_MIPS_32         00000000   .text + 10ec
+00001ad7  00000202 R_MIPS_32         00000000   .text + 1134
+00001ade  00000202 R_MIPS_32         00000000   .text + 1134
+00001ae2  00000202 R_MIPS_32         00000000   .text + 113c
+00001af4  00000202 R_MIPS_32         00000000   .text + 1094
+00001af8  00000202 R_MIPS_32         00000000   .text + 10f0
+00001aff  00000202 R_MIPS_32         00000000   .text + 10f0
+00001b03  00000202 R_MIPS_32         00000000   .text + 1103
+00001b0a  00000202 R_MIPS_32         00000000   .text + 1103
+00001b0e  00000202 R_MIPS_32         00000000   .text + 113c
+00001b20  00000202 R_MIPS_32         00000000   .text + 1094
+00001b24  00000202 R_MIPS_32         00000000   .text + 10d8
+00001b2b  00000202 R_MIPS_32         00000000   .text + 10d8
+00001b2f  00000202 R_MIPS_32         00000000   .text + 1103
+00001b36  00000202 R_MIPS_32         00000000   .text + 1103
+00001b3a  00000202 R_MIPS_32         00000000   .text + 113c
+00001b4c  00000202 R_MIPS_32         00000000   .text + 1094
+00001b50  00000202 R_MIPS_32         00000000   .text + 10f4
+00001b57  00000202 R_MIPS_32         00000000   .text + 10f4
+00001b5b  00000202 R_MIPS_32         00000000   .text + 1103
+00001b63  00000202 R_MIPS_32         00000000   .text + 1103
+00001b67  00000202 R_MIPS_32         00000000   .text + 113c
+00001b79  00000202 R_MIPS_32         00000000   .text + 10fc
+00001b7d  00000202 R_MIPS_32         00000000   .text + 1124
+
+Relocation section '.rela.debug_aranges' at offset 0xb150 contains 3 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name + Addend
+00000006  00000d02 R_MIPS_32         00000000   .debug_info + 0
+00000010  00000202 R_MIPS_32         00000000   .text + 0
+00000018  00000802 R_MIPS_32         00000000   .text.unlikely + 0
+
+Relocation section '.rela.debug_ranges' at offset 0xb174 contains 52 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name + Addend
+00000000  00000802 R_MIPS_32         00000000   .text.unlikely + 8
+00000004  00000802 R_MIPS_32         00000000   .text.unlikely + c
+00000008  00000802 R_MIPS_32         00000000   .text.unlikely + 1c
+0000000c  00000802 R_MIPS_32         00000000   .text.unlikely + 20
+00000018  00000202 R_MIPS_32         00000000   .text + 154
+0000001c  00000202 R_MIPS_32         00000000   .text + 15c
+00000020  00000202 R_MIPS_32         00000000   .text + 168
+00000024  00000202 R_MIPS_32         00000000   .text + 16c
+00000028  00000202 R_MIPS_32         00000000   .text + 170
+0000002c  00000202 R_MIPS_32         00000000   .text + 174
+00000038  00000202 R_MIPS_32         00000000   .text + 214
+0000003c  00000202 R_MIPS_32         00000000   .text + 21c
+00000040  00000202 R_MIPS_32         00000000   .text + 224
+00000044  00000202 R_MIPS_32         00000000   .text + 22c
+00000050  00000202 R_MIPS_32         00000000   .text + 338
+00000054  00000202 R_MIPS_32         00000000   .text + 33c
+00000058  00000202 R_MIPS_32         00000000   .text + 34c
+0000005c  00000202 R_MIPS_32         00000000   .text + 360
+00000068  00000202 R_MIPS_32         00000000   .text + 36c
+0000006c  00000202 R_MIPS_32         00000000   .text + 374
+00000070  00000202 R_MIPS_32         00000000   .text + 378
+00000074  00000202 R_MIPS_32         00000000   .text + 384
+00000078  00000202 R_MIPS_32         00000000   .text + 390
+0000007c  00000202 R_MIPS_32         00000000   .text + 3a4
+00000088  00000202 R_MIPS_32         00000000   .text + 500
+0000008c  00000202 R_MIPS_32         00000000   .text + 508
+00000090  00000202 R_MIPS_32         00000000   .text + 50c
+00000094  00000202 R_MIPS_32         00000000   .text + 510
+000000a0  00000202 R_MIPS_32         00000000   .text + 510
+000000a4  00000202 R_MIPS_32         00000000   .text + 514
+000000a8  00000202 R_MIPS_32         00000000   .text + 520
+000000ac  00000202 R_MIPS_32         00000000   .text + 538
+000000b8  00000202 R_MIPS_32         00000000   .text + 538
+000000bc  00000202 R_MIPS_32         00000000   .text + 550
+000000c0  00000202 R_MIPS_32         00000000   .text + 560
+000000c4  00000202 R_MIPS_32         00000000   .text + 564
+000000d0  00000202 R_MIPS_32         00000000   .text + 558
+000000d4  00000202 R_MIPS_32         00000000   .text + 560
+000000d8  00000202 R_MIPS_32         00000000   .text + 56c
+000000dc  00000202 R_MIPS_32         00000000   .text + 570
+000000e0  00000202 R_MIPS_32         00000000   .text + 574
+000000e4  00000202 R_MIPS_32         00000000   .text + 578
+000000f0  00000202 R_MIPS_32         00000000   .text + 5e8
+000000f4  00000202 R_MIPS_32         00000000   .text + 5ec
+000000f8  00000202 R_MIPS_32         00000000   .text + 5f4
+000000fc  00000202 R_MIPS_32         00000000   .text + 5f8
+00000100  00000202 R_MIPS_32         00000000   .text + 61c
+00000104  00000202 R_MIPS_32         00000000   .text + 620
+00000110  00000202 R_MIPS_32         00000000   .text + 0
+00000114  00000202 R_MIPS_32         00000000   .text + 113c
+00000118  00000802 R_MIPS_32         00000000   .text.unlikely + 0
+0000011c  00000802 R_MIPS_32         00000000   .text.unlikely + c8
+
+Relocation section '.rela.debug_line' at offset 0xb3e4 contains 2 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name + Addend
+000001ea  00000202 R_MIPS_32         00000000   .text + 0
+00000656  00000802 R_MIPS_32         00000000   .text.unlikely + 0
+
+Relocation section '.rela.eh_frame' at offset 0xb3fc contains 18 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name + Addend
+0000001c  00000202 R_MIPS_32         00000000   .text + 0
+00000030  00000202 R_MIPS_32         00000000   .text + 44
+0000005c  00000802 R_MIPS_32         00000000   .text.unlikely + 0
+00000084  00000202 R_MIPS_32         00000000   .text + dc
+000000b0  00000202 R_MIPS_32         00000000   .text + 300
+000000c4  00000202 R_MIPS_32         00000000   .text + 458
+00000110  00000202 R_MIPS_32         00000000   .text + 660
+00000140  00000202 R_MIPS_32         00000000   .text + 734
+0000015c  00000202 R_MIPS_32         00000000   .text + 770
+00000180  00000202 R_MIPS_32         00000000   .text + 7c0
+00000194  00000202 R_MIPS_32         00000000   .text + 7cc
+000001a8  00000202 R_MIPS_32         00000000   .text + 7d8
+000001bc  00000202 R_MIPS_32         00000000   .text + 7f0
+000001e4  00000202 R_MIPS_32         00000000   .text + 878
+0000021c  00000202 R_MIPS_32         00000000   .text + db4
+00000244  00000202 R_MIPS_32         00000000   .text + ec4
+0000026c  00000202 R_MIPS_32         00000000   .text + f6c
+0000029c  00000202 R_MIPS_32         00000000   .text + 1094
+         U memcpy
+         U memmove
+         U memset
+         U memcpy
+         U memmove
+         U memset
+00000044 00000098 t tcp_abort_connection
+00000000 000000c8 t tcp_ack_pending.part.1
+00000300 00000158 T tcp_checksum_ipv4
+00000770 00000050 T tcp_checksum_ipv4_valid
+00001094 000000a8 T tcp_core_close
+000007d8 00000018 T tcp_core_init
+00000878 0000053c T tcp_core_input
+000007f0 00000088 T tcp_core_listen
+00000db4 00000110 T tcp_core_poll
+00000ec4 000000a8 T tcp_core_read
+00000f6c 00000128 T tcp_core_write
+00000458 00000208 t tcp_emit
+00000000 00000044 t tcp_ip_equal
+000000dc 00000224 T tcp_segment_parse
+00000734 0000003c t tcp_send_ack
+00000660 000000d4 t tcp_send_reliable
+000007cc 0000000c T tcp_seq_after
+000007c0 0000000c T tcp_seq_before
+
+/tmp/pa220-p5-validation/obj/tcp.o:     file format elf32-ntradbigmips
+
+
+Disassembly of section .text:
+
+00000000 <tcp_ip_equal>:
+       0:	90860000 	lbu	a2,0(a0)
+       4:	90a30000 	lbu	v1,0(a1)
+       8:	14c3000c 	bne	a2,v1,3c <tcp_ip_equal+0x3c>
+       c:	0000102d 	move	v0,zero
+      10:	90860001 	lbu	a2,1(a0)
+      14:	90a30001 	lbu	v1,1(a1)
+      18:	14c30008 	bne	a2,v1,3c <tcp_ip_equal+0x3c>
+      1c:	00000000 	nop
+      20:	90860002 	lbu	a2,2(a0)
+      24:	90a30002 	lbu	v1,2(a1)
+      28:	14c30004 	bne	a2,v1,3c <tcp_ip_equal+0x3c>
+      2c:	00000000 	nop
+      30:	90830003 	lbu	v1,3(a0)
+      34:	90a20003 	lbu	v0,3(a1)
+      38:	7062102a 	seq	v0,v1,v0
+      3c:	03e00008 	jr	ra
+      40:	00000000 	nop
+
+00000044 <tcp_abort_connection>:
+      44:	27bdffc0 	addiu	sp,sp,-64
+      48:	24060004 	li	a2,4
+      4c:	ffb30030 	sd	s3,48(sp)
+      50:	24930004 	addiu	s3,a0,4
+      54:	ffb00018 	sd	s0,24(sp)
+      58:	0260282d 	move	a1,s3
+      5c:	ffbf0038 	sd	ra,56(sp)
+      60:	0080802d 	move	s0,a0
+      64:	ffb20028 	sd	s2,40(sp)
+      68:	03a0202d 	move	a0,sp
+      6c:	0c000000 	jal	0 <tcp_ip_equal>
+			6c: R_MIPS_26	memcpy
+      70:	ffb10020 	sd	s1,32(sp)
+      74:	8e020010 	lw	v0,16(s0)
+      78:	3c110001 	lui	s1,0x1
+      7c:	9612000c 	lhu	s2,12(s0)
+      80:	0200202d 	move	a0,s0
+      84:	0000282d 	move	a1,zero
+      88:	2406219c 	li	a2,8604
+      8c:	36310001 	ori	s1,s1,0x1
+      90:	0c000000 	jal	0 <tcp_ip_equal>
+			90: R_MIPS_26	memset
+      94:	00518821 	addu	s1,v0,s1
+      98:	0260202d 	move	a0,s3
+      9c:	03a0282d 	move	a1,sp
+      a0:	0c000000 	jal	0 <tcp_ip_equal>
+			a0: R_MIPS_26	memcpy
+      a4:	24060004 	li	a2,4
+      a8:	dfbf0038 	ld	ra,56(sp)
+      ac:	a612000c 	sh	s2,12(s0)
+      b0:	0012902b 	sltu	s2,zero,s2
+      b4:	ae110010 	sw	s1,16(s0)
+      b8:	ae110014 	sw	s1,20(s0)
+      bc:	ae110018 	sw	s1,24(s0)
+      c0:	ae120000 	sw	s2,0(s0)
+      c4:	dfb30030 	ld	s3,48(sp)
+      c8:	dfb20028 	ld	s2,40(sp)
+      cc:	dfb10020 	ld	s1,32(sp)
+      d0:	dfb00018 	ld	s0,24(sp)
+      d4:	03e00008 	jr	ra
+      d8:	27bd0040 	addiu	sp,sp,64
+
+000000dc <tcp_segment_parse>:
+      dc:	2c830001 	sltiu	v1,a0,1
+      e0:	2cc20001 	sltiu	v0,a2,1
+      e4:	27bdffd0 	addiu	sp,sp,-48
+      e8:	00621025 	or	v0,v1,v0
+      ec:	ffb10010 	sd	s1,16(sp)
+      f0:	00c0882d 	move	s1,a2
+      f4:	ffb00008 	sd	s0,8(sp)
+      f8:	0080802d 	move	s0,a0
+      fc:	ffbf0028 	sd	ra,40(sp)
+     100:	ffb30020 	sd	s3,32(sp)
+     104:	14400076 	bnez	v0,2e0 <tcp_segment_parse+0x204>
+     108:	ffb20018 	sd	s2,24(sp)
+     10c:	2ca20014 	sltiu	v0,a1,20
+     110:	14400073 	bnez	v0,2e0 <tcp_segment_parse+0x204>
+     114:	00a0982d 	move	s3,a1
+     118:	9082000c 	lbu	v0,12(a0)
+     11c:	00029102 	srl	s2,v0,0x4
+     120:	2643fffb 	addiu	v1,s2,-5
+     124:	2c63000b 	sltiu	v1,v1,11
+     128:	1060006d 	beqz	v1,2e0 <tcp_segment_parse+0x204>
+     12c:	3042000f 	andi	v0,v0,0xf
+     130:	1440006b 	bnez	v0,2e0 <tcp_segment_parse+0x204>
+     134:	00129080 	sll	s2,s2,0x2
+     138:	00b2102b 	sltu	v0,a1,s2
+     13c:	14400068 	bnez	v0,2e0 <tcp_segment_parse+0x204>
+     140:	00c0202d 	move	a0,a2
+     144:	0000282d 	move	a1,zero
+     148:	24060020 	li	a2,32
+     14c:	0c000000 	jal	0 <tcp_ip_equal>
+			14c: R_MIPS_26	memset
+     150:	02729823 	subu	s3,s3,s2
+     154:	92020000 	lbu	v0,0(s0)
+     158:	92030001 	lbu	v1,1(s0)
+     15c:	24060001 	li	a2,1
+     160:	24070002 	li	a3,2
+     164:	24080004 	li	a4,4
+     168:	00021200 	sll	v0,v0,0x8
+     16c:	24090001 	li	a5,1
+     170:	00431025 	or	v0,v0,v1
+     174:	a6220000 	sh	v0,0(s1)
+     178:	92020002 	lbu	v0,2(s0)
+     17c:	92030003 	lbu	v1,3(s0)
+     180:	00021200 	sll	v0,v0,0x8
+     184:	00431025 	or	v0,v0,v1
+     188:	a6220002 	sh	v0,2(s1)
+     18c:	92030004 	lbu	v1,4(s0)
+     190:	92020005 	lbu	v0,5(s0)
+     194:	00031e00 	sll	v1,v1,0x18
+     198:	00021400 	sll	v0,v0,0x10
+     19c:	00621025 	or	v0,v1,v0
+     1a0:	92030007 	lbu	v1,7(s0)
+     1a4:	00431025 	or	v0,v0,v1
+     1a8:	92030006 	lbu	v1,6(s0)
+     1ac:	00031a00 	sll	v1,v1,0x8
+     1b0:	00431025 	or	v0,v0,v1
+     1b4:	ae220004 	sw	v0,4(s1)
+     1b8:	92030008 	lbu	v1,8(s0)
+     1bc:	92020009 	lbu	v0,9(s0)
+     1c0:	00031e00 	sll	v1,v1,0x18
+     1c4:	00021400 	sll	v0,v0,0x10
+     1c8:	00621025 	or	v0,v1,v0
+     1cc:	9203000b 	lbu	v1,11(s0)
+     1d0:	00431025 	or	v0,v0,v1
+     1d4:	9203000a 	lbu	v1,10(s0)
+     1d8:	00031a00 	sll	v1,v1,0x8
+     1dc:	00431025 	or	v0,v0,v1
+     1e0:	ae220008 	sw	v0,8(s1)
+     1e4:	9202000d 	lbu	v0,13(s0)
+     1e8:	a2220018 	sb	v0,24(s1)
+     1ec:	9202000e 	lbu	v0,14(s0)
+     1f0:	9203000f 	lbu	v1,15(s0)
+     1f4:	00021200 	sll	v0,v0,0x8
+     1f8:	00431025 	or	v0,v0,v1
+     1fc:	a622000c 	sh	v0,12(s1)
+     200:	92020010 	lbu	v0,16(s0)
+     204:	92030011 	lbu	v1,17(s0)
+     208:	00021200 	sll	v0,v0,0x8
+     20c:	00431025 	or	v0,v0,v1
+     210:	a622000e 	sh	v0,14(s1)
+     214:	92020012 	lbu	v0,18(s0)
+     218:	92030013 	lbu	v1,19(s0)
+     21c:	a6320012 	sh	s2,18(s1)
+     220:	a6330014 	sh	s3,20(s1)
+     224:	00021200 	sll	v0,v0,0x8
+     228:	00431025 	or	v0,v0,v1
+     22c:	a6220010 	sh	v0,16(s1)
+     230:	02121021 	addu	v0,s0,s2
+     234:	ae22001c 	sw	v0,28(s1)
+     238:	08000000 	j	0 <tcp_ip_equal>
+			238: R_MIPS_26	.text+0x2cc
+     23c:	24020014 	li	v0,20
+     240:	90640000 	lbu	a0,0(v1)
+     244:	50800027 	beqzl	a0,2e4 <tcp_segment_parse+0x208>
+     248:	0000102d 	move	v0,zero
+     24c:	14860003 	bne	a0,a2,25c <tcp_segment_parse+0x180>
+     250:	02422823 	subu	a1,s2,v0
+     254:	08000000 	j	0 <tcp_ip_equal>
+			254: R_MIPS_26	.text+0x2c8
+     258:	24420001 	addiu	v0,v0,1
+     25c:	30aaffff 	andi	a6,a1,0xffff
+     260:	2d4a0002 	sltiu	a6,a6,2
+     264:	5540001f 	bnezl	a6,2e4 <tcp_segment_parse+0x208>
+     268:	2402ffff 	li	v0,-1
+     26c:	90630001 	lbu	v1,1(v1)
+     270:	2c6a0002 	sltiu	a6,v1,2
+     274:	1540001a 	bnez	a6,2e0 <tcp_segment_parse+0x204>
+     278:	00a3282a 	slt	a1,a1,v1
+     27c:	54a00019 	bnezl	a1,2e4 <tcp_segment_parse+0x208>
+     280:	2402ffff 	li	v0,-1
+     284:	54870010 	bnel	a0,a3,2c8 <tcp_segment_parse+0x1ec>
+     288:	00621021 	addu	v0,v1,v0
+     28c:	54680015 	bnel	v1,a4,2e4 <tcp_segment_parse+0x208>
+     290:	2402ffff 	li	v0,-1
+     294:	92240019 	lbu	a0,25(s1)
+     298:	14800011 	bnez	a0,2e0 <tcp_segment_parse+0x204>
+     29c:	24450002 	addiu	a1,v0,2
+     2a0:	02052821 	addu	a1,s0,a1
+     2a4:	90a40000 	lbu	a0,0(a1)
+     2a8:	90a50001 	lbu	a1,1(a1)
+     2ac:	00042200 	sll	a0,a0,0x8
+     2b0:	00852025 	or	a0,a0,a1
+     2b4:	3084ffff 	andi	a0,a0,0xffff
+     2b8:	10800009 	beqz	a0,2e0 <tcp_segment_parse+0x204>
+     2bc:	a6240016 	sh	a0,22(s1)
+     2c0:	a2290019 	sb	a5,25(s1)
+     2c4:	00621021 	addu	v0,v1,v0
+     2c8:	3042ffff 	andi	v0,v0,0xffff
+     2cc:	0052182b 	sltu	v1,v0,s2
+     2d0:	1460ffdb 	bnez	v1,240 <tcp_segment_parse+0x164>
+     2d4:	02021821 	addu	v1,s0,v0
+     2d8:	08000000 	j	0 <tcp_ip_equal>
+			2d8: R_MIPS_26	.text+0x2e4
+     2dc:	0000102d 	move	v0,zero
+     2e0:	2402ffff 	li	v0,-1
+     2e4:	dfbf0028 	ld	ra,40(sp)
+     2e8:	dfb30020 	ld	s3,32(sp)
+     2ec:	dfb20018 	ld	s2,24(sp)
+     2f0:	dfb10010 	ld	s1,16(sp)
+     2f4:	dfb00008 	ld	s0,8(sp)
+     2f8:	03e00008 	jr	ra
+     2fc:	27bd0030 	addiu	sp,sp,48
+
+00000300 <tcp_checksum_ipv4>:
+     300:	10800053 	beqz	a0,450 <tcp_checksum_ipv4+0x150>
+     304:	00000000 	nop
+     308:	10a00051 	beqz	a1,450 <tcp_checksum_ipv4+0x150>
+     30c:	00000000 	nop
+     310:	10c0004f 	beqz	a2,450 <tcp_checksum_ipv4+0x150>
+     314:	00000000 	nop
+     318:	2ce20014 	sltiu	v0,a3,20
+     31c:	1440004c 	bnez	v0,450 <tcp_checksum_ipv4+0x150>
+     320:	00000000 	nop
+     324:	90830002 	lbu	v1,2(a0)
+     328:	90820003 	lbu	v0,3(a0)
+     32c:	00031a00 	sll	v1,v1,0x8
+     330:	00621825 	or	v1,v1,v0
+     334:	90820000 	lbu	v0,0(a0)
+     338:	3063ffff 	andi	v1,v1,0xffff
+     33c:	90840001 	lbu	a0,1(a0)
+     340:	00021200 	sll	v0,v0,0x8
+     344:	00441025 	or	v0,v0,a0
+     348:	90a40000 	lbu	a0,0(a1)
+     34c:	3042ffff 	andi	v0,v0,0xffff
+     350:	00621021 	addu	v0,v1,v0
+     354:	3043ffff 	andi	v1,v0,0xffff
+     358:	00021402 	srl	v0,v0,0x10
+     35c:	00621821 	addu	v1,v1,v0
+     360:	00042200 	sll	a0,a0,0x8
+     364:	90a20001 	lbu	v0,1(a1)
+     368:	00822025 	or	a0,a0,v0
+     36c:	3084ffff 	andi	a0,a0,0xffff
+     370:	00641821 	addu	v1,v1,a0
+     374:	90a40002 	lbu	a0,2(a1)
+     378:	3062ffff 	andi	v0,v1,0xffff
+     37c:	00031c02 	srl	v1,v1,0x10
+     380:	00431021 	addu	v0,v0,v1
+     384:	90a30003 	lbu	v1,3(a1)
+     388:	00042200 	sll	a0,a0,0x8
+     38c:	00832025 	or	a0,a0,v1
+     390:	3084ffff 	andi	a0,a0,0xffff
+     394:	00441021 	addu	v0,v0,a0
+     398:	3044ffff 	andi	a0,v0,0xffff
+     39c:	00021402 	srl	v0,v0,0x10
+     3a0:	00822021 	addu	a0,a0,v0
+     3a4:	24840006 	addiu	a0,a0,6
+     3a8:	3083ffff 	andi	v1,a0,0xffff
+     3ac:	00042402 	srl	a0,a0,0x10
+     3b0:	00641821 	addu	v1,v1,a0
+     3b4:	00671821 	addu	v1,v1,a3
+     3b8:	00031402 	srl	v0,v1,0x10
+     3bc:	3063ffff 	andi	v1,v1,0xffff
+     3c0:	00431021 	addu	v0,v0,v1
+     3c4:	08000000 	j	0 <tcp_ip_equal>
+			3c4: R_MIPS_26	.text+0x3f8
+     3c8:	0000182d 	move	v1,zero
+     3cc:	24630002 	addiu	v1,v1,2
+     3d0:	90880000 	lbu	a4,0(a0)
+     3d4:	3063ffff 	andi	v1,v1,0xffff
+     3d8:	90850001 	lbu	a1,1(a0)
+     3dc:	00084200 	sll	a4,a4,0x8
+     3e0:	01052025 	or	a0,a4,a1
+     3e4:	3084ffff 	andi	a0,a0,0xffff
+     3e8:	00821021 	addu	v0,a0,v0
+     3ec:	00022402 	srl	a0,v0,0x10
+     3f0:	3042ffff 	andi	v0,v0,0xffff
+     3f4:	00821021 	addu	v0,a0,v0
+     3f8:	24640001 	addiu	a0,v1,1
+     3fc:	0087202a 	slt	a0,a0,a3
+     400:	5480fff2 	bnezl	a0,3cc <tcp_checksum_ipv4+0xcc>
+     404:	00c32021 	addu	a0,a2,v1
+     408:	0067382b 	sltu	a3,v1,a3
+     40c:	50e0000b 	beqzl	a3,43c <tcp_checksum_ipv4+0x13c>
+     410:	00021c02 	srl	v1,v0,0x10
+     414:	00c31821 	addu	v1,a2,v1
+     418:	90630000 	lbu	v1,0(v1)
+     41c:	70633a32 	cins	v1,v1,0x8,0x7
+     420:	00621021 	addu	v0,v1,v0
+     424:	00021c02 	srl	v1,v0,0x10
+     428:	3042ffff 	andi	v0,v0,0xffff
+     42c:	08000000 	j	0 <tcp_ip_equal>
+			42c: R_MIPS_26	.text+0x438
+     430:	00621021 	addu	v0,v1,v0
+     434:	24420001 	addiu	v0,v0,1
+     438:	00021c02 	srl	v1,v0,0x10
+     43c:	5460fffd 	bnezl	v1,434 <tcp_checksum_ipv4+0x134>
+     440:	3042ffff 	andi	v0,v0,0xffff
+     444:	00021027 	nor	v0,zero,v0
+     448:	03e00008 	jr	ra
+     44c:	3042ffff 	andi	v0,v0,0xffff
+     450:	03e00008 	jr	ra
+     454:	0000102d 	move	v0,zero
+
+00000458 <tcp_emit>:
+     458:	27bdff90 	addiu	sp,sp,-112
+     45c:	24030018 	li	v1,24
+     460:	ffb10028 	sd	s1,40(sp)
+     464:	24110014 	li	s1,20
+     468:	ffb20030 	sd	s2,48(sp)
+     46c:	006a880b 	movn	s1,v1,a6
+     470:	ffbe0060 	sd	s8,96(sp)
+     474:	ffb60050 	sd	s6,80(sp)
+     478:	249615f0 	addiu	s6,a0,5616
+     47c:	ffb50048 	sd	s5,72(sp)
+     480:	02299021 	addu	s2,s1,a5
+     484:	ffb00020 	sd	s0,32(sp)
+     488:	3252ffff 	andi	s2,s2,0xffff
+     48c:	ffbf0068 	sd	ra,104(sp)
+     490:	0080802d 	move	s0,a0
+     494:	ffb70058 	sd	s7,88(sp)
+     498:	0120a82d 	move	s5,a5
+     49c:	ffb40040 	sd	s4,64(sp)
+     4a0:	2e4205f1 	sltiu	v0,s2,1521
+     4a4:	ffb30038 	sd	s3,56(sp)
+     4a8:	10400060 	beqz	v0,62c <tcp_emit+0x1d4>
+     4ac:	8fbe0074 	lw	s8,116(sp)
+     4b0:	2d2205b5 	sltiu	v0,a5,1461
+     4b4:	2d640001 	sltiu	a0,a7,1
+     4b8:	38420001 	xori	v0,v0,0x1
+     4bc:	00441025 	or	v0,v0,a0
+     4c0:	1440005a 	bnez	v0,62c <tcp_emit+0x1d4>
+     4c4:	0160b82d 	move	s7,a7
+     4c8:	00c0982d 	move	s3,a2
+     4cc:	00a0602d 	move	t0,a1
+     4d0:	02c0202d 	move	a0,s6
+     4d4:	0000282d 	move	a1,zero
+     4d8:	ffa30018 	sd	v1,24(sp)
+     4dc:	0240302d 	move	a2,s2
+     4e0:	ffa80008 	sd	a4,8(sp)
+     4e4:	00e0a02d 	move	s4,a3
+     4e8:	ffaa0010 	sd	a6,16(sp)
+     4ec:	0c000000 	jal	0 <tcp_ip_equal>
+			4ec: R_MIPS_26	memset
+     4f0:	ffac0000 	sd	t0,0(sp)
+     4f4:	9602000c 	lhu	v0,12(s0)
+     4f8:	dfac0000 	ld	t0,0(sp)
+     4fc:	dfaa0010 	ld	a6,16(sp)
+     500:	a20215f1 	sb	v0,5617(s0)
+     504:	00022202 	srl	a0,v0,0x8
+     508:	9602000e 	lhu	v0,14(s0)
+     50c:	a20415f0 	sb	a0,5616(s0)
+     510:	a21315f7 	sb	s3,5623(s0)
+     514:	a20215f3 	sb	v0,5619(s0)
+     518:	00022202 	srl	a0,v0,0x8
+     51c:	a20415f2 	sb	a0,5618(s0)
+     520:	00131602 	srl	v0,s3,0x18
+     524:	a20215f4 	sb	v0,5620(s0)
+     528:	00131402 	srl	v0,s3,0x10
+     52c:	a20215f5 	sb	v0,5621(s0)
+     530:	00131202 	srl	v0,s3,0x8
+     534:	a20215f6 	sb	v0,5622(s0)
+     538:	00141602 	srl	v0,s4,0x18
+     53c:	a20215f8 	sb	v0,5624(s0)
+     540:	00141402 	srl	v0,s4,0x10
+     544:	a20215f9 	sb	v0,5625(s0)
+     548:	00141202 	srl	v0,s4,0x8
+     54c:	a20215fa 	sb	v0,5626(s0)
+     550:	00111080 	sll	v0,s1,0x2
+     554:	a20215fc 	sb	v0,5628(s0)
+     558:	24041000 	li	a0,4096
+     55c:	96020028 	lhu	v0,40(s0)
+     560:	a21415fb 	sb	s4,5627(s0)
+     564:	a20c15fd 	sb	t0,5629(s0)
+     568:	dfa30018 	ld	v1,24(sp)
+     56c:	00821023 	subu	v0,a0,v0
+     570:	dfa80008 	ld	a4,8(sp)
+     574:	3042ffff 	andi	v0,v0,0xffff
+     578:	a20215ff 	sb	v0,5631(s0)
+     57c:	00022202 	srl	a0,v0,0x8
+     580:	11400007 	beqz	a6,5a0 <tcp_emit+0x148>
+     584:	a20415fe 	sb	a0,5630(s0)
+     588:	24020002 	li	v0,2
+     58c:	24040004 	li	a0,4
+     590:	a2021604 	sb	v0,5636(s0)
+     594:	a2041605 	sb	a0,5637(s0)
+     598:	a2021606 	sb	v0,5638(s0)
+     59c:	a2031607 	sb	v1,5639(s0)
+     5a0:	12a00007 	beqz	s5,5c0 <tcp_emit+0x168>
+     5a4:	26130004 	addiu	s3,s0,4
+     5a8:	262415f0 	addiu	a0,s1,5616
+     5ac:	0100282d 	move	a1,a4
+     5b0:	02042021 	addu	a0,s0,a0
+     5b4:	0c000000 	jal	0 <tcp_ip_equal>
+			5b4: R_MIPS_26	memcpy
+     5b8:	02a0302d 	move	a2,s5
+     5bc:	26130004 	addiu	s3,s0,4
+     5c0:	26110008 	addiu	s1,s0,8
+     5c4:	0260202d 	move	a0,s3
+     5c8:	0220282d 	move	a1,s1
+     5cc:	02c0302d 	move	a2,s6
+     5d0:	0c000000 	jal	0 <tcp_ip_equal>
+			5d0: R_MIPS_26	tcp_checksum_ipv4
+     5d4:	0240382d 	move	a3,s2
+     5d8:	dfbf0068 	ld	ra,104(sp)
+     5dc:	dfb50048 	ld	s5,72(sp)
+     5e0:	03c0202d 	move	a0,s8
+     5e4:	dfb40040 	ld	s4,64(sp)
+     5e8:	00021a02 	srl	v1,v0,0x8
+     5ec:	dfbe0060 	ld	s8,96(sp)
+     5f0:	0260282d 	move	a1,s3
+     5f4:	a2031600 	sb	v1,5632(s0)
+     5f8:	0220302d 	move	a2,s1
+     5fc:	dfb30038 	ld	s3,56(sp)
+     600:	02c0382d 	move	a3,s6
+     604:	dfb10028 	ld	s1,40(sp)
+     608:	0240402d 	move	a4,s2
+     60c:	dfb60050 	ld	s6,80(sp)
+     610:	02e0c82d 	move	t9,s7
+     614:	dfb20030 	ld	s2,48(sp)
+     618:	dfb70058 	ld	s7,88(sp)
+     61c:	a2021601 	sb	v0,5633(s0)
+     620:	dfb00020 	ld	s0,32(sp)
+     624:	03200008 	jr	t9
+     628:	27bd0070 	addiu	sp,sp,112
+     62c:	dfbf0068 	ld	ra,104(sp)
+     630:	2402ffff 	li	v0,-1
+     634:	dfbe0060 	ld	s8,96(sp)
+     638:	dfb70058 	ld	s7,88(sp)
+     63c:	dfb60050 	ld	s6,80(sp)
+     640:	dfb50048 	ld	s5,72(sp)
+     644:	dfb40040 	ld	s4,64(sp)
+     648:	dfb30038 	ld	s3,56(sp)
+     64c:	dfb20030 	ld	s2,48(sp)
+     650:	dfb10028 	ld	s1,40(sp)
+     654:	dfb00020 	ld	s0,32(sp)
+     658:	03e00008 	jr	ra
+     65c:	27bd0070 	addiu	sp,sp,112
+
+00000660 <tcp_send_reliable>:
+     660:	27bdffb0 	addiu	sp,sp,-80
+     664:	2d0205b5 	sltiu	v0,a4,1461
+     668:	ffb10020 	sd	s1,32(sp)
+     66c:	0100882d 	move	s1,a4
+     670:	ffbf0048 	sd	ra,72(sp)
+     674:	ffb50040 	sd	s5,64(sp)
+     678:	ffb40038 	sd	s4,56(sp)
+     67c:	ffb30030 	sd	s3,48(sp)
+     680:	ffb20028 	sd	s2,40(sp)
+     684:	10400021 	beqz	v0,70c <tcp_send_reliable+0xac>
+     688:	ffb00018 	sd	s0,24(sp)
+     68c:	908215e1 	lbu	v0,5601(a0)
+     690:	1440001e 	bnez	v0,70c <tcp_send_reliable+0xac>
+     694:	0080802d 	move	s0,a0
+     698:	8fa20054 	lw	v0,84(sp)
+     69c:	00e0982d 	move	s3,a3
+     6a0:	8c870020 	lw	a3,32(a0)
+     6a4:	0120a02d 	move	s4,a5
+     6a8:	0260402d 	move	a4,s3
+     6ac:	0220482d 	move	a5,s1
+     6b0:	afa20004 	sw	v0,4(sp)
+     6b4:	00a0902d 	move	s2,a1
+     6b8:	0c000000 	jal	0 <tcp_ip_equal>
+			6b8: R_MIPS_26	.text+0x458
+     6bc:	00c0a82d 	move	s5,a2
+     6c0:	14400013 	bnez	v0,710 <tcp_send_reliable+0xb0>
+     6c4:	2402ffff 	li	v0,-1
+     6c8:	52200006 	beqzl	s1,6e4 <tcp_send_reliable+0x84>
+     6cc:	24020001 	li	v0,1
+     6d0:	26041be0 	addiu	a0,s0,7136
+     6d4:	0260282d 	move	a1,s3
+     6d8:	0c000000 	jal	0 <tcp_ip_equal>
+			6d8: R_MIPS_26	memcpy
+     6dc:	0220302d 	move	a2,s1
+     6e0:	24020001 	li	v0,1
+     6e4:	269403e8 	addiu	s4,s4,1000
+     6e8:	a20215e1 	sb	v0,5601(s0)
+     6ec:	0000102d 	move	v0,zero
+     6f0:	a6112194 	sh	s1,8596(s0)
+     6f4:	a2122196 	sb	s2,8598(s0)
+     6f8:	ae152198 	sw	s5,8600(s0)
+     6fc:	a21215e0 	sb	s2,5600(s0)
+     700:	a20015e2 	sb	zero,5602(s0)
+     704:	08000000 	j	0 <tcp_ip_equal>
+			704: R_MIPS_26	.text+0x710
+     708:	ae1415e4 	sw	s4,5604(s0)
+     70c:	2402ffff 	li	v0,-1
+     710:	dfbf0048 	ld	ra,72(sp)
+     714:	dfb50040 	ld	s5,64(sp)
+     718:	dfb40038 	ld	s4,56(sp)
+     71c:	dfb30030 	ld	s3,48(sp)
+     720:	dfb20028 	ld	s2,40(sp)
+     724:	dfb10020 	ld	s1,32(sp)
+     728:	dfb00018 	ld	s0,24(sp)
+     72c:	03e00008 	jr	ra
+     730:	27bd0050 	addiu	sp,sp,80
+
+00000734 <tcp_send_ack>:
+     734:	8c830018 	lw	v1,24(a0)
+     738:	27bdffe0 	addiu	sp,sp,-32
+     73c:	8c870020 	lw	a3,32(a0)
+     740:	00a0582d 	move	a7,a1
+     744:	afa60004 	sw	a2,4(sp)
+     748:	24050010 	li	a1,16
+     74c:	ffbf0018 	sd	ra,24(sp)
+     750:	0060302d 	move	a2,v1
+     754:	0000402d 	move	a4,zero
+     758:	0000482d 	move	a5,zero
+     75c:	0c000000 	jal	0 <tcp_ip_equal>
+			75c: R_MIPS_26	.text+0x458
+     760:	0000502d 	move	a6,zero
+     764:	dfbf0018 	ld	ra,24(sp)
+     768:	03e00008 	jr	ra
+     76c:	27bd0020 	addiu	sp,sp,32
+
+00000770 <tcp_checksum_ipv4_valid>:
+     770:	1080000e 	beqz	a0,7ac <tcp_checksum_ipv4_valid+0x3c>
+     774:	00000000 	nop
+     778:	10a0000c 	beqz	a1,7ac <tcp_checksum_ipv4_valid+0x3c>
+     77c:	00000000 	nop
+     780:	10c0000a 	beqz	a2,7ac <tcp_checksum_ipv4_valid+0x3c>
+     784:	00000000 	nop
+     788:	2ce20014 	sltiu	v0,a3,20
+     78c:	14400007 	bnez	v0,7ac <tcp_checksum_ipv4_valid+0x3c>
+     790:	00000000 	nop
+     794:	27bdfff0 	addiu	sp,sp,-16
+     798:	ffbf0008 	sd	ra,8(sp)
+     79c:	0c000000 	jal	0 <tcp_ip_equal>
+			79c: R_MIPS_26	tcp_checksum_ipv4
+     7a0:	00000000 	nop
+     7a4:	08000000 	j	0 <tcp_ip_equal>
+			7a4: R_MIPS_26	.text+0x7b4
+     7a8:	2c420001 	sltiu	v0,v0,1
+     7ac:	03e00008 	jr	ra
+     7b0:	0000102d 	move	v0,zero
+     7b4:	dfbf0008 	ld	ra,8(sp)
+     7b8:	03e00008 	jr	ra
+     7bc:	27bd0010 	addiu	sp,sp,16
+
+000007c0 <tcp_seq_before>:
+     7c0:	00851023 	subu	v0,a0,a1
+     7c4:	03e00008 	jr	ra
+     7c8:	000217c2 	srl	v0,v0,0x1f
+
+000007cc <tcp_seq_after>:
+     7cc:	00851023 	subu	v0,a0,a1
+     7d0:	03e00008 	jr	ra
+     7d4:	0002102a 	slt	v0,zero,v0
+
+000007d8 <tcp_core_init>:
+     7d8:	10800003 	beqz	a0,7e8 <tcp_core_init+0x10>
+     7dc:	0000282d 	move	a1,zero
+     7e0:	08000000 	j	0 <tcp_ip_equal>
+			7e0: R_MIPS_26	memset
+     7e4:	2406219c 	li	a2,8604
+     7e8:	03e00008 	jr	ra
+     7ec:	00000000 	nop
+
+000007f0 <tcp_core_listen>:
+     7f0:	2c830001 	sltiu	v1,a0,1
+     7f4:	2ca20001 	sltiu	v0,a1,1
+     7f8:	27bdffd0 	addiu	sp,sp,-48
+     7fc:	00621025 	or	v0,v1,v0
+     800:	ffb00010 	sd	s0,16(sp)
+     804:	0080802d 	move	s0,a0
+     808:	ffbf0028 	sd	ra,40(sp)
+     80c:	ffb20020 	sd	s2,32(sp)
+     810:	14400012 	bnez	v0,85c <tcp_core_listen+0x6c>
+     814:	ffb10018 	sd	s1,24(sp)
+     818:	10c00010 	beqz	a2,85c <tcp_core_listen+0x6c>
+     81c:	00c0902d 	move	s2,a2
+     820:	ffa50000 	sd	a1,0(sp)
+     824:	0c000000 	jal	0 <tcp_ip_equal>
+			824: R_MIPS_26	tcp_core_init
+     828:	00e0882d 	move	s1,a3
+     82c:	dfa50000 	ld	a1,0(sp)
+     830:	26040004 	addiu	a0,s0,4
+     834:	0c000000 	jal	0 <tcp_ip_equal>
+			834: R_MIPS_26	memcpy
+     838:	24060004 	li	a2,4
+     83c:	24020001 	li	v0,1
+     840:	ae020000 	sw	v0,0(s0)
+     844:	0000102d 	move	v0,zero
+     848:	a612000c 	sh	s2,12(s0)
+     84c:	ae110010 	sw	s1,16(s0)
+     850:	ae110014 	sw	s1,20(s0)
+     854:	08000000 	j	0 <tcp_ip_equal>
+			854: R_MIPS_26	.text+0x860
+     858:	ae110018 	sw	s1,24(s0)
+     85c:	2402ffff 	li	v0,-1
+     860:	dfbf0028 	ld	ra,40(sp)
+     864:	dfb20020 	ld	s2,32(sp)
+     868:	dfb10018 	ld	s1,24(sp)
+     86c:	dfb00010 	ld	s0,16(sp)
+     870:	03e00008 	jr	ra
+     874:	27bd0030 	addiu	sp,sp,48
+
+00000878 <tcp_core_input>:
+     878:	27bdff80 	addiu	sp,sp,-128
+     87c:	ffb00038 	sd	s0,56(sp)
+     880:	0080802d 	move	s0,a0
+     884:	ffbf0078 	sd	ra,120(sp)
+     888:	ffb70070 	sd	s7,112(sp)
+     88c:	ffb60068 	sd	s6,104(sp)
+     890:	ffb50060 	sd	s5,96(sp)
+     894:	ffb40058 	sd	s4,88(sp)
+     898:	ffb30050 	sd	s3,80(sp)
+     89c:	ffb20048 	sd	s2,72(sp)
+     8a0:	10800132 	beqz	a0,d6c <tcp_core_input+0x4f4>
+     8a4:	ffb10040 	sd	s1,64(sp)
+     8a8:	10a00130 	beqz	a1,d6c <tcp_core_input+0x4f4>
+     8ac:	00a0b02d 	move	s6,a1
+     8b0:	2cc30001 	sltiu	v1,a2,1
+     8b4:	2ce20001 	sltiu	v0,a3,1
+     8b8:	00621025 	or	v0,v1,v0
+     8bc:	00c0a82d 	move	s5,a2
+     8c0:	1440012a 	bnez	v0,d6c <tcp_core_input+0x4f4>
+     8c4:	00e0882d 	move	s1,a3
+     8c8:	11400128 	beqz	a6,d6c <tcp_core_input+0x4f4>
+     8cc:	0140902d 	move	s2,a6
+     8d0:	00e0202d 	move	a0,a3
+     8d4:	0100282d 	move	a1,a4
+     8d8:	27a60010 	addiu	a2,sp,16
+     8dc:	0100b82d 	move	s7,a4
+     8e0:	0120a02d 	move	s4,a5
+     8e4:	0c000000 	jal	0 <tcp_ip_equal>
+			8e4: R_MIPS_26	tcp_segment_parse
+     8e8:	0160982d 	move	s3,a7
+     8ec:	1440011f 	bnez	v0,d6c <tcp_core_input+0x4f4>
+     8f0:	02c0202d 	move	a0,s6
+     8f4:	02a0282d 	move	a1,s5
+     8f8:	0220302d 	move	a2,s1
+     8fc:	0c000000 	jal	0 <tcp_ip_equal>
+			8fc: R_MIPS_26	tcp_checksum_ipv4_valid
+     900:	02e0382d 	move	a3,s7
+     904:	5040011f 	beqzl	v0,d84 <tcp_core_input+0x50c>
+     908:	2411ffff 	li	s1,-1
+     90c:	8e170000 	lw	s7,0(s0)
+     910:	12e0011c 	beqz	s7,d84 <tcp_core_input+0x50c>
+     914:	0000882d 	move	s1,zero
+     918:	97a30012 	lhu	v1,18(sp)
+     91c:	24040001 	li	a0,1
+     920:	16e40041 	bne	s7,a0,a28 <tcp_core_input+0x1b0>
+     924:	9602000c 	lhu	v0,12(s0)
+     928:	14620117 	bne	v1,v0,d88 <tcp_core_input+0x510>
+     92c:	dfbf0078 	ld	ra,120(sp)
+     930:	97a20010 	lhu	v0,16(sp)
+     934:	10400114 	beqz	v0,d88 <tcp_core_input+0x510>
+     938:	93a20028 	lbu	v0,40(sp)
+     93c:	24030002 	li	v1,2
+     940:	304400e2 	andi	a0,v0,0xe2
+     944:	54830111 	bnel	a0,v1,d8c <tcp_core_input+0x514>
+     948:	0220102d 	move	v0,s1
+     94c:	30420015 	andi	v0,v0,0x15
+     950:	1440010d 	bnez	v0,d88 <tcp_core_input+0x510>
+     954:	97a20024 	lhu	v0,36(sp)
+     958:	1440010c 	bnez	v0,d8c <tcp_core_input+0x514>
+     95c:	0220102d 	move	v0,s1
+     960:	26040008 	addiu	a0,s0,8
+     964:	02c0282d 	move	a1,s6
+     968:	0c000000 	jal	0 <tcp_ip_equal>
+			968: R_MIPS_26	memcpy
+     96c:	24060004 	li	a2,4
+     970:	97a20010 	lhu	v0,16(sp)
+     974:	02a0202d 	move	a0,s5
+     978:	26050004 	addiu	a1,s0,4
+     97c:	0c000000 	jal	0 <tcp_ip_equal>
+			97c: R_MIPS_26	.text
+     980:	a602000e 	sh	v0,14(s0)
+     984:	14400003 	bnez	v0,994 <tcp_core_input+0x11c>
+     988:	8fa20014 	lw	v0,20(sp)
+     98c:	08000000 	j	0 <tcp_ip_equal>
+			98c: R_MIPS_26	.text+0xd84
+     990:	a600000e 	sh	zero,14(s0)
+     994:	97a30026 	lhu	v1,38(sp)
+     998:	93a40029 	lbu	a0,41(sp)
+     99c:	ae02001c 	sw	v0,28(s0)
+     9a0:	24420001 	addiu	v0,v0,1
+     9a4:	ae020020 	sw	v0,32(s0)
+     9a8:	97a2001c 	lhu	v0,28(sp)
+     9ac:	a6020024 	sh	v0,36(s0)
+     9b0:	24020218 	li	v0,536
+     9b4:	0064100b 	movn	v0,v1,a0
+     9b8:	2443ffff 	addiu	v1,v0,-1
+     9bc:	2c630218 	sltiu	v1,v1,536
+     9c0:	50600003 	beqzl	v1,9d0 <tcp_core_input+0x158>
+     9c4:	24020218 	li	v0,536
+     9c8:	08000000 	j	0 <tcp_ip_equal>
+			9c8: R_MIPS_26	.text+0x9d4
+     9cc:	8e060010 	lw	a2,16(s0)
+     9d0:	8e060010 	lw	a2,16(s0)
+     9d4:	0200202d 	move	a0,s0
+     9d8:	a6020026 	sh	v0,38(s0)
+     9dc:	24050012 	li	a1,18
+     9e0:	ae1415e8 	sw	s4,5608(s0)
+     9e4:	0000382d 	move	a3,zero
+     9e8:	24c20001 	addiu	v0,a2,1
+     9ec:	0000402d 	move	a4,zero
+     9f0:	ae020018 	sw	v0,24(s0)
+     9f4:	24020002 	li	v0,2
+     9f8:	ae060014 	sw	a2,20(s0)
+     9fc:	0280482d 	move	a5,s4
+     a00:	ae020000 	sw	v0,0(s0)
+     a04:	240a0001 	li	a6,1
+     a08:	afb30004 	sw	s3,4(sp)
+     a0c:	0c000000 	jal	0 <tcp_ip_equal>
+			a0c: R_MIPS_26	.text+0x660
+     a10:	0240582d 	move	a7,s2
+     a14:	104000db 	beqz	v0,d84 <tcp_core_input+0x50c>
+     a18:	24110001 	li	s1,1
+     a1c:	ae110000 	sw	s1,0(s0)
+     a20:	08000000 	j	0 <tcp_ip_equal>
+			a20: R_MIPS_26	.text+0xd6c
+     a24:	a600000e 	sh	zero,14(s0)
+     a28:	146200d7 	bne	v1,v0,d88 <tcp_core_input+0x510>
+     a2c:	dfbf0078 	ld	ra,120(sp)
+     a30:	97a30010 	lhu	v1,16(sp)
+     a34:	9602000e 	lhu	v0,14(s0)
+     a38:	146200d4 	bne	v1,v0,d8c <tcp_core_input+0x514>
+     a3c:	0220102d 	move	v0,s1
+     a40:	02c0202d 	move	a0,s6
+     a44:	0c000000 	jal	0 <tcp_ip_equal>
+			a44: R_MIPS_26	.text
+     a48:	26050008 	addiu	a1,s0,8
+     a4c:	104000cd 	beqz	v0,d84 <tcp_core_input+0x50c>
+     a50:	0000882d 	move	s1,zero
+     a54:	02a0202d 	move	a0,s5
+     a58:	0c000000 	jal	0 <tcp_ip_equal>
+			a58: R_MIPS_26	.text
+     a5c:	26050004 	addiu	a1,s0,4
+     a60:	144000c4 	bnez	v0,d74 <tcp_core_input+0x4fc>
+     a64:	93a20028 	lbu	v0,40(sp)
+     a68:	08000000 	j	0 <tcp_ip_equal>
+			a68: R_MIPS_26	.text+0xd88
+     a6c:	dfbf0078 	ld	ra,120(sp)
+     a70:	8e020020 	lw	v0,32(s0)
+     a74:	8fa30014 	lw	v1,20(sp)
+     a78:	146200c2 	bne	v1,v0,d84 <tcp_core_input+0x50c>
+     a7c:	24110001 	li	s1,1
+     a80:	0c000000 	jal	0 <tcp_ip_equal>
+			a80: R_MIPS_26	.text+0x44
+     a84:	0200202d 	move	a0,s0
+     a88:	08000000 	j	0 <tcp_ip_equal>
+			a88: R_MIPS_26	.text+0xd84
+     a8c:	24110001 	li	s1,1
+     a90:	16e30030 	bne	s7,v1,b54 <tcp_core_input+0x2dc>
+     a94:	304300e2 	andi	v1,v0,0xe2
+     a98:	c8410013 	bbit0	v0,0x1,ae8 <tcp_core_input+0x270>
+     a9c:	8fa40014 	lw	a0,20(sp)
+     aa0:	8e03001c 	lw	v1,28(s0)
+     aa4:	14830010 	bne	a0,v1,ae8 <tcp_core_input+0x270>
+     aa8:	00000000 	nop
+     aac:	920215e1 	lbu	v0,5601(s0)
+     ab0:	104000b4 	beqz	v0,d84 <tcp_core_input+0x50c>
+     ab4:	24110001 	li	s1,1
+     ab8:	92052196 	lbu	a1,8598(s0)
+     abc:	0200202d 	move	a0,s0
+     ac0:	8e062198 	lw	a2,8600(s0)
+     ac4:	0000402d 	move	a4,zero
+     ac8:	8e070020 	lw	a3,32(s0)
+     acc:	0000482d 	move	a5,zero
+     ad0:	afb30004 	sw	s3,4(sp)
+     ad4:	240a0001 	li	a6,1
+     ad8:	0c000000 	jal	0 <tcp_ip_equal>
+			ad8: R_MIPS_26	.text+0x458
+     adc:	0240582d 	move	a7,s2
+     ae0:	08000000 	j	0 <tcp_ip_equal>
+			ae0: R_MIPS_26	.text+0xd88
+     ae4:	dfbf0078 	ld	ra,120(sp)
+     ae8:	c84400a6 	bbit0	v0,0x4,d84 <tcp_core_input+0x50c>
+     aec:	0000882d 	move	s1,zero
+     af0:	8fa50018 	lw	a1,24(sp)
+     af4:	8e030018 	lw	v1,24(s0)
+     af8:	14a300a3 	bne	a1,v1,d88 <tcp_core_input+0x510>
+     afc:	dfbf0078 	ld	ra,120(sp)
+     b00:	8e030020 	lw	v1,32(s0)
+     b04:	8fa40014 	lw	a0,20(sp)
+     b08:	548300a0 	bnel	a0,v1,d8c <tcp_core_input+0x514>
+     b0c:	0220102d 	move	v0,s1
+     b10:	97a30024 	lhu	v1,36(sp)
+     b14:	1460009c 	bnez	v1,d88 <tcp_core_input+0x510>
+     b18:	30420003 	andi	v0,v0,0x3
+     b1c:	1440009a 	bnez	v0,d88 <tcp_core_input+0x510>
+     b20:	0060882d 	move	s1,v1
+     b24:	920215e1 	lbu	v0,5601(s0)
+     b28:	10400004 	beqz	v0,b3c <tcp_core_input+0x2c4>
+     b2c:	97a2001c 	lhu	v0,28(sp)
+     b30:	0c000000 	jal	0 <tcp_ip_equal>
+			b30: R_MIPS_26	.text.unlikely
+     b34:	0200202d 	move	a0,s0
+     b38:	97a2001c 	lhu	v0,28(sp)
+     b3c:	ae1415e8 	sw	s4,5608(s0)
+     b40:	a6020024 	sh	v0,36(s0)
+     b44:	24020003 	li	v0,3
+     b48:	ae020000 	sw	v0,0(s0)
+     b4c:	08000000 	j	0 <tcp_ip_equal>
+			b4c: R_MIPS_26	.text+0xd84
+     b50:	24110001 	li	s1,1
+     b54:	1460008c 	bnez	v1,d88 <tcp_core_input+0x510>
+     b58:	dfbf0078 	ld	ra,120(sp)
+     b5c:	c844008a 	bbit0	v0,0x4,d88 <tcp_core_input+0x510>
+     b60:	8fa50014 	lw	a1,20(sp)
+     b64:	8e040020 	lw	a0,32(s0)
+     b68:	50a40008 	beql	a1,a0,b8c <tcp_core_input+0x314>
+     b6c:	8fa50018 	lw	a1,24(sp)
+     b70:	97a30024 	lhu	v1,36(sp)
+     b74:	14600078 	bnez	v1,d58 <tcp_core_input+0x4e0>
+     b78:	0200202d 	move	a0,s0
+     b7c:	c8400083 	bbit0	v0,0x0,d8c <tcp_core_input+0x514>
+     b80:	0220102d 	move	v0,s1
+     b84:	08000000 	j	0 <tcp_ip_equal>
+			b84: R_MIPS_26	.text+0xd5c
+     b88:	0240282d 	move	a1,s2
+     b8c:	8e020018 	lw	v0,24(s0)
+     b90:	00a21023 	subu	v0,a1,v0
+     b94:	1c40007b 	bgtz	v0,d84 <tcp_core_input+0x50c>
+     b98:	0060882d 	move	s1,v1
+     b9c:	8e020014 	lw	v0,20(s0)
+     ba0:	00a21023 	subu	v0,a1,v0
+     ba4:	04400078 	bltz	v0,d88 <tcp_core_input+0x510>
+     ba8:	dfbf0078 	ld	ra,120(sp)
+     bac:	920215e1 	lbu	v0,5601(s0)
+     bb0:	10400004 	beqz	v0,bc4 <tcp_core_input+0x34c>
+     bb4:	97a2001c 	lhu	v0,28(sp)
+     bb8:	0c000000 	jal	0 <tcp_ip_equal>
+			bb8: R_MIPS_26	.text.unlikely
+     bbc:	0200202d 	move	a0,s0
+     bc0:	97a2001c 	lhu	v0,28(sp)
+     bc4:	24030004 	li	v1,4
+     bc8:	a6020024 	sh	v0,36(s0)
+     bcc:	8e020000 	lw	v0,0(s0)
+     bd0:	14430009 	bne	v0,v1,bf8 <tcp_core_input+0x380>
+     bd4:	24030007 	li	v1,7
+     bd8:	920215e1 	lbu	v0,5601(s0)
+     bdc:	14400014 	bnez	v0,c30 <tcp_core_input+0x3b8>
+     be0:	97b10024 	lhu	s1,36(sp)
+     be4:	920415e3 	lbu	a0,5603(s0)
+     be8:	24020005 	li	v0,5
+     bec:	24030009 	li	v1,9
+     bf0:	08000000 	j	0 <tcp_ip_equal>
+			bf0: R_MIPS_26	.text+0xc10
+     bf4:	0064100b 	movn	v0,v1,a0
+     bf8:	54430007 	bnel	v0,v1,c18 <tcp_core_input+0x3a0>
+     bfc:	24030008 	li	v1,8
+     c00:	920215e1 	lbu	v0,5601(s0)
+     c04:	1440000a 	bnez	v0,c30 <tcp_core_input+0x3b8>
+     c08:	97b10024 	lhu	s1,36(sp)
+     c0c:	24020009 	li	v0,9
+     c10:	08000000 	j	0 <tcp_ip_equal>
+			c10: R_MIPS_26	.text+0xc2c
+     c14:	ae020000 	sw	v0,0(s0)
+     c18:	14430005 	bne	v0,v1,c30 <tcp_core_input+0x3b8>
+     c1c:	97b10024 	lhu	s1,36(sp)
+     c20:	920215e1 	lbu	v0,5601(s0)
+     c24:	1040ff96 	beqz	v0,a80 <tcp_core_input+0x208>
+     c28:	00000000 	nop
+     c2c:	97b10024 	lhu	s1,36(sp)
+     c30:	ae1415e8 	sw	s4,5608(s0)
+     c34:	8fb50014 	lw	s5,20(sp)
+     c38:	1220001b 	beqz	s1,ca8 <tcp_core_input+0x430>
+     c3c:	93b60028 	lbu	s6,40(sp)
+     c40:	2e220219 	sltiu	v0,s1,537
+     c44:	10400044 	beqz	v0,d58 <tcp_core_input+0x4e0>
+     c48:	0200202d 	move	a0,s0
+     c4c:	8e020020 	lw	v0,32(s0)
+     c50:	52a20003 	beql	s5,v0,c60 <tcp_core_input+0x3e8>
+     c54:	96040028 	lhu	a0,40(s0)
+     c58:	08000000 	j	0 <tcp_ip_equal>
+			c58: R_MIPS_26	.text+0xd5c
+     c5c:	0240282d 	move	a1,s2
+     c60:	24021000 	li	v0,4096
+     c64:	00441023 	subu	v0,v0,a0
+     c68:	3042ffff 	andi	v0,v0,0xffff
+     c6c:	0051102b 	sltu	v0,v0,s1
+     c70:	10400003 	beqz	v0,c80 <tcp_core_input+0x408>
+     c74:	8fa5002c 	lw	a1,44(sp)
+     c78:	08000000 	j	0 <tcp_ip_equal>
+			c78: R_MIPS_26	.text+0xd58
+     c7c:	0200202d 	move	a0,s0
+     c80:	02042021 	addu	a0,s0,a0
+     c84:	2484002a 	addiu	a0,a0,42
+     c88:	0c000000 	jal	0 <tcp_ip_equal>
+			c88: R_MIPS_26	memcpy
+     c8c:	0220302d 	move	a2,s1
+     c90:	96020028 	lhu	v0,40(s0)
+     c94:	02221021 	addu	v0,s1,v0
+     c98:	a6020028 	sh	v0,40(s0)
+     c9c:	8e020020 	lw	v0,32(s0)
+     ca0:	00511021 	addu	v0,v0,s1
+     ca4:	ae020020 	sw	v0,32(s0)
+     ca8:	93a30028 	lbu	v1,40(sp)
+     cac:	30630001 	andi	v1,v1,0x1
+     cb0:	10600023 	beqz	v1,d40 <tcp_core_input+0x4c8>
+     cb4:	26b5ffff 	addiu	s5,s5,-1
+     cb8:	8e020020 	lw	v0,32(s0)
+     cbc:	02b18821 	addu	s1,s5,s1
+     cc0:	32d60001 	andi	s6,s6,0x1
+     cc4:	02368821 	addu	s1,s1,s6
+     cc8:	12220003 	beq	s1,v0,cd8 <tcp_core_input+0x460>
+     ccc:	24020001 	li	v0,1
+     cd0:	08000000 	j	0 <tcp_ip_equal>
+			cd0: R_MIPS_26	.text+0xd58
+     cd4:	0200202d 	move	a0,s0
+     cd8:	26310001 	addiu	s1,s1,1
+     cdc:	a20215e3 	sb	v0,5603(s0)
+     ce0:	24040003 	li	a0,3
+     ce4:	8e020000 	lw	v0,0(s0)
+     ce8:	14440003 	bne	v0,a0,cf8 <tcp_core_input+0x480>
+     cec:	ae110020 	sw	s1,32(s0)
+     cf0:	08000000 	j	0 <tcp_ip_equal>
+			cf0: R_MIPS_26	.text+0xd24
+     cf4:	24020006 	li	v0,6
+     cf8:	24040004 	li	a0,4
+     cfc:	14440006 	bne	v0,a0,d18 <tcp_core_input+0x4a0>
+     d00:	24040005 	li	a0,5
+     d04:	920515e1 	lbu	a1,5601(s0)
+     d08:	24020009 	li	v0,9
+     d0c:	24040007 	li	a0,7
+     d10:	08000000 	j	0 <tcp_ip_equal>
+			d10: R_MIPS_26	.text+0xd24
+     d14:	0085100b 	movn	v0,a0,a1
+     d18:	54440004 	bnel	v0,a0,d2c <tcp_core_input+0x4b4>
+     d1c:	8e040000 	lw	a0,0(s0)
+     d20:	24020009 	li	v0,9
+     d24:	ae020000 	sw	v0,0(s0)
+     d28:	8e040000 	lw	a0,0(s0)
+     d2c:	24020009 	li	v0,9
+     d30:	14820003 	bne	a0,v0,d40 <tcp_core_input+0x4c8>
+     d34:	3402ea60 	li	v0,0xea60
+     d38:	0282a021 	addu	s4,s4,v0
+     d3c:	ae1415ec 	sw	s4,5612(s0)
+     d40:	14600005 	bnez	v1,d58 <tcp_core_input+0x4e0>
+     d44:	0200202d 	move	a0,s0
+     d48:	97a20024 	lhu	v0,36(sp)
+     d4c:	1040000d 	beqz	v0,d84 <tcp_core_input+0x50c>
+     d50:	0000882d 	move	s1,zero
+     d54:	0200202d 	move	a0,s0
+     d58:	0240282d 	move	a1,s2
+     d5c:	0c000000 	jal	0 <tcp_ip_equal>
+			d5c: R_MIPS_26	.text+0x734
+     d60:	0260302d 	move	a2,s3
+     d64:	08000000 	j	0 <tcp_ip_equal>
+			d64: R_MIPS_26	.text+0xd84
+     d68:	0040882d 	move	s1,v0
+     d6c:	08000000 	j	0 <tcp_ip_equal>
+			d6c: R_MIPS_26	.text+0xd84
+     d70:	2411ffff 	li	s1,-1
+     d74:	e842ff3e 	bbit1	v0,0x2,a70 <tcp_core_input+0x1f8>
+     d78:	24030002 	li	v1,2
+     d7c:	08000000 	j	0 <tcp_ip_equal>
+			d7c: R_MIPS_26	.text+0xa90
+     d80:	00000000 	nop
+     d84:	dfbf0078 	ld	ra,120(sp)
+     d88:	0220102d 	move	v0,s1
+     d8c:	dfb70070 	ld	s7,112(sp)
+     d90:	dfb60068 	ld	s6,104(sp)
+     d94:	dfb50060 	ld	s5,96(sp)
+     d98:	dfb40058 	ld	s4,88(sp)
+     d9c:	dfb30050 	ld	s3,80(sp)
+     da0:	dfb20048 	ld	s2,72(sp)
+     da4:	dfb10040 	ld	s1,64(sp)
+     da8:	dfb00038 	ld	s0,56(sp)
+     dac:	03e00008 	jr	ra
+     db0:	27bd0080 	addiu	sp,sp,128
+
+00000db4 <tcp_core_poll>:
+     db4:	27bdffd0 	addiu	sp,sp,-48
+     db8:	ffb00010 	sd	s0,16(sp)
+     dbc:	0080802d 	move	s0,a0
+     dc0:	ffbf0028 	sd	ra,40(sp)
+     dc4:	ffb20020 	sd	s2,32(sp)
+     dc8:	10800036 	beqz	a0,ea4 <tcp_core_poll+0xf0>
+     dcc:	ffb10018 	sd	s1,24(sp)
+     dd0:	8c820000 	lw	v0,0(a0)
+     dd4:	2c430002 	sltiu	v1,v0,2
+     dd8:	14600030 	bnez	v1,e9c <tcp_core_poll+0xe8>
+     ddc:	24030009 	li	v1,9
+     de0:	14430009 	bne	v0,v1,e08 <tcp_core_poll+0x54>
+     de4:	00a0902d 	move	s2,a1
+     de8:	8c8215ec 	lw	v0,5612(a0)
+     dec:	00a29023 	subu	s2,a1,v0
+     df0:	0640002d 	bltz	s2,ea8 <tcp_core_poll+0xf4>
+     df4:	0000882d 	move	s1,zero
+     df8:	0c000000 	jal	0 <tcp_ip_equal>
+			df8: R_MIPS_26	.text+0x44
+     dfc:	00000000 	nop
+     e00:	08000000 	j	0 <tcp_ip_equal>
+			e00: R_MIPS_26	.text+0xeac
+     e04:	dfbf0028 	ld	ra,40(sp)
+     e08:	8c8215e8 	lw	v0,5608(a0)
+     e0c:	00a21023 	subu	v0,a1,v0
+     e10:	24428ad0 	addiu	v0,v0,-30000
+     e14:	04420005 	bltzl	v0,e2c <tcp_core_poll+0x78>
+     e18:	908215e1 	lbu	v0,5601(a0)
+     e1c:	0c000000 	jal	0 <tcp_ip_equal>
+			e1c: R_MIPS_26	.text+0x44
+     e20:	0200202d 	move	a0,s0
+     e24:	08000000 	j	0 <tcp_ip_equal>
+			e24: R_MIPS_26	.text+0xea8
+     e28:	24110001 	li	s1,1
+     e2c:	1040001e 	beqz	v0,ea8 <tcp_core_poll+0xf4>
+     e30:	0000882d 	move	s1,zero
+     e34:	8c8215e4 	lw	v0,5604(a0)
+     e38:	00a21023 	subu	v0,a1,v0
+     e3c:	0440001b 	bltz	v0,eac <tcp_core_poll+0xf8>
+     e40:	dfbf0028 	ld	ra,40(sp)
+     e44:	908215e2 	lbu	v0,5602(a0)
+     e48:	2c420005 	sltiu	v0,v0,5
+     e4c:	1040fff3 	beqz	v0,e1c <tcp_core_poll+0x68>
+     e50:	24881be0 	addiu	a4,a0,7136
+     e54:	94892194 	lhu	a5,8596(a0)
+     e58:	8c820020 	lw	v0,32(a0)
+     e5c:	00c0582d 	move	a7,a2
+     e60:	90852196 	lbu	a1,8598(a0)
+     e64:	8c862198 	lw	a2,8600(a0)
+     e68:	0009400a 	movz	a4,zero,a5
+     e6c:	afa70004 	sw	a3,4(sp)
+     e70:	0040382d 	move	a3,v0
+     e74:	0c000000 	jal	0 <tcp_ip_equal>
+			e74: R_MIPS_26	.text+0x458
+     e78:	7caa0043 	dext	a6,a1,0x1,0x1
+     e7c:	14400009 	bnez	v0,ea4 <tcp_core_poll+0xf0>
+     e80:	265203e8 	addiu	s2,s2,1000
+     e84:	920215e2 	lbu	v0,5602(s0)
+     e88:	ae1215e4 	sw	s2,5604(s0)
+     e8c:	24420001 	addiu	v0,v0,1
+     e90:	a20215e2 	sb	v0,5602(s0)
+     e94:	08000000 	j	0 <tcp_ip_equal>
+			e94: R_MIPS_26	.text+0xea8
+     e98:	24110001 	li	s1,1
+     e9c:	08000000 	j	0 <tcp_ip_equal>
+			e9c: R_MIPS_26	.text+0xea8
+     ea0:	0000882d 	move	s1,zero
+     ea4:	2411ffff 	li	s1,-1
+     ea8:	dfbf0028 	ld	ra,40(sp)
+     eac:	0220102d 	move	v0,s1
+     eb0:	dfb20020 	ld	s2,32(sp)
+     eb4:	dfb10018 	ld	s1,24(sp)
+     eb8:	dfb00010 	ld	s0,16(sp)
+     ebc:	03e00008 	jr	ra
+     ec0:	27bd0030 	addiu	sp,sp,48
+
+00000ec4 <tcp_core_read>:
+     ec4:	27bdffe0 	addiu	sp,sp,-32
+     ec8:	ffb00000 	sd	s0,0(sp)
+     ecc:	0080802d 	move	s0,a0
+     ed0:	ffbf0018 	sd	ra,24(sp)
+     ed4:	ffb20010 	sd	s2,16(sp)
+     ed8:	1080001d 	beqz	a0,f50 <tcp_core_read+0x8c>
+     edc:	ffb10008 	sd	s1,8(sp)
+     ee0:	14a00003 	bnez	a1,ef0 <tcp_core_read+0x2c>
+     ee4:	00a0202d 	move	a0,a1
+     ee8:	14c0001a 	bnez	a2,f54 <tcp_core_read+0x90>
+     eec:	2402ffff 	li	v0,-1
+     ef0:	96020028 	lhu	v0,40(s0)
+     ef4:	00c0882d 	move	s1,a2
+     ef8:	3043ffff 	andi	v1,v0,0xffff
+     efc:	0066302b 	sltu	a2,v1,a2
+     f00:	54c00001 	bnezl	a2,f08 <tcp_core_read+0x44>
+     f04:	0040882d 	move	s1,v0
+     f08:	3231ffff 	andi	s1,s1,0xffff
+     f0c:	52200011 	beqzl	s1,f54 <tcp_core_read+0x90>
+     f10:	0220102d 	move	v0,s1
+     f14:	2612002a 	addiu	s2,s0,42
+     f18:	0220302d 	move	a2,s1
+     f1c:	0c000000 	jal	0 <tcp_ip_equal>
+			f1c: R_MIPS_26	memcpy
+     f20:	0240282d 	move	a1,s2
+     f24:	96060028 	lhu	a2,40(s0)
+     f28:	02112821 	addu	a1,s0,s1
+     f2c:	0240202d 	move	a0,s2
+     f30:	24a5002a 	addiu	a1,a1,42
+     f34:	0c000000 	jal	0 <tcp_ip_equal>
+			f34: R_MIPS_26	memmove
+     f38:	00d13023 	subu	a2,a2,s1
+     f3c:	96020028 	lhu	v0,40(s0)
+     f40:	00511023 	subu	v0,v0,s1
+     f44:	a6020028 	sh	v0,40(s0)
+     f48:	08000000 	j	0 <tcp_ip_equal>
+			f48: R_MIPS_26	.text+0xf54
+     f4c:	0220102d 	move	v0,s1
+     f50:	2402ffff 	li	v0,-1
+     f54:	dfbf0018 	ld	ra,24(sp)
+     f58:	dfb20010 	ld	s2,16(sp)
+     f5c:	dfb10008 	ld	s1,8(sp)
+     f60:	dfb00000 	ld	s0,0(sp)
+     f64:	03e00008 	jr	ra
+     f68:	27bd0020 	addiu	sp,sp,32
+
+00000f6c <tcp_core_write>:
+     f6c:	2c830001 	sltiu	v1,a0,1
+     f70:	2ca20001 	sltiu	v0,a1,1
+     f74:	27bdffb0 	addiu	sp,sp,-80
+     f78:	00621025 	or	v0,v1,v0
+     f7c:	ffb00018 	sd	s0,24(sp)
+     f80:	0080802d 	move	s0,a0
+     f84:	ffbf0048 	sd	ra,72(sp)
+     f88:	ffb50040 	sd	s5,64(sp)
+     f8c:	ffb40038 	sd	s4,56(sp)
+     f90:	ffb30030 	sd	s3,48(sp)
+     f94:	ffb20028 	sd	s2,40(sp)
+     f98:	14400034 	bnez	v0,106c <tcp_core_write+0x100>
+     f9c:	ffb10020 	sd	s1,32(sp)
+     fa0:	10c00032 	beqz	a2,106c <tcp_core_write+0x100>
+     fa4:	00c0882d 	move	s1,a2
+     fa8:	8c820000 	lw	v0,0(a0)
+     fac:	00e0a02d 	move	s4,a3
+     fb0:	0100982d 	move	s3,a4
+     fb4:	704301af 	snei	v1,v0,6
+     fb8:	10600004 	beqz	v1,fcc <tcp_core_write+0x60>
+     fbc:	0120a82d 	move	s5,a5
+     fc0:	704200ef 	snei	v0,v0,3
+     fc4:	1440002a 	bnez	v0,1070 <tcp_core_write+0x104>
+     fc8:	2402ffff 	li	v0,-1
+     fcc:	920215e1 	lbu	v0,5601(s0)
+     fd0:	14400027 	bnez	v0,1070 <tcp_core_write+0x104>
+     fd4:	2402ffff 	li	v0,-1
+     fd8:	96030026 	lhu	v1,38(s0)
+     fdc:	0060102d 	move	v0,v1
+     fe0:	2c6305b5 	sltiu	v1,v1,1461
+     fe4:	50600001 	beqzl	v1,fec <tcp_core_write+0x80>
+     fe8:	240205b4 	li	v0,1460
+     fec:	3042ffff 	andi	v0,v0,0xffff
+     ff0:	0051102b 	sltu	v0,v0,s1
+     ff4:	1440001e 	bnez	v0,1070 <tcp_core_write+0x104>
+     ff8:	2402ffff 	li	v0,-1
+     ffc:	96020024 	lhu	v0,36(s0)
+    1000:	0051182b 	sltu	v1,v0,s1
+    1004:	5460001a 	bnezl	v1,1070 <tcp_core_write+0x104>
+    1008:	0000102d 	move	v0,zero
+    100c:	10400018 	beqz	v0,1070 <tcp_core_write+0x104>
+    1010:	0000102d 	move	v0,zero
+    1014:	2612102c 	addiu	s2,s0,4140
+    1018:	0220302d 	move	a2,s1
+    101c:	0c000000 	jal	0 <tcp_ip_equal>
+			101c: R_MIPS_26	memcpy
+    1020:	0240202d 	move	a0,s2
+    1024:	8e060018 	lw	a2,24(s0)
+    1028:	afb50004 	sw	s5,4(sp)
+    102c:	0200202d 	move	a0,s0
+    1030:	24050018 	li	a1,24
+    1034:	0240382d 	move	a3,s2
+    1038:	0220402d 	move	a4,s1
+    103c:	0280482d 	move	a5,s4
+    1040:	0000502d 	move	a6,zero
+    1044:	0c000000 	jal	0 <tcp_ip_equal>
+			1044: R_MIPS_26	.text+0x660
+    1048:	0260582d 	move	a7,s3
+    104c:	54400008 	bnezl	v0,1070 <tcp_core_write+0x104>
+    1050:	2402ffff 	li	v0,-1
+    1054:	8e020018 	lw	v0,24(s0)
+    1058:	a611102a 	sh	s1,4138(s0)
+    105c:	00511021 	addu	v0,v0,s1
+    1060:	ae020018 	sw	v0,24(s0)
+    1064:	08000000 	j	0 <tcp_ip_equal>
+			1064: R_MIPS_26	.text+0x1070
+    1068:	0220102d 	move	v0,s1
+    106c:	2402ffff 	li	v0,-1
+    1070:	dfbf0048 	ld	ra,72(sp)
+    1074:	dfb50040 	ld	s5,64(sp)
+    1078:	dfb40038 	ld	s4,56(sp)
+    107c:	dfb30030 	ld	s3,48(sp)
+    1080:	dfb20028 	ld	s2,40(sp)
+    1084:	dfb10020 	ld	s1,32(sp)
+    1088:	dfb00018 	ld	s0,24(sp)
+    108c:	03e00008 	jr	ra
+    1090:	27bd0050 	addiu	sp,sp,80
+
+00001094 <tcp_core_close>:
+    1094:	27bdffd0 	addiu	sp,sp,-48
+    1098:	ffb00018 	sd	s0,24(sp)
+    109c:	0080802d 	move	s0,a0
+    10a0:	ffbf0028 	sd	ra,40(sp)
+    10a4:	1080001f 	beqz	a0,1124 <tcp_core_close+0x90>
+    10a8:	ffb10020 	sd	s1,32(sp)
+    10ac:	908215e1 	lbu	v0,5601(a0)
+    10b0:	1440001c 	bnez	v0,1124 <tcp_core_close+0x90>
+    10b4:	00a0482d 	move	a5,a1
+    10b8:	8c820000 	lw	v0,0(a0)
+    10bc:	704301af 	snei	v1,v0,6
+    10c0:	10600004 	beqz	v1,10d4 <tcp_core_close+0x40>
+    10c4:	00c0582d 	move	a7,a2
+    10c8:	704300ef 	snei	v1,v0,3
+    10cc:	54600016 	bnezl	v1,1128 <tcp_core_close+0x94>
+    10d0:	2402ffff 	li	v0,-1
+    10d4:	8e060018 	lw	a2,24(s0)
+    10d8:	38420003 	xori	v0,v0,0x3
+    10dc:	afa70004 	sw	a3,4(sp)
+    10e0:	24030004 	li	v1,4
+    10e4:	24110008 	li	s1,8
+    10e8:	0200202d 	move	a0,s0
+    10ec:	24050011 	li	a1,17
+    10f0:	0000382d 	move	a3,zero
+    10f4:	0000402d 	move	a4,zero
+    10f8:	0000502d 	move	a6,zero
+    10fc:	0c000000 	jal	0 <tcp_ip_equal>
+			10fc: R_MIPS_26	.text+0x660
+    1100:	0062880a 	movz	s1,v1,v0
+    1104:	54400008 	bnezl	v0,1128 <tcp_core_close+0x94>
+    1108:	2402ffff 	li	v0,-1
+    110c:	8e020018 	lw	v0,24(s0)
+    1110:	ae110000 	sw	s1,0(s0)
+    1114:	24420001 	addiu	v0,v0,1
+    1118:	ae020018 	sw	v0,24(s0)
+    111c:	08000000 	j	0 <tcp_ip_equal>
+			111c: R_MIPS_26	.text+0x1128
+    1120:	0000102d 	move	v0,zero
+    1124:	2402ffff 	li	v0,-1
+    1128:	dfbf0028 	ld	ra,40(sp)
+    112c:	dfb10020 	ld	s1,32(sp)
+    1130:	dfb00018 	ld	s0,24(sp)
+    1134:	03e00008 	jr	ra
+    1138:	27bd0030 	addiu	sp,sp,48
+    113c:	00000000 	nop
+
+Disassembly of section .text.unlikely:
+
+00000000 <tcp_ack_pending.part.1>:
+   0:	27bdffe0 	addiu	sp,sp,-32
+   4:	ffb10008 	sd	s1,8(sp)
+   8:	8c910014 	lw	s1,20(a0)
+   c:	ffb20010 	sd	s2,16(sp)
+  10:	00a0902d 	move	s2,a1
+  14:	ffb00000 	sd	s0,0(sp)
+  18:	0080802d 	move	s0,a0
+  1c:	00b18823 	subu	s1,a1,s1
+  20:	1a200023 	blez	s1,b0 <tcp_ack_pending.part.1+0xb0>
+  24:	ffbf0018 	sd	ra,24(sp)
+  28:	8c820018 	lw	v0,24(a0)
+  2c:	00a21023 	subu	v0,a1,v0
+  30:	5c400020 	bgtzl	v0,b4 <tcp_ack_pending.part.1+0xb4>
+  34:	dfbf0018 	ld	ra,24(sp)
+  38:	90822196 	lbu	v0,8598(a0)
+  3c:	c8410003 	bbit0	v0,0x1,4c <tcp_ack_pending.part.1+0x4c>
+  40:	00000000 	nop
+  44:	08000000 	j	0 <tcp_ack_pending.part.1>
+			44: R_MIPS_26	.text.unlikely+0x70
+  48:	a20015e1 	sb	zero,5601(s0)
+  4c:	c8400003 	bbit0	v0,0x0,5c <tcp_ack_pending.part.1+0x5c>
+  50:	00000000 	nop
+  54:	08000000 	j	0 <tcp_ack_pending.part.1>
+			54: R_MIPS_26	.text.unlikely+0x70
+  58:	a20015e1 	sb	zero,5601(s0)
+  5c:	94862194 	lhu	a2,8596(a0)
+  60:	0226102b 	sltu	v0,s1,a2
+  64:	14400005 	bnez	v0,7c <tcp_ack_pending.part.1+0x7c>
+  68:	00000000 	nop
+  6c:	a20015e1 	sb	zero,5601(s0)
+  70:	a20015e0 	sb	zero,5600(s0)
+  74:	08000000 	j	0 <tcp_ack_pending.part.1>
+			74: R_MIPS_26	.text.unlikely+0xa8
+  78:	a6002194 	sh	zero,8596(s0)
+  7c:	5220000c 	beqzl	s1,b0 <tcp_ack_pending.part.1+0xb0>
+  80:	ae120014 	sw	s2,20(s0)
+  84:	26251be0 	addiu	a1,s1,7136
+  88:	00d13023 	subu	a2,a2,s1
+  8c:	24841be0 	addiu	a0,a0,7136
+  90:	0c000000 	jal	0 <tcp_ack_pending.part.1>
+			90: R_MIPS_26	memmove
+  94:	02052821 	addu	a1,s0,a1
+  98:	96022194 	lhu	v0,8596(s0)
+  9c:	ae122198 	sw	s2,8600(s0)
+  a0:	00518823 	subu	s1,v0,s1
+  a4:	a6112194 	sh	s1,8596(s0)
+  a8:	a20015e2 	sb	zero,5602(s0)
+  ac:	ae120014 	sw	s2,20(s0)
+  b0:	dfbf0018 	ld	ra,24(sp)
+  b4:	dfb20010 	ld	s2,16(sp)
+  b8:	dfb10008 	ld	s1,8(sp)
+  bc:	dfb00000 	ld	s0,0(sp)
+  c0:	03e00008 	jr	ra
+  c4:	27bd0020 	addiu	sp,sp,32
+   text	   data	    bss	    dec	    hex	filename
+   5336	      0	      0	   5336	   14d8	/tmp/pa220-p5-validation/obj/tcp.o
+========== CONFIGURATION HEADER DEFINITIONS ==========
+----- include/config.h -----
+4:#define CONFIG_OCTEON_CN70XX	1
+----- include/config_cmd_defaults.h -----
+9:#ifndef _CONFIG_CMD_DEFAULTS_H_
+14:#define CONFIG_CMD_EXPORTENV 1
+16:#define CONFIG_CMD_IMPORTENV 1
+----- include/configs/octeon_pa220.h -----
+12:#ifndef __CONFIG_H__
+13:#define __CONFIG_H__
+15:#define CONFIG_OCTEON_CN70XX
+17:#ifndef CONFIG_OCTEON_PCI_HOST
+164:#define CONFIG_CMD_EXPORTENV		/* env export */
+165:#define CONFIG_CMD_IMPORTENV		/* env import */
+196:#define CONFIG_SYS_MEMTEST_START	0x22000000
+197:#define CONFIG_SYS_MEMTEST_END		0x2a000000
+199:#define CONFIG_HW_WATCHDOG		/* octwd; only runs if watchdog_enable is set */
+205:#define CONFIG_HASH_VERIFY
+----- include/configs/octeon_common.h -----
+45:#ifndef __OCTEON_COMMON_H__
+48:#ifndef __U_BOOT__
+53:#ifndef CONFIG_SYS_TEXT_BASE
+57:#ifndef CONFIG_STANDALONE_LOAD_ADDR
+67:#ifndef CONFIG_BOARD_SIZE_LIMIT
+71:#ifndef CONFIG_OCTEON_SPI_STAGE2_START
+102:#ifndef DEFAULT_CPU_REF_FREQUENCY_MHZ
+107:#ifndef DEFAULT_ECLK_FREQ_MHZ
+112:#ifndef CONFIG_OCTEON_NAND_BOOT
+164:#ifndef CONFIG_MAX_I2C_NUM
+167:#ifndef CONFIG_SYS_MAX_I2C_BUS
+180:#ifndef CONFIG_BZIP2
+185:#ifndef CONFIG_ZIP
+188:#ifndef CONFIG_GZIP
+193:#ifndef CONFIG_LZMA
+198:#ifndef CONFIG_ZLIB
+228:#ifndef CONFIG_BOARD_ENV_CALLBACK_LIST
+266:#ifndef CONFIG_SYS_LOAD_ADDR
+283:#define CONFIG_SYS_MEMTEST_START	(CONFIG_SYS_SDRAM_BASE + 0x100000)
+284:#define CONFIG_SYS_MEMTEST_END		(CONFIG_SYS_SDRAM_BASE + 0xffffff)
+312:#ifndef CONFIG_SYS_I2C_SPEED
+333:#ifndef CONFIG_SYS_NO_FLASH
+337:# ifndef CONFIG_SYS_FLASH_BASE
+398:# ifndef OCTEON_FIRST_PCIE_BUSNO
+461:#  ifndef CONFIG_USB_HUB_MIN_POWER_ON_DELAY
+468:#  ifndef CONFIG_USB_MAX_CONTROLLER_COUNT
+481:#ifndef CONFIG_OCTEON_WD_TIMEOUT
+486:#ifndef CONFIG_OCTEON_DEFAULT_CONSOLE_UART_PORT
+491:#ifndef CONFIG_OCTEON_MIN_CONSOLE_UART
+496:#ifndef CONFIG_OCTEON_MAX_CONSOLE_UART
+510:#ifndef CONFIG_OF_LIBFDT
+514:#ifndef CONFIG_LMB
+518:#ifndef CONFIG_OCTEON_NO_BOOT_BUS
+========== GENERATED CONFIGURATION ==========
+----- /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config.h -----
+4:#define CONFIG_OCTEON_CN70XX	1
+----- /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/autoconf.mk -----
+223:CONFIG_CMD_IMPORTENV=y
+224:CONFIG_CMD_EXPORTENV=y
+226:CONFIG_OCTEON_CN70XX=y
+227:CONFIG_SYS_MEMTEST_END=0x2a000000
+253:CONFIG_SYS_MEMTEST_START=0x22000000
+NOT FOUND: /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/generated/autoconf.h
+========== PREVIOUS COMPILER COMMAND RECORDS ==========
+658:ls -lh "$TOOLCHAIN/bin/mips64-octeon-linux-gnu-gcc"
+659:file "$TOOLCHAIN/bin/mips64-octeon-linux-gnu-gcc"
+660:"$TOOLCHAIN/bin/mips64-octeon-linux-gnu-gcc" --version
+670:ls -lh "$TOOLCHAIN/bin/mips64-octeon-linux-gnu-gcc"
+671:file "$TOOLCHAIN/bin/mips64-octeon-linux-gnu-gcc"
+672:"$TOOLCHAIN/bin/mips64-octeon-linux-gnu-gcc" --version
+753:mips64-octeon-linux-gnu-gcc -v 2>&1
+959:{     echo "DATE=$(date -Is)";     echo "HOST=$(uname -a)";     echo "ARCH=$(uname -m)";     echo "NPROC=$(nproc)";     echo "HOST_GCC=$(gcc --version | head -n 1)";     echo "MAKE=$(make --version | head -n 1)";     echo "GIT=$(git --version)";     echo "SDK=$SDK";     echo "TARGET_GCC=$("$SDK/bin/mips64-octeon-linux-gnu-gcc" --version | head -n 1)";     echo "TARGET_LD=$("$SDK/bin/mips64-octeon-linux-gnu-ld" --version | head -n 1)"; } > "$EVIDENCE/config/build-host-toolchain.txt" 2>&1
+979:ls -l /home/debian/OCTEON-SDK/tools-gcc-4.7/bin/mips64-octeon-linux-gnu-gcc
+1474:ls -l /home/debian/OCTEON-SDK/tools-gcc-4.7/bin/mips64-octeon-linux-gnu-gcc
+1477:/home/debian/OCTEON-SDK/tools-gcc-4.7/bin/mips64-octeon-linux-gnu-gcc --version | head -n 2
+1677:ls -l "$TC/bin/mips64-octeon-linux-gnu-gcc"
+1678:"$TC/bin/mips64-octeon-linux-gnu-gcc" --version | head -n 2
+========== EXISTING TCP BUILD COMMAND FILES ==========
+========== PREVIOUS VALIDATION FILES ==========
+总计 0
+drwxrwxr-x  5 debian debian 100 11月20日 16:28 .
+drwxrwxrwt 18 root   root   500 11月20日 16:21 ..
+drwxrwxr-x  2 debian debian  80 11月20日 16:28 audit
+drwxrwxr-x  2 debian debian 120 11月20日 16:13 obj
+drwxrwxr-x  4 debian debian  80 11月20日 16:13 src
+总计 212K
+drwxrwxr-x 2 debian debian  120 11月20日 16:13 .
+drwxrwxr-x 5 debian debian  100 11月20日 16:28 ..
+-rw-rw-r-- 1 debian debian 5.8K 11月20日 16:13 compile.log
+-rw-rw-r-- 1 debian debian 5.8K 11月20日 16:13 preprocess.log
+-rw-rw-r-- 1 debian debian 148K 11月20日 16:13 tcp.i
+-rw-rw-r-- 1 debian debian  46K 11月20日 16:13 tcp.o
+总计 156K
+drwxrwxr-x 2 debian debian   80 11月20日 16:28 .
+drwxrwxr-x 5 debian debian  100 11月20日 16:28 ..
+-rw-rw-r-- 1 debian debian 152K 11月20日 16:28 P5-1A.3-host-audit.txt
+-rw-rw-r-- 1 debian debian  170 11月20日 16:28 source-sha1.txt
+========== AUDIT EXIT STATUS ==========
+REMOTE_HEAD=1f9f527ef6f3436ddd04ab48d45f7dd530fe545d
+AUDIT_LOG=/tmp/pa220-p5-validation/audit/P5-1A.3-host-audit.txt
+AUDIT_COMPLETE
+
