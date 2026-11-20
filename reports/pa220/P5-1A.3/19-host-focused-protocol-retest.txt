@@ -1,59 +1,34 @@
-PA-220 P5-1A.3 — focused Host TCP protocol retest
-Date: 2026-11-20
-Branch: feature/pa220-ubootkit-web
-Remote source commit: 530f6f711adb87d416abf9697201ec4d3492d77f
+DATE=2026-11-20T17:16:39+08:00
+BRANCH=feature/pa220-ubootkit-web
+TCP_SOURCE_SHA1_BEFORE
+2be12d49f0e5d80e6980b649d6148b90a474d287  /tmp/pa220-p5-validation/src/net/tcp.c
+db4752ce1c9589c9579069e40476279c0eabda75  /tmp/pa220-p5-validation/src/include/net/tcp.h
 
-SOURCE IDENTITY
-Test source: reports/pa220/P5-1A.3/18-host-focused-protocol-retest.c
-Expected Git blob SHA: 4bf9d248636a4bb9096e697002f5377cfdee41eb
-Actual Git blob SHA:   4bf9d248636a4bb9096e697002f5377cfdee41eb
-SHA256 extracted test source: 8abdb4a6f3b7027f74ee198d401b0dd9ba493e0f6d144e169b9f7c8f8c2b11eb
-Source identity: VERIFIED
+========== COMPILER ==========
+reports/pa220/P5-1A.3/18-host-focused-protocol-retest.c: In function ‘test_close_wait_post_fin_data’:
+reports/pa220/P5-1A.3/18-host-focused-protocol-retest.c:111:12: error: invalid type argument of ‘->’ (have ‘struct tcp_core_connection’)
+  111 |     CHECK(c->state == TCP_CORE_CLOSE_WAIT);
+      |            ^~
+reports/pa220/P5-1A.3/18-host-focused-protocol-retest.c:14:11: note: in definition of macro ‘CHECK’
+   14 |     if (!(x)) { \
+      |           ^
+reports/pa220/P5-1A.3/18-host-focused-protocol-retest.c:112:12: error: invalid type argument of ‘->’ (have ‘struct tcp_core_connection’)
+  112 |     CHECK(c->fin_received == 1);
+      |            ^~
+reports/pa220/P5-1A.3/18-host-focused-protocol-retest.c:14:11: note: in definition of macro ‘CHECK’
+   14 |     if (!(x)) { \
+      |           ^
+reports/pa220/P5-1A.3/18-host-focused-protocol-retest.c:113:12: error: invalid type argument of ‘->’ (have ‘struct tcp_core_connection’)
+  113 |     CHECK(c->rcv_nxt == 5002);
+      |            ^~
+reports/pa220/P5-1A.3/18-host-focused-protocol-retest.c:14:11: note: in definition of macro ‘CHECK’
+   14 |     if (!(x)) { \
+      |           ^
+BUILD_RC=1
+TEST_SKIPPED
 
-PRODUCTION TCP SOURCE IDENTITY
-u-boot/net/tcp.c SHA1 before: 2be12d49f0e5d80e6980b649d6148b90a474d287
-u-boot/include/net/tcp.h SHA1 before: db4752ce1c9589c9579069e40476279c0eabda75
-u-boot/net/tcp.c SHA1 after:  2be12d49f0e5d80e6980b649d6148b90a474d287
-u-boot/include/net/tcp.h SHA1 after: db4752ce1c9589c9579069e40476279c0eabda75
-Production TCP source/header unchanged.
-
-HOST BUILD
-Command used:
-gcc -std=gnu99 -Wall -Wextra \
-  -I/tmp/pa220-p5-validation/host/include \
-  -I/tmp/pa220-p5-validation/src/include \
-  -include /tmp/pa220-p5-validation/host/include/common.h \
-  /tmp/pa220-p5-validation/host/18-host-focused-protocol-retest.c \
-  /tmp/pa220-p5-validation/src/net/tcp.c \
-  -o /tmp/pa220-p5-validation/obj/18-host-focused-protocol-retest
-BUILD_RC=0
-
-FOCUSED PROTOCOL TEST OUTPUT
-PA-220 TCP FOCUSED PROTOCOL RETEST
-
-[CLOSE-WAIT POST-FIN DATA]
-POST_FIN_INPUT_RC=0
-POST_FIN_STATE=6 RX_LEN=1 RCV_NXT=5003
-FAIL line=125: c.rx_len == 0
-FAIL line=126: c.rcv_nxt == 5002
-RESULT: POST_FIN_DATA_ACCEPTED (PROTOCOL DEFECT)
-
-[TIME-WAIT DUPLICATE FIN]
-DUPLICATE_FIN_INPUT_RC=0
-ORIGINAL_DEADLINE=60012
-AFTER_DUPLICATE_FIN=60012
-RESULT: TIME_WAIT_DEADLINE_PRESERVED
-
-ASSERTIONS_PASSED=29
-ASSERTIONS_FAILED=2
-TEST_RC=1
-
-INTERPRETATION
-1. CLOSE-WAIT post-FIN payload: reproduced. After peer FIN moves the connection to TCP_CORE_CLOSE_WAIT (state 6), a subsequent in-sequence payload byte "X" is accepted: rx_len becomes 1 and rcv_nxt advances from 5002 to 5003. The corrected focused harness explicitly expects rejection, and exactly those two state assertions fail. This confirms a TCP protocol defect candidate in the current implementation. This report records the observation; it does not authorize or include a production source fix.
-2. TIME-WAIT duplicate FIN: duplicate FIN is acknowledged, and time_wait_deadline remains 60012. This is consistent with the intended duplicate/out-of-sequence FIN handling and is not a defect indicated by this test.
-
-TEST SUMMARY
-Host compile succeeded. 29 assertions passed, 2 failed, both representing the reproduced CLOSE-WAIT post-FIN payload acceptance. TCP production source and header hashes remained unchanged. No full U-Boot build, target hardware test, or production TCP source modification was performed.
-
-Raw log location at execution time:
-/tmp/pa220-p5-validation/audit/19-host-focused-protocol-retest.txt
+========== SOURCE IDENTITY AFTER ==========
+2be12d49f0e5d80e6980b649d6148b90a474d287  /tmp/pa220-p5-validation/src/net/tcp.c
+db4752ce1c9589c9579069e40476279c0eabda75  /tmp/pa220-p5-validation/src/include/net/tcp.h
+BUILD_RC=1
+TEST_RC=99
