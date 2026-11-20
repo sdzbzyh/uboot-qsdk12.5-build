@@ -292,3 +292,12 @@ PA-220 固定源码在独立干净 checkout 上完成完整构建，退出码为
 - **TCP 完整连接核心：未实现。** 尚无单连接状态机、SYN/SYN-ACK/ACK、数据接收窗口/缓冲、发送 ACK、FIN/RST 状态处理、超时/重传及发包能力。
 - 本提交暂不接入 `NetReceive()`，不修改 `net.c`、`net.h`、`net/Makefile`、UDP/ARP handler 或全局 timeout；未实现 HTTP/Web。
 - 进度报告：`audit/P5-1A-TCP-CORE-PROGRESS.md`。编译、单元测试、RAM 启动和实机验证均 NOT VERIFIED。
+
+
+## P5-1A.2 TCP 单连接状态机（2026-11-20）
+
+- 新增单连接状态机 API：监听、SYN/SYN-ACK/最终 ACK、序列号与累计 ACK、固定接收窗口/缓冲区、有限发送与重传、FIN/RST、空闲超时和 TIME-WAIT 清理；实现位于 `u-boot/net/tcp.c`，接口位于 `u-boot/include/net/tcp.h`。
+- 输出回调与调用方毫秒时钟注入；不持有 RX packet 指针，不使用全局 NetSetTimeout，不接入 NetReceive。
+- 目前仅单一 outstanding 发送范围、按序接收；SACK/乱序重组/零窗口探测/拥塞控制/独立窗口更新 ACK 尚未实现。
+- 目标工具链编译、单元测试、链接、RAM 启动及实机网络验证均 NOT VERIFIED；本提交不代表完整 TCP 核心完成。
+- 详细接口、状态与限制见 `audit/P5-1A-TCP-CORE-PROGRESS.md`。

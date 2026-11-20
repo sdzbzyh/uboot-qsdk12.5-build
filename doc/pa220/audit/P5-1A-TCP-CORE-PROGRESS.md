@@ -1,38 +1,36 @@
-# P5-1A TCP 核心实现进度：报文基础层
+# P5-1A TCP 核心实现进度：单连接状态机（P5-1A.2）
 
 - 日期：2026-11-20
-- 集成仓库分支：`feature/pa220-ubootkit-web`
-- 固定 PA-220 源码：`IronDemiGod/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
-- 本阶段性质：P5-1A 的第一个独立代码单元；**不是完整 TCP 实现**。
+- 分支：`feature/pa220-ubootkit-web`
+- PA-220 固定源码：`IronDemiGod/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
+- 本提交性质：独立、静态单连接 TCP 核心；尚未接入网络分派。
 
-## 1. 目录布局核实
+## 本提交实现
 
-固定源码采用旧版 U-Boot 常见布局：网络协议对象位于 `u-boot/net/`，公共网络头位于 `u-boot/include/net.h`。当前没有 `u-boot/net/tcp.c` 或 TCP 公共头文件，因此新增独立目录头 `u-boot/include/net/tcp.h` 与实现 `u-boot/net/tcp.c`，不改动既有 `net.h`、`net.c` 或 `net/Makefile`。
+- 单连接静态结构，无动态内存分配；LISTEN、SYN-RECEIVED、ESTABLISHED、FIN-WAIT-1/2、CLOSE-WAIT、CLOSING、LAST-ACK、TIME-WAIT、CLOSED 状态。
+- 主动监听配置、本地/远端 IPv4 和端口绑定；被动 SYN、带 MSS 的 SYN-ACK、最终 ACK 验证。
+- 32 位序列号/确认号管理，拒绝超前 ACK 和旧 ACK；仅接受严格按序报文序列检查，拒绝超出本地 MSS 或剩余接收窗口的数据；未协商的 URG/ECN/保留位报文拒绝处理。
+- 固定 4096-byte 接收缓存；`tcp_core_read()` 消费缓存并释放窗口。缓存空间不会动态扩展。
+- ACK、PSH 数据发送接口（单个 outstanding 发送范围）、累计 ACK 处理及部分 ACK 后剩余数据重传；发送长度受协商 MSS、1460-byte TX 上限及对端通告窗口约束。
+- FIN、RST 处理；RST 仅在连接四元组匹配且序列号等于 RCV.NXT 时清理连接。
+- 独立调用方时钟：`tcp_core_poll(now_ms)`；SYN-ACK/数据/FIN 使用单一待确认范围，固定 1000ms 重传间隔，最多 5 次重传；连接空闲 30s 清理，TIME-WAIT 60s 清理；清理后回到 LISTEN，并推进本地 ISS。
+- 输出回调同步消费 TCP segment；报文由连接自身静态 wire buffer 构造；重传数据复制到连接私有缓存，不保留 RX packet 指针。
 
-## 2. 本提交实现
+## API 与所有权
 
-- TCP 固定报文头长度、最大头长度和 MSS/RX/TX/重传策略常量。
-- 无对齐假设的网络序字段读取。
-- TCP data offset 与头/载荷边界检查。
-- TCP options TLV 边界检查；支持识别 MSS，拒绝非法长度、零 MSS 和重复 MSS；未知 option 安全跳过，EOL/NOP 正确终止/推进。
-- IPv4 TCP 伪首部校验和计算与校验入口，支持奇数长度载荷。
-- RFC 9293 风格 32 位序列号模运算比较。
-- 明确声明 RX payload 指针仅为当前报文视图，后续连接层必须复制数据，不得跨收包周期保存。
+- `tcp_core_listen()` 初始化 listener 和初始发送序列号。
+- `tcp_core_input()` 处理一段经过 IPv4 层交付的 TCP segment；调用方仍须保证 IPv4 目的地址与 segment 的校验和输入正确。
+- `tcp_core_poll()` 由未来前台服务循环提供单调毫秒计数（允许 u32 回绕）。
+- `tcp_core_read()` 将已接收字节复制给调用方并释放接收窗口。
+- `tcp_core_write()` 复制发送数据，不保留调用方指针；返回发送字节数、0 表示对端窗口暂不可用、负值表示拒绝/发送失败。
+- `tcp_core_close()` 发起 FIN。
+- emit 回调参数 segment 仅在回调期间有效；回调必须同步复制/提交，不能保存指针。
 
-## 3. 明确未实现
+## 限制与待处理
 
-本提交**没有**实现 TCP 连接状态机、监听、SYN/SYN-ACK/ACK 交换、序列空间推进、接收窗口/缓冲区操作、发送队列、ACK 管理、FIN/RST 状态处理、重传调度、超时轮询或以太网/IP 发包。头文件中的容量和重传常量只是下一阶段策略约束，不代表相应功能已经存在。
-
-未接入 `NetReceive()`，未修改 UDP/ARP handler、全局 timeout、网络 Makefile 或 CLI；未实现 HTTP parser/Web 服务。
-
-## 4. 验证状态
-
-- 目录/接口静态核对：完成。
-- 代码静态审查：已进行边界与整数宽度检查，仍需编译器和测试向量验证。
-- 编译/链接：未执行（当前仅通过 GitHub 仓库接口读取/提交源码，未取得可运行的 PA-220 构建环境）。
-- 单元测试/校验和向量：未执行。
-- RAM 启动/实机网口：未执行。
-
-## 5. 下一步入口（P5-1A.2）
-
-在不接入 NetReceive 的前提下实现单连接 TCP 状态机和可注入收发/时钟接口：SYN 接入与 SYN-ACK 重传、ACK/序号校验、有限接收缓冲区与乱序策略、RST/FIN、发送确认与重传上限、超时清理。实现前先针对本提交做真实工具链编译和校验和测试；若编译环境仍不可用，保持 NOT VERIFIED，不得宣称 TCP 核心完成。
+- 本提交未接入 `NetReceive()`、`NetLoop()`、Ethernet 驱动或 Makefile。
+- 只实现单一 outstanding 发送范围，不支持发送队列、SACK、窗口缩放、时间戳、拥塞控制、零窗口探测和延迟 ACK；不支持乱序重组。
+- 应用读取数据后不会主动发送独立 window-update ACK，窗口更新在下一次协议响应中通告。
+- 被动关闭路径已实现；TIME-WAIT 的 2MSL 在当前策略中固定为 60s。
+- 当前代码仍需针对 RFC 边界场景补充单元测试；未执行目标交叉编译、链接、RAM 启动或实机测试。不得标记为编译通过或 TCP 核心完成。
+- 本阶段不开放任何 HTTP 命令执行、环境写入、持久化存储写入、CPLD 写入、固件安装或重启接口。
