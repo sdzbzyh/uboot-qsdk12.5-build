@@ -1,0 +1,164 @@
+========== FETCH LATEST REMOTE BRANCH ==========
+来自 https://github.com/sdzbzyh/uboot-qsdk12.5-build
+ * branch              feature/pa220-ubootkit-web -> FETCH_HEAD
+FETCH_RC=0
+FETCH_HEAD=db50a062bc096dfd7cdeb1dcb1d73059da7a6cf9
+EXPECTED_HEAD=db50a062bc096dfd7cdeb1dcb1d73059da7a6cf9
+========== EXPORT P5 TCP SOURCES ==========
+========== VERIFY SOURCE SHA1 ==========
+2be12d49f0e5d80e6980b649d6148b90a474d287  /tmp/pa220-p5-validation/src/net/tcp.c
+db4752ce1c9589c9579069e40476279c0eabda75  /tmp/pa220-p5-validation/src/include/net/tcp.h
+========== VERIFY CONFIGURATION HEADERS ==========
+config.h RC=0
+asm-offsets.h RC=0
+common.h RC=0
+linux/types.h RC=0
+========== COMPILER VERSION ==========
+mips64-octeon-linux-gnu-gcc (Cavium Inc. Version: SDK_BUILD build 52) 4.7.0
+Copyright (C) 2012 Free Software Foundation, Inc.
+========== PREPROCESS P5 TCP ==========
+PREPROCESS_RC=0
+In file included from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config.h:8:0,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/common.h:21,
+                 from /tmp/pa220-p5-validation/src/net/tcp.c:10:
+/home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/configs/octeon_pa220.h:15:0: warning: "CONFIG_OCTEON_CN70XX" redefined [enabled by default]
+In file included from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/common.h:21:0,
+                 from /tmp/pa220-p5-validation/src/net/tcp.c:10:
+/home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config.h:4:0: note: this is the location of the previous definition
+In file included from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config.h:8:0,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/common.h:21,
+                 from /tmp/pa220-p5-validation/src/net/tcp.c:10:
+/home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/configs/octeon_pa220.h:164:0: warning: "CONFIG_CMD_EXPORTENV" redefined [enabled by default]
+In file included from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config.h:6:0,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/common.h:21,
+                 from /tmp/pa220-p5-validation/src/net/tcp.c:10:
+/home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config_cmd_defaults.h:14:0: note: this is the location of the previous definition
+In file included from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config.h:8:0,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/common.h:21,
+                 from /tmp/pa220-p5-validation/src/net/tcp.c:10:
+/home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/configs/octeon_pa220.h:165:0: warning: "CONFIG_CMD_IMPORTENV" redefined [enabled by default]
+In file included from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config.h:6:0,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/common.h:21,
+                 from /tmp/pa220-p5-validation/src/net/tcp.c:10:
+/home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config_cmd_defaults.h:16:0: note: this is the location of the previous definition
+In file included from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config.h:8:0,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/common.h:21,
+                 from /tmp/pa220-p5-validation/src/net/tcp.c:10:
+/home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/configs/octeon_pa220.h:196:0: warning: "CONFIG_SYS_MEMTEST_START" redefined [enabled by default]
+In file included from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/configs/octeon_pa220.h:26:0,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config.h:8,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/common.h:21,
+                 from /tmp/pa220-p5-validation/src/net/tcp.c:10:
+/home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/configs/octeon_common.h:283:0: note: this is the location of the previous definition
+In file included from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config.h:8:0,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/common.h:21,
+                 from /tmp/pa220-p5-validation/src/net/tcp.c:10:
+/home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/configs/octeon_pa220.h:197:0: warning: "CONFIG_SYS_MEMTEST_END" redefined [enabled by default]
+In file included from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/configs/octeon_pa220.h:26:0,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config.h:8,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/common.h:21,
+                 from /tmp/pa220-p5-validation/src/net/tcp.c:10:
+/home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/configs/octeon_common.h:284:0: note: this is the location of the previous definition
+In file included from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/command.h:14:0,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/image.h:39,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/common.h:100,
+                 from /tmp/pa220-p5-validation/src/net/tcp.c:10:
+/home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config.h:4:0: warning: "CONFIG_OCTEON_CN70XX" redefined [enabled by default]
+In file included from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config.h:8:0,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/common.h:21,
+                 from /tmp/pa220-p5-validation/src/net/tcp.c:10:
+/home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/configs/octeon_pa220.h:15:0: note: this is the location of the previous definition
+========== OCTEON TARGET OBJECT COMPILE ==========
+COMPILE_RC=0
+In file included from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config.h:8:0,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/common.h:21,
+                 from /tmp/pa220-p5-validation/src/net/tcp.c:10:
+/home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/configs/octeon_pa220.h:15:0: warning: "CONFIG_OCTEON_CN70XX" redefined [enabled by default]
+In file included from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/common.h:21:0,
+                 from /tmp/pa220-p5-validation/src/net/tcp.c:10:
+/home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config.h:4:0: note: this is the location of the previous definition
+In file included from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config.h:8:0,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/common.h:21,
+                 from /tmp/pa220-p5-validation/src/net/tcp.c:10:
+/home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/configs/octeon_pa220.h:164:0: warning: "CONFIG_CMD_EXPORTENV" redefined [enabled by default]
+In file included from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config.h:6:0,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/common.h:21,
+                 from /tmp/pa220-p5-validation/src/net/tcp.c:10:
+/home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config_cmd_defaults.h:14:0: note: this is the location of the previous definition
+In file included from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config.h:8:0,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/common.h:21,
+                 from /tmp/pa220-p5-validation/src/net/tcp.c:10:
+/home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/configs/octeon_pa220.h:165:0: warning: "CONFIG_CMD_IMPORTENV" redefined [enabled by default]
+In file included from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config.h:6:0,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/common.h:21,
+                 from /tmp/pa220-p5-validation/src/net/tcp.c:10:
+/home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config_cmd_defaults.h:16:0: note: this is the location of the previous definition
+In file included from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config.h:8:0,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/common.h:21,
+                 from /tmp/pa220-p5-validation/src/net/tcp.c:10:
+/home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/configs/octeon_pa220.h:196:0: warning: "CONFIG_SYS_MEMTEST_START" redefined [enabled by default]
+In file included from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/configs/octeon_pa220.h:26:0,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config.h:8,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/common.h:21,
+                 from /tmp/pa220-p5-validation/src/net/tcp.c:10:
+/home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/configs/octeon_common.h:283:0: note: this is the location of the previous definition
+In file included from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config.h:8:0,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/common.h:21,
+                 from /tmp/pa220-p5-validation/src/net/tcp.c:10:
+/home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/configs/octeon_pa220.h:197:0: warning: "CONFIG_SYS_MEMTEST_END" redefined [enabled by default]
+In file included from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/configs/octeon_pa220.h:26:0,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config.h:8,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/common.h:21,
+                 from /tmp/pa220-p5-validation/src/net/tcp.c:10:
+/home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/configs/octeon_common.h:284:0: note: this is the location of the previous definition
+In file included from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/command.h:14:0,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/image.h:39,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/common.h:100,
+                 from /tmp/pa220-p5-validation/src/net/tcp.c:10:
+/home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config.h:4:0: warning: "CONFIG_OCTEON_CN70XX" redefined [enabled by default]
+In file included from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/config.h:8:0,
+                 from /home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/common.h:21,
+                 from /tmp/pa220-p5-validation/src/net/tcp.c:10:
+/home/debian/PA220_P3_integration_20261119/external/pa220-openwrt/u-boot/include/configs/octeon_pa220.h:15:0: note: this is the location of the previous definition
+========== OBJECT FILE TYPE ==========
+/tmp/pa220-p5-validation/obj/tcp.o: ELF 32-bit MSB relocatable, MIPS, N32 MIPS64 rel2 version 1 (SYSV), with debug_info, not stripped
+========== ELF HEADER ==========
+ELF 头：
+  Magic：  7f 45 4c 46 01 02 01 00 00 00 00 00 00 00 00 00 
+  类别:                              ELF32
+  数据:                              2 补码，大端序 (big endian)
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI 版本:                          0
+  类型:                              REL (可重定位文件)
+  系统架构:                          MIPS R3000
+  版本:                              0x1
+  入口点地址：              0x0
+  程序头起点：              0 (bytes into file)
+  Start of section headers:          25348 (bytes into file)
+  标志：             0x808b0025, noreorder, cpic, abi2, octeon, mips64r2
+  Size of this header:               52 (bytes)
+  Size of program headers:           0 (bytes)
+  Number of program headers:         0
+  Size of section headers:           40 (bytes)
+  Number of section headers:         31
+  Section header string table index: 28
+========== MIPS ARCHITECTURE ATTRIBUTES ==========
+Attribute Section: gnu
+File Attributes
+  Tag_GNU_MIPS_ABI_FP: 软浮点数
+========== OBJECT SIZE ==========
+   text	   data	    bss	    dec	    hex	filename
+   5336	      0	      0	   5336	   14d8	/tmp/pa220-p5-validation/obj/tcp.o
+========== RESULT SUMMARY ==========
+FETCH_RC=0
+PREPROCESS_RC=0
+COMPILE_RC=0
+REMOTE_HEAD=db50a062bc096dfd7cdeb1dcb1d73059da7a6cf9
+========== VALIDATION FILES ==========
+总计 212K
+-rw-rw-r-- 1 debian debian 5.8K 11月20日 16:13 compile.log
+-rw-rw-r-- 1 debian debian 5.8K 11月20日 16:13 preprocess.log
+-rw-rw-r-- 1 debian debian 148K 11月20日 16:13 tcp.i
+-rw-rw-r-- 1 debian debian  46K 11月20日 16:13 tcp.o
+
