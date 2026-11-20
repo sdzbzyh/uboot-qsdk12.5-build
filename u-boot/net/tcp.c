@@ -389,6 +389,9 @@ int tcp_core_input(struct tcp_core_connection *c,
 		return 0;
 	if (v.flags & (TCP_FLAG_URG | TCP_FLAG_ECE | TCP_FLAG_CWR))
 		return 0;
+	/* ACK is mandatory after the three-way handshake. */
+	if (!(v.flags & TCP_FLAG_ACK))
+		return 0;
 	/* This minimal core accepts only the exact next receive sequence. */
 	if (v.sequence != c->rcv_nxt) {
 		if (v.payload_len || (v.flags & TCP_FLAG_FIN))
