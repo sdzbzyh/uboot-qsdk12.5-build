@@ -152,3 +152,19 @@ P3 未解决风险继续保留；阶段状态更正不等于风险关闭。
 - P4 实际开发/构建/实机测试：**PAUSED**。
 - 已有 P4-1 固定源码静态审计报告保留为历史材料，不代表本次继续执行 P4。
 - 当前状态以本节、P4-PLAN 第 8 节、TEST-PLAN 第 10 节及 P3 历史审计检查点为准。
+
+
+## P5 独立只读 Web 管理（启动于 2026-11-20）
+
+P5 与 P4 并行推进：P4 负责 DHCP/Ping/TFTP 网络维护与实机验证；P5 仅负责只读 HTTP/Web。两者共享集成分支时，任何修改 `net.c`、`net.h`、`net/Makefile` 前必须重新核对 HEAD 和并行提交，不能覆盖另一会话的变更。
+
+### P5-1：原生 TCP 接收与 Web 生命周期适配
+
+专项静态审计已归档：`audit/P5-1-PA220-NATIVE-TCP-HTTP-ADAPTATION.md`。
+
+- PA-220 原生 `NetReceive()` 不分派 TCP，现有 `NetLoop()` 是阻塞式协议循环，且 UDP/ARP/timeout 均为单例全局状态。
+- 实现顺序：独立 TCP 静态单连接状态机 → 最小 IPv4 TCP 分派 hook → 前台 `pa220 web` 生命周期/统一清理 → 有界 HTTP parser 与只读 URI handler。
+- 复用 PA-220 原生 Ethernet 收发和网络帧接口；不移植 Qualcomm/IPQ 专有网络驱动、寄存器、固定地址或 Cache API。
+- 第一版只读：仅限 GET/HEAD 和审查过的状态 handler；无命令执行、环境/存储/CPLD 写入、上传、安装或重启。
+
+当前状态：**P5-1 静态适配审计完成；代码实现未开始；未编译、未 RAM 启动、未实机验证。** 下一工作单元为独立 TCP 核心文件，暂不改动 `NetReceive()`，以降低与 P4 对网络核心文件并行修改的冲突风险。
