@@ -1,0 +1,43 @@
+========== PA-220 P5-1A.3 FOCUSED PROTOCOL RETEST ==========
+2026-11-20T17:06:06+08:00
+
+========== SOURCE IDENTITY BEFORE ==========
+2be12d49f0e5d80e6980b649d6148b90a474d287  /tmp/pa220-p5-validation/src/net/tcp.c
+db4752ce1c9589c9579069e40476279c0eabda75  /tmp/pa220-p5-validation/src/include/net/tcp.h
+
+========== GENERATED TEST SOURCE ==========
+81a8461ea7fc9c94ac46cb1bff405f44868230162503d3b5410cafcca97141cb  /home/debian/PA220_P3_integration_20261119/reports/pa220/P5-1A.3/18-host-focused-protocol-retest.c
+
+========== HOST COMPILE ==========
+/home/debian/PA220_P3_integration_20261119/reports/pa220/P5-1A.3/18-host-focused-protocol-retest.c: In function ‘test_close_wait_post_fin_data’:
+/home/debian/PA220_P3_integration_20261119/reports/pa220/P5-1A.3/18-host-focused-protocol-retest.c:111:12: error: invalid type argument of ‘->’ (have ‘struct tcp_core_connection’)
+  111 |     CHECK(c->state == TCP_CORE_CLOSE_WAIT);
+      |            ^~
+/home/debian/PA220_P3_integration_20261119/reports/pa220/P5-1A.3/18-host-focused-protocol-retest.c:14:11: note: in definition of macro ‘CHECK’
+   14 |     if (!(x)) { \
+      |           ^
+/home/debian/PA220_P3_integration_20261119/reports/pa220/P5-1A.3/18-host-focused-protocol-retest.c:112:12: error: invalid type argument of ‘->’ (have ‘struct tcp_core_connection’)
+  112 |     CHECK(c->fin_received == 1);
+      |            ^~
+/home/debian/PA220_P3_integration_20261119/reports/pa220/P5-1A.3/18-host-focused-protocol-retest.c:14:11: note: in definition of macro ‘CHECK’
+   14 |     if (!(x)) { \
+      |           ^
+/home/debian/PA220_P3_integration_20261119/reports/pa220/P5-1A.3/18-host-focused-protocol-retest.c:113:12: error: invalid type argument of ‘->’ (have ‘struct tcp_core_connection’)
+  113 |     CHECK(c->rcv_nxt == 5002);
+      |            ^~
+/home/debian/PA220_P3_integration_20261119/reports/pa220/P5-1A.3/18-host-focused-protocol-retest.c:14:11: note: in definition of macro ‘CHECK’
+   14 |     if (!(x)) { \
+      |           ^
+BUILD_RC=1
+TEST_SKIPPED: compilation failed
+
+========== SOURCE IDENTITY AFTER ==========
+2be12d49f0e5d80e6980b649d6148b90a474d287  /tmp/pa220-p5-validation/src/net/tcp.c
+db4752ce1c9589c9579069e40476279c0eabda75  /tmp/pa220-p5-validation/src/include/net/tcp.h
+
+========== FINAL STATUS ==========
+BUILD_RC=1
+TEST_RC=99
+SOURCE=/home/debian/PA220_P3_integration_20261119/reports/pa220/P5-1A.3/18-host-focused-protocol-retest.c
+LOG=/home/debian/PA220_P3_integration_20261119/reports/pa220/P5-1A.3/18-host-focused-protocol-retest.txt
+========== END ==========
