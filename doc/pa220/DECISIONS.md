@@ -73,3 +73,12 @@
 - 决策：PA-220 的 `flush_cache()` 视为全局同步并失效 I/D-cache 的操作；`flush_dcache_range()` 视为执行 `syncw` 的写入完成同步；`invalidate_dcache_range()` 当前为空实现。不得按函数名或其他 MIPS 平台实现推断其语义。
 - 理由：固定 PA-220 `arch/mips/cpu/octeon/cpu.c` 与 `cvmx-asm.h` 已确认实际指令和宏定义；`flush_cache(start,size)` 忽略地址/长度参数。
 - 影响：TFTP/HTTP payload 完成同步与 ELF/bootm 代码装载后的 I/D-cache 处理必须分别设计；不应对每个网络 chunk 调用全局 `flush_cache()`。任何后续优化必须保留可审查的同步/指令 Cache 一致性保证。
+
+
+## D-012：P5 第一版 Web 服务采用显式前台只读生命周期
+
+- 日期：2026-11-20
+- 决策：PA-220 第一版 Web 仅由用户在 CLI 显式执行 `pa220 web` 启动；服务前台运行，Ctrl-C 退出并统一清理网络/TCP 状态。首版不自动进入 Web、不接管 autoboot、不后台常驻。
+- 理由：PA-220 U-Boot 2013.07 的 `NetLoop()` 是阻塞式协议状态机，UDP/ARP handler 与 timeout callback 为单例全局状态；不能直接复用 uBootKit 2016 的 failsafe/TCP 生命周期。
+- 影响：P5 必须单独实现 TCP 接收分派和服务轮询/cleanup；Web 与 DHCP/Ping/TFTP 等网络命令按串行使用，不并行抢占 NetLoop。首版仅允许 GET/HEAD 和经过审查的只读 handler；不提供命令执行、环境/存储/CPLD 写入、上传、安装或重启。
+- 状态：架构决策已记录；代码实现、编译、RAM 启动和实机验证均未完成。
