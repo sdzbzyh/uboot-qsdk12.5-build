@@ -1,0 +1,460 @@
+========== HOST common.h ==========
+#ifndef HOST_COMMON_H
+#define HOST_COMMON_H
+#include <stdint.h>
+#include <stddef.h>
+#include <string.h>
+typedef uint8_t u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef int32_t s32;
+#endif
+
+========== HOST linux/types.h ==========
+#ifndef HOST_LINUX_TYPES_H
+#define HOST_LINUX_TYPES_H
+#include <stdint.h>
+typedef uint8_t u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef int32_t s32;
+#endif
+
+========== HARNESS REMAINING ==========
+    CHECK(input(&c, 5001, 1001,
+                TCP_FLAG_FIN | TCP_FLAG_ACK,
+                NULL, 0, 10) == 1);
+    CHECK(c.state == TCP_CORE_CLOSE_WAIT);
+
+    CHECK(tcp_core_close(&c, 11, emit_cb, NULL) == 0);
+    CHECK(c.state == TCP_CORE_LAST_ACK);
+
+    CHECK(input(&c, 5002, 1002, TCP_FLAG_ACK,
+                NULL, 0, 12) == 1);
+    CHECK(c.state == TCP_CORE_LISTEN);
+
+    handshake(&c);
+    CHECK(tcp_core_poll(&c, 30002, emit_cb, NULL) == 1);
+    CHECK(c.state == TCP_CORE_LISTEN);
+}
+
+static void test_time_wait_expiry(void)
+{
+    struct tcp_core_connection c;
+
+    printf("\n[TIME-WAIT EXPIRY]\n");
+    handshake(&c);
+    CHECK(tcp_core_close(&c, 10, emit_cb, NULL) == 0);
+    CHECK(input(&c, 5001, 1002, TCP_FLAG_ACK,
+                NULL, 0, 11) == 1);
+    CHECK(input(&c, 5001, 1002,
+                TCP_FLAG_FIN | TCP_FLAG_ACK,
+                NULL, 0, 12) == 1);
+
+    CHECK(c.state == TCP_CORE_TIME_WAIT);
+    CHECK(tcp_core_poll(&c, c.time_wait_deadline - 1,
+                        emit_cb, NULL) == 0);
+    CHECK(c.state == TCP_CORE_TIME_WAIT);
+    CHECK(tcp_core_poll(&c, c.time_wait_deadline,
+                        emit_cb, NULL) == 0);
+    CHECK(c.state == TCP_CORE_LISTEN);
+}
+
+static void test_tuple_sequence_and_ack(void)
+{
+    struct tcp_core_connection c;
+    u8 packet[64];
+    u16 n;
+
+    printf("\n[TUPLE SEQUENCE ACK AND INVALID FLAGS]\n");
+    handshake(&c);
+
+    n = make_packet(packet, 40001, 8080, 5001, 1001,
+                    TCP_FLAG_ACK, NULL, 0);
+    CHECK(tcp_core_input(&c, client_ip, server_ip, packet, n,
+                         10, emit_cb, NULL) == 0);
+    CHECK(c.state == TCP_CORE_ESTABLISHED);
+
+    CHECK(input(&c, 5002, 1001,
+                TCP_FLAG_ACK | TCP_FLAG_PSH,
+                (const u8 *)"Z", 1, 11) == 1);
+    CHECK(c.rx_len == 0);
+    CHECK(get32(last_packet + 8) == 5001);
+
+    CHECK(input(&c, 5001, 999999,
+                TCP_FLAG_ACK, NULL, 0, 12) == 0);
+    CHECK(c.state == TCP_CORE_ESTABLISHED);
+
+    CHECK(tcp_core_listen(&c, server_ip, 8080, 1000) == 0);
+    CHECK(input(&c, 5000, 1001,
+                TCP_FLAG_SYN | TCP_FLAG_ACK,
+                NULL, 0, 13) == 0);
+    CHECK(c.state == TCP_CORE_LISTEN);
+}
+
+static void test_buffer_boundary_and_malformed(void)
+{
+    struct tcp_core_connection c;
+    u8 data[512], packet[600];
+    unsigned i;
+    u16 n;
+
+    printf("\n[RX BUFFER BOUNDARY AND MALFORMED INPUT]\n");
+    memset(data, 'B', sizeof(data));
+    handshake(&c);
+
+    for (i = 0; i < 8; i++) {
+        CHECK(input(&c, 5001 + i * 512, 1001,
+                    TCP_FLAG_ACK | TCP_FLAG_PSH,
+                    data, sizeof(data), 20 + i) == 1);
+    }
+    CHECK(c.rx_len == TCP_CORE_RX_CAPACITY);
+    CHECK(c.rcv_nxt == 5001 + TCP_CORE_RX_CAPACITY);
+
+    CHECK(input(&c, c.rcv_nxt, 1001,
+                TCP_FLAG_ACK | TCP_FLAG_PSH,
+                (const u8 *)"Q", 1, 40) == 1);
+    CHECK(c.rx_len == TCP_CORE_RX_CAPACITY);
+
+    n = make_packet(packet, 40000, 8080, c.rcv_nxt, 1001,
+                    TCP_FLAG_ACK, NULL, 0);
+    CHECK(tcp_core_input(&c, client_ip, server_ip, packet, 10,
+                         41, emit_cb, NULL) == -1);
+
+    packet[12] = 0x40;
+    n = make_packet(packet, 40000, 8080, c.rcv_nxt, 1001,
+                    TCP_FLAG_ACK, NULL, 0);
+    packet[12] = 0x40;
+    CHECK(tcp_core_input(&c, client_ip, server_ip, packet, n,
+                         42, emit_cb, NULL) == -1);
+
+    n = make_packet(packet, 40000, 8080, c.rcv_nxt, 1001,
+                    TCP_FLAG_ACK, NULL, 0);
+    packet[16] ^= 0x80;
+    CHECK(tcp_core_input(&c, client_ip, server_ip, packet, n,
+                         43, emit_cb, NULL) == -1);
+}
+
+int main(void)
+{
+    printf("PA-220 TCP HOST PROTOCOL TEST\n");
+    printf("TCP source SHA1 expected: 2be12d49f0e5d80e6980b649d6148b90a474d287\n");
+
+    test_data_and_ack();
+    test_retransmission();
+    test_close_wait_data();
+    test_time_wait_duplicate_fin();
+    test_passive_close_and_idle();
+    test_time_wait_expiry();
+    test_tuple_sequence_and_ack();
+    test_buffer_boundary_and_malformed();
+
+    printf("\n========== SUMMARY ==========\n");
+    printf("ASSERTIONS_PASSED=%d\n", passes);
+    printf("ASSERTIONS_FAILED=%d\n", failures);
+
+    return failures ? 1 : 0;
+}
+
+========== PREVIOUS HOST BUILD COMMAND ==========
+--
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-1-========== HOST TCP PROTOCOL RETEST ==========
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-2-2026-11-20T16:39:31+08:00
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-3-BUILD_RC=1
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-4-TEST_RC=99
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:5:In file included from /tmp/pa220-p5-validation/host/test_tcp.c:5:
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-6-/tmp/pa220-p5-validation/src/include/net/tcp.h:36:9: error: unknown type name ‘u16’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-7-   36 |         u16 source_port;
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-8-      |         ^~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-9-/tmp/pa220-p5-validation/src/include/net/tcp.h:37:9: error: unknown type name ‘u16’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-10-   37 |         u16 dest_port;
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-11-      |         ^~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-12-/tmp/pa220-p5-validation/src/include/net/tcp.h:38:9: error: unknown type name ‘u32’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-13-   38 |         u32 sequence;
+--
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-232-  125 |                    u16 length, u32 now_ms, tcp_core_emit_fn emit,
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-233-      |                                            ^~~~~~~~~~~~~~~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-234-/tmp/pa220-p5-validation/src/include/net/tcp.h:127:54: error: unknown type name ‘u32’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-235-  127 | int tcp_core_close(struct tcp_core_connection *conn, u32 now_ms,
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-236-      |                                                      ^~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-237-/tmp/pa220-p5-validation/src/include/net/tcp.h:128:20: error: unknown type name ‘tcp_core_emit_fn’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-238-  128 |                    tcp_core_emit_fn emit, void *emit_arg);
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-239-      |                    ^~~~~~~~~~~~~~~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:240:/tmp/pa220-p5-validation/host/test_tcp.c:18:8: error: unknown type name ‘u8’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-241-   18 | static u8 last_packet[1600];
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-242-      |        ^~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:243:/tmp/pa220-p5-validation/host/test_tcp.c:19:8: error: unknown type name ‘u16’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-244-   19 | static u16 last_len;
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-245-      |        ^~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:246:/tmp/pa220-p5-validation/host/test_tcp.c:20:8: error: unknown type name ‘u8’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-247-   20 | static u8 last_src[4], last_dst[4];
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-248-      |        ^~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:249:/tmp/pa220-p5-validation/host/test_tcp.c:22:14: error: unknown type name ‘u8’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-250-   22 | static const u8 server_ip[4] = {10,0,0,1};
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-251-      |              ^~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:252:/tmp/pa220-p5-validation/host/test_tcp.c:23:14: error: unknown type name ‘u8’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-253-   23 | static const u8 client_ip[4] = {10,0,0,2};
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-254-      |              ^~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:255:/tmp/pa220-p5-validation/host/test_tcp.c:25:37: error: unknown type name ‘u8’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-256-   25 | static int emit_cb(void *arg, const u8 src[4], const u8 dst[4],
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-257-      |                                     ^~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:258:/tmp/pa220-p5-validation/host/test_tcp.c:25:54: error: unknown type name ‘u8’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-259-   25 | static int emit_cb(void *arg, const u8 src[4], const u8 dst[4],
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-260-      |                                                      ^~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:261:/tmp/pa220-p5-validation/host/test_tcp.c:26:26: error: unknown type name ‘u8’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-262-   26 |                    const u8 *packet, u16 len)
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-263-      |                          ^~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:264:/tmp/pa220-p5-validation/host/test_tcp.c:26:38: error: unknown type name ‘u16’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-265-   26 |                    const u8 *packet, u16 len)
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-266-      |                                      ^~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:267:/tmp/pa220-p5-validation/host/test_tcp.c:39:19: error: unknown type name ‘u8’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-268-   39 | static void put16(u8 *p, u16 v)
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-269-      |                   ^~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:270:/tmp/pa220-p5-validation/host/test_tcp.c:39:26: error: unknown type name ‘u16’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-271-   39 | static void put16(u8 *p, u16 v)
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-272-      |                          ^~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:273:/tmp/pa220-p5-validation/host/test_tcp.c:45:19: error: unknown type name ‘u8’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-274-   45 | static void put32(u8 *p, u32 v)
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-275-      |                   ^~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:276:/tmp/pa220-p5-validation/host/test_tcp.c:45:26: error: unknown type name ‘u32’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-277-   45 | static void put32(u8 *p, u32 v)
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-278-      |                          ^~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:279:/tmp/pa220-p5-validation/host/test_tcp.c:54:8: error: unknown type name ‘u32’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-280-   54 | static u32 get32(const u8 *p)
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-281-      |        ^~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:282:/tmp/pa220-p5-validation/host/test_tcp.c:54:24: error: unknown type name ‘u8’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-283-   54 | static u32 get32(const u8 *p)
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-284-      |                        ^~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:285:/tmp/pa220-p5-validation/host/test_tcp.c: In function ‘get32’:
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:286:/tmp/pa220-p5-validation/host/test_tcp.c:56:14: error: ‘u32’ undeclared (first use in this function)
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-287-   56 |     return ((u32)p[0] << 24) |
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-288-      |              ^~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:289:/tmp/pa220-p5-validation/host/test_tcp.c:56:14: note: each undeclared identifier is reported only once for each function it appears in
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:290:/tmp/pa220-p5-validation/host/test_tcp.c:56:18: error: expected ‘)’ before ‘p’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-291-   56 |     return ((u32)p[0] << 24) |
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-292-      |            ~     ^
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-293-      |                  )
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:294:/tmp/pa220-p5-validation/host/test_tcp.c:57:18: error: expected ‘)’ before ‘p’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-295-   57 |            ((u32)p[1] << 16) |
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-296-      |            ~     ^
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-297-      |                  )
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:298:/tmp/pa220-p5-validation/host/test_tcp.c:58:18: error: expected ‘)’ before ‘p’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-299-   58 |            ((u32)p[2] << 8) | p[3];
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-300-      |            ~     ^
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-301-      |                  )
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:302:/tmp/pa220-p5-validation/host/test_tcp.c: At top level:
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:303:/tmp/pa220-p5-validation/host/test_tcp.c:61:8: error: unknown type name ‘u16’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-304-   61 | static u16 make_packet(u8 *p, u16 sport, u16 dport,
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-305-      |        ^~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:306:/tmp/pa220-p5-validation/host/test_tcp.c:61:24: error: unknown type name ‘u8’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-307-   61 | static u16 make_packet(u8 *p, u16 sport, u16 dport,
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-308-      |                        ^~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:309:/tmp/pa220-p5-validation/host/test_tcp.c:61:31: error: unknown type name ‘u16’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-310-   61 | static u16 make_packet(u8 *p, u16 sport, u16 dport,
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-311-      |                               ^~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:312:/tmp/pa220-p5-validation/host/test_tcp.c:61:42: error: unknown type name ‘u16’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-313-   61 | static u16 make_packet(u8 *p, u16 sport, u16 dport,
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-314-      |                                          ^~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:315:/tmp/pa220-p5-validation/host/test_tcp.c:62:24: error: unknown type name ‘u32’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-316-   62 |                        u32 seq, u32 ack, u8 flags,
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-317-      |                        ^~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:318:/tmp/pa220-p5-validation/host/test_tcp.c:62:33: error: unknown type name ‘u32’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-319-   62 |                        u32 seq, u32 ack, u8 flags,
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-320-      |                                 ^~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:321:/tmp/pa220-p5-validation/host/test_tcp.c:62:42: error: unknown type name ‘u8’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-322-   62 |                        u32 seq, u32 ack, u8 flags,
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-323-      |                                          ^~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:324:/tmp/pa220-p5-validation/host/test_tcp.c:63:30: error: unknown type name ‘u8’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-325-   63 |                        const u8 *data, u16 len)
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-326-      |                              ^~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:327:/tmp/pa220-p5-validation/host/test_tcp.c:63:40: error: unknown type name ‘u16’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-328-   63 |                        const u8 *data, u16 len)
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-329-      |                                        ^~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:330:/tmp/pa220-p5-validation/host/test_tcp.c:80:49: error: unknown type name ‘u32’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-331-   80 | static int input(struct tcp_core_connection *c, u32 seq,
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-332-      |                                                 ^~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:333:/tmp/pa220-p5-validation/host/test_tcp.c:81:18: error: unknown type name ‘u32’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-334-   81 |                  u32 ack, u8 flags, const u8 *data,
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-335-      |                  ^~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:336:/tmp/pa220-p5-validation/host/test_tcp.c:81:27: error: unknown type name ‘u8’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-337-   81 |                  u32 ack, u8 flags, const u8 *data,
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-338-      |                           ^~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:339:/tmp/pa220-p5-validation/host/test_tcp.c:81:43: error: unknown type name ‘u8’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-340-   81 |                  u32 ack, u8 flags, const u8 *data,
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-341-      |                                           ^~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:342:/tmp/pa220-p5-validation/host/test_tcp.c:82:18: error: unknown type name ‘u16’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-343-   82 |                  u16 len, u32 now)
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-344-      |                  ^~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:345:/tmp/pa220-p5-validation/host/test_tcp.c:82:27: error: unknown type name ‘u32’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-346-   82 |                  u16 len, u32 now)
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-347-      |                           ^~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:348:/tmp/pa220-p5-validation/host/test_tcp.c: In function ‘handshake’:
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:349:/tmp/pa220-p5-validation/host/test_tcp.c:93:11: error: implicit declaration of function ‘tcp_core_listen’; did you mean ‘tcp_core_init’? [-Wimplicit-function-declaration]
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-350-   93 |     CHECK(tcp_core_listen(c, server_ip, 8080, 1000) == 0);
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-351-      |           ^~~~~~~~~~~~~~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:352:/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-353-    8 |     if (!(x)) { \
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-354-      |           ^
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:355:/tmp/pa220-p5-validation/host/test_tcp.c:95:11: error: implicit declaration of function ‘input’ [-Wimplicit-function-declaration]
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-356-   95 |     CHECK(input(c, 5000, 0, TCP_FLAG_SYN, NULL, 0, 1) == 1);
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-357-      |           ^~~~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:358:/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-359-    8 |     if (!(x)) { \
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-360-      |           ^
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:361:/tmp/pa220-p5-validation/host/test_tcp.c: In function ‘test_data_and_ack’:
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:362:/tmp/pa220-p5-validation/host/test_tcp.c:110:5: error: unknown type name ‘u8’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-363-  110 |     u8 received[16];
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-364-      |     ^~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:365:/tmp/pa220-p5-validation/host/test_tcp.c:117:24: error: unknown type name ‘u8’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-366-  117 |                 (const u8 *)"abc", 3, 3) == 1);
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-367-      |                        ^~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:368:/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-369-    8 |     if (!(x)) { \
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-370-      |           ^
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:371:/tmp/pa220-p5-validation/host/test_tcp.c:123:11: error: implicit declaration of function ‘tcp_core_read’; did you mean ‘tcp_core_init’? [-Wimplicit-function-declaration]
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-372-  123 |     CHECK(tcp_core_read(&c, received, sizeof(received)) == 3);
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-373-      |           ^~~~~~~~~~~~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:374:/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-375-    8 |     if (!(x)) { \
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-376-      |           ^
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:377:/tmp/pa220-p5-validation/host/test_tcp.c:127:11: error: implicit declaration of function ‘tcp_core_write’; did you mean ‘tcp_core_init’? [-Wimplicit-function-declaration]
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-378-  127 |     CHECK(tcp_core_write(&c, (const u8 *)"reply", 5,
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-379-      |           ^~~~~~~~~~~~~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:380:/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-381-    8 |     if (!(x)) { \
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-382-      |           ^
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:383:/tmp/pa220-p5-validation/host/test_tcp.c:127:37: error: unknown type name ‘u8’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-384-  127 |     CHECK(tcp_core_write(&c, (const u8 *)"reply", 5,
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-385-      |                                     ^~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:386:/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-387-    8 |     if (!(x)) { \
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-388-      |           ^
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:389:/tmp/pa220-p5-validation/host/test_tcp.c:128:29: error: ‘emit_cb’ undeclared (first use in this function)
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-390-  128 |                          4, emit_cb, NULL) == 5);
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-391-      |                             ^~~~~~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:392:/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-393-    8 |     if (!(x)) { \
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-394-      |           ^
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:395:/tmp/pa220-p5-validation/host/test_tcp.c: In function ‘test_retransmission’:
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:396:/tmp/pa220-p5-validation/host/test_tcp.c:148:37: error: unknown type name ‘u8’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-397-  148 |     CHECK(tcp_core_write(&c, (const u8 *)"retry", 5,
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-398-      |                                     ^~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:399:/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-400-    8 |     if (!(x)) { \
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-401-      |           ^
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:402:/tmp/pa220-p5-validation/host/test_tcp.c:149:30: error: ‘emit_cb’ undeclared (first use in this function)
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-403-  149 |                          10, emit_cb, NULL) == 5);
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-404-      |                              ^~~~~~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:405:/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-406-    8 |     if (!(x)) { \
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-407-      |           ^
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:408:/tmp/pa220-p5-validation/host/test_tcp.c:151:11: error: implicit declaration of function ‘tcp_core_poll’; did you mean ‘tcp_core_init’? [-Wimplicit-function-declaration]
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-409-  151 |     CHECK(tcp_core_poll(&c, 1009, emit_cb, NULL) == 0);
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-410-      |           ^~~~~~~~~~~~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:411:/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-412-    8 |     if (!(x)) { \
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-413-      |           ^
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:414:/tmp/pa220-p5-validation/host/test_tcp.c: In function ‘test_close_wait_data’:
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:415:/tmp/pa220-p5-validation/host/test_tcp.c:181:24: error: unknown type name ‘u8’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-416-  181 |                 (const u8 *)"X", 1, 11) == 1);
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-417-      |                        ^~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:418:/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-419-    8 |     if (!(x)) { \
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-420-      |           ^
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:421:/tmp/pa220-p5-validation/host/test_tcp.c: In function ‘test_time_wait_duplicate_fin’:
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:422:/tmp/pa220-p5-validation/host/test_tcp.c:195:5: error: unknown type name ‘u32’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-423-  195 |     u32 original_deadline;
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-424-      |     ^~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:425:/tmp/pa220-p5-validation/host/test_tcp.c:201:11: error: implicit declaration of function ‘tcp_core_close’ [-Wimplicit-function-declaration]
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-426-  201 |     CHECK(tcp_core_close(&c, 10, emit_cb, NULL) == 0);
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-427-      |           ^~~~~~~~~~~~~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:428:/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-429-    8 |     if (!(x)) { \
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-430-      |           ^
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:431:/tmp/pa220-p5-validation/host/test_tcp.c:201:34: error: ‘emit_cb’ undeclared (first use in this function)
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-432-  201 |     CHECK(tcp_core_close(&c, 10, emit_cb, NULL) == 0);
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-433-      |                                  ^~~~~~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:434:/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-435-    8 |     if (!(x)) { \
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-436-      |           ^
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:437:/tmp/pa220-p5-validation/host/test_tcp.c: In function ‘test_passive_close_and_idle’:
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:438:/tmp/pa220-p5-validation/host/test_tcp.c:245:34: error: ‘emit_cb’ undeclared (first use in this function)
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-439-  245 |     CHECK(tcp_core_close(&c, 11, emit_cb, NULL) == 0);
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-440-      |                                  ^~~~~~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:441:/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-442-    8 |     if (!(x)) { \
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-443-      |           ^
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:444:/tmp/pa220-p5-validation/host/test_tcp.c: In function ‘test_time_wait_expiry’:
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:445:/tmp/pa220-p5-validation/host/test_tcp.c:263:34: error: ‘emit_cb’ undeclared (first use in this function)
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-446-  263 |     CHECK(tcp_core_close(&c, 10, emit_cb, NULL) == 0);
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-447-      |                                  ^~~~~~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:448:/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-449-    8 |     if (!(x)) { \
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-450-      |           ^
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:451:/tmp/pa220-p5-validation/host/test_tcp.c: In function ‘test_tuple_sequence_and_ack’:
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:452:/tmp/pa220-p5-validation/host/test_tcp.c:282:5: error: unknown type name ‘u8’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-453-  282 |     u8 packet[64];
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-454-      |     ^~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:455:/tmp/pa220-p5-validation/host/test_tcp.c:283:5: error: unknown type name ‘u16’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-456-  283 |     u16 n;
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-457-      |     ^~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:458:/tmp/pa220-p5-validation/host/test_tcp.c:288:9: error: implicit declaration of function ‘make_packet’ [-Wimplicit-function-declaration]
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-459-  288 |     n = make_packet(packet, 40001, 8080, 5001, 1001,
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-460-      |         ^~~~~~~~~~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:461:/tmp/pa220-p5-validation/host/test_tcp.c:290:11: error: implicit declaration of function ‘tcp_core_input’; did you mean ‘tcp_core_init’? [-Wimplicit-function-declaration]
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-462-  290 |     CHECK(tcp_core_input(&c, client_ip, server_ip, packet, n,
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-463-      |           ^~~~~~~~~~~~~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:464:/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-465-    8 |     if (!(x)) { \
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-466-      |           ^
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:467:/tmp/pa220-p5-validation/host/test_tcp.c:291:30: error: ‘emit_cb’ undeclared (first use in this function)
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-468-  291 |                          10, emit_cb, NULL) == 0);
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-469-      |                              ^~~~~~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:470:/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-471-    8 |     if (!(x)) { \
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-472-      |           ^
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:473:/tmp/pa220-p5-validation/host/test_tcp.c:296:24: error: unknown type name ‘u8’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-474-  296 |                 (const u8 *)"Z", 1, 11) == 1);
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-475-      |                        ^~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:476:/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-477-    8 |     if (!(x)) { \
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-478-      |           ^
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:479:/tmp/pa220-p5-validation/host/test_tcp.c: In function ‘test_buffer_boundary_and_malformed’:
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:480:/tmp/pa220-p5-validation/host/test_tcp.c:314:5: error: unknown type name ‘u8’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-481-  314 |     u8 data[512], packet[600];
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-482-      |     ^~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:483:/tmp/pa220-p5-validation/host/test_tcp.c:316:5: error: unknown type name ‘u16’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-484-  316 |     u16 n;
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-485-      |     ^~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:486:/tmp/pa220-p5-validation/host/test_tcp.c:332:24: error: unknown type name ‘u8’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-487-  332 |                 (const u8 *)"Q", 1, 40) == 1);
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-488-      |                        ^~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:489:/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-490-    8 |     if (!(x)) { \
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-491-      |           ^
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:492:/tmp/pa220-p5-validation/host/test_tcp.c:338:30: error: ‘emit_cb’ undeclared (first use in this function)
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-493-  338 |                          41, emit_cb, NULL) == -1);
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-494-      |                              ^~~~~~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:495:/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-496-    8 |     if (!(x)) { \
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-497-      |           ^
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:498:/tmp/pa220-p5-validation/host/test_tcp.c: In function ‘get32’:
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:499:/tmp/pa220-p5-validation/host/test_tcp.c:59:1: error: control reaches end of non-void function [-Werror=return-type]
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-500-   59 | }
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-501-      | ^
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:502:/tmp/pa220-p5-validation/host/test_tcp.c: At top level:
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:503:/tmp/pa220-p5-validation/host/test_tcp.c:20:24: error: ‘last_dst’ defined but not used [-Werror=unused-variable]
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-504-   20 | static u8 last_src[4], last_dst[4];
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-505-      |                        ^~~~~~~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:506:/tmp/pa220-p5-validation/host/test_tcp.c:20:11: error: ‘last_src’ defined but not used [-Werror=unused-variable]
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-507-   20 | static u8 last_src[4], last_dst[4];
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-508-      |           ^~~~~~~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt:509:/tmp/pa220-p5-validation/host/test_tcp.c:19:12: error: ‘last_len’ defined but not used [-Werror=unused-variable]
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-510-   19 | static u16 last_len;
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-511-      |            ^~~~~~~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-512-cc1: all warnings being treated as errors
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-513-/tmp/pa220-p5-validation/src/net/tcp.c:10:10: fatal error: common.h: 没有那个文件或目录
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-514-   10 | #include <common.h>
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-515-      |          ^~~~~~~~~~
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-516-compilation terminated.
+/tmp/pa220-p5-validation/audit/P5-1A.3-HOST-PROTOCOL-RETEST.txt-517-========== FINAL ==========
