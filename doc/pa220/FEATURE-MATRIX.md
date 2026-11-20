@@ -284,3 +284,11 @@ PA-220 固定源码在独立干净 checkout 上完成完整构建，退出码为
 - 建议以显式前台 `pa220 web` 命令管理服务，独立轮询 `eth_rx()`、TCP 定时处理和 watchdog；Ctrl-C 与统一 cleanup 负责退出，禁止自动进入 Web 或后台驻留。
 - 首版只允许有界 GET/HEAD、固定 URI allowlist、静态只读 handler；禁止任意命令执行、环境写入、saveenv、存储/CPLD 写入、上传、安装和重启。
 - 本批仅完成静态源码审计与设计收敛；TCP/HTTP 实现、编译、RAM 启动和 MGT 实机访问均 NOT VERIFIED。
+
+
+## P5-1A TCP 核心实现进度（2026-11-20）
+
+- **TCP 报文基础层：已提交，待编译/测试。** 新增 `u-boot/include/net/tcp.h` 与 `u-boot/net/tcp.c`，实现无对齐假设的 TCP 固定头解析、data offset/option TLV 边界检查、MSS 选项识别、IPv4 TCP 伪首部校验和计算/验证入口，以及 32 位序列号比较。
+- **TCP 完整连接核心：未实现。** 尚无单连接状态机、SYN/SYN-ACK/ACK、数据接收窗口/缓冲、发送 ACK、FIN/RST 状态处理、超时/重传及发包能力。
+- 本提交暂不接入 `NetReceive()`，不修改 `net.c`、`net.h`、`net/Makefile`、UDP/ARP handler 或全局 timeout；未实现 HTTP/Web。
+- 进度报告：`audit/P5-1A-TCP-CORE-PROGRESS.md`。编译、单元测试、RAM 启动和实机验证均 NOT VERIFIED。
