@@ -1,0 +1,518 @@
+========== HOST TCP PROTOCOL RETEST ==========
+2026-11-20T16:39:31+08:00
+BUILD_RC=1
+TEST_RC=99
+In file included from /tmp/pa220-p5-validation/host/test_tcp.c:5:
+/tmp/pa220-p5-validation/src/include/net/tcp.h:36:9: error: unknown type name ‘u16’
+   36 |         u16 source_port;
+      |         ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:37:9: error: unknown type name ‘u16’
+   37 |         u16 dest_port;
+      |         ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:38:9: error: unknown type name ‘u32’
+   38 |         u32 sequence;
+      |         ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:39:9: error: unknown type name ‘u32’
+   39 |         u32 acknowledgment;
+      |         ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:40:9: error: unknown type name ‘u16’
+   40 |         u16 window;
+      |         ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:41:9: error: unknown type name ‘u16’
+   41 |         u16 checksum;
+      |         ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:42:9: error: unknown type name ‘u16’
+   42 |         u16 urgent;
+      |         ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:43:9: error: unknown type name ‘u16’
+   43 |         u16 header_len;
+      |         ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:44:9: error: unknown type name ‘u16’
+   44 |         u16 payload_len;
+      |         ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:45:9: error: unknown type name ‘u16’
+   45 |         u16 mss;
+      |         ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:46:9: error: unknown type name ‘u8’
+   46 |         u8 flags;
+      |         ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:47:9: error: unknown type name ‘u8’
+   47 |         u8 mss_present;
+      |         ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:48:15: error: unknown type name ‘u8’
+   48 |         const u8 *payload;
+      |               ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:69:50: error: unknown type name ‘u8’
+   69 | typedef int (*tcp_core_emit_fn)(void *arg, const u8 src[4],
+      |                                                  ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:70:39: error: unknown type name ‘u8’
+   70 |                                 const u8 dst[4], const u8 *segment,
+      |                                       ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:70:56: error: unknown type name ‘u8’
+   70 |                                 const u8 dst[4], const u8 *segment,
+      |                                                        ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:71:33: error: unknown type name ‘u16’
+   71 |                                 u16 segment_len);
+      |                                 ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:75:9: error: unknown type name ‘u8’
+   75 |         u8 local_ip[4];
+      |         ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:76:9: error: unknown type name ‘u8’
+   76 |         u8 remote_ip[4];
+      |         ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:77:9: error: unknown type name ‘u16’
+   77 |         u16 local_port;
+      |         ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:78:9: error: unknown type name ‘u16’
+   78 |         u16 remote_port;
+      |         ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:79:9: error: unknown type name ‘u32’
+   79 |         u32 iss;
+      |         ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:80:9: error: unknown type name ‘u32’
+   80 |         u32 snd_una;
+      |         ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:81:9: error: unknown type name ‘u32’
+   81 |         u32 snd_nxt;
+      |         ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:82:9: error: unknown type name ‘u32’
+   82 |         u32 irs;
+      |         ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:83:9: error: unknown type name ‘u32’
+   83 |         u32 rcv_nxt;
+      |         ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:84:9: error: unknown type name ‘u16’
+   84 |         u16 peer_window;
+      |         ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:85:9: error: unknown type name ‘u16’
+   85 |         u16 peer_mss;
+      |         ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:86:9: error: unknown type name ‘u16’
+   86 |         u16 rx_len;
+      |         ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:87:9: error: unknown type name ‘u8’
+   87 |         u8 rx_data[TCP_CORE_RX_CAPACITY];
+      |         ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:88:9: error: unknown type name ‘u16’
+   88 |         u16 tx_len;
+      |         ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:89:9: error: unknown type name ‘u8’
+   89 |         u8 tx_data[TCP_CORE_TX_CAPACITY];
+      |         ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:90:9: error: unknown type name ‘u8’
+   90 |         u8 pending_flags;
+      |         ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:91:9: error: unknown type name ‘u8’
+   91 |         u8 pending;
+      |         ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:92:9: error: unknown type name ‘u8’
+   92 |         u8 retries;
+      |         ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:93:9: error: unknown type name ‘u8’
+   93 |         u8 fin_received;
+      |         ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:94:9: error: unknown type name ‘u32’
+   94 |         u32 retry_deadline;
+      |         ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:95:9: error: unknown type name ‘u32’
+   95 |         u32 last_activity;
+      |         ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:96:9: error: unknown type name ‘u32’
+   96 |         u32 time_wait_deadline;
+      |         ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:97:9: error: unknown type name ‘u8’
+   97 |         u8 tx_wire[TCP_CORE_WIRE_MAX];
+      |         ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:98:9: error: unknown type name ‘u8’
+   98 |         u8 retry_data[TCP_CORE_TX_CAPACITY];
+      |         ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:99:9: error: unknown type name ‘u16’
+   99 |         u16 retry_len;
+      |         ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:100:9: error: unknown type name ‘u8’
+  100 |         u8 retry_flags;
+      |         ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:101:9: error: unknown type name ‘u32’
+  101 |         u32 retry_seq;
+      |         ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:104:29: error: unknown type name ‘u8’
+  104 | int tcp_segment_parse(const u8 *segment, u16 segment_len,
+      |                             ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:104:42: error: unknown type name ‘u16’
+  104 | int tcp_segment_parse(const u8 *segment, u16 segment_len,
+      |                                          ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:106:1: error: unknown type name ‘u16’
+  106 | u16 tcp_checksum_ipv4(const u8 src[4], const u8 dst[4],
+      | ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:106:29: error: unknown type name ‘u8’
+  106 | u16 tcp_checksum_ipv4(const u8 src[4], const u8 dst[4],
+      |                             ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:106:46: error: unknown type name ‘u8’
+  106 | u16 tcp_checksum_ipv4(const u8 src[4], const u8 dst[4],
+      |                                              ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:107:29: error: unknown type name ‘u8’
+  107 |                       const u8 *segment, u16 segment_len);
+      |                             ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:107:42: error: unknown type name ‘u16’
+  107 |                       const u8 *segment, u16 segment_len);
+      |                                          ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:108:35: error: unknown type name ‘u8’
+  108 | int tcp_checksum_ipv4_valid(const u8 src[4], const u8 dst[4],
+      |                                   ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:108:52: error: unknown type name ‘u8’
+  108 | int tcp_checksum_ipv4_valid(const u8 src[4], const u8 dst[4],
+      |                                                    ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:109:35: error: unknown type name ‘u8’
+  109 |                             const u8 *segment, u16 segment_len);
+      |                                   ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:109:48: error: unknown type name ‘u16’
+  109 |                             const u8 *segment, u16 segment_len);
+      |                                                ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:110:20: error: unknown type name ‘u32’
+  110 | int tcp_seq_before(u32 a, u32 b);
+      |                    ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:110:27: error: unknown type name ‘u32’
+  110 | int tcp_seq_before(u32 a, u32 b);
+      |                           ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:111:19: error: unknown type name ‘u32’
+  111 | int tcp_seq_after(u32 a, u32 b);
+      |                   ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:111:26: error: unknown type name ‘u32’
+  111 | int tcp_seq_after(u32 a, u32 b);
+      |                          ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:115:61: error: unknown type name ‘u8’
+  115 | int tcp_core_listen(struct tcp_core_connection *conn, const u8 local_ip[4],
+      |                                                             ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:116:21: error: unknown type name ‘u16’
+  116 |                     u16 local_port, u32 initial_sequence);
+      |                     ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:116:37: error: unknown type name ‘u32’
+  116 |                     u16 local_port, u32 initial_sequence);
+      |                                     ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:118:26: error: unknown type name ‘u8’
+  118 |                    const u8 src_ip[4], const u8 dst_ip[4],
+      |                          ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:118:46: error: unknown type name ‘u8’
+  118 |                    const u8 src_ip[4], const u8 dst_ip[4],
+      |                                              ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:119:26: error: unknown type name ‘u8’
+  119 |                    const u8 *segment, u16 segment_len, u32 now_ms,
+      |                          ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:119:39: error: unknown type name ‘u16’
+  119 |                    const u8 *segment, u16 segment_len, u32 now_ms,
+      |                                       ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:119:56: error: unknown type name ‘u32’
+  119 |                    const u8 *segment, u16 segment_len, u32 now_ms,
+      |                                                        ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:120:20: error: unknown type name ‘tcp_core_emit_fn’
+  120 |                    tcp_core_emit_fn emit, void *emit_arg);
+      |                    ^~~~~~~~~~~~~~~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:121:53: error: unknown type name ‘u32’
+  121 | int tcp_core_poll(struct tcp_core_connection *conn, u32 now_ms,
+      |                                                     ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:122:19: error: unknown type name ‘tcp_core_emit_fn’
+  122 |                   tcp_core_emit_fn emit, void *emit_arg);
+      |                   ^~~~~~~~~~~~~~~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:123:53: error: unknown type name ‘u8’
+  123 | int tcp_core_read(struct tcp_core_connection *conn, u8 *dst, u16 capacity);
+      |                                                     ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:123:62: error: unknown type name ‘u16’
+  123 | int tcp_core_read(struct tcp_core_connection *conn, u8 *dst, u16 capacity);
+      |                                                              ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:124:60: error: unknown type name ‘u8’
+  124 | int tcp_core_write(struct tcp_core_connection *conn, const u8 *data,
+      |                                                            ^~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:125:20: error: unknown type name ‘u16’
+  125 |                    u16 length, u32 now_ms, tcp_core_emit_fn emit,
+      |                    ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:125:32: error: unknown type name ‘u32’
+  125 |                    u16 length, u32 now_ms, tcp_core_emit_fn emit,
+      |                                ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:125:44: error: unknown type name ‘tcp_core_emit_fn’
+  125 |                    u16 length, u32 now_ms, tcp_core_emit_fn emit,
+      |                                            ^~~~~~~~~~~~~~~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:127:54: error: unknown type name ‘u32’
+  127 | int tcp_core_close(struct tcp_core_connection *conn, u32 now_ms,
+      |                                                      ^~~
+/tmp/pa220-p5-validation/src/include/net/tcp.h:128:20: error: unknown type name ‘tcp_core_emit_fn’
+  128 |                    tcp_core_emit_fn emit, void *emit_arg);
+      |                    ^~~~~~~~~~~~~~~~
+/tmp/pa220-p5-validation/host/test_tcp.c:18:8: error: unknown type name ‘u8’
+   18 | static u8 last_packet[1600];
+      |        ^~
+/tmp/pa220-p5-validation/host/test_tcp.c:19:8: error: unknown type name ‘u16’
+   19 | static u16 last_len;
+      |        ^~~
+/tmp/pa220-p5-validation/host/test_tcp.c:20:8: error: unknown type name ‘u8’
+   20 | static u8 last_src[4], last_dst[4];
+      |        ^~
+/tmp/pa220-p5-validation/host/test_tcp.c:22:14: error: unknown type name ‘u8’
+   22 | static const u8 server_ip[4] = {10,0,0,1};
+      |              ^~
+/tmp/pa220-p5-validation/host/test_tcp.c:23:14: error: unknown type name ‘u8’
+   23 | static const u8 client_ip[4] = {10,0,0,2};
+      |              ^~
+/tmp/pa220-p5-validation/host/test_tcp.c:25:37: error: unknown type name ‘u8’
+   25 | static int emit_cb(void *arg, const u8 src[4], const u8 dst[4],
+      |                                     ^~
+/tmp/pa220-p5-validation/host/test_tcp.c:25:54: error: unknown type name ‘u8’
+   25 | static int emit_cb(void *arg, const u8 src[4], const u8 dst[4],
+      |                                                      ^~
+/tmp/pa220-p5-validation/host/test_tcp.c:26:26: error: unknown type name ‘u8’
+   26 |                    const u8 *packet, u16 len)
+      |                          ^~
+/tmp/pa220-p5-validation/host/test_tcp.c:26:38: error: unknown type name ‘u16’
+   26 |                    const u8 *packet, u16 len)
+      |                                      ^~~
+/tmp/pa220-p5-validation/host/test_tcp.c:39:19: error: unknown type name ‘u8’
+   39 | static void put16(u8 *p, u16 v)
+      |                   ^~
+/tmp/pa220-p5-validation/host/test_tcp.c:39:26: error: unknown type name ‘u16’
+   39 | static void put16(u8 *p, u16 v)
+      |                          ^~~
+/tmp/pa220-p5-validation/host/test_tcp.c:45:19: error: unknown type name ‘u8’
+   45 | static void put32(u8 *p, u32 v)
+      |                   ^~
+/tmp/pa220-p5-validation/host/test_tcp.c:45:26: error: unknown type name ‘u32’
+   45 | static void put32(u8 *p, u32 v)
+      |                          ^~~
+/tmp/pa220-p5-validation/host/test_tcp.c:54:8: error: unknown type name ‘u32’
+   54 | static u32 get32(const u8 *p)
+      |        ^~~
+/tmp/pa220-p5-validation/host/test_tcp.c:54:24: error: unknown type name ‘u8’
+   54 | static u32 get32(const u8 *p)
+      |                        ^~
+/tmp/pa220-p5-validation/host/test_tcp.c: In function ‘get32’:
+/tmp/pa220-p5-validation/host/test_tcp.c:56:14: error: ‘u32’ undeclared (first use in this function)
+   56 |     return ((u32)p[0] << 24) |
+      |              ^~~
+/tmp/pa220-p5-validation/host/test_tcp.c:56:14: note: each undeclared identifier is reported only once for each function it appears in
+/tmp/pa220-p5-validation/host/test_tcp.c:56:18: error: expected ‘)’ before ‘p’
+   56 |     return ((u32)p[0] << 24) |
+      |            ~     ^
+      |                  )
+/tmp/pa220-p5-validation/host/test_tcp.c:57:18: error: expected ‘)’ before ‘p’
+   57 |            ((u32)p[1] << 16) |
+      |            ~     ^
+      |                  )
+/tmp/pa220-p5-validation/host/test_tcp.c:58:18: error: expected ‘)’ before ‘p’
+   58 |            ((u32)p[2] << 8) | p[3];
+      |            ~     ^
+      |                  )
+/tmp/pa220-p5-validation/host/test_tcp.c: At top level:
+/tmp/pa220-p5-validation/host/test_tcp.c:61:8: error: unknown type name ‘u16’
+   61 | static u16 make_packet(u8 *p, u16 sport, u16 dport,
+      |        ^~~
+/tmp/pa220-p5-validation/host/test_tcp.c:61:24: error: unknown type name ‘u8’
+   61 | static u16 make_packet(u8 *p, u16 sport, u16 dport,
+      |                        ^~
+/tmp/pa220-p5-validation/host/test_tcp.c:61:31: error: unknown type name ‘u16’
+   61 | static u16 make_packet(u8 *p, u16 sport, u16 dport,
+      |                               ^~~
+/tmp/pa220-p5-validation/host/test_tcp.c:61:42: error: unknown type name ‘u16’
+   61 | static u16 make_packet(u8 *p, u16 sport, u16 dport,
+      |                                          ^~~
+/tmp/pa220-p5-validation/host/test_tcp.c:62:24: error: unknown type name ‘u32’
+   62 |                        u32 seq, u32 ack, u8 flags,
+      |                        ^~~
+/tmp/pa220-p5-validation/host/test_tcp.c:62:33: error: unknown type name ‘u32’
+   62 |                        u32 seq, u32 ack, u8 flags,
+      |                                 ^~~
+/tmp/pa220-p5-validation/host/test_tcp.c:62:42: error: unknown type name ‘u8’
+   62 |                        u32 seq, u32 ack, u8 flags,
+      |                                          ^~
+/tmp/pa220-p5-validation/host/test_tcp.c:63:30: error: unknown type name ‘u8’
+   63 |                        const u8 *data, u16 len)
+      |                              ^~
+/tmp/pa220-p5-validation/host/test_tcp.c:63:40: error: unknown type name ‘u16’
+   63 |                        const u8 *data, u16 len)
+      |                                        ^~~
+/tmp/pa220-p5-validation/host/test_tcp.c:80:49: error: unknown type name ‘u32’
+   80 | static int input(struct tcp_core_connection *c, u32 seq,
+      |                                                 ^~~
+/tmp/pa220-p5-validation/host/test_tcp.c:81:18: error: unknown type name ‘u32’
+   81 |                  u32 ack, u8 flags, const u8 *data,
+      |                  ^~~
+/tmp/pa220-p5-validation/host/test_tcp.c:81:27: error: unknown type name ‘u8’
+   81 |                  u32 ack, u8 flags, const u8 *data,
+      |                           ^~
+/tmp/pa220-p5-validation/host/test_tcp.c:81:43: error: unknown type name ‘u8’
+   81 |                  u32 ack, u8 flags, const u8 *data,
+      |                                           ^~
+/tmp/pa220-p5-validation/host/test_tcp.c:82:18: error: unknown type name ‘u16’
+   82 |                  u16 len, u32 now)
+      |                  ^~~
+/tmp/pa220-p5-validation/host/test_tcp.c:82:27: error: unknown type name ‘u32’
+   82 |                  u16 len, u32 now)
+      |                           ^~~
+/tmp/pa220-p5-validation/host/test_tcp.c: In function ‘handshake’:
+/tmp/pa220-p5-validation/host/test_tcp.c:93:11: error: implicit declaration of function ‘tcp_core_listen’; did you mean ‘tcp_core_init’? [-Wimplicit-function-declaration]
+   93 |     CHECK(tcp_core_listen(c, server_ip, 8080, 1000) == 0);
+      |           ^~~~~~~~~~~~~~~
+/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+    8 |     if (!(x)) { \
+      |           ^
+/tmp/pa220-p5-validation/host/test_tcp.c:95:11: error: implicit declaration of function ‘input’ [-Wimplicit-function-declaration]
+   95 |     CHECK(input(c, 5000, 0, TCP_FLAG_SYN, NULL, 0, 1) == 1);
+      |           ^~~~~
+/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+    8 |     if (!(x)) { \
+      |           ^
+/tmp/pa220-p5-validation/host/test_tcp.c: In function ‘test_data_and_ack’:
+/tmp/pa220-p5-validation/host/test_tcp.c:110:5: error: unknown type name ‘u8’
+  110 |     u8 received[16];
+      |     ^~
+/tmp/pa220-p5-validation/host/test_tcp.c:117:24: error: unknown type name ‘u8’
+  117 |                 (const u8 *)"abc", 3, 3) == 1);
+      |                        ^~
+/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+    8 |     if (!(x)) { \
+      |           ^
+/tmp/pa220-p5-validation/host/test_tcp.c:123:11: error: implicit declaration of function ‘tcp_core_read’; did you mean ‘tcp_core_init’? [-Wimplicit-function-declaration]
+  123 |     CHECK(tcp_core_read(&c, received, sizeof(received)) == 3);
+      |           ^~~~~~~~~~~~~
+/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+    8 |     if (!(x)) { \
+      |           ^
+/tmp/pa220-p5-validation/host/test_tcp.c:127:11: error: implicit declaration of function ‘tcp_core_write’; did you mean ‘tcp_core_init’? [-Wimplicit-function-declaration]
+  127 |     CHECK(tcp_core_write(&c, (const u8 *)"reply", 5,
+      |           ^~~~~~~~~~~~~~
+/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+    8 |     if (!(x)) { \
+      |           ^
+/tmp/pa220-p5-validation/host/test_tcp.c:127:37: error: unknown type name ‘u8’
+  127 |     CHECK(tcp_core_write(&c, (const u8 *)"reply", 5,
+      |                                     ^~
+/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+    8 |     if (!(x)) { \
+      |           ^
+/tmp/pa220-p5-validation/host/test_tcp.c:128:29: error: ‘emit_cb’ undeclared (first use in this function)
+  128 |                          4, emit_cb, NULL) == 5);
+      |                             ^~~~~~~
+/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+    8 |     if (!(x)) { \
+      |           ^
+/tmp/pa220-p5-validation/host/test_tcp.c: In function ‘test_retransmission’:
+/tmp/pa220-p5-validation/host/test_tcp.c:148:37: error: unknown type name ‘u8’
+  148 |     CHECK(tcp_core_write(&c, (const u8 *)"retry", 5,
+      |                                     ^~
+/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+    8 |     if (!(x)) { \
+      |           ^
+/tmp/pa220-p5-validation/host/test_tcp.c:149:30: error: ‘emit_cb’ undeclared (first use in this function)
+  149 |                          10, emit_cb, NULL) == 5);
+      |                              ^~~~~~~
+/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+    8 |     if (!(x)) { \
+      |           ^
+/tmp/pa220-p5-validation/host/test_tcp.c:151:11: error: implicit declaration of function ‘tcp_core_poll’; did you mean ‘tcp_core_init’? [-Wimplicit-function-declaration]
+  151 |     CHECK(tcp_core_poll(&c, 1009, emit_cb, NULL) == 0);
+      |           ^~~~~~~~~~~~~
+/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+    8 |     if (!(x)) { \
+      |           ^
+/tmp/pa220-p5-validation/host/test_tcp.c: In function ‘test_close_wait_data’:
+/tmp/pa220-p5-validation/host/test_tcp.c:181:24: error: unknown type name ‘u8’
+  181 |                 (const u8 *)"X", 1, 11) == 1);
+      |                        ^~
+/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+    8 |     if (!(x)) { \
+      |           ^
+/tmp/pa220-p5-validation/host/test_tcp.c: In function ‘test_time_wait_duplicate_fin’:
+/tmp/pa220-p5-validation/host/test_tcp.c:195:5: error: unknown type name ‘u32’
+  195 |     u32 original_deadline;
+      |     ^~~
+/tmp/pa220-p5-validation/host/test_tcp.c:201:11: error: implicit declaration of function ‘tcp_core_close’ [-Wimplicit-function-declaration]
+  201 |     CHECK(tcp_core_close(&c, 10, emit_cb, NULL) == 0);
+      |           ^~~~~~~~~~~~~~
+/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+    8 |     if (!(x)) { \
+      |           ^
+/tmp/pa220-p5-validation/host/test_tcp.c:201:34: error: ‘emit_cb’ undeclared (first use in this function)
+  201 |     CHECK(tcp_core_close(&c, 10, emit_cb, NULL) == 0);
+      |                                  ^~~~~~~
+/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+    8 |     if (!(x)) { \
+      |           ^
+/tmp/pa220-p5-validation/host/test_tcp.c: In function ‘test_passive_close_and_idle’:
+/tmp/pa220-p5-validation/host/test_tcp.c:245:34: error: ‘emit_cb’ undeclared (first use in this function)
+  245 |     CHECK(tcp_core_close(&c, 11, emit_cb, NULL) == 0);
+      |                                  ^~~~~~~
+/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+    8 |     if (!(x)) { \
+      |           ^
+/tmp/pa220-p5-validation/host/test_tcp.c: In function ‘test_time_wait_expiry’:
+/tmp/pa220-p5-validation/host/test_tcp.c:263:34: error: ‘emit_cb’ undeclared (first use in this function)
+  263 |     CHECK(tcp_core_close(&c, 10, emit_cb, NULL) == 0);
+      |                                  ^~~~~~~
+/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+    8 |     if (!(x)) { \
+      |           ^
+/tmp/pa220-p5-validation/host/test_tcp.c: In function ‘test_tuple_sequence_and_ack’:
+/tmp/pa220-p5-validation/host/test_tcp.c:282:5: error: unknown type name ‘u8’
+  282 |     u8 packet[64];
+      |     ^~
+/tmp/pa220-p5-validation/host/test_tcp.c:283:5: error: unknown type name ‘u16’
+  283 |     u16 n;
+      |     ^~~
+/tmp/pa220-p5-validation/host/test_tcp.c:288:9: error: implicit declaration of function ‘make_packet’ [-Wimplicit-function-declaration]
+  288 |     n = make_packet(packet, 40001, 8080, 5001, 1001,
+      |         ^~~~~~~~~~~
+/tmp/pa220-p5-validation/host/test_tcp.c:290:11: error: implicit declaration of function ‘tcp_core_input’; did you mean ‘tcp_core_init’? [-Wimplicit-function-declaration]
+  290 |     CHECK(tcp_core_input(&c, client_ip, server_ip, packet, n,
+      |           ^~~~~~~~~~~~~~
+/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+    8 |     if (!(x)) { \
+      |           ^
+/tmp/pa220-p5-validation/host/test_tcp.c:291:30: error: ‘emit_cb’ undeclared (first use in this function)
+  291 |                          10, emit_cb, NULL) == 0);
+      |                              ^~~~~~~
+/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+    8 |     if (!(x)) { \
+      |           ^
+/tmp/pa220-p5-validation/host/test_tcp.c:296:24: error: unknown type name ‘u8’
+  296 |                 (const u8 *)"Z", 1, 11) == 1);
+      |                        ^~
+/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+    8 |     if (!(x)) { \
+      |           ^
+/tmp/pa220-p5-validation/host/test_tcp.c: In function ‘test_buffer_boundary_and_malformed’:
+/tmp/pa220-p5-validation/host/test_tcp.c:314:5: error: unknown type name ‘u8’
+  314 |     u8 data[512], packet[600];
+      |     ^~
+/tmp/pa220-p5-validation/host/test_tcp.c:316:5: error: unknown type name ‘u16’
+  316 |     u16 n;
+      |     ^~~
+/tmp/pa220-p5-validation/host/test_tcp.c:332:24: error: unknown type name ‘u8’
+  332 |                 (const u8 *)"Q", 1, 40) == 1);
+      |                        ^~
+/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+    8 |     if (!(x)) { \
+      |           ^
+/tmp/pa220-p5-validation/host/test_tcp.c:338:30: error: ‘emit_cb’ undeclared (first use in this function)
+  338 |                          41, emit_cb, NULL) == -1);
+      |                              ^~~~~~~
+/tmp/pa220-p5-validation/host/test_tcp.c:8:11: note: in definition of macro ‘CHECK’
+    8 |     if (!(x)) { \
+      |           ^
+/tmp/pa220-p5-validation/host/test_tcp.c: In function ‘get32’:
+/tmp/pa220-p5-validation/host/test_tcp.c:59:1: error: control reaches end of non-void function [-Werror=return-type]
+   59 | }
+      | ^
+/tmp/pa220-p5-validation/host/test_tcp.c: At top level:
+/tmp/pa220-p5-validation/host/test_tcp.c:20:24: error: ‘last_dst’ defined but not used [-Werror=unused-variable]
+   20 | static u8 last_src[4], last_dst[4];
+      |                        ^~~~~~~~
+/tmp/pa220-p5-validation/host/test_tcp.c:20:11: error: ‘last_src’ defined but not used [-Werror=unused-variable]
+   20 | static u8 last_src[4], last_dst[4];
+      |           ^~~~~~~~
+/tmp/pa220-p5-validation/host/test_tcp.c:19:12: error: ‘last_len’ defined but not used [-Werror=unused-variable]
+   19 | static u16 last_len;
+      |            ^~~~~~~~
+cc1: all warnings being treated as errors
+/tmp/pa220-p5-validation/src/net/tcp.c:10:10: fatal error: common.h: 没有那个文件或目录
+   10 | #include <common.h>
+      |          ^~~~~~~~~~
+compilation terminated.
+========== FINAL ==========
+BUILD_RC=1 TEST_RC=99
