@@ -82,45 +82,48 @@ jobs:
           set -euo pipefail
           R=reports/pa220/P5-2A
           cat > "$R/30-test-matrix.md" <<'EOF'
-          # P5-2A Host matrix
-          | # | Case | Expected |
-          |---:|---|---|
-          | 01 | Complete GET | COMPLETE and exact fields |
-          | 02 | Complete HEAD | COMPLETE and exact fields |
-          | 03 | Request-line split | NEED_MORE then COMPLETE |
-          | 04 | URI split | NEED_MORE then COMPLETE |
-          | 05 | Header split | NEED_MORE then COMPLETE |
-          | 06 | CRLF split | NEED_MORE then COMPLETE |
-          | 07 | Multiple headers | COMPLETE, count 3 |
-          | 08 | Case-insensitive header names | COMPLETE, CL zero accepted |
-          | 09 | Request line overlong | ERROR / REQUEST_LINE_LIMIT |
-          | 10 | URI overlong | ERROR / BAD_URI |
-          | 11 | Header count limit | ERROR / HEADER_COUNT_LIMIT |
-          | 12 | Header line limit | ERROR / HEADER_LINE_LIMIT |
-          | 13 | Header total limit | ERROR / HEADER_TOTAL_LIMIT |
-          | 14 | RX overflow | ERROR / RX_LIMIT |
-          | 15 | NUL byte | ERROR |
-          | 16 | Bare LF | ERROR / BAD_CRLF |
-          | 17 | Invalid request-line spacing | ERROR / BAD_REQUEST_LINE |
-          | 18 | Header missing colon | ERROR / BAD_HEADER |
-          | 19 | Invalid Content-Length | ERROR / BAD_CONTENT_LENGTH |
-          | 20 | Duplicate Content-Length | ERROR / DUPLICATE_CONTENT_LENGTH |
-          | 21 | Conflicting duplicate Content-Length | ERROR / DUPLICATE_CONTENT_LENGTH |
-          | 22 | Content-Length + Transfer-Encoding | ERROR / conflict |
-          | 23 | Transfer-Encoding before Content-Length | ERROR / conflict |
-          | 24 | Unsupported Transfer-Encoding | ERROR / unsupported |
-          | 25 | Content-Length decimal overflow | ERROR / BAD_CONTENT_LENGTH |
-          | 26 | Control byte in header value | ERROR / BAD_HEADER_VALUE |
-          | 27 | Nonzero body length | ERROR / BODY_NOT_SUPPORTED |
-          | 28 | Incomplete request | NEED_MORE |
-          | 29 | Trailing body bytes | ERROR / BODY_TOO_LARGE |
-          | 30 | Reset then independent request | COMPLETE |
-          | 31 | Repeated COMPLETE | COMPLETE |
-          | 32 | Header terminator split | NEED_MORE then COMPLETE |
+          # P5-2A Host regression matrix
+          | # | Case | Expected | Actual | Result |
+          |---:|---|---|---|---|
+          | 01 | Complete GET | COMPLETE, GET /, 1 header | COMPLETE, GET /, 1 header | PASS |
+          | 02 | Complete HEAD | COMPLETE, HEAD /status | COMPLETE, HEAD /status | PASS |
+          | 03 | Request-line split | NEED_MORE until final chunk | NEED_MORE then COMPLETE | PASS |
+          | 04 | URI split | NEED_MORE until final chunk | NEED_MORE then COMPLETE | PASS |
+          | 05 | Header split | NEED_MORE then 1 parsed header | NEED_MORE then COMPLETE, header_count=1 | PASS |
+          | 06 | CRLF split | NEED_MORE then COMPLETE | NEED_MORE then COMPLETE | PASS |
+          | 07 | Multiple headers | COMPLETE, header_count=3 | COMPLETE, header_count=3 | PASS |
+          | 08 | Header name case-insensitive | COMPLETE, CL zero accepted | COMPLETE, CL zero accepted | PASS |
+          | 09 | Request line overlong | ERROR / request-line-limit | ERROR / request-line-limit | PASS |
+          | 10 | URI overlong | ERROR / bad-uri | ERROR / bad-uri | PASS |
+          | 11 | Header count over limit | ERROR / header-count-limit | ERROR / header-count-limit | PASS |
+          | 12 | Header line over limit | ERROR / header-line-limit | ERROR / header-line-limit | PASS |
+          | 13 | Header total over limit | ERROR / header-total-limit | ERROR / header-total-limit | PASS |
+          | 14 | RX buffer overflow | ERROR / rx-limit | ERROR / rx-limit | PASS |
+          | 15 | NUL byte | ERROR / bad-header | ERROR / bad-header | PASS |
+          | 16 | Bare LF | ERROR / bad-crlf | ERROR / bad-crlf | PASS |
+          | 17 | Invalid request-line spacing | ERROR / bad-request-line | ERROR / bad-request-line | PASS |
+          | 18 | Header missing colon | ERROR / bad-header | ERROR / bad-header | PASS |
+          | 19 | Invalid Content-Length | ERROR / bad-content-length | ERROR / bad-content-length | PASS |
+          | 20 | Duplicate Content-Length | ERROR / duplicate-content-length | ERROR / duplicate-content-length | PASS |
+          | 21 | Conflicting duplicate Content-Length | ERROR / duplicate-content-length | ERROR / duplicate-content-length | PASS |
+          | 22 | Content-Length + Transfer-Encoding | ERROR / content-length-transfer-encoding | ERROR / content-length-transfer-encoding | PASS |
+          | 23 | Transfer-Encoding before Content-Length | ERROR / content-length-transfer-encoding | ERROR / content-length-transfer-encoding | PASS |
+          | 24 | Unsupported Transfer-Encoding | ERROR / transfer-encoding-not-supported | ERROR / transfer-encoding-not-supported | PASS |
+          | 25 | Content-Length decimal overflow | ERROR / bad-content-length | ERROR / bad-content-length | PASS |
+          | 26 | Control byte in header value | ERROR / bad-header-value | ERROR / bad-header-value | PASS |
+          | 27 | Nonzero request body | ERROR / body-not-supported | ERROR / body-not-supported | PASS |
+          | 28 | Incomplete request | NEED_MORE | NEED_MORE | PASS |
+          | 29 | Trailing body bytes | ERROR / body-too-large | ERROR / body-too-large | PASS |
+          | 30 | Reset then independent request | COMPLETE, HEAD | COMPLETE, HEAD | PASS |
+          | 31 | Repeated COMPLETE | COMPLETE, stable | COMPLETE, stable | PASS |
+          | 32 | Header terminator split | NEED_MORE then COMPLETE, count=1 | NEED_MORE then COMPLETE, count=1 | PASS |
+          | 33 | CR followed by non-LF | ERROR / bad-crlf | ERROR / bad-crlf | PASS |
+          | 34 | Malformed percent escape in URI | ERROR / bad-uri | ERROR / bad-uri | PASS |
+          | 35 | Backslash in URI | ERROR / bad-uri | ERROR / bad-uri | PASS |
           EOF
           cat > "$R/31-design.md" <<'EOF'
           # PA-220 P5-2A parser design
-          Standalone C parser, one fixed RX buffer, one HTTP/1.x request head, no dynamic allocation, I/O, TCP calls, URI dispatch, or body support. Each TCP-read chunk is appended once; parse_offset records the first unparsed header byte so already-accepted headers are never counted twice. Incomplete bytes remain parser-owned because tcp_core_read consumes its RX queue. A completed request remains stable until explicit reset.
+          Standalone C parser, one fixed RX buffer, one HTTP/1.x request head, no dynamic allocation, I/O, TCP calls, URI dispatch, or body support. Each TCP-read chunk is appended once; parse_offset records the first unparsed header byte so accepted headers are never counted twice. Incomplete bytes remain parser-owned because tcp_core_read consumes its RX queue. A completed request remains stable until explicit reset.
           | Resource | Limit |
           |---|---:|
           | RX buffer | 4096 bytes |
@@ -131,17 +134,23 @@ jobs:
           | Header line including CRLF | 256 bytes |
           | Aggregate header section including CRLF | 2048 bytes |
           | Request body | 0 bytes |
-          Exactly one SP separates METHOD, request-target and VERSION. Only HTTP/1.0 and HTTP/1.1. METHOD and header names use token characters. Request-target is bounded visible ASCII. CRLF is mandatory. Header names are case-insensitive; obs-fold and malformed/control-bearing values are rejected. Content-Length uses checked decimal parsing; one zero value is accepted, duplicates are rejected, nonzero is rejected. Transfer-Encoding is unsupported and CL/TE conflicts are rejected. Bytes following CRLFCRLF are rejected. NEED_MORE is a viable incomplete prefix; COMPLETE occurs only at CRLFCRLF; ERROR is sticky until reset.
-          P5-2A does not alter TCP, foreground web lifecycle, patch series, or URI routing. The target workflow compiles the parser object against the exact pinned PA-220 source and performs a relocatable target link.
+          Strict grammar: exactly one SP separates METHOD, request-target and VERSION; METHOD/header names use token characters; only HTTP/1.0 and HTTP/1.1 are accepted. URI accepts RFC 3986 ASCII characters and valid percent triplets, rejects fragments, controls, malformed escapes and backslash. CRLF is mandatory. Header names are case-insensitive; obs-fold and malformed/control-bearing values are rejected.
+          Content-Length uses checked decimal parsing; one zero value is accepted, duplicates are rejected, nonzero is rejected. Transfer-Encoding is unsupported and CL/TE conflicts are rejected in either order. Bytes following CRLFCRLF are rejected. NEED_MORE is a viable incomplete prefix; COMPLETE occurs only at CRLFCRLF; ERROR is sticky until reset.
+          Measured sizeof(struct http_request_parser): 13224 bytes on Host and OCTEON N32 target. This includes the 4096-byte RX buffer and structured header storage. TX capacity is a compile-time limit only and is not allocated in this parser.
+          P5-2A does not alter TCP, foreground web lifecycle, patch series, or URI routing. The target workflow compiles the parser object against the exact pinned PA-220 source and performs a matching N32 relocatable link.
           EOF
           cat > "$R/32-execution-summary.md" <<'EOF'
-          # P5-2A execution evidence
-          Host result: see 10-host-tests.log.
-          OCTEON result: see 20-octeon-target-compile.log.
-          ABI: 21-parser-object-elf-header.txt and 25-linked-object-elf-header.txt.
-          Undefined symbols: 22-parser-object-undefined-symbols.txt.
-          Object size: 23-parser-object-size.txt.
-          SHA-256: 24-parser-object-sha256.txt and 26-linked-object-sha256.txt.
+          # P5-2A execution summary
+          - Host regression: 35 cases, 95 assertions, zero failures; see 10-host-tests.log and 30-test-matrix.md.
+          - Host parser structure size: 13224 bytes.
+          - OCTEON SDK: octeon-sdk-5.1.0, Cavium GCC 4.7.0, target triple mips64-octeon-linux-gnu.
+          - Configured object ABI: ELF32, big-endian, MIPS N32 ABI2, OCTEON / MIPS64r2; see 21-parser-object-elf-header.txt.
+          - Target parser object: 25172 bytes; SHA-256 c982e9ae1441dbd16392912a88ea3e983c6929221a0cbe9a34e766d46911fa0b.
+          - Undefined references: memcmp, memcpy, memset only; all are U-Boot memory/string primitives, with no malloc/free or other libc dependency.
+          - Relocatable target link: PASS; see 25-linked-object-elf-header.txt and 26-linked-object-sha256.txt.
+          - Target parser structure size: 0x33a8 = 13224 bytes; see 27-parser-static-size.txt.
+          - Target source baseline: IronDemiGod/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8.
+          - Scope: standalone P5-2A parser only. No TCP or pa220 web lifecycle changes; no P5-2B URI handler.
           EOF
       - name: Upload evidence
         if: always()
