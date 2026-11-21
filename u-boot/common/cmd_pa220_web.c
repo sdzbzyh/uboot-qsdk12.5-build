@@ -18,9 +18,11 @@
 DECLARE_GLOBAL_DATA_PTR;
 
 #define PA220_WEB_TCP_PORT 80
+#define PA220_WEB_CLOSE_RETRY_MS 1000U
 
 static struct tcp_core_connection pa220_web_connection;
 static struct tcp_ipv4_tx_peer pa220_web_peer;
+static u32 pa220_web_close_retry_deadline;
 
 static void pa220_web_reset_listener(void)
 {
@@ -29,9 +31,43 @@ static void pa220_web_reset_listener(void)
 
 	memcpy(local_ip, pa220_web_connection.local_ip, sizeof(local_ip));
 	tcp_ipv4_tx_clear(&pa220_web_peer);
+	pa220_web_close_retry_deadline = 0;
 	tcp_core_init(&pa220_web_connection);
 	(void)tcp_core_listen(&pa220_web_connection, local_ip,
 			      PA220_WEB_TCP_PORT, next_iss);
+}
+
+/*
+ * The current foreground service has no HTTP parser or response handler.
+ * Once the TCP core has acknowledged a peer FIN, there is no application
+ * response left to produce: close our send direction through the TCP core.
+ *
+ * A failed Ethernet emission leaves the connection in CLOSE-WAIT, so retry
+ * at a bounded interval. A successful call moves it to LAST-ACK; that state
+ * gate prevents duplicate FIN calls while awaiting the peer's final ACK.
+ */
+static void pa220_web_service_close_wait(void)
+{
+	u32 now;
+
+	if (pa220_web_connection.state != TCP_CORE_CLOSE_WAIT) {
+		pa220_web_close_retry_deadline = 0;
+		return;
+	}
+
+	now = (u32)get_timer(0);
+	if (pa220_web_close_retry_deadline &&
+	    (s32)(now - pa220_web_close_retry_deadline) < 0)
+		return;
+
+	if (!tcp_core_close(&pa220_web_connection, now,
+			    tcp_ipv4_tx_emit, &pa220_web_peer)) {
+		pa220_web_close_retry_deadline = 0;
+		puts("pa220 web: CLOSE-WAIT; tcp_core_close() sent local FIN\n");
+	} else {
+		pa220_web_close_retry_deadline = now +
+			PA220_WEB_CLOSE_RETRY_MS;
+	}
 }
 
 static void pa220_web_tcp_rx(const uchar *segment, unsigned len,
@@ -72,6 +108,9 @@ static void pa220_web_tcp_rx(const uchar *segment, unsigned len,
 	(void)tcp_core_input(&pa220_web_connection, src, dst, segment,
 			     (u16)len, (u32)get_timer(0),
 			     tcp_ipv4_tx_emit, &pa220_web_peer);
+
+	/* Run application close policy only after TCP has processed the FIN. */
+	pa220_web_service_close_wait();
 	if (pa220_web_connection.state == TCP_CORE_LISTEN)
 		tcp_ipv4_tx_clear(&pa220_web_peer);
 }
@@ -133,6 +172,7 @@ int do_pa220_web(cmd_tbl_t *cmdtp, int flag, int argc,
 	}
 
 	tcp_ipv4_tx_clear(&pa220_web_peer);
+	pa220_web_close_retry_deadline = 0;
 	/* Registration occurs only after all startup checks have succeeded. */
 	net_set_tcp_handler(pa220_web_tcp_rx);
 	puts("pa220 web: foreground lifecycle started; TCP RX hook on port 80\n");
@@ -143,8 +183,10 @@ int do_pa220_web(cmd_tbl_t *cmdtp, int flag, int argc,
 	while (!ctrlc()) {
 		WATCHDOG_RESET();
 		eth_rx();
+		pa220_web_service_close_wait();
 		(void)tcp_core_poll(&pa220_web_connection, (u32)get_timer(0),
 				    tcp_ipv4_tx_emit, &pa220_web_peer);
+		pa220_web_service_close_wait();
 		if (pa220_web_connection.state == TCP_CORE_LISTEN)
 			tcp_ipv4_tx_clear(&pa220_web_peer);
 	}
@@ -158,6 +200,7 @@ cleanup:
 	 * can never call into a reset or expired connection context.
 	 */
 	net_set_tcp_handler(NULL);
+	pa220_web_close_retry_deadline = 0;
 	tcp_ipv4_tx_clear(&pa220_web_peer);
 	tcp_core_init(&pa220_web_connection);
 	if (eth_attempted)

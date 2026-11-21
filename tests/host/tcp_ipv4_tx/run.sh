@@ -21,3 +21,9 @@ cc -std=c99 -Wall -Wextra -Werror \
   "$ROOT/u-boot/net/tcp_ipv4_tx.c" \
   "$ROOT/tests/host/tcp_ipv4_tx/tcp_synack_tx_test.c" -o "$OUT-synack"
 "$OUT-synack"
+cc -std=c99 -Wall -Wextra -Werror \
+  -I"$ROOT/tests/host/tcp_ipv4_tx/stubs_core" \
+  -I"$ROOT/u-boot/include" \
+  "$ROOT/u-boot/net/tcp.c" \
+  "$ROOT/tests/host/tcp_ipv4_tx/tcp_close_wait_test.c" -o "$OUT-close"
+"$OUT-close"
