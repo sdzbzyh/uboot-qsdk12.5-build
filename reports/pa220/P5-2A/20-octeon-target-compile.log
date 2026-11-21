@@ -1,5 +1,5 @@
-UTC=2026-11-21T08:42:39Z
-INTEGRATION_COMMIT=32fca77857f0dfe3a3e0b5a4a658259798b15449
+UTC=2026-11-21T08:44:17Z
+INTEGRATION_COMMIT=848da42d90f5f9f137649e1b5a9588f4f51f301a
 PA220_SOURCE_PIN=801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8
 c3cf15f2b0457b6582cca112589fb95d62a43dbe0bdc8b51760bb3242c755278  u-boot/net/http_request.c
 305b2372b6661c625c5f80f8dccc96b11272cca64001ba5441c68772ad5a529a  u-boot/include/net/http_request.h
@@ -153,8 +153,6 @@ ELF Header:
          U memcmp
          U memcpy
          U memset
-/home/runner/work/_temp/octeon-sdk/tools-gcc-4.7/bin/mips64-octeon-linux-gnu-ld: /home/runner/work/_temp/pa220-source/u-boot/net/http_request.o: ABI is incompatible with that of the selected emulation: "elf32-ntradbigmips" != "elf64-tradbigmips"
-/home/runner/work/_temp/octeon-sdk/tools-gcc-4.7/bin/mips64-octeon-linux-gnu-ld: failed to merge target specific data of file /home/runner/work/_temp/pa220-source/u-boot/net/http_request.o
-/home/runner/work/_temp/octeon-sdk/tools-gcc-4.7/bin/mips64-octeon-linux-gnu-ld: Attempt to do relocatable link with elf32-ntradbigmips input and elf64-tradbigmips output
-/home/runner/work/_temp/octeon-sdk/tools-gcc-4.7/bin/mips64-octeon-linux-gnu-ld: /home/runner/work/_temp/pa220-source/u-boot/net/http_request.o: file class ELFCLASS32 incompatible with ELFCLASS64
-/home/runner/work/_temp/octeon-sdk/tools-gcc-4.7/bin/mips64-octeon-linux-gnu-ld: final link failed: File in wrong format
+/home/runner/work/_temp/octeon-sdk/tools-gcc-4.7/bin/../lib/gcc/mips64-octeon-linux-gnu/4.7.0/../../../../mips64-octeon-linux-gnu/bin/ld: /home/runner/work/_temp/pa220-source/u-boot/net/http_request.o: ABI is incompatible with that of the selected emulation: "elf32-ntradbigmips" != "elf32-tradbigmips"
+/home/runner/work/_temp/octeon-sdk/tools-gcc-4.7/bin/../lib/gcc/mips64-octeon-linux-gnu/4.7.0/../../../../mips64-octeon-linux-gnu/bin/ld: failed to merge target specific data of file /home/runner/work/_temp/pa220-source/u-boot/net/http_request.o
+collect2: error: ld returned 1 exit status
