@@ -1,5 +1,5 @@
-UTC=2026-11-21T08:36:48Z
-COMMIT=ef38674aa08180dbe035e5368bf9e2cc32c872ca
+UTC=2026-11-21T08:39:28Z
+COMMIT=0c8bc155e09502345dd49ee4e6bff8bb725213eb
 cc (Ubuntu 15.2.0-16ubuntu1) 15.2.0
 01 complete GET: PASS
 02 complete HEAD: PASS
@@ -32,7 +32,6 @@ cc (Ubuntu 15.2.0-16ubuntu1) 15.2.0
 29 trailing body: PASS (body-too-large)
 30 reset and new request: PASS
 31 repeated COMPLETE: PASS
-FAIL line 43: z==HTTP_REQ_COMPLETE&&p.request.header_count==1
 32 terminator split: PASS
-PARSER_STRUCT_BYTES=13220
-CHECKS=85 FAILURES=1
+PARSER_STRUCT_BYTES=13224
+CHECKS=89 FAILURES=0
