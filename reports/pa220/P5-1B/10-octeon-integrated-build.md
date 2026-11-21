@@ -1,6 +1,6 @@
 # PA-220 P5-1B integrated OCTEON build
 
-- Integration commit: effd2d9dd6117866c7a0548eca072830c9025d68
+- Integration commit: d4e27b43b7079b071d56a4793bf14923a669b15f
 - PA-220 source: 801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8
 - SDK: octeon-sdk-5.1.0 / Cavium GCC 4.7.0 / SDK Build 52
 - SDK download/checksum: 0 / 0
