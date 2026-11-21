@@ -132,7 +132,7 @@ jobs:
                   echo
                   echo "========== OBJECT ABI =========="
                   file "$UBOOT_DIR/net/tcp.o"
-                  "$TOOLCHAIN_DIR/bin/mips64-oct eon-linux-gnu-readelf" -h "$UBOOT_DIR/net/tcp.o"
+                  "$TOOLCHAIN_DIR/bin/mips64-octeon-linux-gnu-readelf" -h "$UBOOT_DIR/net/tcp.o"
                   INSPECT_RC=$?
                   echo "OBJECT_SIZE=$(wc -c < "$UBOOT_DIR/net/tcp.o")"
                   sha256sum "$UBOOT_DIR/net/tcp.o"
