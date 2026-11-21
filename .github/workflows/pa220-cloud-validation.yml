@@ -117,7 +117,7 @@ jobs:
               TAR_RC=$?
               echo "EXTRACT_RC=$TAR_RC"
               if [ "$TAR_RC" -eq 0 ]; then
-                GCC_PATH=$(find "$RUNNER_TEMP/octeon-sdk" -type f -path '*/bin/mips64-octeon-linux-gnu-gcc' -print -quit)
+                GCC_PATH=$(find "$RUNNER_TEMP/octeon-sdk" -path '*/bin/mips64-octeon-linux-gnu-gcc' -print -quit)
                 if [ -n "$GCC_PATH" ]; then
                   TOOLCHAIN_DIR=$(dirname "$(dirname "$GCC_PATH")")
                   echo "TOOLCHAIN_DIR=$TOOLCHAIN_DIR"
@@ -152,16 +152,16 @@ jobs:
           cat > "$SUMMARY" <<EOF
           # PA-220 GitHub Actions validation
 
-          - Branch: `feature/pa220-ubootkit-web`
-          - Commit: `$(git rev-parse HEAD)`
-          - TCP source SHA-1: `$(sha1sum u-boot/net/tcp.c | awk '{print $1}')`
-          - TCP header SHA-1: `$(sha1sum u-boot/include/net/tcp.h | awk '{print $1}')`
-          - Host regression source: `reports/pa220/P5-1A.3/18-host-focused-protocol-retest.c`
-          - Host compile exit code: `$HOST_BUILD_RC`
-          - Host test exit code: `$HOST_TEST_RC`
-          - Private SDK release download exit code: `$DOWNLOAD_RC`
-          - SDK archive checksum exit code: `$CHECKSUM_RC`
-          - OCTEON build exit code: `$OCTEON_BUILD_RC`
+          - Branch: feature/pa220-ubootkit-web
+          - Commit: $(git rev-parse HEAD)
+          - TCP source SHA-1: $(sha1sum u-boot/net/tcp.c | awk '{print $1}')
+          - TCP header SHA-1: $(sha1sum u-boot/include/net/tcp.h | awk '{print $1}')
+          - Host regression source: reports/pa220/P5-1A.3/18-host-focused-protocol-retest.c
+          - Host compile exit code: $HOST_BUILD_RC
+          - Host test exit code: $HOST_TEST_RC
+          - Private SDK release download exit code: $DOWNLOAD_RC
+          - SDK archive checksum exit code: $CHECKSUM_RC
+          - OCTEON build exit code: $OCTEON_BUILD_RC
 
           The full command output is in [21-github-actions-validation.log](21-github-actions-validation.log).
           EOF
