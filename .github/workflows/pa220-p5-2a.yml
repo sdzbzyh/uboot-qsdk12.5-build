@@ -64,7 +64,7 @@ jobs:
             file "$U/net/http_request.o"
             "$TC/bin/mips64-octeon-linux-gnu-readelf" -h "$U/net/http_request.o" | tee "$R/21-parser-object-elf-header.txt"
             "$TC/bin/mips64-octeon-linux-gnu-nm" -u "$U/net/http_request.o" | tee "$R/22-parser-object-undefined-symbols.txt"
-            "$GCC" -mabi=32 -mno-abicalls -fno-pic -nostdlib -Wl,-r "$U/net/http_request.o" -o "$R/http_request-linked.o"
+            "$GCC" -mabi=n32 -mabicalls -msoft-float -G 0 -nostdlib -Wl,-r "$U/net/http_request.o" -o "$R/http_request-linked.o"
             "$TC/bin/mips64-octeon-linux-gnu-readelf" -h "$R/http_request-linked.o" | tee "$R/25-linked-object-elf-header.txt"
             printf '%s\n' '#include <common.h>' '#include <net/http_request.h>' 'char pa220_http_request_parser_size[sizeof(struct http_request_parser)];' > "$U/net/http_request_size.c"
             make -C "$U" V=1 net/http_request_size.o HOSTCC="$U/tools/hostcc-gnu89"
