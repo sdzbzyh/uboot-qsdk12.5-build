@@ -1,0 +1,471 @@
+diff --git a/u-boot/common/cmd_pa220_web.c b/u-boot/common/cmd_pa220_web.c
+index 3379d27332e0d566d9949b4e16bad6bde32a1ac3..48217376f4bd5d4e734fe737df9baacfb6f96f8b 100644
+--- a/u-boot/common/cmd_pa220_web.c
++++ b/u-boot/common/cmd_pa220_web.c
+@@ -1,9 +1,8 @@
+ /*
+  * PA-220 foreground Web/TCP lifecycle entry.
+  *
+- * This stage deliberately integrates only the foreground service lifecycle
+- * and the existing single-connection TCP input core.  The output callback
+- * fails closed until a reviewed IPv4/Ethernet/ARP transmit path is available.
++ * This stage integrates the foreground service lifecycle with the bounded
++ * single-peer TCP core and its native IPv4/Ethernet output adapter.
+  * No HTTP parser, URI handlers, upload path or remote write operation exists.
+  *
+  * SPDX-License-Identifier: GPL-2.0+
+@@ -12,6 +11,7 @@
+ #include <command.h>
+ #include <net.h>
+ #include <net/tcp.h>
++#include <net/tcp_ipv4_tx.h>
+ #include <watchdog.h>
+ #include <asm/global_data.h>
+ 
+@@ -20,39 +20,60 @@ DECLARE_GLOBAL_DATA_PTR;
+ #define PA220_WEB_TCP_PORT 80
+ 
+ static struct tcp_core_connection pa220_web_connection;
++static struct tcp_ipv4_tx_peer pa220_web_peer;
+ 
+-static int pa220_web_emit_unavailable(void *arg, const u8 src[4],
+-				      const u8 dst[4], const u8 *segment,
+-				      u16 segment_len)
++static void pa220_web_reset_listener(void)
+ {
+-	/*
+-	 * Do not report a discarded frame as transmitted.  tcp_core_input()
+-	 * therefore refuses a passive open when SYN-ACK cannot be emitted.
+-	 */
+-	(void)arg;
+-	(void)src;
+-	(void)dst;
+-	(void)segment;
+-	(void)segment_len;
+-	return -1;
++	u8 local_ip[4];
++	u32 next_iss = pa220_web_connection.iss + 0x10001U;
++
++	memcpy(local_ip, pa220_web_connection.local_ip, sizeof(local_ip));
++	tcp_ipv4_tx_clear(&pa220_web_peer);
++	tcp_core_init(&pa220_web_connection);
++	(void)tcp_core_listen(&pa220_web_connection, local_ip,
++			      PA220_WEB_TCP_PORT, next_iss);
+ }
+ 
+ static void pa220_web_tcp_rx(const uchar *segment, unsigned len,
+-			     IPaddr_t src_ip, IPaddr_t dst_ip)
++			     IPaddr_t src_ip, IPaddr_t dst_ip,
++			     const uchar src_mac[6])
+ {
+-	u8 src[4];
+-	u8 dst[4];
++	struct tcp_segment_view view;
++	u8 src[4], dst[4];
+ 
+-	if (!segment || len < TCP_CORE_HEADER_MIN || len > 0xffffU)
++	if (!segment || len < TCP_CORE_HEADER_MIN || len > 0xffffU ||
++	    !src_mac)
+ 		return;
+ 
+-	/* Copy address values; the RX packet buffer is transient. */
+ 	memcpy(src, &src_ip, sizeof(src));
+ 	memcpy(dst, &dst_ip, sizeof(dst));
+ 
++	if (pa220_web_connection.state == TCP_CORE_LISTEN) {
++		/* Learn L2 only from a valid, payload-free SYN addressed to us. */
++		if (tcp_segment_parse(segment, (u16)len, &view) ||
++		    !tcp_checksum_ipv4_valid(src, dst, segment, (u16)len) ||
++		    view.dest_port != PA220_WEB_TCP_PORT ||
++		    !view.source_port || view.flags != TCP_FLAG_SYN ||
++		    view.payload_len ||
++		    memcmp(dst, pa220_web_connection.local_ip, sizeof(dst)) ||
++		    tcp_ipv4_tx_learn_peer(&pa220_web_peer, src, src_mac))
++			return;
++	} else {
++		/* Ignore unrelated IPs; an L2 identity change aborts this session. */
++		if (!pa220_web_peer.valid ||
++		    memcmp(src, pa220_web_peer.ip, sizeof(src)))
++			return;
++		if (!tcp_ipv4_tx_peer_matches(&pa220_web_peer, src, src_mac)) {
++			pa220_web_reset_listener();
++			return;
++		}
++	}
++
+ 	(void)tcp_core_input(&pa220_web_connection, src, dst, segment,
+ 			     (u16)len, (u32)get_timer(0),
+-			     pa220_web_emit_unavailable, NULL);
++			     tcp_ipv4_tx_emit, &pa220_web_peer);
++	if (pa220_web_connection.state == TCP_CORE_LISTEN)
++		tcp_ipv4_tx_clear(&pa220_web_peer);
+ }
+ 
+ int do_pa220_web(cmd_tbl_t *cmdtp, int flag, int argc,
+@@ -111,10 +132,11 @@ int do_pa220_web(cmd_tbl_t *cmdtp, int flag, int argc,
+ 		goto cleanup;
+ 	}
+ 
++	tcp_ipv4_tx_clear(&pa220_web_peer);
+ 	/* Registration occurs only after all startup checks have succeeded. */
+ 	net_set_tcp_handler(pa220_web_tcp_rx);
+ 	puts("pa220 web: foreground lifecycle started; TCP RX hook on port 80\n");
+-	puts("TCP output is not implemented; SYN handshakes will fail closed.\n");
++	puts("TCP IPv4/Ethernet output enabled for one on-link peer.\n");
+ 	puts("No HTTP parser or remote management operation is enabled.\n");
+ 	puts("Press Ctrl-C to stop.\n");
+ 
+@@ -122,7 +144,9 @@ int do_pa220_web(cmd_tbl_t *cmdtp, int flag, int argc,
+ 		WATCHDOG_RESET();
+ 		eth_rx();
+ 		(void)tcp_core_poll(&pa220_web_connection, (u32)get_timer(0),
+-				    pa220_web_emit_unavailable, NULL);
++				    tcp_ipv4_tx_emit, &pa220_web_peer);
++		if (pa220_web_connection.state == TCP_CORE_LISTEN)
++			tcp_ipv4_tx_clear(&pa220_web_peer);
+ 	}
+ 
+ 	puts("\npa220 web: foreground service stopped by user\n");
+@@ -134,6 +158,7 @@ cleanup:
+ 	 * can never call into a reset or expired connection context.
+ 	 */
+ 	net_set_tcp_handler(NULL);
++	tcp_ipv4_tx_clear(&pa220_web_peer);
+ 	tcp_core_init(&pa220_web_connection);
+ 	if (eth_attempted)
+ 		eth_halt();
+diff --git a/u-boot/include/net.h b/u-boot/include/net.h
+index ad04a747c2250ef21d07f40c80cb30ee07877c72..62586734a98cd60842c6c666efedda8f71366370 100644
+--- a/u-boot/include/net.h
++++ b/u-boot/include/net.h
+@@ -56,7 +56,8 @@ typedef void rxhand_f(uchar *pkt, unsigned dport,
+ 
+ /* IPv4 TCP segment callback; segment is valid only during this call. */
+ typedef void tcp_rxhand_f(const uchar *segment, unsigned len,
+-		  IPaddr_t src_ip, IPaddr_t dst_ip);
++		  IPaddr_t src_ip, IPaddr_t dst_ip,
++		  const uchar src_mac[6]);
+ 
+ /**
+  * An incoming ICMP packet handler.
+diff --git a/u-boot/include/net/tcp.h b/u-boot/include/net/tcp.h
+index 1fe7e8b01cef73f42f5a5af176d08edb474423bb..c4d71e0afb05e4f6d54b1ca3c6c68ded1dee33b5 100644
+--- a/u-boot/include/net/tcp.h
++++ b/u-boot/include/net/tcp.h
+@@ -127,7 +127,4 @@ int tcp_core_write(struct tcp_core_connection *conn, const u8 *data,
+ int tcp_core_close(struct tcp_core_connection *conn, u32 now_ms,
+ 		   tcp_core_emit_fn emit, void *emit_arg);
+ 
+-/* Internal link anchor: preserves the public API with linker section GC. */
+-const void *tcp_core_link_anchor(void);
+-
+ #endif /* __PA220_NET_TCP_H__ */
+diff --git a/u-boot/include/net/tcp_ipv4_tx.h b/u-boot/include/net/tcp_ipv4_tx.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..6b820197da05be715ec7eca84d9da7a09d740723
+--- /dev/null
++++ b/u-boot/include/net/tcp_ipv4_tx.h
+@@ -0,0 +1,20 @@
++/*
++ * PA-220 single-peer IPv4/TCP Ethernet transmitter.
++ * SPDX-License-Identifier: GPL-2.0+
++ */
++#ifndef __PA220_NET_TCP_IPV4_TX_H__
++#define __PA220_NET_TCP_IPV4_TX_H__
++#include <common.h>
++struct tcp_ipv4_tx_peer {
++	u8 ip[4];
++	u8 mac[6];
++	u8 valid;
++};
++void tcp_ipv4_tx_clear(struct tcp_ipv4_tx_peer *peer);
++int tcp_ipv4_tx_learn_peer(struct tcp_ipv4_tx_peer *peer,
++			   const u8 src_ip[4], const u8 src_mac[6]);
++int tcp_ipv4_tx_peer_matches(const struct tcp_ipv4_tx_peer *peer,
++			     const u8 src_ip[4], const u8 src_mac[6]);
++int tcp_ipv4_tx_emit(void *arg, const u8 src[4], const u8 dst[4],
++		     const u8 *segment, u16 segment_len);
++#endif
+diff --git a/u-boot/net/Makefile b/u-boot/net/Makefile
+index 389faab2ab4d208715e6dcfd3d19288aa396583a..ba2e5a23900ae7fa3e70a7cc8b0d2df3bd267796 100644
+--- a/u-boot/net/Makefile
++++ b/u-boot/net/Makefile
+@@ -19,6 +19,7 @@ COBJS-$(CONFIG_CMD_NET)  += eth.o
+ COBJS-$(CONFIG_CMD_LINK_LOCAL) += link_local.o
+ COBJS-$(CONFIG_CMD_NET)  += net.o
+ COBJS-$(CONFIG_CMD_NET)  += tcp.o
++COBJS-$(CONFIG_CMD_NET)  += tcp_ipv4_tx.o
+ COBJS-$(CONFIG_CMD_NFS)  += nfs.o
+ COBJS-$(CONFIG_CMD_PING) += ping.o
+ COBJS-$(CONFIG_CMD_RARP) += rarp.o
+diff --git a/u-boot/net/net.c b/u-boot/net/net.c
+index b6b243298c0a74a30d0c60117583c74115ea3a6e..6cc848e63e5ce67cb405c50e14c253fdc79f8b25 100644
+--- a/u-boot/net/net.c
++++ b/u-boot/net/net.c
+@@ -1175,7 +1175,7 @@ NetReceive(uchar *inpkt, int len)
+ 			    tcp_segment_len > 0xffffU)
+ 				return;
+ 			tcp_packet_handler((uchar *)ip + IP_HDR_SIZE,
+-					   tcp_segment_len, src_ip, dst_ip);
++				   tcp_segment_len, src_ip, dst_ip, et->et_src);
+ 			return;
+ 		}
+ 		if (ip->ip_p == IPPROTO_ICMP) {
+diff --git a/u-boot/net/tcp.c b/u-boot/net/tcp.c
+index 5a0f63e1d27829ee2268145401d3fd2b3e2e249a..bc9713b4d38927a8562d8eeacd85bb6207361258 100644
+--- a/u-boot/net/tcp.c
++++ b/u-boot/net/tcp.c
+@@ -10,48 +10,6 @@
+ #include <common.h>
+ #include <net/tcp.h>
+ 
+-/*
+- * Keep the complete public TCP core API reachable when the PA-220 final
+- * link uses --gc-sections. The native network layer references this table
+- * only when a TCP input handler is explicitly registered.
+- */
+-struct tcp_core_link_refs {
+-	int (*segment_parse)(const u8 *, u16, struct tcp_segment_view *);
+-	u16 (*checksum_ipv4)(const u8 [4], const u8 [4], const u8 *, u16);
+-	int (*checksum_ipv4_valid)(const u8 [4], const u8 [4], const u8 *, u16);
+-	int (*seq_before)(u32, u32);
+-	int (*seq_after)(u32, u32);
+-	void (*init)(struct tcp_core_connection *);
+-	int (*listen)(struct tcp_core_connection *, const u8 [4], u16, u32);
+-	int (*input)(struct tcp_core_connection *, const u8 [4], const u8 [4],
+-		     const u8 *, u16, u32, tcp_core_emit_fn, void *);
+-	int (*poll)(struct tcp_core_connection *, u32, tcp_core_emit_fn, void *);
+-	int (*read)(struct tcp_core_connection *, u8 *, u16);
+-	int (*write)(struct tcp_core_connection *, const u8 *, u16, u32,
+-		     tcp_core_emit_fn, void *);
+-	int (*close)(struct tcp_core_connection *, u32, tcp_core_emit_fn, void *);
+-};
+-
+-static const struct tcp_core_link_refs tcp_core_api_refs = {
+-	.segment_parse = tcp_segment_parse,
+-	.checksum_ipv4 = tcp_checksum_ipv4,
+-	.checksum_ipv4_valid = tcp_checksum_ipv4_valid,
+-	.seq_before = tcp_seq_before,
+-	.seq_after = tcp_seq_after,
+-	.init = tcp_core_init,
+-	.listen = tcp_core_listen,
+-	.input = tcp_core_input,
+-	.poll = tcp_core_poll,
+-	.read = tcp_core_read,
+-	.write = tcp_core_write,
+-	.close = tcp_core_close
+-};
+-
+-const void *tcp_core_link_anchor(void)
+-{
+-	return &tcp_core_api_refs;
+-}
+-
+ static u16 tcp_get_be16(const u8 *p)
+ {
+ 	return ((u16)p[0] << 8) | p[1];
+@@ -410,9 +368,10 @@ int tcp_core_input(struct tcp_core_connection *c,
+ 	}
+ 	if (c->state == TCP_CORE_SYN_RECEIVED) {
+ 		if ((v.flags & TCP_FLAG_SYN) && v.sequence == c->irs) {
+-			if (c->pending)
+-				tcp_emit(c, c->retry_flags, c->retry_seq,
+-					 c->rcv_nxt, NULL, 0, 1, emit, arg);
++			if (c->pending &&
++			    tcp_emit(c, c->retry_flags, c->retry_seq,
++				     c->rcv_nxt, NULL, 0, 1, emit, arg))
++				return -1;
+ 			return 1;
+ 		}
+ 		if (!(v.flags & TCP_FLAG_ACK) ||
+@@ -522,8 +481,15 @@ int tcp_core_poll(struct tcp_core_connection *c, u32 now,
+ 	}
+ 	if (tcp_emit(c, c->retry_flags, c->retry_seq, c->rcv_nxt,
+ 		     c->retry_len ? c->retry_data : NULL, c->retry_len,
+-		     !!(c->retry_flags & TCP_FLAG_SYN), emit, arg))
++		     !!(c->retry_flags & TCP_FLAG_SYN), emit, arg)) {
++		c->retries++;
++		if (c->retries >= TCP_CORE_MAX_RETRIES) {
++			tcp_abort_connection(c);
++			return 1;
++		}
++		c->retry_deadline = now + TCP_CORE_RETRANSMIT_MS;
+ 		return -1;
++	}
+ 	c->retries++;
+ 	c->retry_deadline = now + TCP_CORE_RETRANSMIT_MS;
+ 	return 1;
+diff --git a/u-boot/net/tcp_ipv4_tx.c b/u-boot/net/tcp_ipv4_tx.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..03d4a6ecf159e0305e07d59c104e53547b0e4d06
+--- /dev/null
++++ b/u-boot/net/tcp_ipv4_tx.c
+@@ -0,0 +1,168 @@
++/*
++ * PA-220 bounded single-peer IPv4/TCP Ethernet output.
++ *
++ * Peer MAC is learned only from a validated inbound SYN after confirming
++ * that the source IPv4 address is on the configured local subnet. This
++ * deliberately avoids the legacy global ARP pending slot and NetTxPacket.
++ *
++ * eth_send() is called directly because NetSendPacket() discards its return
++ * value. The PA-220 OCTEON driver copies the frame into an FPA buffer before
++ * returning, so this private aligned frame is not retained by the driver.
++ *
++ * SPDX-License-Identifier: GPL-2.0+
++ */
++#include <common.h>
++#include <net.h>
++#include <net/tcp.h>
++#include <net/tcp_ipv4_tx.h>
++
++#define TCP_IPV4_TX_FRAME_CAPACITY	1600
++#define TCP_IPV4_TX_ETH_MIN_SIZE	60
++#define TCP_IPV4_TX_MTU		1500
++
++static u8 tcp_ipv4_tx_frame[TCP_IPV4_TX_FRAME_CAPACITY] __aligned(PKTALIGN);
++
++static int tcp_ipv4_tx_mac_valid(const u8 mac[6])
++{
++	u8 any = 0;
++	u8 all_ff = 0xff;
++	int i;
++
++	if (!mac || (mac[0] & 1))
++		return 0;
++	for (i = 0; i < 6; i++) {
++		any |= mac[i];
++		all_ff &= mac[i];
++	}
++	return any != 0 && all_ff != 0xff;
++}
++
++static int tcp_ipv4_tx_mask_prefix(const u8 mask[4])
++{
++	int prefix = 0;
++	int zero_seen = 0;
++	int i, bit;
++
++	for (i = 0; i < 4; i++) {
++		for (bit = 7; bit >= 0; bit--) {
++			if (mask[i] & (1U << bit)) {
++				if (zero_seen)
++					return -1;
++				prefix++;
++			} else {
++				zero_seen = 1;
++			}
++		}
++	}
++	if (prefix == 0 || prefix == 32)
++		return -1;
++	return prefix;
++}
++
++static int tcp_ipv4_tx_ip_valid(const u8 ip[4])
++{
++	if (!ip || ip[0] == 0 || ip[0] == 127 || ip[0] >= 224)
++		return 0;
++	return 1;
++}
++
++void tcp_ipv4_tx_clear(struct tcp_ipv4_tx_peer *peer)
++{
++	if (peer)
++		memset(peer, 0, sizeof(*peer));
++}
++
++int tcp_ipv4_tx_learn_peer(struct tcp_ipv4_tx_peer *peer,
++			   const u8 src_ip[4], const u8 src_mac[6])
++{
++	u8 local[4], mask[4], host[4];
++	int prefix;
++	int all_host_zero = 1, all_host_one = 1;
++	int i;
++
++	if (!peer || !src_ip || !src_mac || !NetOurIP ||
++	    !NetOurSubnetMask || !tcp_ipv4_tx_mac_valid(src_mac) ||
++	    !tcp_ipv4_tx_ip_valid(src_ip) ||
++	    !memcmp(src_mac, NetOurEther, 6))
++		return -1;
++
++	memcpy(local, &NetOurIP, sizeof(local));
++	memcpy(mask, &NetOurSubnetMask, sizeof(mask));
++	prefix = tcp_ipv4_tx_mask_prefix(mask);
++	if (prefix < 0 || !memcmp(local, src_ip, sizeof(local)))
++		return -1;
++
++	for (i = 0; i < 4; i++) {
++		if ((local[i] & mask[i]) != (src_ip[i] & mask[i]))
++			return -1;
++		host[i] = (u8)(src_ip[i] & (u8)~mask[i]);
++		if (host[i] != 0)
++			all_host_zero = 0;
++		if (host[i] != (u8)~mask[i])
++			all_host_one = 0;
++	}
++	if (prefix <= 30 && (all_host_zero || all_host_one))
++		return -1;
++
++	if (peer->valid)
++		return tcp_ipv4_tx_peer_matches(peer, src_ip, src_mac) ? 0 : -1;
++
++	memcpy(peer->ip, src_ip, sizeof(peer->ip));
++	memcpy(peer->mac, src_mac, sizeof(peer->mac));
++	peer->valid = 1;
++	return 0;
++}
++
++int tcp_ipv4_tx_peer_matches(const struct tcp_ipv4_tx_peer *peer,
++			     const u8 src_ip[4], const u8 src_mac[6])
++{
++	return peer && peer->valid && src_ip && src_mac &&
++	       !memcmp(peer->ip, src_ip, sizeof(peer->ip)) &&
++	       !memcmp(peer->mac, src_mac, sizeof(peer->mac));
++}
++
++int tcp_ipv4_tx_emit(void *arg, const u8 src[4], const u8 dst[4],
++		     const u8 *segment, u16 segment_len)
++{
++	struct tcp_ipv4_tx_peer *peer = arg;
++	struct ip_udp_hdr *ip;
++	IPaddr_t src_addr, dst_addr;
++	int eth_len, ip_len, frame_len, send_len;
++
++	if (!peer || !peer->valid || !src || !dst || !segment ||
++	    segment_len < TCP_CORE_HEADER_MIN)
++		return -1;
++
++	memcpy(&src_addr, src, sizeof(src_addr));
++	memcpy(&dst_addr, dst, sizeof(dst_addr));
++	if (src_addr != NetOurIP || memcmp(dst, peer->ip, 4))
++		return -1;
++
++	ip_len = IP_HDR_SIZE + segment_len;
++	if (ip_len > TCP_IPV4_TX_MTU ||
++	    !tcp_checksum_ipv4_valid(src, dst, segment, segment_len))
++		return -1;
++
++	eth_len = NetSetEther(tcp_ipv4_tx_frame, peer->mac, PROT_IP);
++	if (eth_len != ETHER_HDR_SIZE && eth_len != VLAN_ETHER_HDR_SIZE)
++		return -1;
++	if (eth_len + ip_len > (int)sizeof(tcp_ipv4_tx_frame))
++		return -1;
++
++	ip = (struct ip_udp_hdr *)(tcp_ipv4_tx_frame + eth_len);
++	net_set_ip_header((uchar *)ip, dst_addr, src_addr);
++	ip->ip_len = htons(ip_len);
++	ip->ip_p = IPPROTO_TCP;
++	ip->ip_sum = 0;
++	ip->ip_sum = (ushort)~NetCksum((uchar *)ip, IP_HDR_SIZE / 2);
++	memcpy((u8 *)ip + IP_HDR_SIZE, segment, segment_len);
++
++	frame_len = eth_len + ip_len;
++	send_len = frame_len < TCP_IPV4_TX_ETH_MIN_SIZE ?
++		   TCP_IPV4_TX_ETH_MIN_SIZE : frame_len;
++	if (send_len > frame_len)
++		memset(tcp_ipv4_tx_frame + frame_len, 0, send_len - frame_len);
++
++	/* The native OCTEON eth_send() success result is exactly zero. */
++	return eth_send(tcp_ipv4_tx_frame, send_len) == 0 ? 0 : -1;
++}

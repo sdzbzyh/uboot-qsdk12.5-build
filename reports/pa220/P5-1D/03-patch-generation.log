@@ -1,0 +1,19 @@
+Cloning into '/home/runner/work/_temp/pa220-p5-1d-patch-base'...
+From https://github.com/IronDemiGod/pa220-openwrt
+ * branch            801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8 -> FETCH_HEAD
+HEAD is now at 801717b docs/BUILD.md: describe the PA-220 kernel patches
+[detached HEAD 11ee22f] temporary baseline: accepted PA-220 P5-1C patch series
+ 8 files changed, 1121 insertions(+)
+ create mode 100644 u-boot/common/cmd_pa220_web.c
+ create mode 100644 u-boot/include/net/tcp.h
+ create mode 100644 u-boot/net/tcp.c
+7f101f854bdc2423350c8ce759853691e4c17941a61052d9eafa4079cf7dc946  /home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/patches/pa220/0005-pa220-native-tcp-ipv4-ethernet-output.patch
+ u-boot/common/cmd_pa220_web.c    |  73 +++++++++++------
+ u-boot/include/net.h             |   3 +-
+ u-boot/include/net/tcp.h         |   3 -
+ u-boot/include/net/tcp_ipv4_tx.h |  20 +++++
+ u-boot/net/Makefile              |   1 +
+ u-boot/net/net.c                 |   2 +-
+ u-boot/net/tcp.c                 |  58 +++-----------
+ u-boot/net/tcp_ipv4_tx.c         | 168 +++++++++++++++++++++++++++++++++++++++
+ 8 files changed, 253 insertions(+), 75 deletions(-)
