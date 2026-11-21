@@ -12,3 +12,9 @@
 - OCTEON build exit code: 0
 
 The full command output is in [21-github-actions-validation.log](21-github-actions-validation.log).
+
+- Host assertions: 76 passed, 0 failed
+- CLOSE-WAIT post-FIN payload: rejected
+- TIME-WAIT duplicate FIN: ACK emitted; 60-second deadline preserved
+- OCTEON output: `bin/pa220/u-boot-octeon_pa220.bin`, 1,362,216 bytes
+- RAM boot / physical TCP network test: NOT RUN
