@@ -1,0 +1,48 @@
+========== PA-220 P5-1B INTEGRATED BUILD ==========
+UTC_DATE=2026-11-21T03:21:10Z
+INTEGRATION_COMMIT=d5082d9e0e604a397c15cc6f441978220db28513
+PA220_SOURCE_COMMIT=801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8
+
+========== SOURCE AND PATCH SHA-256 ==========
+6f09b7051408fad0086fc90b36b57bee42c096b3cc8e0530d92d0f71e39dbb46  patches/pa220/0001-pa220-read-only-maintenance-command.patch
+5be4ae5f69f3a307d35e32cf8aa13260f52bd092c52bbdf610316b933aae59f0  patches/pa220/0002-pa220-board-clock-readonly-diagnostics.patch
+03b4458e3e986d40cee59f79df3ed86a255113ba597fb2a1f60ef3f48ef6b000  patches/pa220/0003-pa220-native-ipv4-tcp-dispatch.patch
+5094dd4e28a372f2a533e0144cc8cdd17c02507ff3cd5d88d5cfbdcea8823996  u-boot/net/tcp.c
+3593909580af16b3e4909d6af95a77bb759d3ffaeaf4caa3b9b879aa01b217f6  u-boot/include/net/tcp.h
+
+========== PRIVATE OCTEON SDK RELEASE ==========
+DOWNLOAD_RC=0
+octeon-sdk-5.1.0-tools-gcc-4.7.tar.gz: OK
+CHECKSUM_RC=0
+EXTRACT_RC=0
+mips64-octeon-linux-gnu-gcc (Cavium Inc. Version: SDK_BUILD build 52) 4.7.0
+Copyright (C) 2012 Free Software Foundation, Inc.
+TARGET=mips64-octeon-linux-gnu
+
+========== CHECK OUT FIXED PA-220 SOURCE ==========
+Cloning into '/home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/external/pa220-openwrt'...
+From https://github.com/sdzbzyh/pa220-openwrt
+ * branch            801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8 -> FETCH_HEAD
+HEAD is now at 801717b docs/BUILD.md: describe the PA-220 kernel patches
+CLONE_RC=0 FETCH_RC=0 CHECKOUT_RC=0
+ACTUAL_SOURCE=801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8
+SOURCE_RC=0
+
+========== APPLY-CHECK AND APPLY 0001/0002/0003 ==========
+PATCH_FILE=/home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/patches/pa220/0001-pa220-read-only-maintenance-command.patch
+PATCH_CHECK_RC=0
+PATCH_APPLY_RC=0
+PATCH_FILE=/home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/patches/pa220/0002-pa220-board-clock-readonly-diagnostics.patch
+PATCH_CHECK_RC=0
+PATCH_APPLY_RC=0
+PATCH_FILE=/home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/patches/pa220/0003-pa220-native-ipv4-tcp-dispatch.patch
+error: u-boot/net/tcp.c: No such file or directory
+error: u-boot/include/net/tcp.h: No such file or directory
+PATCH_CHECK_RC=1
+PATCH_RC=1
+BUILD_RC=99
+
+========== FINAL STATUS ==========
+DOWNLOAD_RC=0 CHECKSUM_RC=0 SOURCE_RC=0
+PATCH_RC=1 BUILD_RC=99 OBJECT_RC=99 LINK_RC=99
+========== END ==========
