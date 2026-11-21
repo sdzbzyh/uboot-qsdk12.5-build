@@ -1,0 +1,5 @@
+c0106560 T net_set_tcp_handler
+c010965c T tcp_core_write
+c01097c0 T tcp_core_poll
+c0109af4 T tcp_core_input
+c010a03c T tcp_core_link_anchor
