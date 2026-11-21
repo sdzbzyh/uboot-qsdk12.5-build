@@ -212,3 +212,23 @@ Actions #3 的 1,362,216-byte 镜像证明 PA-220 **baseline + 0001/0002 现有�
 - RAM boot / physical TCP network: NOT RUN。
 
 下一工作单元 **P5-1B**：将 TCP core 源码和头文件通过真实源码差异补丁纳入 PA-220；增加仅在显式注册时启用的 IPv4 protocol 6 接收分派；保持 ARP/ICMP/UDP 原路径不变；随后执行实际 PA-220 完整构建，确认 `net/tcp.o` 编入并最终链接成功。此阶段不实现 Web 循环、TCP Ethernet 输出或 HTTP parser。
+
+
+## P5-1B 原生 IPv4 TCP 接收分派完成（2026-11-21）
+
+**P5-1B 已完成代码集成、Cavium OCTEON 目标完整构建和最终链接验收。** 本节覆盖此前 P5-1B “尚未实施”的历史状态。
+
+- 固定源码：`sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`。
+- 正式补丁：`patches/pa220/0003-pa220-native-ipv4-tcp-dispatch.patch`，包含现有 TCP 核心源码/头文件、网络注册接口、IPv4 protocol 6 分派和 `net/tcp.o` 构建集成。
+- 分派位于原有 IPv4 头部/长度/校验、目的地址过滤和分片重组之后；TCP segment 长度独立验证；未显式注册 handler 时维持丢弃行为。
+- ARP、ICMP、UDP 原有接收分支未改写。
+- PA-220 最终链接启用 `--gc-sections`；通过从活动 `NetReceive()` 路径引用的链接保留表，确保注册入口及 TCP core 公共 API 保留在最终 ELF。
+- GitHub Actions run `44861736535`：SDK 下载/校验、固定源码、补丁、完整目标构建、对象、最终 ELF、map、System.map 检查全部 PASS（所有验收返回码为 0）。
+- 目标对象：`net/tcp.o` 53,016 bytes；网络聚合对象 `net/libnet.o` 401,774 bytes。
+- 最终 ELF：7,792,898 bytes；MIPS N32 big-endian OCTEON executable，entry `0xc0000000`；最终 BIN 1,367,048 bytes。
+- 最终 ELF/System.map 已确认包含 `net_set_tcp_handler`、`tcp_core_init/listen/input/poll/read/write/close`、`tcp_segment_parse`、IPv4 checksum 和 sequence helper 等符号。
+- 完整日志与证据：`reports/pa220/P5-1B/10-octeon-integrated-build.log`、`11` 至 `17` 的 ELF/object/map/symbol 检查文件；Actions artifact ID `14690151455`。
+
+**仍未验证：** RAM 启动、真实网口 TCP 接收/发送。P5-1B 只完成接收分派；没有 TCP Ethernet/IP 输出、MAC 邻居解析、前台 `pa220 web` 生命周期或 HTTP parser。
+
+**下一入口：P5-1C — 前台 Web 生命周期与 TCP core 连接管理集成。** 该阶段应显式注册/注销 TCP handler、建立单连接上下文并接入 `tcp_core_input()`；另行安排 RAM 启动和真实网口验证。不得将本阶段构建成功等同于实机网络通过。
