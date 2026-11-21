@@ -120,6 +120,16 @@ jobs:
 
                 if [ "$CONFIG_RC" -eq 0 ]; then
                   echo
+                  echo "========== GENERATE REQUIRED ASM OFFSETS =========="
+                  make -C "$UBOOT_DIR" V=1 include/generated/generic-asm-offsets.h include/generated/asm-offsets.h HOSTCC="$UBOOT_DIR/tools/hostcc-gnu89"
+                  PREP_RC=$?
+                  echo "PREP_RC=$PREP_RC"
+                else
+                  PREP_RC=99
+                fi
+
+                if [ "$CONFIG_RC" -eq 0 ] && [ "$PREP_RC" -eq 0 ]; then
+                  echo
                   echo "========== OCTEON TCP OBJECT COMPILE =========="
                   make -C "$UBOOT_DIR" V=1 net/tcp.o HOSTCC="$UBOOT_DIR/tools/hostcc-gnu89"
                   COMPILE_RC=$?
@@ -192,11 +202,16 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add reports/pa220/P5-1A.3/20-octeon-tcp-object-compile.log reports/pa220/P5-1A.3/20-octeon-tcp-object-compile.md
           git commit -m "pa220: record OCTEON TCP core object compile"
-          if ! git push origin HEAD:refs/heads/feature/pa220-ubootkit-web; then
+          PUSHED=0
+          for attempt in 1 2 3 4; do
+            if git push origin HEAD:refs/heads/feature/pa220-ubootkit-web; then
+              PUSHED=1
+              break
+            fi
             git fetch origin feature/pa220-ubootkit-web
-            git rebase origin/feature/pa220-ubootkit-web
-            git push origin HEAD:refs/heads/feature/pa220-ubootkit-web
-          fi
+            git rebase origin/feature/pa220-ubootkit-web || exit 1
+          done
+          [ "$PUSHED" -eq 1 ]
 
       - name: Enforce target compile result
         if: always()
