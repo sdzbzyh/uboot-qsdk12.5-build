@@ -1,29 +1,273 @@
-name: PA-220 P5-1D TCP IPv4 transmit host tests
+name: PA-220 P5-1D native TCP IPv4 Ethernet integration
 
 on:
   push:
     branches:
       - feature/pa220-ubootkit-web
     paths:
+      - '.github/workflows/pa220-p5-1d-host.yml'
+      - 'scripts/generate-pa220-p5-1d-patch.sh'
+      - 'u-boot/common/cmd_pa220_web.c'
+      - 'u-boot/net/tcp.c'
       - 'u-boot/net/tcp_ipv4_tx.c'
+      - 'u-boot/include/net/tcp.h'
       - 'u-boot/include/net/tcp_ipv4_tx.h'
       - 'tests/host/tcp_ipv4_tx/**'
-      - '.github/workflows/pa220-p5-1d-host.yml'
+      - 'build-pa220.sh'
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  host-tests:
+  integrated-build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout integration branch
         uses: actions/checkout@v7.0.1
         with:
           ref: feature/pa220-ubootkit-web
-      - name: Compile and run focused transmitter tests
+          fetch-depth: 0
+
+      - name: Run focused TCP IPv4 transmitter and retry regressions
+        id: host
         shell: bash
         run: |
           set -euo pipefail
-          tests/host/tcp_ipv4_tx/run.sh
+          mkdir -p reports/pa220/P5-1D
+          tests/host/tcp_ipv4_tx/run.sh 2>&1 | tee reports/pa220/P5-1D/02-host-tests.log
+
+      - name: Generate P5-1D patch from pinned source diff
+        id: patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p reports/pa220/P5-1D
+          scripts/generate-pa220-p5-1d-patch.sh 2>&1 | tee reports/pa220/P5-1D/03-patch-generation.log
+          PATCH=patches/pa220/0005-pa220-native-tcp-ipv4-ethernet-output.patch
+          sha256sum "$PATCH" | tee reports/pa220/P5-1D/04-patch-sha256.txt
+          echo "patch_sha=$(sha256sum "$PATCH" | awk '{print $1}')" >> "$GITHUB_OUTPUT"
+
+      - name: Download private OCTEON SDK and build final PA-220 image
+        id: build
+        env:
+          GH_TOKEN: ${{ secrets.OCTEON_SDK_READ_TOKEN }}
+        shell: bash
+        run: |
+          set +e
+          REPORT_DIR="reports/pa220/P5-1D"
+          mkdir -p "$REPORT_DIR" external "$RUNNER_TEMP/octeon-download" "$RUNNER_TEMP/octeon-sdk"
+          LOG="$REPORT_DIR/10-octeon-integrated-build.log"
+          DOWNLOAD_RC=99
+          CHECKSUM_RC=99
+          SOURCE_RC=99
+          PATCH_RC=99
+          BUILD_RC=99
+          OBJECT_RC=99
+          LINK_RC=99
+          TOOLCHAIN_DIR=""
+          PA220_REPO_DIR="$GITHUB_WORKSPACE/external/pa220-openwrt"
+          UBOOT_DIR="$PA220_REPO_DIR/u-boot"
+
+          {
+            echo "========== PA-220 P5-1D FULL BUILD =========="
+            date -u '+UTC_DATE=%Y-%m-%dT%H:%M:%SZ'
+            echo "INTEGRATION_COMMIT=$(git rev-parse HEAD)"
+            echo "PA220_SOURCE_COMMIT=801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8"
+            echo
+            echo "========== SOURCE AND PATCH HASHES =========="
+            sha256sum u-boot/net/tcp.c u-boot/include/net/tcp.h
+            sha256sum u-boot/net/tcp_ipv4_tx.c u-boot/include/net/tcp_ipv4_tx.h
+            sha256sum u-boot/common/cmd_pa220_web.c
+            sha256sum patches/pa220/0005-pa220-native-tcp-ipv4-ethernet-output.patch
+            echo
+            echo "========== PRIVATE OCTEON SDK RELEASE =========="
+            if [ -z "$GH_TOKEN" ]; then
+              echo "ERROR: OCTEON_SDK_READ_TOKEN unavailable"
+            else
+              gh release download octeon-sdk-5.1.0 --repo sdzbzyh/pa220-toolchains \
+                --pattern '*.tar.gz' --pattern '*.sha256' --dir "$RUNNER_TEMP/octeon-download"
+              DOWNLOAD_RC=$?
+            fi
+            echo "DOWNLOAD_RC=$DOWNLOAD_RC"
+            if [ "$DOWNLOAD_RC" -eq 0 ]; then
+              (cd "$RUNNER_TEMP/octeon-download" && sha256sum -c ./*.sha256)
+              CHECKSUM_RC=$?
+            fi
+            echo "CHECKSUM_RC=$CHECKSUM_RC"
+            if [ "$DOWNLOAD_RC" -eq 0 ] && [ "$CHECKSUM_RC" -eq 0 ]; then
+              ARCHIVE=$(find "$RUNNER_TEMP/octeon-download" -maxdepth 1 -type f -name '*.tar.gz' -print -quit)
+              tar -xzf "$ARCHIVE" -C "$RUNNER_TEMP/octeon-sdk"
+              EXTRACT_RC=$?
+            else
+              EXTRACT_RC=99
+            fi
+            echo "EXTRACT_RC=$EXTRACT_RC"
+            if [ "$EXTRACT_RC" -eq 0 ]; then
+              GCC_PATH=$(find "$RUNNER_TEMP/octeon-sdk" -path '*/bin/mips64-octeon-linux-gnu-gcc' -print -quit)
+            else
+              GCC_PATH=""
+            fi
+            if [ -n "$GCC_PATH" ]; then
+              TOOLCHAIN_DIR=$(dirname "$(dirname "$GCC_PATH")")
+              export PATH="$TOOLCHAIN_DIR/bin:$PATH"
+              export OCTEON_MODEL=OCTEON_CN70XX
+              "$GCC_PATH" --version | head -n 2
+              echo "TARGET=$("$GCC_PATH" -dumpmachine)"
+              echo
+              echo "========== BUILD SCRIPT APPLIES PATCH SERIES =========="
+              PA220_REPO_DIR="$PA220_REPO_DIR" PA220_OUTPUT_DIR="$GITHUB_WORKSPACE/bin/pa220" \
+                ./build-pa220.sh "$TOOLCHAIN_DIR" > "$RUNNER_TEMP/pa220-p5-1d-build-output.log" 2>&1
+              BUILD_RC=$?
+              cat "$RUNNER_TEMP/pa220-p5-1d-build-output.log"
+              ACTUAL_SOURCE=$(git -C "$PA220_REPO_DIR" rev-parse HEAD 2>/dev/null)
+              echo "ACTUAL_SOURCE=$ACTUAL_SOURCE"
+              if [ "$ACTUAL_SOURCE" = "801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8" ]; then SOURCE_RC=0; fi
+              if grep -E 'Applied PA-220 patch: 0005-|PA-220 patch already applied: 0005-' "$RUNNER_TEMP/pa220-p5-1d-build-output.log" >/dev/null; then PATCH_RC=0; fi
+            else
+              echo "ERROR: OCTEON GCC missing from SDK"
+              DOWNLOAD_RC=97
+            fi
+            echo "SOURCE_RC=$SOURCE_RC PATCH_RC=$PATCH_RC BUILD_RC=$BUILD_RC"
+
+            if [ "$BUILD_RC" -eq 0 ]; then
+              echo
+              echo "========== REQUIRED TARGET OBJECTS =========="
+              for obj in net/tcp.o net/tcp_ipv4_tx.o common/cmd_pa220_web.o; do
+                test -s "$UBOOT_DIR/$obj"
+                OBJ_RC=$?
+                echo "OBJECT_$obj=$OBJ_RC"
+                if [ "$OBJ_RC" -ne 0 ]; then OBJECT_RC=1; fi
+                if [ "$OBJ_RC" -eq 0 ]; then
+                  "$TOOLCHAIN_DIR/bin/mips64-octeon-linux-gnu-readelf" -h "$UBOOT_DIR/$obj" > "$REPORT_DIR/$(basename "$obj").elf-header.txt"
+                  if [ "$?" -ne 0 ]; then OBJECT_RC=1; fi
+                fi
+              done
+              if [ "$OBJECT_RC" -ne 1 ]; then OBJECT_RC=0; fi
+
+              echo
+              echo "========== FINAL ELF / MAP / SYSTEM.MAP =========="
+              ELF="$UBOOT_DIR/u-boot-octeon_pa220"
+              MAP="$UBOOT_DIR/u-boot-octeon_pa220.map"
+              SYSTEM_MAP="$UBOOT_DIR/System-octeon_pa220.map"
+              test -s "$ELF"; ELF_RC=$?
+              test -s "$MAP"; MAP_RC=$?
+              test -s "$SYSTEM_MAP"; SYSTEM_MAP_RC=$?
+              echo "ELF_RC=$ELF_RC MAP_RC=$MAP_RC SYSTEM_MAP_RC=$SYSTEM_MAP_RC"
+              if [ "$ELF_RC" -eq 0 ] && [ "$MAP_RC" -eq 0 ] && [ "$SYSTEM_MAP_RC" -eq 0 ]; then
+                file "$ELF"
+                "$TOOLCHAIN_DIR/bin/mips64-octeon-linux-gnu-readelf" -h "$ELF" > "$REPORT_DIR/12-final-elf-header.txt"
+                "$TOOLCHAIN_DIR/bin/mips64-octeon-linux-gnu-nm" -n "$ELF" > "$REPORT_DIR/13-final-elf-symbols.txt"
+                grep -E 'tcp_ipv4_tx\.o|tcp_ipv4_tx_emit|tcp_ipv4_tx_learn_peer|do_pa220_web|tcp_core_input|tcp_core_poll|net_set_tcp_handler' "$MAP" > "$REPORT_DIR/14-p5-1d-link-map-extract.txt"
+                MAP_GREP_RC=$?
+                grep -E 'tcp_ipv4_tx_emit|tcp_ipv4_tx_learn_peer|do_pa220_web|tcp_core_input|tcp_core_poll|net_set_tcp_handler' "$REPORT_DIR/13-final-elf-symbols.txt" > "$REPORT_DIR/15-p5-1d-final-elf-symbols.txt"
+                ELF_GREP_RC=$?
+                grep -E 'tcp_ipv4_tx_emit|tcp_ipv4_tx_learn_peer|do_pa220_web|tcp_core_input|tcp_core_poll|net_set_tcp_handler' "$SYSTEM_MAP" > "$REPORT_DIR/16-p5-1d-system-map-extract.txt"
+                SYSTEM_GREP_RC=$?
+                for symbol in tcp_ipv4_tx_emit tcp_ipv4_tx_learn_peer do_pa220_web tcp_core_input tcp_core_poll net_set_tcp_handler; do
+                  grep -E " [Tt] $symbol$" "$REPORT_DIR/13-final-elf-symbols.txt" >/dev/null
+                  SYMBOL_RC=$?
+                  echo "FINAL_ELF_SYMBOL_$symbol=$SYMBOL_RC"
+                  if [ "$SYMBOL_RC" -ne 0 ]; then LINK_RC=1; fi
+                done
+                if [ "$MAP_GREP_RC" -ne 0 ] || [ "$ELF_GREP_RC" -ne 0 ] || [ "$SYSTEM_GREP_RC" -ne 0 ]; then LINK_RC=1; fi
+                if [ "$LINK_RC" -ne 1 ]; then LINK_RC=0; fi
+                sha256sum "$UBOOT_DIR/net/tcp.o" "$UBOOT_DIR/net/tcp_ipv4_tx.o" "$UBOOT_DIR/common/cmd_pa220_web.o" "$ELF" "$MAP" "$SYSTEM_MAP" "$UBOOT_DIR/u-boot-octeon_pa220.bin"
+              else
+                LINK_RC=1
+              fi
+            fi
+
+            echo
+            echo "========== FINAL STATUS =========="
+            echo "DOWNLOAD_RC=$DOWNLOAD_RC CHECKSUM_RC=$CHECKSUM_RC SOURCE_RC=$SOURCE_RC"
+            echo "PATCH_RC=$PATCH_RC BUILD_RC=$BUILD_RC OBJECT_RC=$OBJECT_RC LINK_RC=$LINK_RC"
+            echo "========== END =========="
+          } > "$LOG" 2>&1
+
+          cat "$LOG"
+          cat > "$REPORT_DIR/18-final-verification-summary.md" <<EOF
+          # PA-220 P5-1D final verification
+
+          - Integration commit: $(git rev-parse HEAD)
+          - Fixed PA-220 source: 801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8
+          - Toolchain: octeon-sdk-5.1.0 / Cavium GCC 4.7.0 / SDK Build 52
+          - SDK download/checksum: $DOWNLOAD_RC / $CHECKSUM_RC
+          - Exact source checkout: $SOURCE_RC
+          - Generated P5-1D patch applied by build-pa220.sh: $PATCH_RC
+          - Full target build: $BUILD_RC
+          - Required target objects: $OBJECT_RC
+          - Final ELF / map / System.map / symbols: $LINK_RC
+
+          The output path is still subject to real PA-220 hardware validation. A successful cloud build is not evidence of an on-wire TCP handshake.
+          EOF
+          echo "download_rc=$DOWNLOAD_RC" >> "$GITHUB_OUTPUT"
+          echo "checksum_rc=$CHECKSUM_RC" >> "$GITHUB_OUTPUT"
+          echo "source_rc=$SOURCE_RC" >> "$GITHUB_OUTPUT"
+          echo "patch_rc=$PATCH_RC" >> "$GITHUB_OUTPUT"
+          echo "build_rc=$BUILD_RC" >> "$GITHUB_OUTPUT"
+          echo "object_rc=$OBJECT_RC" >> "$GITHUB_OUTPUT"
+          echo "link_rc=$LINK_RC" >> "$GITHUB_OUTPUT"
+
+      - name: Upload P5-1D source, tests and target artifacts
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: pa220-p5-1d-native-tcp-ipv4-ethernet
+          path: |
+            reports/pa220/P5-1D/
+            patches/pa220/0005-pa220-native-tcp-ipv4-ethernet-output.patch
+            external/pa220-openwrt/u-boot/net/tcp.o
+            external/pa220-openwrt/u-boot/net/tcp_ipv4_tx.o
+            external/pa220-openwrt/u-boot/common/cmd_pa220_web.o
+            external/pa220-openwrt/u-boot/u-boot-octeon_pa220
+            external/pa220-openwrt/u-boot/u-boot-octeon_pa220.map
+            external/pa220-openwrt/u-boot/System-octeon_pa220.map
+            external/pa220-openwrt/u-boot/u-boot-octeon_pa220.bin
+            bin/pa220/u-boot-octeon_pa220.bin
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Commit P5-1D patch and evidence
+        if: always()
+        shell: bash
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/pa220/P5-1D/
+          if [ -s patches/pa220/0005-pa220-native-tcp-ipv4-ethernet-output.patch ]; then
+            git add patches/pa220/0005-pa220-native-tcp-ipv4-ethernet-output.patch
+          fi
+          if ! git diff --cached --quiet; then
+            git commit -m "pa220: integrate P5-1D TCP IPv4 Ethernet output"
+            PUSHED=0
+            for attempt in 1 2 3 4; do
+              git fetch origin feature/pa220-ubootkit-web
+              if git rebase origin/feature/pa220-ubootkit-web && git push origin HEAD:refs/heads/feature/pa220-ubootkit-web; then
+                PUSHED=1
+                break
+              fi
+            done
+            [ "$PUSHED" -eq 1 ]
+          fi
+
+      - name: Enforce P5-1D acceptance
+        if: always()
+        shell: bash
+        run: |
+          if [ "${{ steps.host.outcome }}" != "success" ] || [ "${{ steps.patch.outcome }}" != "success" ]; then
+            echo "Host regression or generated patch validation failed."
+            exit 1
+          fi
+          if [ "${{ steps.build.outputs.download_rc }}" != "0" ] ||
+             [ "${{ steps.build.outputs.checksum_rc }}" != "0" ] ||
+             [ "${{ steps.build.outputs.source_rc }}" != "0" ] ||
+             [ "${{ steps.build.outputs.patch_rc }}" != "0" ] ||
+             [ "${{ steps.build.outputs.build_rc }}" != "0" ] ||
+             [ "${{ steps.build.outputs.object_rc }}" != "0" ] ||
+             [ "${{ steps.build.outputs.link_rc }}" != "0" ]; then
+            echo "P5-1D OCTEON build, object, final-link or symbol verification failed."
+            exit 1
+          fi
+          echo "P5-1D cloud acceptance passed; physical Ethernet/TCP validation remains separate."

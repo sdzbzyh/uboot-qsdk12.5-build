@@ -7,7 +7,7 @@
 
 IPaddr_t NetOurIP;
 IPaddr_t NetOurSubnetMask;
-static u8 local_mac[6] = { 0x02, 0x10, 0x20, 0x30, 0x40, 0x50 };
+uchar NetOurEther[6] = { 0x02, 0x10, 0x20, 0x30, 0x40, 0x50 };
 static u8 captured[1600];
 static int captured_len, send_result;
 
@@ -41,7 +41,7 @@ int tcp_checksum_ipv4_valid(const u8 src[4], const u8 dst[4],
 int NetSetEther(uchar *pkt, uchar *addr, uint prot)
 {
 	memcpy(pkt, addr, 6);
-	memcpy(pkt + 6, local_mac, 6);
+	memcpy(pkt + 6, NetOurEther, 6);
 	pkt[12] = prot >> 8;
 	pkt[13] = prot;
 	return ETHER_HDR_SIZE;

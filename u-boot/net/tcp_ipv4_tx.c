@@ -82,7 +82,8 @@ int tcp_ipv4_tx_learn_peer(struct tcp_ipv4_tx_peer *peer,
 
 	if (!peer || !src_ip || !src_mac || !NetOurIP ||
 	    !NetOurSubnetMask || !tcp_ipv4_tx_mac_valid(src_mac) ||
-	    !tcp_ipv4_tx_ip_valid(src_ip))
+	    !tcp_ipv4_tx_ip_valid(src_ip) ||
+	    !memcmp(src_mac, NetOurEther, 6))
 		return -1;
 
 	memcpy(local, &NetOurIP, sizeof(local));

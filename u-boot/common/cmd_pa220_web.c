@@ -35,19 +35,16 @@ static void pa220_web_reset_listener(void)
 }
 
 static void pa220_web_tcp_rx(const uchar *segment, unsigned len,
-			     IPaddr_t src_ip, IPaddr_t dst_ip)
+			     IPaddr_t src_ip, IPaddr_t dst_ip,
+			     const uchar src_mac[6])
 {
-	struct ethernet_hdr *et;
 	struct tcp_segment_view view;
-	u8 src[4], dst[4], src_mac[6];
+	u8 src[4], dst[4];
 
 	if (!segment || len < TCP_CORE_HEADER_MIN || len > 0xffffU ||
-	    !NetRxPacket || NetRxPacketLen < ETHER_HDR_SIZE)
+	    !src_mac)
 		return;
 
-	/* NetReceive() keeps the original L2 frame in NetRxPacket for this call. */
-	et = (struct ethernet_hdr *)NetRxPacket;
-	memcpy(src_mac, et->et_src, sizeof(src_mac));
 	memcpy(src, &src_ip, sizeof(src));
 	memcpy(dst, &dst_ip, sizeof(dst));
 

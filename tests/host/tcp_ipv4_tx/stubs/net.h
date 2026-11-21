@@ -15,6 +15,7 @@ struct ip_udp_hdr {
 };
 extern IPaddr_t NetOurIP;
 extern IPaddr_t NetOurSubnetMask;
+extern uchar NetOurEther[6];
 int NetSetEther(uchar *pkt, uchar *addr, uint prot);
 void net_set_ip_header(uchar *pkt, IPaddr_t dest, IPaddr_t source);
 uint NetCksum(uchar *ptr, int len);
