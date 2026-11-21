@@ -1,0 +1,211 @@
+name: PA-220 TCP core OCTEON target compile
+
+on:
+  push:
+    branches:
+      - feature/pa220-ubootkit-web
+    paths:
+      - '.github/workflows/pa220-tcp-target-compile.yml'
+      - 'u-boot/net/tcp.c'
+      - 'u-boot/include/net/tcp.h'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  target-compile:
+    name: Compile standalone TCP core with Cavium GCC 4.7.0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout integration repository
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: feature/pa220-ubootkit-web
+          fetch-depth: 0
+
+      - name: Compile TCP core against pinned PA-220 target configuration
+        id: compile
+        env:
+          GH_TOKEN: ${{ secrets.OCTEON_SDK_READ_TOKEN }}
+        shell: bash
+        run: |
+          set +e
+          REPORT_DIR="reports/pa220/P5-1A.3"
+          mkdir -p "$REPORT_DIR"
+          LOG="$REPORT_DIR/20-octeon-tcp-object-compile.log"
+          SUMMARY="$REPORT_DIR/20-octeon-tcp-object-compile.md"
+          COMPILE_RC=99
+          CONFIG_RC=99
+          INSPECT_RC=99
+
+          {
+            echo "========== PA-220 TCP CORE OCTEON OBJECT COMPILE =========="
+            date -u '+UTC_DATE=%Y-%m-%dT%H:%M:%SZ'
+            echo "BRANCH=feature/pa220-ubootkit-web"
+            echo "INTEGRATION_COMMIT=$(git rev-parse HEAD)"
+            echo "PA220_SOURCE_COMMIT=801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8"
+            echo
+            echo "========== TCP SOURCE IDENTITY =========="
+            sha256sum u-boot/net/tcp.c u-boot/include/net/tcp.h
+            echo
+            echo "========== SDK RELEASE DOWNLOAD =========="
+            mkdir -p "$RUNNER_TEMP/octeon-download" "$RUNNER_TEMP/octeon-sdk"
+            if [ -z "$GH_TOKEN" ]; then
+              echo "ERROR: OCTEON_SDK_READ_TOKEN secret is unavailable"
+            else
+              gh release download octeon-sdk-5.1.0 \
+                --repo sdzbzyh/pa220-toolchains \
+                --pattern '*.tar.gz' --pattern '*.sha256' \
+                --dir "$RUNNER_TEMP/octeon-download"
+              DOWNLOAD_RC=$?
+            fi
+            echo "DOWNLOAD_RC=$DOWNLOAD_RC"
+            if [ "$DOWNLOAD_RC" -eq 0 ]; then
+              (cd "$RUNNER_TEMP/octeon-download" && sha256sum -c ./*.sha256)
+              CHECKSUM_RC=$?
+            else
+              CHECKSUM_RC=98
+            fi
+            echo "CHECKSUM_RC=$CHECKSUM_RC"
+
+            if [ "$DOWNLOAD_RC" -eq 0 ] && [ "$CHECKSUM_RC" -eq 0 ]; then
+              ARCHIVE=$(find "$RUNNER_TEMP/octeon-download" -maxdepth 1 -type f -name '*.tar.gz' -print -quit)
+              tar -xzf "$ARCHIVE" -C "$RUNNER_TEMP/octeon-sdk"
+              EXTRACT_RC=$?
+            else
+              EXTRACT_RC=99
+            fi
+            echo "EXTRACT_RC=$EXTRACT_RC"
+
+            if [ "$EXTRACT_RC" -eq 0 ]; then
+              GCC_PATH=$(find "$RUNNER_TEMP/octeon-sdk" -path '*/bin/mips64-octeon-linux-gnu-gcc' -print -quit)
+            else
+              GCC_PATH=""
+            fi
+            if [ -z "$GCC_PATH" ]; then
+              echo "ERROR: OCTEON compiler not found"
+              COMPILE_RC=97
+            else
+              TOOLCHAIN_DIR=$(dirname "$(dirname "$GCC_PATH")")
+              export PATH="$TOOLCHAIN_DIR/bin:$PATH"
+              export OCTEON_MODEL=OCTEON_CN70XX
+              "$GCC_PATH" --version | head -n 2
+              echo "TARGET=$("$GCC_PATH" -dumpmachine)"
+
+              echo
+              echo "========== FETCH PINNED PA-220 SOURCE =========="
+              git clone --no-checkout https://github.com/IronDemiGod/pa220-openwrt.git "$RUNNER_TEMP/pa220-source"
+              CLONE_RC=$?
+              if [ "$CLONE_RC" -eq 0 ]; then
+                git -C "$RUNNER_TEMP/pa220-source" checkout --detach 801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8
+                CHECKOUT_RC=$?
+              else
+                CHECKOUT_RC=99
+              fi
+              echo "CLONE_RC=$CLONE_RC"
+              echo "CHECKOUT_RC=$CHECKOUT_RC"
+
+              if [ "$CHECKOUT_RC" -eq 0 ]; then
+                UBOOT_DIR="$RUNNER_TEMP/pa220-source/u-boot"
+                cp u-boot/net/tcp.c "$UBOOT_DIR/net/tcp.c"
+                mkdir -p "$UBOOT_DIR/include/net"
+                cp u-boot/include/net/tcp.h "$UBOOT_DIR/include/net/tcp.h"
+
+                echo
+                echo "========== GENERATE PA-220 CONFIGURATION =========="
+                make -C "$UBOOT_DIR" octeon_pa220_config HOSTCC="$UBOOT_DIR/tools/hostcc-gnu89"
+                CONFIG_RC=$?
+                echo "CONFIG_RC=$CONFIG_RC"
+
+                if [ "$CONFIG_RC" -eq 0 ]; then
+                  echo
+                  echo "========== OCTEON TCP OBJECT COMPILE =========="
+                  make -C "$UBOOT_DIR" V=1 net/tcp.o HOSTCC="$UBOOT_DIR/tools/hostcc-gnu89"
+                  COMPILE_RC=$?
+                else
+                  COMPILE_RC=96
+                fi
+                echo "COMPILE_RC=$COMPILE_RC"
+
+                if [ "$COMPILE_RC" -eq 0 ] && [ -f "$UBOOT_DIR/net/tcp.o" ]; then
+                  echo
+                  echo "========== OBJECT ABI =========="
+                  file "$UBOOT_DIR/net/tcp.o"
+                  "$TOOLCHAIN_DIR/bin/mips64-oct eon-linux-gnu-readelf" -h "$UBOOT_DIR/net/tcp.o"
+                  INSPECT_RC=$?
+                  echo "OBJECT_SIZE=$(wc -c < "$UBOOT_DIR/net/tcp.o")"
+                  sha256sum "$UBOOT_DIR/net/tcp.o"
+                else
+                  INSPECT_RC=97
+                fi
+              else
+                CONFIG_RC=99
+                COMPILE_RC=95
+                INSPECT_RC=99
+              fi
+            fi
+
+            echo
+            echo "========== FINAL STATUS =========="
+            echo "DOWNLOAD_RC=${DOWNLOAD_RC:-99}"
+            echo "CHECKSUM_RC=${CHECKSUM_RC:-99}"
+            echo "CONFIG_RC=$CONFIG_RC"
+            echo "COMPILE_RC=$COMPILE_RC"
+            echo "INSPECT_RC=$INSPECT_RC"
+            echo "========== END =========="
+          } > "$LOG" 2>&1
+
+          cat "$LOG"
+          cat > "$SUMMARY" <<EOF
+          # PA-220 TCP core OCTEON target object compile
+
+          - Integration commit: $(git rev-parse HEAD)
+          - PA-220 source: 801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8
+          - TCP source SHA-256: $(sha256sum u-boot/net/tcp.c | awk '{print $1}')
+          - TCP header SHA-256: $(sha256sum u-boot/include/net/tcp.h | awk '{print $1}')
+          - Configuration exit code: $CONFIG_RC
+          - TCP object compile exit code: $COMPILE_RC
+          - Object inspection exit code: $INSPECT_RC
+
+          Full log: [20-octeon-tcp-object-compile.log](20-octeon-tcp-object-compile.log)
+          EOF
+          echo "config_rc=$CONFIG_RC" >> "$GITHUB_OUTPUT"
+          echo "compile_rc=$COMPILE_RC" >> "$GITHUB_OUTPUT"
+          echo "inspect_rc=$INSPECT_RC" >> "$GITHUB_OUTPUT"
+
+      - name: Upload target object evidence
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: pa220-tcp-octeon-object
+          path: reports/pa220/P5-1A.3/20-octeon-tcp-object-compile.*
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Commit target compile evidence
+        if: always()
+        shell: bash
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/pa220/P5-1A.3/20-octeon-tcp-object-compile.log reports/pa220/P5-1A.3/20-octeon-tcp-object-compile.md
+          git commit -m "pa220: record OCTEON TCP core object compile"
+          if ! git push origin HEAD:refs/heads/feature/pa220-ubootkit-web; then
+            git fetch origin feature/pa220-ubootkit-web
+            git rebase origin/feature/pa220-ubootkit-web
+            git push origin HEAD:refs/heads/feature/pa220-ubootkit-web
+          fi
+
+      - name: Enforce target compile result
+        if: always()
+        shell: bash
+        run: |
+          if [ "${{ steps.compile.outputs.config_rc }}" != "0" ] ||
+             [ "${{ steps.compile.outputs.compile_rc }}" != "0" ] ||
+             [ "${{ steps.compile.outputs.inspect_rc }}" != "0" ]; then
+            echo "TCP core OCTEON target object compile did not pass."
+            exit 1
+          fi
+          echo "TCP core OCTEON target object compile passed."
