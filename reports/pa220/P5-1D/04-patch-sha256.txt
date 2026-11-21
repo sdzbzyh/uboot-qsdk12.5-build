@@ -1,1 +1,1 @@
-7f101f854bdc2423350c8ce759853691e4c17941a61052d9eafa4079cf7dc946  patches/pa220/0005-pa220-native-tcp-ipv4-ethernet-output.patch
+24589f80c99538e5b2f4a62b67185cc6f58ace358999ec134de85c63438fb24f  patches/pa220/0005-pa220-native-tcp-ipv4-ethernet-output.patch
