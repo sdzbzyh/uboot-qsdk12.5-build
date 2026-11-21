@@ -1,0 +1,164 @@
+diff --git a/u-boot/common/Makefile b/u-boot/common/Makefile
+--- a/u-boot/common/Makefile
++++ b/u-boot/common/Makefile
+@@ -130,7 +130,8 @@
+ COBJS-$(CONFIG_MP) += cmd_mp.o
+ COBJS-$(CONFIG_CMD_MTDPARTS) += cmd_mtdparts.o
+ COBJS-$(CONFIG_CMD_NAND) += cmd_nand.o
+ COBJS-$(CONFIG_CMD_NET) += cmd_net.o
++COBJS-$(CONFIG_CMD_NET) += cmd_pa220_web.o
+ COBJS-$(CONFIG_CMD_NVME) += cmd_nvme.o
+ COBJS-$(CONFIG_CMD_ONENAND) += cmd_onenand.o
+ COBJS-$(CONFIG_CMD_OTP) += cmd_otp.o
+diff --git a/u-boot/common/cmd_pa220_web.c b/u-boot/common/cmd_pa220_web.c
+new file mode 100644
+--- /dev/null
++++ b/u-boot/common/cmd_pa220_web.c
+@@ -0,0 +147 @@
++/*
++ * PA-220 foreground Web/TCP lifecycle entry.
++ *
++ * This stage deliberately integrates only the foreground service lifecycle
++ * and the existing single-connection TCP input core.  The output callback
++ * fails closed until a reviewed IPv4/Ethernet/ARP transmit path is available.
++ * No HTTP parser, URI handlers, upload path or remote write operation exists.
++ *
++ * SPDX-License-Identifier: GPL-2.0+
++ */
++#include <common.h>
++#include <command.h>
++#include <net.h>
++#include <net/tcp.h>
++#include <watchdog.h>
++#include <asm/global_data.h>
++
++DECLARE_GLOBAL_DATA_PTR;
++
++#define PA220_WEB_TCP_PORT 80
++
++static struct tcp_core_connection pa220_web_connection;
++
++static int pa220_web_emit_unavailable(void *arg, const u8 src[4],
++				      const u8 dst[4], const u8 *segment,
++				      u16 segment_len)
++{
++	/*
++	 * Do not report a discarded frame as transmitted.  tcp_core_input()
++	 * therefore refuses a passive open when SYN-ACK cannot be emitted.
++	 */
++	(void)arg;
++	(void)src;
++	(void)dst;
++	(void)segment;
++	(void)segment_len;
++	return -1;
++}
++
++static void pa220_web_tcp_rx(const uchar *segment, unsigned len,
++			     IPaddr_t src_ip, IPaddr_t dst_ip)
++{
++	u8 src[4];
++	u8 dst[4];
++
++	if (!segment || len < TCP_CORE_HEADER_MIN || len > 0xffffU)
++		return;
++
++	/* Copy address values; the RX packet buffer is transient. */
++	memcpy(src, &src_ip, sizeof(src));
++	memcpy(dst, &dst_ip, sizeof(dst));
++
++	(void)tcp_core_input(&pa220_web_connection, src, dst, segment,
++			     (u16)len, (u32)get_timer(0),
++			     pa220_web_emit_unavailable, NULL);
++}
++
++int do_pa220_web(cmd_tbl_t *cmdtp, int flag, int argc,
++		 char * const argv[])
++{
++	struct eth_device *dev;
++	static const uchar zero_mac[6] = { 0, 0, 0, 0, 0, 0 };
++	static const uchar broadcast_mac[6] =
++		{ 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
++	u8 local_ip[4];
++	u32 initial_sequence;
++	int eth_attempted = 0;
++	int ret = 1;
++
++	(void)cmdtp;
++	(void)flag;
++
++	if (argc != 2 || strcmp(argv[1], "web"))
++		return CMD_RET_USAGE;
++
++	/*
++	 * Follow NetLoop's established initialization order, but keep this
++	 * service in its own foreground eth_rx() loop rather than nesting a
++	 * blocking NetLoop().
++	 */
++	net_init();
++	eth_halt();
++	eth_set_current();
++	dev = eth_get_dev();
++	if (!dev) {
++		puts("pa220 web: no current Ethernet device\n");
++		goto cleanup;
++	}
++	if (!memcmp(dev->enetaddr, zero_mac, sizeof(zero_mac)) ||
++	    !memcmp(dev->enetaddr, broadcast_mac, sizeof(broadcast_mac))) {
++		puts("pa220 web: current Ethernet device has no valid MAC\n");
++		goto cleanup;
++	}
++	if (!NetOurIP) {
++		puts("pa220 web: ipaddr is not configured\n");
++		goto cleanup;
++	}
++
++	eth_attempted = 1;
++	if (eth_init(gd->bd) < 0) {
++		puts("pa220 web: Ethernet initialization failed\n");
++		goto cleanup;
++	}
++
++	memcpy(local_ip, &NetOurIP, sizeof(local_ip));
++	initial_sequence = (u32)get_timer(0) ^ (u32)NetOurIP;
++	tcp_core_init(&pa220_web_connection);
++	if (tcp_core_listen(&pa220_web_connection, local_ip,
++			    PA220_WEB_TCP_PORT, initial_sequence)) {
++		puts("pa220 web: TCP listener initialization failed\n");
++		goto cleanup;
++	}
++
++	/* Registration occurs only after all startup checks have succeeded. */
++	net_set_tcp_handler(pa220_web_tcp_rx);
++	puts("pa220 web: foreground lifecycle started; TCP RX hook on port 80\n");
++	puts("TCP output is not implemented; SYN handshakes will fail closed.\n");
++	puts("No HTTP parser or remote management operation is enabled.\n");
++	puts("Press Ctrl-C to stop.\n");
++
++	while (!ctrlc()) {
++		WATCHDOG_RESET();
++		eth_rx();
++		(void)tcp_core_poll(&pa220_web_connection, (u32)get_timer(0),
++				    pa220_web_emit_unavailable, NULL);
++	}
++
++	puts("\npa220 web: foreground service stopped by user\n");
++	ret = 0;
++
++cleanup:
++	/*
++	 * Unregister before clearing the connection object so NetReceive()
++	 * can never call into a reset or expired connection context.
++	 */
++	net_set_tcp_handler(NULL);
++	tcp_core_init(&pa220_web_connection);
++	if (eth_attempted)
++		eth_halt();
++	return ret;
++}
++
++U_BOOT_CMD(
++	pa220, 2, 0, do_pa220_web,
++	"PA-220 foreground read-only service controls",
++	"web - run the foreground TCP/Web lifecycle"
++);
