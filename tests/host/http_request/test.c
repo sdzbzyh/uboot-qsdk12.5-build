@@ -6,15 +6,15 @@ static int checks,failures;
 static enum http_req_status feed(struct http_request_parser*p,const char*s){return http_request_parser_feed(p,(const u8*)s,(u16)strlen(s));}
 static void bad(const char*n,const char*s,enum http_req_error e){struct http_request_parser p;enum http_req_status z;http_request_parser_init(&p);z=feed(&p,s);C(z==HTTP_REQ_ERROR);C(p.error==e);printf("%s: %s (%s)\n",n,z==HTTP_REQ_ERROR&&p.error==e?"PASS":"FAIL",http_request_error_string(p.error));}
 static void good(const char*n,const char*s,const char*m,const char*u,u8 h){struct http_request_parser p;enum http_req_status z;http_request_parser_init(&p);z=feed(&p,s);C(z==HTTP_REQ_COMPLETE);C(p.request.header_end==strlen(s));C(!strcmp(p.request.method,m));C(!strcmp(p.request.uri,u));C(p.request.header_count==h);printf("%s: %s\n",n,z==HTTP_REQ_COMPLETE?"PASS":"FAIL");}
-static void split(const char*n,const char*s,const u16*c,unsigned int nc){struct http_request_parser p;unsigned int i;u16 off=0,total=(u16)strlen(s);enum http_req_status z=HTTP_REQ_NEED_MORE;http_request_parser_init(&p);for(i=0;i<nc;i++){z=http_request_parser_feed(&p,(const u8*)s+off,c[i]);off+=c[i];C(z==HTTP_REQ_NEED_MORE);}z=http_request_parser_feed(&p,(const u8*)s+off,total-off);C(z==HTTP_REQ_COMPLETE);C(!strcmp(p.request.uri,"/fragmented"));printf("%s: %s\n",n,z==HTTP_REQ_COMPLETE?"PASS":"FAIL");}
+static void split(const char*n,const char*s,const u16*c,unsigned int nc,u8 expected_headers){struct http_request_parser p;unsigned int i;u16 off=0,total=(u16)strlen(s);enum http_req_status z=HTTP_REQ_NEED_MORE;http_request_parser_init(&p);for(i=0;i<nc;i++){z=http_request_parser_feed(&p,(const u8*)s+off,c[i]);off+=c[i];C(z==HTTP_REQ_NEED_MORE);}z=http_request_parser_feed(&p,(const u8*)s+off,total-off);C(z==HTTP_REQ_COMPLETE);C(!strcmp(p.request.uri,"/fragmented"));C(p.request.header_count==expected_headers);printf("%s: %s\n",n,z==HTTP_REQ_COMPLETE?"PASS":"FAIL");}
 int main(void){
  const char*g="GET / HTTP/1.1\r\nHost: example\r\n\r\n",*h="HEAD /status HTTP/1.0\r\n\r\n",*f="GET /fragmented HTTP/1.1\r\n\r\n";
  struct http_request_parser p;enum http_req_status z;u8 over[HTTP_REQ_RX_CAPACITY+1];char b[2400];unsigned int i;
  const u16 a[]={4,5,6,2,3},v[]={8,2,2,2},hd[]={20,5,4},cr[]={25,1};
  good("01 complete GET",g,"GET","/",1);good("02 complete HEAD",h,"HEAD","/status",0);
- split("03 request-line split",f,a,5);split("04 URI split",f,v,4);
- split("05 header split","GET /fragmented HTTP/1.1\r\nX-A: b\r\n\r\n",hd,3);
- split("06 CRLF split",f,cr,2);
+ split("03 request-line split",f,a,5,0);split("04 URI split",f,v,4,0);
+ split("05 header split","GET /fragmented HTTP/1.1\r\nX-A: b\r\n\r\n",hd,3,1);
+ split("06 CRLF split",f,cr,2,0);
  good("07 multiple headers","GET / HTTP/1.1\r\nHost: x\r\nAccept: */*\r\nX-Test: yes\r\n\r\n","GET","/",3);
  good("08 header case insensitive","GET / HTTP/1.1\r\ncOnTeNt-LeNgTh: 0\r\nhOsT: x\r\n\r\n","GET","/",2);
  memset(b,'A',sizeof(b));http_request_parser_init(&p);z=http_request_parser_feed(&p,(u8*)b,HTTP_REQ_LINE_MAX+2);C(z==HTTP_REQ_ERROR&&p.error==HTTP_REQ_ERR_REQUEST_LINE_LIMIT);printf("09 request line overlong: %s\n",p.error==HTTP_REQ_ERR_REQUEST_LINE_LIMIT?"PASS":"FAIL");

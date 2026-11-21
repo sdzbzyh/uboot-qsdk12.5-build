@@ -43,6 +43,8 @@ struct http_request {
 struct http_request_parser {
  u8 rx[HTTP_REQ_RX_CAPACITY];
  u16 rx_len;
+ u16 parse_offset;
+ u8 request_line_parsed;
  enum http_req_error error;
  struct http_request request;
 };
