@@ -1,12 +1,12 @@
 # PA-220 P5-1B integrated OCTEON build
 
-- Integration commit: d5082d9e0e604a397c15cc6f441978220db28513
+- Integration commit: effd2d9dd6117866c7a0548eca072830c9025d68
 - PA-220 source: 801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8
 - SDK: octeon-sdk-5.1.0 / Cavium GCC 4.7.0 / SDK Build 52
 - SDK download/checksum: 0 / 0
 - Exact source checkout: 0
-- Patch series apply-check/apply: 1
-- Full PA-220 build: 99
+- Patch series apply-check/apply: 0
+- Full PA-220 build: 1
 - TCP object/libnet symbol verification: 99
 - Final U-Boot ELF/map/System.map verification: 99
 
