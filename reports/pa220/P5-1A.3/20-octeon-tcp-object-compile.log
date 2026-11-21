@@ -1,0 +1,90 @@
+========== PA-220 TCP CORE OCTEON OBJECT COMPILE ==========
+UTC_DATE=2026-11-21T02:53:55Z
+BRANCH=feature/pa220-ubootkit-web
+INTEGRATION_COMMIT=18f4949d23dbd41bfa7164eb2cd1acfa0b46e6af
+PA220_SOURCE_COMMIT=801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8
+
+========== TCP SOURCE IDENTITY ==========
+5094dd4e28a372f2a533e0144cc8cdd17c02507ff3cd5d88d5cfbdcea8823996  u-boot/net/tcp.c
+3593909580af16b3e4909d6af95a77bb759d3ffaeaf4caa3b9b879aa01b217f6  u-boot/include/net/tcp.h
+
+========== SDK RELEASE DOWNLOAD ==========
+DOWNLOAD_RC=0
+octeon-sdk-5.1.0-tools-gcc-4.7.tar.gz: OK
+CHECKSUM_RC=0
+EXTRACT_RC=0
+mips64-octeon-linux-gnu-gcc (Cavium Inc. Version: SDK_BUILD build 52) 4.7.0
+Copyright (C) 2012 Free Software Foundation, Inc.
+TARGET=mips64-octeon-linux-gnu
+
+========== FETCH PINNED PA-220 SOURCE ==========
+Cloning into '/home/runner/work/_temp/pa220-source'...
+HEAD is now at 801717b docs/BUILD.md: describe the PA-220 kernel patches
+CLONE_RC=0
+CHECKOUT_RC=0
+
+========== GENERATE PA-220 CONFIGURATION ==========
+make: Entering directory '/home/runner/work/_temp/pa220-source/u-boot'
+Configuring for octeon_pa220 - Board: octeon_pa220, Options: OCTEON_PA220,OCTEON_PCI_HOST=0,OCTEON_CN70XX
+make: Leaving directory '/home/runner/work/_temp/pa220-source/u-boot'
+CONFIG_RC=0
+
+========== OCTEON TCP OBJECT COMPILE ==========
+make: Entering directory '/home/runner/work/_temp/pa220-source/u-boot'
+mips64-octeon-linux-gnu-gcc  -g  -Os  -ffunction-sections -fdata-sections -D__KERNEL__ -DCONFIG_SYS_TEXT_BASE=0xC0000000 -I/home/runner/work/_temp/pa220-source/u-boot/include -fno-builtin -ffreestanding -nostdinc -isystem /home/runner/work/_temp/octeon-sdk/tools-gcc-4.7/bin/../lib/gcc/mips64-octeon-linux-gnu/4.7.0/include -pipe -DCONFIG_MIPS -D__MIPS__ -G 0 -mabicalls -mabi=n32 -msoft-float -D__MIPS64__ -EB -mabi=n32 -DCVMX_ENABLE_CSR_ADDRESS_CHECKING=0 -finline-functions -finline-functions-called-once -fearly-inlining -finline-small-functions -fmerge-all-constants -mtune=octeon2 -Os -Wdeclaration-after-statement -std=gnu90 -Wno-long-long -mno-check-zero-division -mtune=octeon2 -finline -ffunction-sections -fdata-sections -ftree-pre -fno-asynchronous-unwind-tables -DCVMX_ENABLE_PARAMETER_CHECKING=0 -DCVMX_ENABLE_DEBUG_PRINTS=1 -Wall -Wstrict-prototypes -fno-stack-protector -Wno-format-nonliteral -Wno-format-security -fstack-usage     -o net/tcp.o net/tcp.c -c
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:8:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from net/tcp.c:10:
+/home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_pa220.h:15:0: warning: "CONFIG_OCTEON_CN70XX" redefined [enabled by default]
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21:0,
+                 from net/tcp.c:10:
+/home/runner/work/_temp/pa220-source/u-boot/include/config.h:4:0: note: this is the location of the previous definition
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:8:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from net/tcp.c:10:
+/home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_pa220.h:164:0: warning: "CONFIG_CMD_EXPORTENV" redefined [enabled by default]
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:6:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from net/tcp.c:10:
+/home/runner/work/_temp/pa220-source/u-boot/include/config_cmd_defaults.h:14:0: note: this is the location of the previous definition
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:8:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from net/tcp.c:10:
+/home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_pa220.h:165:0: warning: "CONFIG_CMD_IMPORTENV" redefined [enabled by default]
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:6:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from net/tcp.c:10:
+/home/runner/work/_temp/pa220-source/u-boot/include/config_cmd_defaults.h:16:0: note: this is the location of the previous definition
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:8:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from net/tcp.c:10:
+/home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_pa220.h:196:0: warning: "CONFIG_SYS_MEMTEST_START" redefined [enabled by default]
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_pa220.h:26:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:8,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from net/tcp.c:10:
+/home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_common.h:283:0: note: this is the location of the previous definition
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:8:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from net/tcp.c:10:
+/home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_pa220.h:197:0: warning: "CONFIG_SYS_MEMTEST_END" redefined [enabled by default]
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_pa220.h:26:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:8,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from net/tcp.c:10:
+/home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_common.h:284:0: note: this is the location of the previous definition
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:22:0,
+                 from net/tcp.c:10:
+/home/runner/work/_temp/pa220-source/u-boot/include/asm-offsets.h:3:43: fatal error: generated/generic-asm-offsets.h: No such file or directory
+compilation terminated.
+make: *** [/home/runner/work/_temp/pa220-source/u-boot/config.mk:353: net/tcp.o] Error 1
+make: Leaving directory '/home/runner/work/_temp/pa220-source/u-boot'
+COMPILE_RC=2
+
+========== FINAL STATUS ==========
+DOWNLOAD_RC=0
+CHECKSUM_RC=0
+CONFIG_RC=0
+COMPILE_RC=2
+INSPECT_RC=97
+========== END ==========
