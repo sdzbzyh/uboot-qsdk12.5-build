@@ -107,3 +107,16 @@
 5. 以固定源码真实差异生成补丁，不手工编写/猜测 unified diff hunk 行数；完成后才运行针对性 Host/目标构建验证。
 
 P5-1B 尚未实施。不得将本节的 P5-1A.3 PASS 扩展解释为 P5-1 整体完成。
+
+
+## 重要验证范围更正（2026-11-21）
+
+对 Actions #3 的实际构建命令、`build-pa220.sh` 和其应用的两个 PA-220 patch 进行二次核对后，必须收窄上文“目标交叉编译 PASS”的含义：
+
+- Actions 确实完成了 PA-220 固定源码基线加现有 `0001`、`0002` 补丁的完整 OCTEON 构建，BIN 为 1,362,216 bytes。
+- Actions 同时对仓库中的 `u-boot/net/tcp.c` 和 focused harness 执行了 Host GCC 编译/运行。
+- 但 `build-pa220.sh` 只将 `patches/pa220/*.patch` 应用到 PA-220 checkout；当前这两个补丁只修改 `u-boot/board/octeon/pa220/pa220_board.c`。仓库中的独立 TCP core 源文件 `u-boot/net/tcp.c` 尚未进入 PA-220 checkout 的 `net/Makefile`，本次 Actions 日志也没有 `net/tcp.o` 编译记录。
+- 因此：**PA-220 baseline 完整构建 PASS；TCP core Host 回归 PASS；TCP core 的 OCTEON 目标编译/链接仍 NOT RUN。** 不得把 baseline 构建误记为 TCP core 已完成目标交叉编译。
+- 本更正优先于本文件上文任何可能被理解为“TCP core 已目标编译”的表述。
+
+下一项必要工作先完成 TCP core 的 OCTEON 目标对象编译（使用固定 PA-220 生成的配置头、include 路径和 Cavium GCC 4.7.0），保留对象/编译日志；之后再进入 P5-1B IPv4 TCP 分派接入。此项不需要重新跑 Host 76 项回归，除非 TCP core 源码发生变化；也不应无理由重复完整 baseline 构建。
