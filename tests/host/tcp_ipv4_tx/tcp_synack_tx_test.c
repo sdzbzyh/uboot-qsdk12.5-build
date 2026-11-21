@@ -17,11 +17,6 @@ static void put32(u8 *p, u32 v)
 {
 	p[0] = v >> 24; p[1] = v >> 16; p[2] = v >> 8; p[3] = v;
 }
-static u32 get32(const u8 *p)
-{
-	return ((u32)p[0] << 24) | ((u32)p[1] << 16) |
-	       ((u32)p[2] << 8) | p[3];
-}
 int NetSetEther(uchar *pkt, uchar *addr, uint prot)
 {
 	memcpy(pkt, addr, 6);
