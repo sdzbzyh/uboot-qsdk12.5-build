@@ -9,7 +9,7 @@ cc -std=c99 -Wall -Wextra -Werror \
   "$ROOT/tests/host/tcp_ipv4_tx/test.c" -o "$OUT"
 "$OUT"
 cc -std=c99 -Wall -Wextra -Werror \
-  -I"$ROOT/tests/host/tcp_ipv4_tx/stubs" \
+  -I"$ROOT/tests/host/tcp_ipv4_tx/stubs_core" \
   -I"$ROOT/u-boot/include" \
   "$ROOT/u-boot/net/tcp.c" \
   "$ROOT/tests/host/tcp_ipv4_tx/tcp_core_retry_test.c" -o "$OUT-retry"
