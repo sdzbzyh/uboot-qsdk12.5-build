@@ -1,0 +1,2 @@
+Start: 2026-11-21T15:31:50.1653079+08:00
+ETL: C:\Users\Administrator\PA220-FIN-20261121-153150\fin-capture.etl
