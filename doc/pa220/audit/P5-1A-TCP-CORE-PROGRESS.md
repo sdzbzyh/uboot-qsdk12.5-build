@@ -120,3 +120,29 @@ P5-1B 尚未实施。不得将本节的 P5-1A.3 PASS 扩展解释为 P5-1 整体
 - 本更正优先于本文件上文任何可能被理解为“TCP core 已目标编译”的表述。
 
 下一项必要工作先完成 TCP core 的 OCTEON 目标对象编译（使用固定 PA-220 生成的配置头、include 路径和 Cavium GCC 4.7.0），保留对象/编译日志；之后再进入 P5-1B IPv4 TCP 分派接入。此项不需要重新跑 Host 76 项回归，除非 TCP core 源码发生变化；也不应无理由重复完整 baseline 构建。
+
+
+## P5-1A.3.1-T OCTEON 目标对象编译结果（2026-11-21）
+
+<https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/44858430936>
+
+- 专用工作流 run #2：SUCCESS。
+- 固定 PA-220 源码：`801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`。
+- 工具链：Cavium GCC 4.7.0 / SDK Build 52；目标 `mips64-octeon-linux-gnu`。
+- 配置生成：PASS；生成所需 generic/CPU asm-offsets 后，TCP core 独立目标对象编译：PASS。
+- 对象：`net/tcp.o`；49,564 bytes；ELF32 big-endian MIPS N32 / MIPS64r2 / OCTEON flags；SHA-256 `16ccf75c9cb4e779753ee99fdfeadba21802e9d6a6ed009cb8b9d33da7240ca2`。
+- TCP source SHA-256：`5094dd4e28a372f2a533e0144cc8cdd17c02507ff3cd5d88d5cfbdcea8823996`。
+- TCP header SHA-256：`3593909580af16b3e4909d6af95a77bb759d3ffaeaf4caa3b9b879aa01b217f6`。
+- 详细日志与摘要已由 Actions 提交：`reports/pa220/P5-1A.3/20-octeon-tcp-object-compile.log`、`20-octeon-tcp-object-compile.md`。
+
+首次专用工作流运行因仅执行 config target、未生成 `include/generated/generic-asm-offsets.h` 而在编译前失败；随后加入明确的 asm-offsets 生成步骤并重跑，目标对象编译通过。此为构建准备依赖修正，不是 TCP 源码缺陷。
+
+### 当前验收边界
+
+- Host TCP 回归：PASS（76/0）。
+- TCP core 独立 OCTEON 目标对象编译：PASS。
+- PA-220 baseline + 0001/0002 完整构建：PASS。
+- TCP core 尚未纳入 PA-220 `net/Makefile`，因此尚无 TCP core 与 U-Boot 的最终链接证据。
+- RAM 启动与真实 TCP 网口验证：NOT RUN。
+
+下一项进入 **P5-1B：最小 IPv4 TCP 分派接入**。该项必须把独立 TCP core 源码/头文件纳入固定 PA-220 树，增加显式注册的 TCP 接收回调，在 NetReceive 完成 IPv4 校验、目的地址过滤和分片处理后分派 protocol 6，并由真实构建验证对象编入及最终链接。暂不增加 TCP 输出、Web 生命周期或 HTTP parser。
