@@ -1,0 +1,160 @@
+name: PA-220 P5-2A bounded HTTP request parser
+on:
+  push:
+    branches: [feature/pa220-ubootkit-web]
+    paths:
+      - '.github/workflows/pa220-p5-2a.yml'
+      - 'u-boot/net/http_request.c'
+      - 'u-boot/include/net/http_request.h'
+      - 'tests/host/http_request/**'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  host-and-octeon:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: feature/pa220-ubootkit-web
+          fetch-depth: 0
+      - name: Host regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p reports/pa220/P5-2A
+          chmod +x tests/host/http_request/run.sh
+          { echo "UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)"; echo "COMMIT=$(git rev-parse HEAD)"; cc --version | head -n 1; tests/host/http_request/run.sh; } 2>&1 | tee reports/pa220/P5-2A/10-host-tests.log
+      - name: OCTEON target object compile
+        env:
+          GH_TOKEN: ${{ secrets.OCTEON_SDK_READ_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          R=reports/pa220/P5-2A
+          mkdir -p "$R" "$RUNNER_TEMP/octeon-download" "$RUNNER_TEMP/octeon-sdk"
+          {
+            echo "UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "INTEGRATION_COMMIT=$(git rev-parse HEAD)"
+            echo "PA220_SOURCE_PIN=801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8"
+            sha256sum u-boot/net/http_request.c u-boot/include/net/http_request.h
+            test -n "$GH_TOKEN"
+            gh release download octeon-sdk-5.1.0 --repo sdzbzyh/pa220-toolchains --pattern '*.tar.gz' --pattern '*.sha256' --dir "$RUNNER_TEMP/octeon-download"
+            (cd "$RUNNER_TEMP/octeon-download" && sha256sum -c ./*.sha256)
+            A=$(find "$RUNNER_TEMP/octeon-download" -maxdepth 1 -name '*.tar.gz' -print -quit)
+            tar -xzf "$A" -C "$RUNNER_TEMP/octeon-sdk"
+            GCC=$(find "$RUNNER_TEMP/octeon-sdk" -path '*/bin/mips64-octeon-linux-gnu-gcc' -print -quit)
+            test -n "$GCC"
+            TC=$(dirname "$(dirname "$GCC")")
+            export PATH="$TC/bin:$PATH" OCTEON_MODEL=OCTEON_CN70XX
+            "$GCC" --version | head -n 2
+            echo "TARGET=$("$GCC" -dumpmachine)"
+            git clone --no-checkout https://github.com/IronDemiGod/pa220-openwrt.git "$RUNNER_TEMP/pa220-source"
+            git -C "$RUNNER_TEMP/pa220-source" checkout --detach 801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8
+            test "$(git -C "$RUNNER_TEMP/pa220-source" rev-parse HEAD)" = 801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8
+            U="$RUNNER_TEMP/pa220-source/u-boot"
+            cp u-boot/net/http_request.c "$U/net/http_request.c"
+            cp u-boot/include/net/http_request.h "$U/include/net/http_request.h"
+            make -C "$U" octeon_pa220_config HOSTCC="$U/tools/hostcc-gnu89"
+            make -C "$U" V=1 include/generated/generic-asm-offsets.h include/generated/asm-offsets.h HOSTCC="$U/tools/hostcc-gnu89"
+            make -C "$U" V=1 net/http_request.o HOSTCC="$U/tools/hostcc-gnu89"
+            test -s "$U/net/http_request.o"
+            file "$U/net/http_request.o"
+            "$TC/bin/mips64-octeon-linux-gnu-readelf" -h "$U/net/http_request.o" | tee "$R/21-parser-object-elf-header.txt"
+            "$TC/bin/mips64-octeon-linux-gnu-nm" -u "$U/net/http_request.o" | tee "$R/22-parser-object-undefined-symbols.txt"
+            wc -c "$U/net/http_request.o" | tee "$R/23-parser-object-size.txt"
+            sha256sum "$U/net/http_request.o" | tee "$R/24-parser-object-sha256.txt"
+            cp "$U/net/http_request.o" "$R/http_request.o"
+            echo TARGET_COMPILE=PASS
+          } 2>&1 | tee "$R/20-octeon-target-compile.log"
+      - name: Archive design and matrix
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          R=reports/pa220/P5-2A
+          cat > "$R/30-test-matrix.md" <<'EOF'
+          # P5-2A Host matrix
+          | # | Case | Expected |
+          |---:|---|---|
+                    | 01 | Complete GET | COMPLETE and exact fields |
+          | 02 | Complete HEAD | COMPLETE and exact fields |
+          | 03 | Request-line split | NEED_MORE then COMPLETE |
+          | 04 | URI split | NEED_MORE then COMPLETE |
+          | 05 | Header split | NEED_MORE then COMPLETE |
+          | 06 | CRLF split | NEED_MORE then COMPLETE |
+          | 07 | Multiple headers | COMPLETE, count 3 |
+          | 08 | Case-insensitive header names | COMPLETE, CL zero accepted |
+          | 09 | Request line overlong | ERROR / REQUEST_LINE_LIMIT |
+          | 10 | URI overlong | ERROR / BAD_URI |
+          | 11 | Header count limit | ERROR / HEADER_COUNT_LIMIT |
+          | 12 | Header line limit | ERROR / HEADER_LINE_LIMIT |
+          | 13 | Header total limit | ERROR / HEADER_TOTAL_LIMIT |
+          | 14 | RX overflow | ERROR / RX_LIMIT |
+          | 15 | NUL byte | ERROR |
+          | 16 | Bare LF | ERROR / BAD_CRLF |
+          | 17 | Invalid request-line spacing | ERROR / BAD_REQUEST_LINE |
+          | 18 | Header missing colon | ERROR / BAD_HEADER |
+          | 19 | Invalid Content-Length | ERROR / BAD_CONTENT_LENGTH |
+          | 20 | Duplicate Content-Length | ERROR / DUPLICATE_CONTENT_LENGTH |
+          | 21 | Conflicting duplicate Content-Length | ERROR / DUPLICATE_CONTENT_LENGTH |
+          | 22 | Content-Length + Transfer-Encoding | ERROR / conflict |
+          | 23 | Transfer-Encoding before Content-Length | ERROR / conflict |
+          | 24 | Unsupported Transfer-Encoding | ERROR / unsupported |
+          | 25 | Content-Length decimal overflow | ERROR / BAD_CONTENT_LENGTH |
+          | 26 | Control byte in header value | ERROR / BAD_HEADER_VALUE |
+          | 27 | Nonzero body length | ERROR / BODY_NOT_SUPPORTED |
+          | 28 | Incomplete request | NEED_MORE |
+          | 29 | Trailing body bytes | ERROR / BODY_TOO_LARGE |
+          | 30 | Reset then independent request | COMPLETE |
+          | 31 | Repeated COMPLETE | COMPLETE |
+          | 32 | Header terminator split | NEED_MORE then COMPLETE |
+          EOF
+          cat > "$R/31-design.md" <<'EOF'
+          # PA-220 P5-2A parser design
+          Standalone C parser, one fixed RX buffer, one HTTP/1.x request head, no dynamic allocation, I/O, TCP calls, URI dispatch, or body support. Each TCP-read chunk is appended once; incomplete bytes remain parser-owned because tcp_core_read consumes its RX queue. A completed request remains stable until explicit reset.
+          | Resource | Limit |
+          |---|---:|
+          | RX buffer | 4096 bytes |
+          | TX planning limit (not allocated here) | 1460 bytes |
+          | Request line excluding CRLF | 512 bytes |
+          | URI | 384 bytes |
+          | Header count | 16 |
+          | Header line including CRLF | 256 bytes |
+          | Aggregate header section including CRLF | 2048 bytes |
+          | Request body | 0 bytes |
+          Exactly one SP separates METHOD, request-target and VERSION. Only HTTP/1.0 and HTTP/1.1. METHOD and header names use token characters. Request-target is bounded visible ASCII. CRLF is mandatory. Header names are case-insensitive; obs-fold and malformed/control-bearing values are rejected. Content-Length uses checked decimal parsing; one zero value is accepted, duplicates are rejected, nonzero is rejected. Transfer-Encoding is unsupported and CL/TE conflicts are rejected. Bytes following CRLFCRLF are rejected. NEED_MORE is a viable incomplete prefix; COMPLETE occurs only at CRLFCRLF; ERROR is sticky until reset.
+          P5-2A does not alter TCP, foreground web lifecycle, patch series, or URI routing. The target workflow compiles the parser object against the exact pinned PA-220 source.
+          EOF
+          cat > "$R/32-execution-summary.md" <<'EOF'
+          # P5-2A execution evidence
+          Host result: see 10-host-tests.log.
+          OCTEON result: see 20-octeon-target-compile.log.
+          ABI: 21-parser-object-elf-header.txt.
+          Undefined symbols: 22-parser-object-undefined-symbols.txt.
+          Object size: 23-parser-object-size.txt.
+          SHA-256: 24-parser-object-sha256.txt.
+          EOF
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: pa220-p5-2a-http-request-parser
+          path: reports/pa220/P5-2A/
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Commit evidence
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/pa220/P5-2A/
+          if ! git diff --cached --quiet; then
+            git commit -m "pa220: archive P5-2A HTTP parser validation"
+            git fetch origin feature/pa220-ubootkit-web
+            git rebase origin/feature/pa220-ubootkit-web
+            git push origin HEAD:refs/heads/feature/pa220-ubootkit-web
+          fi
