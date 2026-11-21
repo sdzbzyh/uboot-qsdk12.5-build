@@ -1,0 +1,212 @@
+name: PA-220 cloud validation
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/pa220-ubootkit-web
+    paths:
+      - '.github/workflows/pa220-cloud-validation.yml'
+      - 'build-pa220.sh'
+      - 'u-boot/net/tcp.c'
+      - 'u-boot/include/net/tcp.h'
+      - 'reports/pa220/P5-1A.3/18-host-focused-protocol-retest.c'
+      - 'patches/pa220/**'
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    name: Host TCP regression and OCTEON build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project branch
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: feature/pa220-ubootkit-web
+          fetch-depth: 0
+
+      - name: Run host regression and OCTEON cross-build
+        id: validation
+        env:
+          GH_TOKEN: ${{ secrets.OCTEON_SDK_READ_TOKEN }}
+        shell: bash
+        run: |
+          set +e
+          REPORT_DIR="reports/pa220/cloud-validation"
+          mkdir -p "$REPORT_DIR"
+          LOG="$REPORT_DIR/21-github-actions-validation.log"
+          SUMMARY="$REPORT_DIR/21-github-actions-validation.md"
+          HOST_BUILD_RC=99
+          HOST_TEST_RC=99
+          DOWNLOAD_RC=99
+          CHECKSUM_RC=99
+          OCTEON_BUILD_RC=99
+
+          {
+            echo "========== PA-220 GITHUB ACTIONS VALIDATION =========="
+            date -u '+UTC_DATE=%Y-%m-%dT%H:%M:%SZ'
+            echo "BRANCH=feature/pa220-ubootkit-web"
+            echo "CHECKED_OUT_COMMIT=$(git rev-parse HEAD)"
+            echo
+            echo "========== SOURCE IDENTITY =========="
+            sha1sum u-boot/net/tcp.c u-boot/include/net/tcp.h reports/pa220/P5-1A.3/18-host-focused-protocol-retest.c
+            echo
+            echo "========== HOST TCP REGRESSION =========="
+            mkdir -p "$RUNNER_TEMP/pa220-host/include/linux"
+            cat > "$RUNNER_TEMP/pa220-host/include/common.h" <<'EOF'
+          #ifndef PA220_HOST_COMMON_H
+          #define PA220_HOST_COMMON_H
+          #include <stdint.h>
+          #include <stddef.h>
+          #include <string.h>
+          typedef uint8_t u8;
+          typedef uint16_t u16;
+          typedef uint32_t u32;
+          typedef int32_t s32;
+          #endif
+          EOF
+            cat > "$RUNNER_TEMP/pa220-host/include/linux/types.h" <<'EOF'
+          #ifndef PA220_HOST_LINUX_TYPES_H
+          #define PA220_HOST_LINUX_TYPES_H
+          #include <stdint.h>
+          typedef uint8_t u8;
+          typedef uint16_t u16;
+          typedef uint32_t u32;
+          typedef int32_t s32;
+          #endif
+          EOF
+            gcc --version | head -n 1
+            gcc -std=gnu89 -Wall -Wextra -Werror \
+              -include "$RUNNER_TEMP/pa220-host/include/common.h" \
+              -I"$RUNNER_TEMP/pa220-host/include" -Iu-boot/include \
+              u-boot/net/tcp.c \
+              reports/pa220/P5-1A.3/18-host-focused-protocol-retest.c \
+              -o "$RUNNER_TEMP/pa220-host/tcp-regression"
+            HOST_BUILD_RC=$?
+            echo "HOST_BUILD_RC=$HOST_BUILD_RC"
+            if [ "$HOST_BUILD_RC" -eq 0 ]; then
+              "$RUNNER_TEMP/pa220-host/tcp-regression"
+              HOST_TEST_RC=$?
+            fi
+            echo "HOST_TEST_RC=$HOST_TEST_RC"
+            echo
+            echo "========== OCTEON SDK RELEASE DOWNLOAD =========="
+            mkdir -p "$RUNNER_TEMP/octeon-download" "$RUNNER_TEMP/octeon-sdk"
+            if [ -z "$GH_TOKEN" ]; then
+              echo "ERROR: OCTEON_SDK_READ_TOKEN secret is unavailable"
+            else
+              gh release download octeon-sdk-5.1.0 \
+                --repo sdzbzyh/pa220-toolchains \
+                --pattern '*.tar.gz' --pattern '*.sha256' \
+                --dir "$RUNNER_TEMP/octeon-download"
+              DOWNLOAD_RC=$?
+            fi
+            echo "DOWNLOAD_RC=$DOWNLOAD_RC"
+            if [ "$DOWNLOAD_RC" -eq 0 ]; then
+              cd "$RUNNER_TEMP/octeon-download"
+              sha256sum -c ./*.sha256
+              CHECKSUM_RC=$?
+              cd "$GITHUB_WORKSPACE"
+            fi
+            echo "CHECKSUM_RC=$CHECKSUM_RC"
+            if [ "$DOWNLOAD_RC" -eq 0 ] && [ "$CHECKSUM_RC" -eq 0 ]; then
+              ARCHIVE=$(find "$RUNNER_TEMP/octeon-download" -maxdepth 1 -type f -name '*.tar.gz' -print -quit)
+              tar -xzf "$ARCHIVE" -C "$RUNNER_TEMP/octeon-sdk"
+              TAR_RC=$?
+              echo "EXTRACT_RC=$TAR_RC"
+              if [ "$TAR_RC" -eq 0 ]; then
+                GCC_PATH=$(find "$RUNNER_TEMP/octeon-sdk" -type f -path '*/bin/mips64-octeon-linux-gnu-gcc' -print -quit)
+                if [ -n "$GCC_PATH" ]; then
+                  TOOLCHAIN_DIR=$(dirname "$(dirname "$GCC_PATH")")
+                  echo "TOOLCHAIN_DIR=$TOOLCHAIN_DIR"
+                  "$GCC_PATH" --version | head -n 2
+                  echo "TARGET=$("$GCC_PATH" -dumpmachine)"
+                  echo
+                  echo "========== PA-220 PINNED-SOURCE BUILD =========="
+                  ./build-pa220.sh "$TOOLCHAIN_DIR"
+                  OCTEON_BUILD_RC=$?
+                else
+                  echo "ERROR: extracted archive does not contain bin/mips64-octeon-linux-gnu-gcc"
+                  OCTEON_BUILD_RC=98
+                fi
+              else
+                OCTEON_BUILD_RC=97
+              fi
+            else
+              OCTEON_BUILD_RC=96
+            fi
+            echo "OCTEON_BUILD_RC=$OCTEON_BUILD_RC"
+            echo
+            echo "========== FINAL STATUS =========="
+            echo "HOST_BUILD_RC=$HOST_BUILD_RC"
+            echo "HOST_TEST_RC=$HOST_TEST_RC"
+            echo "DOWNLOAD_RC=$DOWNLOAD_RC"
+            echo "CHECKSUM_RC=$CHECKSUM_RC"
+            echo "OCTEON_BUILD_RC=$OCTEON_BUILD_RC"
+            echo "========== END =========="
+          } > "$LOG" 2>&1
+
+          cat "$LOG"
+          cat > "$SUMMARY" <<EOF
+          # PA-220 GitHub Actions validation
+
+          - Branch: `feature/pa220-ubootkit-web`
+          - Commit: `$(git rev-parse HEAD)`
+          - TCP source SHA-1: `$(sha1sum u-boot/net/tcp.c | awk '{print $1}')`
+          - TCP header SHA-1: `$(sha1sum u-boot/include/net/tcp.h | awk '{print $1}')`
+          - Host regression source: `reports/pa220/P5-1A.3/18-host-focused-protocol-retest.c`
+          - Host compile exit code: `$HOST_BUILD_RC`
+          - Host test exit code: `$HOST_TEST_RC`
+          - Private SDK release download exit code: `$DOWNLOAD_RC`
+          - SDK archive checksum exit code: `$CHECKSUM_RC`
+          - OCTEON build exit code: `$OCTEON_BUILD_RC`
+
+          The full command output is in [21-github-actions-validation.log](21-github-actions-validation.log).
+          EOF
+          echo "host_build_rc=$HOST_BUILD_RC" >> "$GITHUB_OUTPUT"
+          echo "host_test_rc=$HOST_TEST_RC" >> "$GITHUB_OUTPUT"
+          echo "download_rc=$DOWNLOAD_RC" >> "$GITHUB_OUTPUT"
+          echo "checksum_rc=$CHECKSUM_RC" >> "$GITHUB_OUTPUT"
+          echo "octeon_build_rc=$OCTEON_BUILD_RC" >> "$GITHUB_OUTPUT"
+
+      - name: Upload logs and build image
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: pa220-cloud-validation
+          path: |
+            reports/pa220/cloud-validation/
+            bin/pa220/u-boot-octeon_pa220.bin
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Commit validation evidence to project branch
+        if: always()
+        shell: bash
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/pa220/cloud-validation/21-github-actions-validation.log reports/pa220/cloud-validation/21-github-actions-validation.md
+          git commit -m "pa220: record GitHub cloud validation"
+          if ! git push origin HEAD:refs/heads/feature/pa220-ubootkit-web; then
+            git fetch origin feature/pa220-ubootkit-web
+            git rebase origin/feature/pa220-ubootkit-web
+            git push origin HEAD:refs/heads/feature/pa220-ubootkit-web
+          fi
+
+      - name: Enforce validation result
+        if: always()
+        shell: bash
+        run: |
+          if [ "${{ steps.validation.outputs.host_build_rc }}" != "0" ] ||
+             [ "${{ steps.validation.outputs.host_test_rc }}" != "0" ] ||
+             [ "${{ steps.validation.outputs.download_rc }}" != "0" ] ||
+             [ "${{ steps.validation.outputs.checksum_rc }}" != "0" ] ||
+             [ "${{ steps.validation.outputs.octeon_build_rc }}" != "0" ]; then
+            echo "One or more validation stages failed; inspect the committed report and artifact."
+            exit 1
+          fi
+          echo "All validation stages passed."
