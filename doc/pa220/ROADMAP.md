@@ -168,3 +168,20 @@ P5 与 P4 并行推进：P4 负责 DHCP/Ping/TFTP 网络维护与实机验证；
 - 第一版只读：仅限 GET/HEAD 和审查过的状态 handler；无命令执行、环境/存储/CPLD 写入、上传、安装或重启。
 
 当前状态：**P5-1 静态适配审计完成；代码实现未开始；未编译、未 RAM 启动、未实机验证。** 下一工作单元为独立 TCP 核心文件，暂不改动 `NetReceive()`，以降低与 P4 对网络核心文件并行修改的冲突风险。
+
+
+## P5 最新状态与交接（2026-11-21）
+
+本节为 P5 状态的最新覆盖记录；早期“代码实现未开始”的历史文字不再代表当前 TCP 核心状态。
+
+- **P5-1A.2 独立静态单连接 TCP 核心：已实现。**
+- **P5-1A.3 Host 协议回归：PASS，76 assertions passed / 0 failed。**
+- **OCTEON SDK 5.1.0 下载、SHA-256 校验及 PA-220 完整交叉编译：PASS。** Actions run #3：`44856960192`；生成 BIN 1,362,216 bytes。
+- **RAM 启动、真实网口 TCP 收发：NOT RUN。**
+- **P5-1B：尚未实施，下一工作单元为最小 IPv4 TCP 分派 hook。**
+
+### P5-1B 范围边界
+
+仅在固定 PA-220 源码 `801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8` 的 `NetReceive()` 中，为 IPv4 protocol 6 增加显式注册的窄分派接口。入口必须位于 IPv4 header/长度/校验、目的地址过滤及分片处理之后；TCP segment 长度仍需独立边界核验。未注册时保持原有丢弃行为。ARP、ICMP、UDP 的处理不得改变。
+
+P5-1B 不包含 TCP 输出封装、Ethernet/MAC 邻居处理、前台 Web 生命周期、HTTP parser 或任何上传/写入接口。P5 与 P4 并行，修改 `net.c` / `net.h` / `net/Makefile` 前必须基于最新远端 HEAD 核对实际差异；不覆盖并行改动。所有补丁必须由真实源码差异生成，禁止手工猜测 hunk 行数。
