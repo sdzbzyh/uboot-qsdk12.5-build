@@ -14,7 +14,7 @@ diff --git a/u-boot/common/cmd_pa220_web.c b/u-boot/common/cmd_pa220_web.c
 new file mode 100644
 --- /dev/null
 +++ b/u-boot/common/cmd_pa220_web.c
-@@ -0,0 +1,147 @@
+@@ -0,0 +1,142 @@
 +/*
 + * PA-220 foreground Web/TCP lifecycle entry.
 + *
@@ -157,8 +157,66 @@ new file mode 100644
 +	return ret;
 +}
 +
-+U_BOOT_CMD(
-+	pa220, 2, 0, do_pa220_web,
-+	"PA-220 foreground read-only service controls",
-+	"web - run the foreground TCP/Web lifecycle"
-+);
+diff --git a/u-boot/board/octeon/pa220/pa220_board.c b/u-boot/board/octeon/pa220/pa220_board.c
+--- a/u-boot/board/octeon/pa220/pa220_board.c
++++ b/u-boot/board/octeon/pa220/pa220_board.c
+@@ -415,41 +415,58 @@
+ 	puts("DDR source : valid EEPROM DDR clock descriptor, otherwise PA-220 fallback; source is not retained.\n");
+ }
+ 
++#ifdef CONFIG_CMD_NET
++extern int do_pa220_web(cmd_tbl_t *cmdtp, int flag, int argc,
++			char * const argv[]);
++#endif
++
+ static int do_pa220(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+ {
++#ifdef CONFIG_CMD_NET
++	if (argc == 2 && !strcmp(argv[1], "web"))
++		return do_pa220_web(cmdtp, flag, argc, argv);
++#endif
++
+ 	if (argc == 1 || !strcmp(argv[1], "status")) {
+ 		pa220_print_status();
+ 		return CMD_RET_SUCCESS;
+ 	}
+ 
+ 	if (argc == 2 && !strcmp(argv[1], "env")) {
+ 		pa220_print_environment_info();
+ 		return CMD_RET_SUCCESS;
+ 	}
+ 
+ 	if (argc == 2 && !strcmp(argv[1], "memory")) {
+ 		pa220_print_memory_info();
+ 		return CMD_RET_SUCCESS;
+ 	}
+ 
+ 	if (argc == 2 && !strcmp(argv[1], "board")) {
+ 		pa220_print_board_info();
+ 		return CMD_RET_SUCCESS;
+ 	}
+ 
+ 	if (argc == 2 && !strcmp(argv[1], "clock")) {
+ 		pa220_print_clock_info();
+ 		return CMD_RET_SUCCESS;
+ 	}
+ 
+ 	return CMD_RET_USAGE;
+ }
+ 
++#ifdef CONFIG_CMD_NET
++#define PA220_WEB_HELP "\npa220 web     - run the foreground TCP/Web lifecycle"
++#else
++#define PA220_WEB_HELP ""
++#endif
++
+ U_BOOT_CMD(pa220, 2, 1, do_pa220,
+ 	   "PA-220 read-only maintenance information",
+ 	   "status  - show board, memory, network and CPLD status\n"
+ 	   "pa220 env     - show environment storage and write warning\n"
+ 	   "pa220 memory  - show load memory variables and __tmp_load block\n"
+ 	   "pa220 board   - show cached board descriptor and MAC information\n"
+-	   "pa220 clock   - show initialized CORE, SCLK and DDR clock values");
++	   "pa220 clock   - show initialized CORE, SCLK and DDR clock values"
++	   PA220_WEB_HELP);
+ 
