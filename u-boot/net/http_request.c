@@ -72,7 +72,17 @@ static int http_parse_request_line(struct http_request_parser *p,u16 end)
  if(ul>HTTP_REQ_URI_MAX) return -HTTP_REQ_ERR_BAD_URI;
  if(vl!=8) return -HTTP_REQ_ERR_BAD_VERSION;
  for(i=0;i<ml;i++) if(!http_is_token(p->rx[i])) return -HTTP_REQ_ERR_BAD_METHOD;
- for(i=0;i<ul;i++) {u8 ch=p->rx[sp1+1+i]; if(ch<0x21 || ch>0x7e || ch=='#') return -HTTP_REQ_ERR_BAD_URI;}
+ for(i=0;i<ul;i++) {
+  u8 ch=p->rx[sp1+1+i];
+  if(ch=='%') {
+   if(i+2>=ul || !http_is_hex(p->rx[sp1+2+i]) ||
+      !http_is_hex(p->rx[sp1+3+i]))
+    return -HTTP_REQ_ERR_BAD_URI;
+   i+=2;
+  } else if(!http_is_uri_char(ch)) {
+   return -HTTP_REQ_ERR_BAD_URI;
+  }
+ }
  if(memcmp(p->rx+sp2+1,"HTTP/1.0",8) && memcmp(p->rx+sp2+1,"HTTP/1.1",8)) return -HTTP_REQ_ERR_BAD_VERSION;
  memcpy(r->method,p->rx,ml); r->method[ml]='\0';
  memcpy(r->uri,p->rx+sp1+1,ul); r->uri[ul]='\0';
