@@ -1,2 +1,27 @@
 tcp_ipv4_tx: PASS
 tcp_core_retry: PASS
+In file included from /home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/u-boot/net/tcp_ipv4_tx.c:15:
+/home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/tests/host/tcp_ipv4_tx/stubs_core/net.h:5:9: error: ‘IPPROTO_TCP’ redefined [-Werror]
+    5 | #define IPPROTO_TCP 6
+      |         ^~~~~~~~~~~
+In file included from /usr/include/arpa/inet.h:22,
+                 from /home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/tests/host/tcp_ipv4_tx/stubs_core/common.h:6,
+                 from /home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/u-boot/net/tcp_ipv4_tx.c:14:
+/usr/include/netinet/in.h:51:9: note: this is the location of the previous definition
+   51 | #define IPPROTO_TCP             IPPROTO_TCP
+      |         ^~~~~~~~~~~
+cc1: all warnings being treated as errors
+In file included from /home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/tests/host/tcp_ipv4_tx/tcp_synack_tx_test.c:4:
+/home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/tests/host/tcp_ipv4_tx/stubs_core/net.h:5:9: error: ‘IPPROTO_TCP’ redefined [-Werror]
+    5 | #define IPPROTO_TCP 6
+      |         ^~~~~~~~~~~
+In file included from /usr/include/arpa/inet.h:22,
+                 from /home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/tests/host/tcp_ipv4_tx/stubs_core/common.h:6,
+                 from /home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/tests/host/tcp_ipv4_tx/tcp_synack_tx_test.c:3:
+/usr/include/netinet/in.h:51:9: note: this is the location of the previous definition
+   51 | #define IPPROTO_TCP             IPPROTO_TCP
+      |         ^~~~~~~~~~~
+/home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/tests/host/tcp_ipv4_tx/tcp_synack_tx_test.c:20:12: error: ‘get32’ defined but not used [-Werror=unused-function]
+   20 | static u32 get32(const u8 *p)
+      |            ^~~~~
+cc1: all warnings being treated as errors
