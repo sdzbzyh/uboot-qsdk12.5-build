@@ -1,0 +1,29 @@
+name: PA-220 P5-1D TCP IPv4 transmit host tests
+
+on:
+  push:
+    branches:
+      - feature/pa220-ubootkit-web
+    paths:
+      - 'u-boot/net/tcp_ipv4_tx.c'
+      - 'u-boot/include/net/tcp_ipv4_tx.h'
+      - 'tests/host/tcp_ipv4_tx/**'
+      - '.github/workflows/pa220-p5-1d-host.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  host-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout integration branch
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: feature/pa220-ubootkit-web
+      - name: Compile and run focused transmitter tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          tests/host/tcp_ipv4_tx/run.sh
