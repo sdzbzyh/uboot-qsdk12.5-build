@@ -82,7 +82,7 @@ int main(void)
 	/* The peer FIN is acknowledged and leaves the core in CLOSE-WAIT. */
 	make_segment(seg, 2001, 1001, TCP_FLAG_FIN | TCP_FLAG_ACK);
 	assert(tcp_core_input(&c, peer_ip, local_ip, seg, sizeof(seg), 2,
-			      capture_emit, &cap) == 1);
+			      capture_emit, &cap) == 0);
 	assert(c.state == TCP_CORE_CLOSE_WAIT);
 	assert(c.fin_received);
 	assert(cap.flags == TCP_FLAG_ACK);
