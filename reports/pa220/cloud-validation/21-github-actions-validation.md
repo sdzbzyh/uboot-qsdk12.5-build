@@ -21,3 +21,9 @@ The full command output is in [21-github-actions-validation.log](21-github-actio
 
 - Scope clarification: the full OCTEON build validated the PA-220 baseline plus patches 0001/0002; it did not compile the standalone TCP core source `u-boot/net/tcp.c` (no `net/tcp.o` build record).
 - TCP core OCTEON target-object compile/link: NOT RUN; tracked as the next required task before P5-1B.
+
+- Standalone TCP core OCTEON target object compile: PASS (Cavium GCC 4.7.0, PA-220 pinned configuration)
+- Object: ELF32 big-endian MIPS N32 / MIPS64r2 OCTEON, 49,564 bytes
+- Object SHA-256: `16ccf75c9cb4e779753ee99fdfeadba21802e9d6a6ed009cb8b9d33da7240ca2`
+- Evidence: `../P5-1A.3/20-octeon-tcp-object-compile.log` and `20-octeon-tcp-object-compile.md`
+- TCP core final link into PA-220 U-Boot: NOT RUN; deferred to P5-1B integration build
