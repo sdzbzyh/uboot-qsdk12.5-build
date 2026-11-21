@@ -1,12 +1,12 @@
  .text.do_pa220_web
-                0x00000000c00b774c                do_pa220_web
+                0x00000000c00b7804                do_pa220_web
  .text.net_set_tcp_handler
-                0x00000000c01069fc                net_set_tcp_handler
+                0x00000000c0106ad4                net_set_tcp_handler
  .text.tcp_core_poll
-                0x00000000c0109c5c                tcp_core_poll
+                0x00000000c0109d34                tcp_core_poll
  .text.tcp_core_input
-                0x00000000c0109fa8                tcp_core_input
+                0x00000000c010a080                tcp_core_input
  .text.tcp_ipv4_tx_learn_peer
-                0x00000000c010a598                tcp_ipv4_tx_learn_peer
+                0x00000000c010a670                tcp_ipv4_tx_learn_peer
  .text.tcp_ipv4_tx_emit
-                0x00000000c010a800                tcp_ipv4_tx_emit
+                0x00000000c010a8d8                tcp_ipv4_tx_emit
