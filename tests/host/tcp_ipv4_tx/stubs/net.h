@@ -2,7 +2,6 @@
 #define TEST_NET_H
 #include <common.h>
 #define PROT_IP 0x0800
-#define IPPROTO_TCP 6
 #define IP_HDR_SIZE 20
 #define ETHER_HDR_SIZE 14
 #define VLAN_ETHER_HDR_SIZE 18

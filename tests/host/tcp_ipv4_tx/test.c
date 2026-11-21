@@ -122,7 +122,7 @@ int main(void)
 	assert(tcp_ipv4_tx_learn_peer(&peer, offlink, mac) != 0);
 	assert(tcp_ipv4_tx_learn_peer(&peer, remote, bad_mac) != 0);
 
-	make_segment(seg, remote, (const u8 *)&NetOurIP);
+	make_segment(seg, (const u8 *)&NetOurIP, remote);
 	memcpy(rx, seg, sizeof(rx));
 	assert(tcp_ipv4_tx_emit(&peer, (const u8 *)&NetOurIP, remote,
 				rx, sizeof(rx)) == 0);

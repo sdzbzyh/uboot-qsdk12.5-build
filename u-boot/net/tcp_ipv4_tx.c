@@ -145,7 +145,7 @@ int tcp_ipv4_tx_emit(void *arg, const u8 src[4], const u8 dst[4],
 	eth_len = NetSetEther(tcp_ipv4_tx_frame, peer->mac, PROT_IP);
 	if (eth_len != ETHER_HDR_SIZE && eth_len != VLAN_ETHER_HDR_SIZE)
 		return -1;
-	if (eth_len + ip_len > sizeof(tcp_ipv4_tx_frame))
+	if (eth_len + ip_len > (int)sizeof(tcp_ipv4_tx_frame))
 		return -1;
 
 	ip = (struct ip_udp_hdr *)(tcp_ipv4_tx_frame + eth_len);
