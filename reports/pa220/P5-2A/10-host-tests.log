@@ -1,37 +1,10 @@
-UTC=2026-11-21T08:48:28Z
-COMMIT=dae4c5d431cd518e29d1cff21ee7c2f2c11809d2
+UTC=2026-11-21T08:49:52Z
+COMMIT=2c6086f0dac99419c0dd6b1dd270ebb0b06e1fb2
 cc (Ubuntu 15.2.0-16ubuntu1) 15.2.0
-01 complete GET: PASS
-02 complete HEAD: PASS
-03 request-line split: PASS
-04 URI split: PASS
-05 header split: PASS
-06 CRLF split: PASS
-07 multiple headers: PASS
-08 header case insensitive: PASS
-09 request line overlong: PASS
-10 URI overlong: PASS
-11 header count limit: PASS (header-count-limit)
-12 header line limit: PASS (header-line-limit)
-13 header total limit: PASS (header-total-limit)
-14 RX overflow: PASS
-15 NUL byte: PASS
-16 bare LF: PASS (bad-crlf)
-17 malformed request line: PASS (bad-request-line)
-18 malformed header: PASS (bad-header)
-19 invalid Content-Length: PASS (bad-content-length)
-20 duplicate Content-Length: PASS (duplicate-content-length)
-21 conflicting duplicate Content-Length: PASS (duplicate-content-length)
-22 CL plus TE: PASS (content-length-transfer-encoding)
-23 TE then CL conflict: PASS (content-length-transfer-encoding)
-24 unsupported TE: PASS (transfer-encoding-not-supported)
-25 CL decimal overflow: PASS (bad-content-length)
-26 control in header value: PASS (bad-header-value)
-27 nonzero body: PASS (body-not-supported)
-28 incomplete NEED_MORE: PASS
-29 trailing body: PASS (body-too-large)
-30 reset and new request: PASS
-31 repeated COMPLETE: PASS
-32 terminator split: PASS
-PARSER_STRUCT_BYTES=13224
-CHECKS=89 FAILURES=0
+/home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/u-boot/net/http_request.c:22:12: error: ‘http_is_uri_char’ defined but not used [-Werror=unused-function]
+   22 | static int http_is_uri_char(u8 c)
+      |            ^~~~~~~~~~~~~~~~
+/home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/u-boot/net/http_request.c:18:12: error: ‘http_is_hex’ defined but not used [-Werror=unused-function]
+   18 | static int http_is_hex(u8 c)
+      |            ^~~~~~~~~~~
+cc1: all warnings being treated as errors
