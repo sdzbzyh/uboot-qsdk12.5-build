@@ -2,7 +2,7 @@ Cloning into '/home/runner/work/_temp/pa220-p5-1d-patch-base'...
 From https://github.com/IronDemiGod/pa220-openwrt
  * branch            801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8 -> FETCH_HEAD
 HEAD is now at 801717b docs/BUILD.md: describe the PA-220 kernel patches
-[detached HEAD 961907f] temporary baseline: accepted PA-220 P5-1C patch series
+[detached HEAD 32312a2] temporary baseline: accepted PA-220 P5-1C patch series
  8 files changed, 1121 insertions(+)
  create mode 100644 u-boot/common/cmd_pa220_web.c
  create mode 100644 u-boot/include/net/tcp.h
