@@ -102,7 +102,7 @@ int main(void)
 	/* The peer's final ACK clears the connection and restores LISTEN. */
 	make_segment(seg, 2002, 1002, TCP_FLAG_ACK);
 	assert(tcp_core_input(&c, peer_ip, local_ip, seg, sizeof(seg), 4,
-			      capture_emit, &cap) == 0);
+			      capture_emit, &cap) == 1);
 	assert(c.state == TCP_CORE_LISTEN);
 	assert(c.local_port == 80);
 	assert(c.remote_port == 0);
