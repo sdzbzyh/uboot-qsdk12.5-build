@@ -136,9 +136,9 @@ static void test_close_wait_post_fin_data(void)
     CHECK(get32(last_packet + 8) == 5002);
 
     if (c.rx_len == 0 && c.rcv_nxt == 5002)
-        printf("RESULT: POST_FIN_DATA_REJECTED\\n");
+        printf("RESULT: POST_FIN_DATA_REJECTED\n");
     else
-        printf("RESULT: POST_FIN_DATA_ACCEPTED (PROTOCOL DEFECT)\\n");
+        printf("RESULT: POST_FIN_DATA_ACCEPTED (PROTOCOL DEFECT)\n");
 }
 
 static void test_close_wait_preserves_buffer_and_ack(void)
@@ -147,7 +147,7 @@ static void test_close_wait_preserves_buffer_and_ack(void)
     u8 received[4];
     int rc;
 
-    printf("\\n[CLOSE-WAIT BUFFER READ AND ACK PROCESSING]\\n");
+    printf("\n[CLOSE-WAIT BUFFER READ AND ACK PROCESSING]\n");
     handshake(&c);
 
     CHECK(input(&c, 5001, 1001, TCP_FLAG_ACK | TCP_FLAG_PSH,
@@ -190,7 +190,7 @@ static void test_close_wait_rst(void)
 {
     struct tcp_core_connection c;
 
-    printf("\\n[CLOSE-WAIT RST]\\n");
+    printf("\n[CLOSE-WAIT RST]\n");
     handshake(&c);
     CHECK(input(&c, 5001, 1001, TCP_FLAG_FIN | TCP_FLAG_ACK,
                 NULL, 0, 10) == 0);
