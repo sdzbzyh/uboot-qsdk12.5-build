@@ -185,3 +185,16 @@ P5 与 P4 并行推进：P4 负责 DHCP/Ping/TFTP 网络维护与实机验证；
 仅在固定 PA-220 源码 `801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8` 的 `NetReceive()` 中，为 IPv4 protocol 6 增加显式注册的窄分派接口。入口必须位于 IPv4 header/长度/校验、目的地址过滤及分片处理之后；TCP segment 长度仍需独立边界核验。未注册时保持原有丢弃行为。ARP、ICMP、UDP 的处理不得改变。
 
 P5-1B 不包含 TCP 输出封装、Ethernet/MAC 邻居处理、前台 Web 生命周期、HTTP parser 或任何上传/写入接口。P5 与 P4 并行，修改 `net.c` / `net.h` / `net/Makefile` 前必须基于最新远端 HEAD 核对实际差异；不覆盖并行改动。所有补丁必须由真实源码差异生成，禁止手工猜测 hunk 行数。
+
+
+## P5 验证范围更正（2026-11-21）
+
+Actions #3 的 1,362,216-byte 镜像证明 PA-220 **baseline + 0001/0002 现有补丁**完整 OCTEON 构建通过；76/0 则证明独立 TCP core 的 Host focused regression 通过。二者不能合并解释为 TCP core 的目标交叉编译通过：当前 `build-pa220.sh` 只应用 `patches/pa220/*.patch`，这两个补丁不包含 TCP core；Actions 日志没有 `net/tcp.o` 编译证据。
+
+故当前精确状态为：
+- TCP core Host regression：PASS（76/0）。
+- PA-220 baseline 完整 OCTEON 构建：PASS。
+- TCP core OCTEON 目标对象编译/链接：NOT RUN。
+- TCP 网络接入、RAM 启动及实机网络验证：NOT RUN。
+
+**下一工作单元改为 P5-1A.3.1-T：独立 TCP core 的 OCTEON 目标对象编译验证。** 使用现有云端 SDK Release 和 PA-220 固定源码生成的配置/include 环境，不重复 Host 回归或完整 baseline 构建。只有该目标对象编译通过后，才进入 P5-1B 最小 IPv4 TCP 分派 hook。
