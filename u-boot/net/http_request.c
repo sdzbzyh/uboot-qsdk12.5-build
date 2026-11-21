@@ -141,7 +141,12 @@ enum http_req_status http_request_parser_feed(struct http_request_parser *p,cons
  if(!p->request_line_parsed) {
   found=http_find_crlf(p->rx,0,end,&line_end,&scan);
   if(found<0) return http_fail(p,scan);
-  if(!found) {if(end>HTTP_REQ_LINE_MAX+1) return http_fail(p,HTTP_REQ_ERR_REQUEST_LINE_LIMIT);return HTTP_REQ_NEED_MORE;}
+  if(!found) {
+   if(end>HTTP_REQ_LINE_MAX &&
+      !(end==HTTP_REQ_LINE_MAX+1 && p->rx[end-1]=='\r'))
+    return http_fail(p,HTTP_REQ_ERR_REQUEST_LINE_LIMIT);
+   return HTTP_REQ_NEED_MORE;
+  }
   rc=http_parse_request_line(p,line_end);
   if(rc) return http_fail(p,(enum http_req_error)-rc);
   p->request_line_parsed=1;
@@ -154,7 +159,9 @@ enum http_req_status http_request_parser_feed(struct http_request_parser *p,cons
   if(found<0) return http_fail(p,scan);
   if(!found) {
    if(end-header_start>HTTP_REQ_HEADER_TOTAL_MAX) return http_fail(p,HTTP_REQ_ERR_HEADER_TOTAL_LIMIT);
-   if(end-pos>HTTP_REQ_HEADER_LINE_MAX+1) return http_fail(p,HTTP_REQ_ERR_HEADER_LINE_LIMIT);
+   if(end-pos>HTTP_REQ_HEADER_LINE_MAX-2 &&
+      !(end-pos==HTTP_REQ_HEADER_LINE_MAX-1 && p->rx[end-1]=='\r'))
+    return http_fail(p,HTTP_REQ_ERR_HEADER_LINE_LIMIT);
    return HTTP_REQ_NEED_MORE;
   }
   if(line_end==pos) {

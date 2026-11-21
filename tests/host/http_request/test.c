@@ -17,10 +17,10 @@ int main(void){
  split("06 CRLF split",f,cr,2,0);
  good("07 multiple headers","GET / HTTP/1.1\r\nHost: x\r\nAccept: */*\r\nX-Test: yes\r\n\r\n","GET","/",3);
  good("08 header case insensitive","GET / HTTP/1.1\r\ncOnTeNt-LeNgTh: 0\r\nhOsT: x\r\n\r\n","GET","/",2);
- memset(b,'A',sizeof(b));http_request_parser_init(&p);z=http_request_parser_feed(&p,(u8*)b,HTTP_REQ_LINE_MAX+2);C(z==HTTP_REQ_ERROR&&p.error==HTTP_REQ_ERR_REQUEST_LINE_LIMIT);printf("09 request line overlong: %s\n",p.error==HTTP_REQ_ERR_REQUEST_LINE_LIMIT?"PASS":"FAIL");
+ memset(b,'A',sizeof(b));http_request_parser_init(&p);z=http_request_parser_feed(&p,(u8*)b,HTTP_REQ_LINE_MAX+1);C(z==HTTP_REQ_ERROR&&p.error==HTTP_REQ_ERR_REQUEST_LINE_LIMIT);printf("09 request line overlong: %s\n",p.error==HTTP_REQ_ERR_REQUEST_LINE_LIMIT?"PASS":"FAIL");
  memset(b,0,sizeof(b));memcpy(b,"GET /",5);memset(b+5,'a',HTTP_REQ_URI_MAX+1);memcpy(b+5+HTTP_REQ_URI_MAX+1," HTTP/1.1\r\n\r\n",13);http_request_parser_init(&p);z=http_request_parser_feed(&p,(u8*)b,(u16)(5+HTTP_REQ_URI_MAX+1+13));C(z==HTTP_REQ_ERROR&&p.error==HTTP_REQ_ERR_BAD_URI);printf("10 URI overlong: %s\n",p.error==HTTP_REQ_ERR_BAD_URI?"PASS":"FAIL");
  {char x[1024]="GET / HTTP/1.1\r\n";for(i=0;i<17;i++)strcat(x,"X: y\r\n");strcat(x,"\r\n");bad("11 header count limit",x,HTTP_REQ_ERR_HEADER_COUNT_LIMIT);}
- {char x[400]="GET / HTTP/1.1\r\nX:";size_t n=strlen(x);memset(x+n,'a',HTTP_REQ_HEADER_LINE_MAX);x[n+HTTP_REQ_HEADER_LINE_MAX]=0;bad("12 header line limit",x,HTTP_REQ_ERR_HEADER_LINE_LIMIT);}
+ {char x[400]="GET / HTTP/1.1\r\nX:";size_t n=strlen(x);memset(x+n,'a',HTTP_REQ_HEADER_LINE_MAX-3);x[n+HTTP_REQ_HEADER_LINE_MAX-3]=0;bad("12 header line limit",x,HTTP_REQ_ERR_HEADER_LINE_LIMIT);}
  {char x[2400]="GET / HTTP/1.1\r\n",line[241];memset(line,'a',240);line[240]=0;for(i=0;i<9;i++){strcat(x,"X:");strcat(x,line);strcat(x,"\r\n");}bad("13 header total limit",x,HTTP_REQ_ERR_HEADER_TOTAL_LIMIT);}
  http_request_parser_init(&p);memset(over,'A',sizeof(over));z=http_request_parser_feed(&p,over,sizeof(over));C(z==HTTP_REQ_ERROR&&p.error==HTTP_REQ_ERR_RX_LIMIT);printf("14 RX overflow: %s\n",p.error==HTTP_REQ_ERR_RX_LIMIT?"PASS":"FAIL");
  {const u8 nul[]={'G','E','T',' ','/',' ','H','T','T','P','/','1','.','1','\r','\n',0,'\r','\n'};http_request_parser_init(&p);z=http_request_parser_feed(&p,nul,sizeof(nul));C(z==HTTP_REQ_ERROR&&p.error==HTTP_REQ_ERR_BAD_HEADER);printf("15 NUL byte: %s\n",z==HTTP_REQ_ERROR&&p.error==HTTP_REQ_ERR_BAD_HEADER?"PASS":"FAIL");}
