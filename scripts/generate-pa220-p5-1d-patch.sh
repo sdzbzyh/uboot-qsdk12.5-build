@@ -31,16 +31,14 @@ git -C "$BASE_DIR" commit -m "temporary baseline: accepted PA-220 P5-1C patch se
 
 UBOOT="$BASE_DIR/u-boot"
 cp "$ROOT_DIR/u-boot/common/cmd_pa220_web.c" "$UBOOT/common/cmd_pa220_web.c"
-cp "$ROOT_DIR/u-boot/net/tcp.c" "$UBOOT/net/tcp.c"
 cp "$ROOT_DIR/u-boot/net/tcp_ipv4_tx.c" "$UBOOT/net/tcp_ipv4_tx.c"
-cp "$ROOT_DIR/u-boot/include/net/tcp.h" "$UBOOT/include/net/tcp.h"
 cp "$ROOT_DIR/u-boot/include/net/tcp_ipv4_tx.h" "$UBOOT/include/net/tcp_ipv4_tx.h"
 
-python3 - "$UBOOT/include/net.h" "$UBOOT/net/net.c" "$UBOOT/net/Makefile" <<'PY'
+python3 - "$UBOOT/include/net.h" "$UBOOT/net/net.c" "$UBOOT/net/Makefile" "$UBOOT/net/tcp.c" <<'PY'
 import re
 import sys
 
-net_h, net_c, makefile = sys.argv[1:]
+net_h, net_c, makefile, tcp_c = sys.argv[1:]
 
 def replace_once(path, pattern, replacement):
     with open(path, "r", encoding="utf-8") as f:
@@ -51,6 +49,16 @@ def replace_once(path, pattern, replacement):
                          (path, count))
     with open(path, "w", encoding="utf-8") as f:
         f.write(updated)
+
+def replace_literal_once(path, old, new):
+    with open(path, "r", encoding="utf-8") as f:
+        data = f.read()
+    count = data.count(old)
+    if count != 1:
+        raise SystemExit("expected exactly one literal source match in %s, found %d" %
+                         (path, count))
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(data.replace(old, new, 1))
 
 replace_once(
     net_h,
@@ -67,6 +75,52 @@ replace_once(
     "tcp_packet_handler((uchar *)ip + IP_HDR_SIZE,\n"
     "\t\t\t\t   tcp_segment_len, src_ip, dst_ip, et->et_src);"
 )
+
+old_syn = (
+    "\t\tif ((v.flags & TCP_FLAG_SYN) && v.sequence == c->irs) {\n"
+    "\t\t\tif (c->pending)\n"
+    "\t\t\t\ttcp_emit(c, c->retry_flags, c->retry_seq,\n"
+    "\t\t\t\t\t c->rcv_nxt, NULL, 0, 1, emit, arg);\n"
+    "\t\t\treturn 1;\n"
+    "\t\t}"
+)
+new_syn = (
+    "\t\tif ((v.flags & TCP_FLAG_SYN) && v.sequence == c->irs) {\n"
+    "\t\t\tif (c->pending &&\n"
+    "\t\t\t    tcp_emit(c, c->retry_flags, c->retry_seq,\n"
+    "\t\t\t\t     c->rcv_nxt, NULL, 0, 1, emit, arg))\n"
+    "\t\t\t\treturn -1;\n"
+    "\t\t\treturn 1;\n"
+    "\t\t}"
+)
+replace_literal_once(tcp_c, old_syn, new_syn)
+
+old_poll = (
+    "\tif (tcp_emit(c, c->retry_flags, c->retry_seq, c->rcv_nxt,\n"
+    "\t\t     c->retry_len ? c->retry_data : NULL, c->retry_len,\n"
+    "\t\t     !!(c->retry_flags & TCP_FLAG_SYN), emit, arg))\n"
+    "\t\treturn -1;\n"
+    "\tc->retries++;\n"
+    "\tc->retry_deadline = now + TCP_CORE_RETRANSMIT_MS;\n"
+    "\treturn 1;"
+)
+new_poll = (
+    "\tif (tcp_emit(c, c->retry_flags, c->retry_seq, c->rcv_nxt,\n"
+    "\t\t     c->retry_len ? c->retry_data : NULL, c->retry_len,\n"
+    "\t\t     !!(c->retry_flags & TCP_FLAG_SYN), emit, arg)) {\n"
+    "\t\tc->retries++;\n"
+    "\t\tif (c->retries >= TCP_CORE_MAX_RETRIES) {\n"
+    "\t\t\ttcp_abort_connection(c);\n"
+    "\t\t\treturn 1;\n"
+    "\t\t}\n"
+    "\t\tc->retry_deadline = now + TCP_CORE_RETRANSMIT_MS;\n"
+    "\t\treturn -1;\n"
+    "\t}\n"
+    "\tc->retries++;\n"
+    "\tc->retry_deadline = now + TCP_CORE_RETRANSMIT_MS;\n"
+    "\treturn 1;"
+)
+replace_literal_once(tcp_c, old_poll, new_poll)
 
 with open(makefile, "r", encoding="utf-8") as f:
     lines = f.readlines()
