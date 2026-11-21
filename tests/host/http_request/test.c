@@ -23,7 +23,10 @@ int main(void){
  {char x[400]="GET / HTTP/1.1\r\nX:";size_t n=strlen(x);memset(x+n,'a',HTTP_REQ_HEADER_LINE_MAX);x[n+HTTP_REQ_HEADER_LINE_MAX]=0;bad("12 header line limit",x,HTTP_REQ_ERR_HEADER_LINE_LIMIT);}
  {char x[2400]="GET / HTTP/1.1\r\n",line[241];memset(line,'a',240);line[240]=0;for(i=0;i<9;i++){strcat(x,"X:");strcat(x,line);strcat(x,"\r\n");}bad("13 header total limit",x,HTTP_REQ_ERR_HEADER_TOTAL_LIMIT);}
  http_request_parser_init(&p);memset(over,'A',sizeof(over));z=http_request_parser_feed(&p,over,sizeof(over));C(z==HTTP_REQ_ERROR&&p.error==HTTP_REQ_ERR_RX_LIMIT);printf("14 RX overflow: %s\n",p.error==HTTP_REQ_ERR_RX_LIMIT?"PASS":"FAIL");
- {const u8 nul[]={'G','E','T',' ','/',' ','H','T','T','P','/','1','.','1','\r','\n',0,'\r','\n'};http_request_parser_init(&p);z=http_request_parser_feed(&p,nul,sizeof(nul));C(z==HTTP_REQ_ERROR);printf("15 NUL byte: %s\n",z==HTTP_REQ_ERROR?"PASS":"FAIL");}
+ {const u8 nul[]={'G','E','T',' ','/',' ','H','T','T','P','/','1','.','1','\r','\n',0,'\r','\n'};http_request_parser_init(&p);z=http_request_parser_feed(&p,nul,sizeof(nul));C(z==HTTP_REQ_ERROR&&p.error==HTTP_REQ_ERR_BAD_HEADER);printf("15 NUL byte: %s\n",z==HTTP_REQ_ERROR&&p.error==HTTP_REQ_ERR_BAD_HEADER?"PASS":"FAIL");}
+ bad("33 CR followed by non-LF","GET / HTTP/1.1\rX\n\r\n",HTTP_REQ_ERR_BAD_CRLF);
+ bad("34 malformed percent escape","GET /bad%2 HTTP/1.1\r\n\r\n",HTTP_REQ_ERR_BAD_URI);
+ bad("35 backslash in URI","GET /bad\\path HTTP/1.1\r\n\r\n",HTTP_REQ_ERR_BAD_URI);
  bad("16 bare LF","GET / HTTP/1.1\n\n",HTTP_REQ_ERR_BAD_CRLF);
  bad("17 malformed request line","GET  / HTTP/1.1\r\n\r\n",HTTP_REQ_ERR_BAD_REQUEST_LINE);
  bad("18 malformed header","GET / HTTP/1.1\r\nBadHeader\r\n\r\n",HTTP_REQ_ERR_BAD_HEADER);
