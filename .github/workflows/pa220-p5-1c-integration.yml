@@ -252,11 +252,14 @@ jobs:
           LINK_RC: ${{ steps.build.outputs.link_rc }}
         shell: bash
         run: |
-          for name in DOWNLOAD CHECKSUM SOURCE PATCH BUILD OBJECT LINK; do
-            value=$(eval "printf '%s' \"\$$${name}_RC\"")
-            if [ "$value" != "0" ]; then
-              echo "P5-1C acceptance failed: ${name}_RC=$value"
-              exit 1
-            fi
-          done
+          if [ "$DOWNLOAD_RC" != "0" ] ||
+             [ "$CHECKSUM_RC" != "0" ] ||
+             [ "$SOURCE_RC" != "0" ] ||
+             [ "$PATCH_RC" != "0" ] ||
+             [ "$BUILD_RC" != "0" ] ||
+             [ "$OBJECT_RC" != "0" ] ||
+             [ "$LINK_RC" != "0" ]; then
+            echo "P5-1C acceptance failed: DOWNLOAD=$DOWNLOAD_RC CHECKSUM=$CHECKSUM_RC SOURCE=$SOURCE_RC PATCH=$PATCH_RC BUILD=$BUILD_RC OBJECT=$OBJECT_RC LINK=$LINK_RC"
+            exit 1
+          fi
           echo "P5-1C OCTEON build and final ELF/map/symbol checks passed."

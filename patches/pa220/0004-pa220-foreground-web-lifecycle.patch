@@ -14,7 +14,7 @@ diff --git a/u-boot/common/cmd_pa220_web.c b/u-boot/common/cmd_pa220_web.c
 new file mode 100644
 --- /dev/null
 +++ b/u-boot/common/cmd_pa220_web.c
-@@ -0,0 +147 @@
+@@ -0,0 +1,147 @@
 +/*
 + * PA-220 foreground Web/TCP lifecycle entry.
 + *
