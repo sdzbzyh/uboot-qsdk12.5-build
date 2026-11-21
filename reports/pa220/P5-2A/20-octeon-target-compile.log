@@ -1,7 +1,7 @@
-UTC=2026-11-21T08:48:31Z
-INTEGRATION_COMMIT=dae4c5d431cd518e29d1cff21ee7c2f2c11809d2
+UTC=2026-11-21T08:51:02Z
+INTEGRATION_COMMIT=5a02e0b7701cedab6e355f47d55f8f59679a2221
 PA220_SOURCE_PIN=801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8
-c3cf15f2b0457b6582cca112589fb95d62a43dbe0bdc8b51760bb3242c755278  u-boot/net/http_request.c
+cf0fcd7765dde9af38ea4c87e8377d3db6f922d4e0b53a5b3741e77e884da18d  u-boot/net/http_request.c
 305b2372b6661c625c5f80f8dccc96b11272cca64001ba5441c68772ad5a529a  u-boot/include/net/http_request.h
 octeon-sdk-5.1.0-tools-gcc-4.7.tar.gz: OK
 mips64-octeon-linux-gnu-gcc (Cavium Inc. Version: SDK_BUILD build 52) 4.7.0
@@ -142,14 +142,14 @@ ELF Header:
   Version:                           0x1
   Entry point address:               0x0
   Start of program headers:          0 (bytes into file)
-  Start of section headers:          13944 (bytes into file)
+  Start of section headers:          14768 (bytes into file)
   Flags:                             0x808b0025, noreorder, cpic, abi2, octeon, mips64r2
   Size of this header:               52 (bytes)
   Size of program headers:           0 (bytes)
   Number of program headers:         0
   Size of section headers:           40 (bytes)
-  Number of section headers:         45
-  Section header string table index: 42
+  Number of section headers:         46
+  Section header string table index: 43
          U memcmp
          U memcpy
          U memset
@@ -165,14 +165,14 @@ ELF Header:
   Version:                           0x1
   Entry point address:               0x0
   Start of program headers:          0 (bytes into file)
-  Start of section headers:          13944 (bytes into file)
+  Start of section headers:          14768 (bytes into file)
   Flags:                             0x808b0025, noreorder, cpic, abi2, octeon, mips64r2
   Size of this header:               52 (bytes)
   Size of program headers:           0 (bytes)
   Number of program headers:         0
   Size of section headers:           40 (bytes)
-  Number of section headers:         45
-  Section header string table index: 42
+  Number of section headers:         46
+  Section header string table index: 43
 make: Entering directory '/home/runner/work/_temp/pa220-source/u-boot'
 mips64-octeon-linux-gnu-gcc  -g  -Os  -ffunction-sections -fdata-sections -D__KERNEL__ -DCONFIG_SYS_TEXT_BASE=0xC0000000 -I/home/runner/work/_temp/pa220-source/u-boot/include -fno-builtin -ffreestanding -nostdinc -isystem /home/runner/work/_temp/octeon-sdk/tools-gcc-4.7/bin/../lib/gcc/mips64-octeon-linux-gnu/4.7.0/include -pipe -DCONFIG_MIPS -D__MIPS__ -G 0 -mabicalls -mabi=n32 -msoft-float -D__MIPS64__ -EB -mabi=n32 -DCVMX_ENABLE_CSR_ADDRESS_CHECKING=0 -finline-functions -finline-functions-called-once -fearly-inlining -finline-small-functions -fmerge-all-constants -mtune=octeon2 -Os -Wdeclaration-after-statement -std=gnu90 -Wno-long-long -mno-check-zero-division -mtune=octeon2 -finline -ffunction-sections -fdata-sections -ftree-pre -fno-asynchronous-unwind-tables -DCVMX_ENABLE_PARAMETER_CHECKING=0 -DCVMX_ENABLE_DEBUG_PRINTS=1 -Wall -Wstrict-prototypes -fno-stack-protector -Wno-format-nonliteral -Wno-format-security -fstack-usage     -o net/http_request_size.o net/http_request_size.c -c
 In file included from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:8:0,
@@ -227,7 +227,7 @@ In file included from /home/runner/work/_temp/pa220-source/u-boot/include/config
 /home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_pa220.h:15:0: note: this is the location of the previous definition
 make: Leaving directory '/home/runner/work/_temp/pa220-source/u-boot'
 000033a8 000033a8 C pa220_http_request_parser_size
-f6e1e00f06474c58f3bc20c56b5fc450c440e21bbdbde6be6fd1df5d40158e26  reports/pa220/P5-2A/http_request-linked.o
-25172 /home/runner/work/_temp/pa220-source/u-boot/net/http_request.o
-c982e9ae1441dbd16392912a88ea3e983c6929221a0cbe9a34e766d46911fa0b  /home/runner/work/_temp/pa220-source/u-boot/net/http_request.o
+7e569b5a4183835617b75d0406a7cfd19cc02df3d02ae31b605a6936ad020156  reports/pa220/P5-2A/http_request-linked.o
+26800 /home/runner/work/_temp/pa220-source/u-boot/net/http_request.o
+9d0609254d6dd83c269d96080e0391b581d192693d16861039b807dd936b4d94  /home/runner/work/_temp/pa220-source/u-boot/net/http_request.o
 TARGET_COMPILE_AND_RELOCATABLE_LINK=PASS
