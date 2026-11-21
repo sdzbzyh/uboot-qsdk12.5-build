@@ -368,9 +368,10 @@ int tcp_core_input(struct tcp_core_connection *c,
 	}
 	if (c->state == TCP_CORE_SYN_RECEIVED) {
 		if ((v.flags & TCP_FLAG_SYN) && v.sequence == c->irs) {
-			if (c->pending)
-				tcp_emit(c, c->retry_flags, c->retry_seq,
-					 c->rcv_nxt, NULL, 0, 1, emit, arg);
+			if (c->pending &&
+			    tcp_emit(c, c->retry_flags, c->retry_seq,
+				     c->rcv_nxt, NULL, 0, 1, emit, arg))
+				return -1;
 			return 1;
 		}
 		if (!(v.flags & TCP_FLAG_ACK) ||
@@ -480,8 +481,15 @@ int tcp_core_poll(struct tcp_core_connection *c, u32 now,
 	}
 	if (tcp_emit(c, c->retry_flags, c->retry_seq, c->rcv_nxt,
 		     c->retry_len ? c->retry_data : NULL, c->retry_len,
-		     !!(c->retry_flags & TCP_FLAG_SYN), emit, arg))
+		     !!(c->retry_flags & TCP_FLAG_SYN), emit, arg)) {
+		c->retries++;
+		if (c->retries >= TCP_CORE_MAX_RETRIES) {
+			tcp_abort_connection(c);
+			return 1;
+		}
+		c->retry_deadline = now + TCP_CORE_RETRANSMIT_MS;
 		return -1;
+	}
 	c->retries++;
 	c->retry_deadline = now + TCP_CORE_RETRANSMIT_MS;
 	return 1;
