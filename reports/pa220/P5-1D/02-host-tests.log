@@ -1,0 +1,6 @@
+In file included from /home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/tests/host/tcp_ipv4_tx/test.c:1:
+/home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/tests/host/tcp_ipv4_tx/test.c: In function ‘main’:
+/home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/tests/host/tcp_ipv4_tx/test.c:131:38: error: ‘local_mac’ undeclared (first use in this function)
+  131 |         assert(!memcmp(captured + 6, local_mac, 6));
+      |                                      ^~~~~~~~~
+/home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/tests/host/tcp_ipv4_tx/test.c:131:38: note: each undeclared identifier is reported only once for each function it appears in
