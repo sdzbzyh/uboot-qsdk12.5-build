@@ -26,32 +26,48 @@ diff --git a/u-boot/net/net.c b/u-boot/net/net.c
  	net_set_arp_handler(NULL);
  	NetSetTimeout(0, NULL);
  }
-@@ -657,6 +661,14 @@
+@@ -657,6 +661,27 @@
  		udp_packet_handler = f;
  }
  
 +/* Register or disable the optional IPv4 TCP input callback. */
 +void net_set_tcp_handler(tcp_rxhand_f *f)
 +{
-+	if (f)
-+		(void)tcp_core_link_anchor();
 +	tcp_packet_handler = f;
 +}
++
++/*
++ * Keep the registration API and TCP core link anchor reachable when the
++ * final PA-220 link uses --gc-sections. NetReceive takes this table's
++ * address through a volatile pointer only after explicit registration.
++ */
++struct tcp_net_link_refs {
++	void (*set_handler)(tcp_rxhand_f *);
++	const void *(*core_anchor)(void);
++};
++
++static const struct tcp_net_link_refs tcp_net_api_refs = {
++	.set_handler = net_set_tcp_handler,
++	.core_anchor = tcp_core_link_anchor
++};
 +
  rxhand_f *net_get_arp_handler(void)
  {
  	return arp_packet_handler;
-@@ -1129,6 +1141,27 @@
+@@ -1129,6 +1154,30 @@
  		 * we send a tftp packet to a dead connection, or when
  		 * there is no server at the other end.
  		 */
 +		if (ip->ip_p == IPPROTO_TCP) {
++			const struct tcp_net_link_refs * volatile link_refs;
 +			unsigned ip_total_len;
 +			unsigned tcp_segment_len;
 +
 +			/* TCP remains disabled unless a caller explicitly registers. */
 +			if (!tcp_packet_handler)
 +				return;
++			link_refs = &tcp_net_api_refs;
++			(void)link_refs;
 +			if (len < IP_HDR_SIZE)
 +				return;
 +			ip_total_len = ntohs(ip->ip_len);

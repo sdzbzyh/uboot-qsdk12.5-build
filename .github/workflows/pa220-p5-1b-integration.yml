@@ -121,12 +121,6 @@ jobs:
             echo "SOURCE_RC=$SOURCE_RC"
             echo "PATCH_RC=$PATCH_RC"
 
-            if [ "$SOURCE_RC" -eq 0 ] && [ "$PATCH_RC" -eq 0 ] && [ -n "$TOOLCHAIN_DIR" ]; then
-              echo
-              echo "========== FULL PA-220 BUILD =========="
-              PA220_REPO_DIR="$PA220_REPO_DIR" ./build-pa220.sh "$TOOLCHAIN_DIR"
-              BUILD_RC=$?
-            fi
             echo "BUILD_RC=$BUILD_RC"
 
             if [ "$BUILD_RC" -eq 0 ]; then
