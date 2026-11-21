@@ -124,11 +124,79 @@ static void test_close_wait_post_fin_data(void)
 
     CHECK(c.rx_len == 0);
     CHECK(c.rcv_nxt == 5002);
+    CHECK(get32(last_packet + 8) == 5002);
+
+    /* A longer in-sequence payload must also be ignored. */
+    rc = input(&c, 5002, 1001,
+               TCP_FLAG_ACK | TCP_FLAG_PSH,
+               (const u8 *)"XYZ", 3, 12);
+    CHECK(rc == 0);
+    CHECK(c.rx_len == 0);
+    CHECK(c.rcv_nxt == 5002);
+    CHECK(get32(last_packet + 8) == 5002);
 
     if (c.rx_len == 0 && c.rcv_nxt == 5002)
-        printf("RESULT: POST_FIN_DATA_REJECTED\n");
+        printf("RESULT: POST_FIN_DATA_REJECTED\\n");
     else
-        printf("RESULT: POST_FIN_DATA_ACCEPTED (PROTOCOL DEFECT)\n");
+        printf("RESULT: POST_FIN_DATA_ACCEPTED (PROTOCOL DEFECT)\\n");
+}
+
+static void test_close_wait_preserves_buffer_and_ack(void)
+{
+    struct tcp_core_connection c;
+    u8 received[4];
+    int rc;
+
+    printf("\\n[CLOSE-WAIT BUFFER READ AND ACK PROCESSING]\\n");
+    handshake(&c);
+
+    CHECK(input(&c, 5001, 1001, TCP_FLAG_ACK | TCP_FLAG_PSH,
+                (const u8 *)"A", 1, 3) == 0);
+    CHECK(c.rx_len == 1);
+    CHECK(c.rcv_nxt == 5002);
+
+    CHECK(input(&c, 5002, 1001, TCP_FLAG_FIN | TCP_FLAG_ACK,
+                NULL, 0, 4) == 0);
+    CHECK(c.state == TCP_CORE_CLOSE_WAIT);
+    CHECK(c.rx_len == 1);
+    CHECK(c.rcv_nxt == 5003);
+
+    rc = tcp_core_read(&c, received, sizeof(received));
+    CHECK(rc == 1);
+    CHECK(received[0] == 'A');
+    CHECK(c.rx_len == 0);
+
+    CHECK(tcp_core_write(&c, (const u8 *)"R", 1, 5,
+                         emit_cb, NULL) == 1);
+    CHECK(c.state == TCP_CORE_CLOSE_WAIT);
+    CHECK(c.pending == 1);
+
+    CHECK(input(&c, 5003, 1002, TCP_FLAG_ACK | TCP_FLAG_PSH,
+                (const u8 *)"Z", 1, 6) == 0);
+    CHECK(c.state == TCP_CORE_CLOSE_WAIT);
+    CHECK(c.pending == 0);
+    CHECK(c.snd_una == 1002);
+    CHECK(c.rx_len == 0);
+    CHECK(c.rcv_nxt == 5003);
+
+    CHECK(tcp_core_close(&c, 7, emit_cb, NULL) == 0);
+    CHECK(c.state == TCP_CORE_LAST_ACK);
+    CHECK(c.pending == 1);
+    CHECK(input(&c, 5003, 1003, TCP_FLAG_ACK, NULL, 0, 8) == 1);
+    CHECK(c.state == TCP_CORE_LISTEN);
+}
+
+static void test_close_wait_rst(void)
+{
+    struct tcp_core_connection c;
+
+    printf("\\n[CLOSE-WAIT RST]\\n");
+    handshake(&c);
+    CHECK(input(&c, 5001, 1001, TCP_FLAG_FIN | TCP_FLAG_ACK,
+                NULL, 0, 10) == 0);
+    CHECK(c.state == TCP_CORE_CLOSE_WAIT);
+    CHECK(input(&c, 5002, 1001, TCP_FLAG_RST, NULL, 0, 11) == 1);
+    CHECK(c.state == TCP_CORE_LISTEN);
 }
 
 static void test_time_wait_duplicate_fin(void)
@@ -181,6 +249,8 @@ int main(void)
     printf("PA-220 TCP FOCUSED PROTOCOL RETEST\n");
 
     test_close_wait_post_fin_data();
+    test_close_wait_preserves_buffer_and_ack();
+    test_close_wait_rst();
     test_time_wait_duplicate_fin();
 
     printf("\nASSERTIONS_PASSED=%d\n", passes);

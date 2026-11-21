@@ -418,7 +418,11 @@ int tcp_core_input(struct tcp_core_connection *c,
 
 	seg_end = v.sequence + v.payload_len +
 		  ((v.flags & TCP_FLAG_FIN) ? 1 : 0);
-	if (v.payload_len) {
+	/*
+	 * In CLOSE-WAIT the peer has closed its send direction.  Continue
+	 * processing ACKs above, but ignore any subsequent segment payload.
+	 */
+	if (v.payload_len && c->state != TCP_CORE_CLOSE_WAIT) {
 		if (v.sequence != c->rcv_nxt ||
 		    v.payload_len > TCP_CORE_MAX_MSS)
 			return tcp_send_ack(c, emit, arg);
