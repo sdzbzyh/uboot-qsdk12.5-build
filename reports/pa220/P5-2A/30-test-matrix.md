@@ -1,7 +1,7 @@
 # P5-2A Host matrix
 | # | Case | Expected |
 |---:|---|---|
-          | 01 | Complete GET | COMPLETE and exact fields |
+| 01 | Complete GET | COMPLETE and exact fields |
 | 02 | Complete HEAD | COMPLETE and exact fields |
 | 03 | Request-line split | NEED_MORE then COMPLETE |
 | 04 | URI split | NEED_MORE then COMPLETE |

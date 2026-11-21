@@ -1,5 +1,5 @@
-UTC=2026-11-21T08:39:30Z
-INTEGRATION_COMMIT=0c8bc155e09502345dd49ee4e6bff8bb725213eb
+UTC=2026-11-21T08:42:39Z
+INTEGRATION_COMMIT=32fca77857f0dfe3a3e0b5a4a658259798b15449
 PA220_SOURCE_PIN=801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8
 c3cf15f2b0457b6582cca112589fb95d62a43dbe0bdc8b51760bb3242c755278  u-boot/net/http_request.c
 305b2372b6661c625c5f80f8dccc96b11272cca64001ba5441c68772ad5a529a  u-boot/include/net/http_request.h
@@ -9,4 +9,152 @@ Copyright (C) 2012 Free Software Foundation, Inc.
 TARGET=mips64-octeon-linux-gnu
 Cloning into '/home/runner/work/_temp/pa220-source'...
 HEAD is now at 801717b docs/BUILD.md: describe the PA-220 kernel patches
-cp: cannot create regular file '/home/runner/work/_temp/pa220-source/u-boot/include/net/http_request.h': No such file or directory
+make: Entering directory '/home/runner/work/_temp/pa220-source/u-boot'
+Configuring for octeon_pa220 - Board: octeon_pa220, Options: OCTEON_PA220,OCTEON_PCI_HOST=0,OCTEON_CN70XX
+make: Leaving directory '/home/runner/work/_temp/pa220-source/u-boot'
+make: Entering directory '/home/runner/work/_temp/pa220-source/u-boot'
+mips64-octeon-linux-gnu-gcc -DDO_DEPS_ONLY \
+	-g  -Os  -ffunction-sections -fdata-sections -D__KERNEL__ -DCONFIG_SYS_TEXT_BASE=0xC0000000 -I/home/runner/work/_temp/pa220-source/u-boot/include -fno-builtin -ffreestanding -nostdinc -isystem /home/runner/work/_temp/octeon-sdk/tools-gcc-4.7/bin/../lib/gcc/mips64-octeon-linux-gnu/4.7.0/include -pipe -DCONFIG_MIPS -D__MIPS__ -G 0 -mabicalls -mabi=n32 -msoft-float -D__MIPS64__ -EB -mabi=n32 -DCVMX_ENABLE_CSR_ADDRESS_CHECKING=0 -finline-functions -finline-functions-called-once -fearly-inlining -finline-small-functions -fmerge-all-constants -mtune=octeon2 -Os -Wdeclaration-after-statement -std=gnu90 -Wno-long-long -mno-check-zero-division -mtune=octeon2 -finline -ffunction-sections -fdata-sections -ftree-pre -fno-asynchronous-unwind-tables -DCVMX_ENABLE_PARAMETER_CHECKING=0 -DCVMX_ENABLE_DEBUG_PRINTS=1 -Wall -Wstrict-prototypes -fno-stack-protector -Wno-format-nonliteral -Wno-format-security -fstack-usage   \
+	-o lib/asm-offsets.s lib/asm-offsets.c -c -S
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:8:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from lib/asm-offsets.c:15:
+/home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_pa220.h:15:0: warning: "CONFIG_OCTEON_CN70XX" redefined [enabled by default]
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21:0,
+                 from lib/asm-offsets.c:15:
+/home/runner/work/_temp/pa220-source/u-boot/include/config.h:4:0: note: this is the location of the previous definition
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:8:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from lib/asm-offsets.c:15:
+/home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_pa220.h:164:0: warning: "CONFIG_CMD_EXPORTENV" redefined [enabled by default]
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:6:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from lib/asm-offsets.c:15:
+/home/runner/work/_temp/pa220-source/u-boot/include/config_cmd_defaults.h:14:0: note: this is the location of the previous definition
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:8:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from lib/asm-offsets.c:15:
+/home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_pa220.h:165:0: warning: "CONFIG_CMD_IMPORTENV" redefined [enabled by default]
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:6:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from lib/asm-offsets.c:15:
+/home/runner/work/_temp/pa220-source/u-boot/include/config_cmd_defaults.h:16:0: note: this is the location of the previous definition
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:8:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from lib/asm-offsets.c:15:
+/home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_pa220.h:196:0: warning: "CONFIG_SYS_MEMTEST_START" redefined [enabled by default]
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_pa220.h:26:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:8,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from lib/asm-offsets.c:15:
+/home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_common.h:283:0: note: this is the location of the previous definition
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:8:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from lib/asm-offsets.c:15:
+/home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_pa220.h:197:0: warning: "CONFIG_SYS_MEMTEST_END" redefined [enabled by default]
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_pa220.h:26:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:8,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from lib/asm-offsets.c:15:
+/home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_common.h:284:0: note: this is the location of the previous definition
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/command.h:14:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/image.h:39,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:100,
+                 from lib/asm-offsets.c:15:
+/home/runner/work/_temp/pa220-source/u-boot/include/config.h:4:0: warning: "CONFIG_OCTEON_CN70XX" redefined [enabled by default]
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:8:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from lib/asm-offsets.c:15:
+/home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_pa220.h:15:0: note: this is the location of the previous definition
+tools/scripts/make-asm-offsets lib/asm-offsets.s include/generated/generic-asm-offsets.h
+if [ -f arch/mips/cpu/octeon//asm-offsets.c ];then \
+	mips64-octeon-linux-gnu-gcc -DDO_DEPS_ONLY \
+	-g  -Os  -ffunction-sections -fdata-sections -D__KERNEL__ -DCONFIG_SYS_TEXT_BASE=0xC0000000 -I/home/runner/work/_temp/pa220-source/u-boot/include -fno-builtin -ffreestanding -nostdinc -isystem /home/runner/work/_temp/octeon-sdk/tools-gcc-4.7/bin/../lib/gcc/mips64-octeon-linux-gnu/4.7.0/include -pipe -DCONFIG_MIPS -D__MIPS__ -G 0 -mabicalls -mabi=n32 -msoft-float -D__MIPS64__ -EB -mabi=n32 -DCVMX_ENABLE_CSR_ADDRESS_CHECKING=0 -finline-functions -finline-functions-called-once -fearly-inlining -finline-small-functions -fmerge-all-constants -mtune=octeon2 -Os -Wdeclaration-after-statement -std=gnu90 -Wno-long-long -mno-check-zero-division -mtune=octeon2 -finline -ffunction-sections -fdata-sections -ftree-pre -fno-asynchronous-unwind-tables -DCVMX_ENABLE_PARAMETER_CHECKING=0 -DCVMX_ENABLE_DEBUG_PRINTS=1 -Wall -Wstrict-prototypes -fno-stack-protector -Wno-format-nonliteral -Wno-format-security -fstack-usage   \
+		-o arch/mips/cpu/octeon//asm-offsets.s arch/mips/cpu/octeon//asm-offsets.c -c -S; \
+else \
+	touch arch/mips/cpu/octeon//asm-offsets.s; \
+fi
+tools/scripts/make-asm-offsets arch/mips/cpu/octeon//asm-offsets.s include/generated/asm-offsets.h
+make: Leaving directory '/home/runner/work/_temp/pa220-source/u-boot'
+make: Entering directory '/home/runner/work/_temp/pa220-source/u-boot'
+mips64-octeon-linux-gnu-gcc  -g  -Os  -ffunction-sections -fdata-sections -D__KERNEL__ -DCONFIG_SYS_TEXT_BASE=0xC0000000 -I/home/runner/work/_temp/pa220-source/u-boot/include -fno-builtin -ffreestanding -nostdinc -isystem /home/runner/work/_temp/octeon-sdk/tools-gcc-4.7/bin/../lib/gcc/mips64-octeon-linux-gnu/4.7.0/include -pipe -DCONFIG_MIPS -D__MIPS__ -G 0 -mabicalls -mabi=n32 -msoft-float -D__MIPS64__ -EB -mabi=n32 -DCVMX_ENABLE_CSR_ADDRESS_CHECKING=0 -finline-functions -finline-functions-called-once -fearly-inlining -finline-small-functions -fmerge-all-constants -mtune=octeon2 -Os -Wdeclaration-after-statement -std=gnu90 -Wno-long-long -mno-check-zero-division -mtune=octeon2 -finline -ffunction-sections -fdata-sections -ftree-pre -fno-asynchronous-unwind-tables -DCVMX_ENABLE_PARAMETER_CHECKING=0 -DCVMX_ENABLE_DEBUG_PRINTS=1 -Wall -Wstrict-prototypes -fno-stack-protector -Wno-format-nonliteral -Wno-format-security -fstack-usage     -o net/http_request.o net/http_request.c -c
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:8:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from net/http_request.c:6:
+/home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_pa220.h:15:0: warning: "CONFIG_OCTEON_CN70XX" redefined [enabled by default]
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21:0,
+                 from net/http_request.c:6:
+/home/runner/work/_temp/pa220-source/u-boot/include/config.h:4:0: note: this is the location of the previous definition
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:8:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from net/http_request.c:6:
+/home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_pa220.h:164:0: warning: "CONFIG_CMD_EXPORTENV" redefined [enabled by default]
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:6:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from net/http_request.c:6:
+/home/runner/work/_temp/pa220-source/u-boot/include/config_cmd_defaults.h:14:0: note: this is the location of the previous definition
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:8:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from net/http_request.c:6:
+/home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_pa220.h:165:0: warning: "CONFIG_CMD_IMPORTENV" redefined [enabled by default]
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:6:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from net/http_request.c:6:
+/home/runner/work/_temp/pa220-source/u-boot/include/config_cmd_defaults.h:16:0: note: this is the location of the previous definition
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:8:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from net/http_request.c:6:
+/home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_pa220.h:196:0: warning: "CONFIG_SYS_MEMTEST_START" redefined [enabled by default]
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_pa220.h:26:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:8,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from net/http_request.c:6:
+/home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_common.h:283:0: note: this is the location of the previous definition
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:8:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from net/http_request.c:6:
+/home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_pa220.h:197:0: warning: "CONFIG_SYS_MEMTEST_END" redefined [enabled by default]
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_pa220.h:26:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:8,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from net/http_request.c:6:
+/home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_common.h:284:0: note: this is the location of the previous definition
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/command.h:14:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/image.h:39,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:100,
+                 from net/http_request.c:6:
+/home/runner/work/_temp/pa220-source/u-boot/include/config.h:4:0: warning: "CONFIG_OCTEON_CN70XX" redefined [enabled by default]
+In file included from /home/runner/work/_temp/pa220-source/u-boot/include/config.h:8:0,
+                 from /home/runner/work/_temp/pa220-source/u-boot/include/common.h:21,
+                 from net/http_request.c:6:
+/home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_pa220.h:15:0: note: this is the location of the previous definition
+make: Leaving directory '/home/runner/work/_temp/pa220-source/u-boot'
+/home/runner/work/_temp/pa220-source/u-boot/net/http_request.o: ELF 32-bit MSB relocatable, MIPS, N32 MIPS64 rel2 version 1 (SYSV), with debug_info, not stripped
+ELF Header:
+  Magic:   7f 45 4c 46 01 02 01 00 00 00 00 00 00 00 00 00 
+  Class:                             ELF32
+  Data:                              2's complement, big endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              REL (Relocatable file)
+  Machine:                           MIPS R3000
+  Version:                           0x1
+  Entry point address:               0x0
+  Start of program headers:          0 (bytes into file)
+  Start of section headers:          13944 (bytes into file)
+  Flags:                             0x808b0025, noreorder, cpic, abi2, octeon, mips64r2
+  Size of this header:               52 (bytes)
+  Size of program headers:           0 (bytes)
+  Number of program headers:         0
+  Size of section headers:           40 (bytes)
+  Number of section headers:         45
+  Section header string table index: 42
+         U memcmp
+         U memcpy
+         U memset
+/home/runner/work/_temp/octeon-sdk/tools-gcc-4.7/bin/mips64-octeon-linux-gnu-ld: /home/runner/work/_temp/pa220-source/u-boot/net/http_request.o: ABI is incompatible with that of the selected emulation: "elf32-ntradbigmips" != "elf64-tradbigmips"
+/home/runner/work/_temp/octeon-sdk/tools-gcc-4.7/bin/mips64-octeon-linux-gnu-ld: failed to merge target specific data of file /home/runner/work/_temp/pa220-source/u-boot/net/http_request.o
+/home/runner/work/_temp/octeon-sdk/tools-gcc-4.7/bin/mips64-octeon-linux-gnu-ld: Attempt to do relocatable link with elf32-ntradbigmips input and elf64-tradbigmips output
+/home/runner/work/_temp/octeon-sdk/tools-gcc-4.7/bin/mips64-octeon-linux-gnu-ld: /home/runner/work/_temp/pa220-source/u-boot/net/http_request.o: file class ELFCLASS32 incompatible with ELFCLASS64
+/home/runner/work/_temp/octeon-sdk/tools-gcc-4.7/bin/mips64-octeon-linux-gnu-ld: final link failed: File in wrong format
