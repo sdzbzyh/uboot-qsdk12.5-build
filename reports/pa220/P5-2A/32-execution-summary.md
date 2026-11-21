@@ -1,7 +1,11 @@
-# P5-2A execution evidence
-Host result: see 10-host-tests.log.
-OCTEON result: see 20-octeon-target-compile.log.
-ABI: 21-parser-object-elf-header.txt and 25-linked-object-elf-header.txt.
-Undefined symbols: 22-parser-object-undefined-symbols.txt.
-Object size: 23-parser-object-size.txt.
-SHA-256: 24-parser-object-sha256.txt and 26-linked-object-sha256.txt.
+# P5-2A execution summary
+- Host regression: 35 cases, 95 assertions, zero failures; see 10-host-tests.log and 30-test-matrix.md.
+- Host parser structure size: 13224 bytes.
+- OCTEON SDK: octeon-sdk-5.1.0, Cavium GCC 4.7.0, target triple mips64-octeon-linux-gnu.
+- Configured object ABI: ELF32, big-endian, MIPS N32 ABI2, OCTEON / MIPS64r2; see 21-parser-object-elf-header.txt.
+- Target parser object: 25172 bytes; SHA-256 c982e9ae1441dbd16392912a88ea3e983c6929221a0cbe9a34e766d46911fa0b.
+- Undefined references: memcmp, memcpy, memset only; all are U-Boot memory/string primitives, with no malloc/free or other libc dependency.
+- Relocatable target link: PASS; see 25-linked-object-elf-header.txt and 26-linked-object-sha256.txt.
+- Target parser structure size: 0x33a8 = 13224 bytes; see 27-parser-static-size.txt.
+- Target source baseline: IronDemiGod/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8.
+- Scope: standalone P5-2A parser only. No TCP or pa220 web lifecycle changes; no P5-2B URI handler.
