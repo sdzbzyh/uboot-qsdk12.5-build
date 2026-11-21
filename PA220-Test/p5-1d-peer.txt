@@ -1,0 +1,102 @@
+﻿
+  C:\PA220-Test\p5-1d.txt:22556:[02]0754.1A84::2026-11-21 13:07:50.962560200 [Microsoft-Windows-PktMon] PktGroupId 5629
+49953422052，PktNumber 1，出现 1，方向 Tx ，类型 WiFi ，组件 12，边缘 1，筛选器 0，OriginalSize 72，LoggedSize 72 
+  C:\PA220-Test\p5-1d.txt:22557:	BSSID:92-B4-2E-07-17-E3 SA:6C-88-14-FF-C2-4C DA:92-B4-2E-07-17-E3 LLC, dsap SNAP (0xaa
+) Individual, ssap SNAP (0xaa) Command, ctrl 0x03: oui Ethernet (0x000000), ethertype IPv4 (0x0800), length 40: 192.168
+.3.135.3599 > 192.168.3.1.9090: Flags [.], ack 2693029877, win 4103, length 0
+  C:\PA220-Test\p5-1d.txt:22558:[01]0004.1044::2026-11-21 13:07:51.146134600 [Microsoft-Windows-PktMon] PktGroupId 2814
+74976711466，PktNumber 1，出现 1，方向 Tx ，类型 以太网 ，组件 13，边缘 1，筛选器 0，OriginalSize 42，LoggedSize 42 
+> C:\PA220-Test\p5-1d.txt:22559:	3C-97-0E-D4-E1-0E > FF-FF-FF-FF-FF-FF, ethertype ARP (0x0806), length 42: Request who-
+has 192.168.2.2 tell 192.168.2.10, length 28
+  C:\PA220-Test\p5-1d.txt:22560:[00]0004.0100::2026-11-21 13:07:51.184606900 [Microsoft-Windows-PktMon] PktGroupId 9517
+，PktNumber 1，出现 1，方向 Rx ，类型 WiFi ，组件 12，边缘 1，筛选器 0，OriginalSize 76，LoggedSize 76 
+  C:\PA220-Test\p5-1d.txt:22561:	CF +QoS DA:6C-88-14-FF-C2-4C BSSID:92-B4-2E-07-17-E3 SA:6C-88-14-FF-C2-4C Data IV:3aaa
+a Pad 0 KeyID 0
+  C:\PA220-Test\p5-1d.txt:22562:[00]0004.0100::2026-11-21 13:07:51.184608600 [Microsoft-Windows-PktMon] PktGroupId 9518
+，PktNumber 1，出现 1，方向 Rx ，类型 WiFi ，组件 12，边缘 1，筛选器 0，OriginalSize 136，LoggedSize 136 
+  C:\PA220-Test\p5-1d.txt:22563:	CF +QoS DA:6C-88-14-FF-C2-4C BSSID:92-B4-2E-07-17-E3 SA:6C-88-14-FF-C2-4C Data IV:3aaa
+a Pad 0 KeyID 0
+  C:\PA220-Test\p5-1d.txt:22564:[00]0004.0100::2026-11-21 13:07:51.184816900 [Microsoft-Windows-PktMon] PktGroupId 9519
+，PktNumber 1，出现 1，方向 Tx ，类型 WiFi ，组件 12，边缘 1，筛选器 0，OriginalSize 72，LoggedSize 72 
+  C:\PA220-Test\p5-1d.txt:22565:	BSSID:92-B4-2E-07-17-E3 SA:6C-88-14-FF-C2-4C DA:92-B4-2E-07-17-E3 LLC, dsap SNAP (0xaa
+) Individual, ssap SNAP (0xaa) Command, ctrl 0x03: oui Ethernet (0x000000), ethertype IPv4 (0x0800), length 40: 192.168
+.3.135.3611 > 192.168.3.1.9090: Flags [.], ack 802719291, win 511, length 0
+  C:\PA220-Test\p5-1d.txt:22566:[01]1218.1434::2026-11-21 13:07:51.536192800 [Microsoft-Windows-PktMon] PktGroupId 2814
+74976711467，PktNumber 1，出现 1，方向 Tx ，类型 WiFi ，组件 12，边缘 1，筛选器 0，OriginalSize 197，LoggedSize 197 
+  C:\PA220-Test\p5-1d.txt:22567:	BSSID:92-B4-2E-07-17-E3 SA:6C-88-14-FF-C2-4C DA:92-B4-2E-07-17-E3 LLC, dsap SNAP (0xaa
+) Individual, ssap SNAP (0xaa) Command, ctrl 0x03: oui Ethernet (0x000000), ethertype IPv4 (0x0800), length 165: 192.16
+8.3.135.9993 > 60.215.69.209.62488: UDP, length 137
+  C:\PA220-Test\p5-1d.txt:22608:[00]0004.0100::2026-11-21 13:07:51.548254700 [Microsoft-Windows-PktMon] PktGroupId 9528
+，PktNumber 1，出现 1，方向 Rx ，类型 WiFi ，组件 12，边缘 1，筛选器 0，OriginalSize 121，LoggedSize 121 
+  C:\PA220-Test\p5-1d.txt:22609:	CF +QoS DA:6C-88-14-FF-C2-4C BSSID:92-B4-2E-07-17-E3 SA:6C-88-14-FF-C2-4C Data IV:3aaa
+a Pad 0 KeyID 0
+  C:\PA220-Test\p5-1d.txt:22610:[02]0000.0000::2026-11-21 13:07:51.739724600 [Microsoft-Windows-PktMon] PktGroupId 5629
+49953422053，PktNumber 1，出现 1，方向 Tx ，类型 以太网 ，组件 13，边缘 1，筛选器 0，OriginalSize 42，LoggedSize 42 
+> C:\PA220-Test\p5-1d.txt:22611:	3C-97-0E-D4-E1-0E > FF-FF-FF-FF-FF-FF, ethertype ARP (0x0806), length 42: Request who-
+has 192.168.2.2 tell 192.168.2.10, length 28
+  C:\PA220-Test\p5-1d.txt:22612:[00]0004.0100::2026-11-21 13:07:51.739855500 [Microsoft-Windows-PktMon] PktGroupId 9529
+，PktNumber 1，出现 1，方向 Rx ，类型 以太网 ，组件 13，边缘 1，筛选器 0，OriginalSize 60，LoggedSize 60 
+> C:\PA220-Test\p5-1d.txt:22613:	08-30-6B-E1-BE-08 > 3C-97-0E-D4-E1-0E, ethertype ARP (0x0806), length 60: Reply 192.16
+8.2.2 is-at 08-30-6B-E1-BE-08, length 46
+  C:\PA220-Test\p5-1d.txt:22614:[00]0004.0100::2026-11-21 13:07:51.739896800 [Microsoft-Windows-PktMon] PktGroupId 9530
+，PktNumber 1，出现 1，方向 Tx ，类型 以太网 ，组件 13，边缘 1，筛选器 0，OriginalSize 66，LoggedSize 66 
+> C:\PA220-Test\p5-1d.txt:22615:	3C-97-0E-D4-E1-0E > 08-30-6B-E1-BE-08, ethertype IPv4 (0x0800), length 66: 192.168.2.1
+0.5464 > 192.168.2.2.80: Flags [S], seq 824783136, win 64240, options [mss 1460,nop,wscale 8,nop,nop,sackOK], length 0
+  C:\PA220-Test\p5-1d.txt:22616:[02]0004.0108::2026-11-21 13:07:51.739986600 [Microsoft-Windows-PktMon] PktGroupId 5629
+49953422054，PktNumber 1，出现 1，方向 Rx ，类型 以太网 ，组件 13，边缘 1，筛选器 0，OriginalSize 60，LoggedSize 60 
+> C:\PA220-Test\p5-1d.txt:22617:	08-30-6B-E1-BE-08 > 3C-97-0E-D4-E1-0E, ethertype IPv4 (0x0800), length 60: 192.168.2.2
+.80 > 192.168.2.10.5464: Flags [S.], seq 3232238604, ack 824783137, win 4096, options [mss 536], length 0
+  C:\PA220-Test\p5-1d.txt:22618:[02]0004.0108::2026-11-21 13:07:51.740132100 [Microsoft-Windows-PktMon] PktGroupId 5629
+49953422055，PktNumber 1，出现 1，方向 Tx ，类型 以太网 ，组件 13，边缘 1，筛选器 0，OriginalSize 54，LoggedSize 54 
+> C:\PA220-Test\p5-1d.txt:22619:	3C-97-0E-D4-E1-0E > 08-30-6B-E1-BE-08, ethertype IPv4 (0x0800), length 54: 192.168.2.1
+0.5464 > 192.168.2.2.80: Flags [.], ack 3232238605, win 65392, length 0
+  C:\PA220-Test\p5-1d.txt:22620:[02]0754.1A84::2026-11-21 13:07:51.842699000 [Microsoft-Windows-PktMon] PktGroupId 5629
+49953422056，PktNumber 1，出现 1，方向 Tx ，类型 以太网 ，组件 13，边缘 1，筛选器 0，OriginalSize 64，LoggedSize 64 
+> C:\PA220-Test\p5-1d.txt:22621:	3C-97-0E-D4-E1-0E > 08-30-6B-E1-BE-08, ethertype IPv4 (0x0800), length 64: 192.168.2.1
+0.5464 > 192.168.2.2.80: Flags [P.], seq 824783137:824783147, ack 3232238605, win 65392, length 10: HTTP
+  C:\PA220-Test\p5-1d.txt:22622:[02]0004.0108::2026-11-21 13:07:51.842940900 [Microsoft-Windows-PktMon] PktGroupId 5629
+49953422057，PktNumber 1，出现 1，方向 Rx ，类型 以太网 ，组件 13，边缘 1，筛选器 0，OriginalSize 60，LoggedSize 60 
+> C:\PA220-Test\p5-1d.txt:22623:	08-30-6B-E1-BE-08 > 3C-97-0E-D4-E1-0E, ethertype IPv4 (0x0800), length 60: 192.168.2.2
+.80 > 192.168.2.10.5464: Flags [.], ack 824783147, win 4086, length 0
+  C:\PA220-Test\p5-1d.txt:22624:[00]0004.0100::2026-11-21 13:07:51.919381900 [Microsoft-Windows-PktMon] PktGroupId 9531
+，PktNumber 1，出现 1，方向 Rx ，类型 WiFi ，组件 12，边缘 1，筛选器 0，OriginalSize 78，LoggedSize 78 
+  C:\PA220-Test\p5-1d.txt:22625:	CF +QoS DA:6C-88-14-FF-C2-4C BSSID:92-B4-2E-07-17-E3 SA:6C-88-14-FF-C2-4C Data IV:3aaa
+a Pad 0 KeyID 0
+  C:\PA220-Test\p5-1d.txt:22626:[00]0004.0100::2026-11-21 13:07:51.919383200 [Microsoft-Windows-PktMon] PktGroupId 9532
+，PktNumber 1，出现 1，方向 Rx ，类型 WiFi ，组件 12，边缘 1，筛选器 0，OriginalSize 1534，LoggedSize 1534 
+  C:\PA220-Test\p5-1d.txt:22627:	CF +QoS DA:6C-88-14-FF-C2-4C BSSID:92-B4-2E-07-17-E3 SA:6C-88-14-FF-C2-4C Data IV:3aaa
+a Pad 0 KeyID 0
+  C:\PA220-Test\p5-1d.txt:22628:[00]0004.0100::2026-11-21 13:07:51.919383900 [Microsoft-Windows-PktMon] PktGroupId 9533
+，PktNumber 1，出现 1，方向 Rx ，类型 WiFi ，组件 12，边缘 1，筛选器 0，OriginalSize 1534，LoggedSize 1534 
+  C:\PA220-Test\p5-1d.txt:22629:	CF +QoS DA:6C-88-14-FF-C2-4C BSSID:92-B4-2E-07-17-E3 SA:6C-88-14-FF-C2-4C Data IV:3aaa
+a Pad 0 KeyID 0
+  C:\PA220-Test\p5-1d.txt:22630:[00]0004.0100::2026-11-21 13:07:51.919384400 [Microsoft-Windows-PktMon] PktGroupId 9534
+，PktNumber 1，出现 1，方向 Rx ，类型 WiFi ，组件 12，边缘 1，筛选器 0，OriginalSize 1534，LoggedSize 1534 
+  C:\PA220-Test\p5-1d.txt:22631:	CF +QoS DA:6C-88-14-FF-C2-4C BSSID:92-B4-2E-07-17-E3 SA:6C-88-14-FF-C2-4C Data IV:3aaa
+a Pad 0 KeyID 0
+  C:\PA220-Test\p5-1d.txt:31858:[01]0770.2BAC::2026-11-21 13:08:32.598670500 [Microsoft-Windows-PktMon] 流计数器: 组件 116，边缘
+ Upper，边缘 ID 2，传入方向 = Rx ，传入数据包 0，传入字节 0，传出方向 = Tx ，传出数据包 0，传出字节 0 
+  C:\PA220-Test\p5-1d.txt:31859:[01]0770.2BAC::2026-11-21 13:08:32.598670900 [Microsoft-Windows-PktMon] 流计数器: 组件 116，边缘
+ Lower，边缘 ID 1，传入方向 = Rx ，传入数据包 0，传入字节 0，传出方向 = Tx ，传出数据包 0，传出字节 0 
+  C:\PA220-Test\p5-1d.txt:31860:[01]0770.2BAC::2026-11-21 13:08:32.598671200 [Microsoft-Windows-PktMon] 组件 115，类型 HTTP 
+Protocol ，名称 http.sys，HTTP 
+> C:\PA220-Test\p5-1d.txt:31861:[01]0770.2BAC::2026-11-21 13:08:32.598671400 [Microsoft-Windows-PktMon] 属性: 组件 115，IP 地
+址  = 192.168.2.10 
+  C:\PA220-Test\p5-1d.txt:31862:[01]0770.2BAC::2026-11-21 13:08:32.598671700 [Microsoft-Windows-PktMon] 属性: 组件 115，Mini
+portIfIndex  = 16 
+  C:\PA220-Test\p5-1d.txt:31863:[01]0770.2BAC::2026-11-21 13:08:32.598672000 [Microsoft-Windows-PktMon] 丢弃计数器: 组件 115，传
+入方向 = Rx ，传入数据包 0，传入字节 0，传出方向 = Tx ，传出数据包 0，传出字节 0 
+  C:\PA220-Test\p5-1d.txt:31864:[01]0770.2BAC::2026-11-21 13:08:32.598672500 [Microsoft-Windows-PktMon] 流计数器: 组件 115，边缘
+ Upper，边缘 ID 2，传入方向 = Rx ，传入数据包 0，传入字节 0，传出方向 = Tx ，传出数据包 0，传出字节 0 
+  C:\PA220-Test\p5-1d.txt:31865:[01]0770.2BAC::2026-11-21 13:08:32.598672900 [Microsoft-Windows-PktMon] 流计数器: 组件 115，边缘
+ Lower，边缘 ID 1，传入方向 = Rx ，传入数据包 0，传入字节 0，传出方向 = Tx ，传出数据包 0，传出字节 0 
+  C:\PA220-Test\p5-1d.txt:31866:[01]0770.2BAC::2026-11-21 13:08:32.598673200 [Microsoft-Windows-PktMon] 组件 114，类型 HTTP 
+Protocol ，名称 http.sys，HTTP 
+  C:\PA220-Test\p5-1d.txt:31867:[01]0770.2BAC::2026-11-21 13:08:32.598673400 [Microsoft-Windows-PktMon] 属性: 组件 114，IP 地
+址  = 127.0.0.1 
+  C:\PA220-Test\p5-1d.txt:31868:[01]0770.2BAC::2026-11-21 13:08:32.598673700 [Microsoft-Windows-PktMon] 属性: 组件 114，Mini
+portIfIndex  = 1 
+  C:\PA220-Test\p5-1d.txt:31869:[01]0770.2BAC::2026-11-21 13:08:32.598674000 [Microsoft-Windows-PktMon] 丢弃计数器: 组件 114，传
+入方向 = Rx ，传入数据包 0，传入字节 0，传出方向 = Tx ，传出数据包 0，传出字节 0 
+
+
