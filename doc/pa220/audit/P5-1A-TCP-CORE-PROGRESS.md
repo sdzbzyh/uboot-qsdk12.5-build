@@ -68,3 +68,42 @@
 ## 环境记录纠正（2026-11-20）
 
 此前本节将 ChatGPT 当前临时容器的文件系统检查错误地表述为“构建环境不存在”。该结论不成立，现予纠正：用户的 Debian 13.7 构建主机和 Cavium GCC 4.7.0 工具链已有历史实证；本轮只是当前助手容器不能直接访问用户主机。后续按既有协作方式在用户主机运行命令并依据回传结果验证。
+
+
+## P5-1A.3 最终验证结果（2026-11-21，GitHub Actions）
+
+本节覆盖并取代上文 2026-11-20 的“尚未执行”状态；旧记录保留为历史检查点，不再作为当前状态。
+
+- 验证工作流：GitHub Actions run [44856960192](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/44856960192)，run #3，结论 SUCCESS。
+- 验证提交：`62e2a0b7b96f5b0b0dbca9628fe451a456472193`；其后当前分支仅增加 Actions 生成的证据归档提交，TCP 代码未因此改变。
+- Host 回归：编译退出码 0；76 项断言通过、0 项失败。
+- CLOSE-WAIT：收到 FIN 后到达的后续 payload 被拒绝；已有接收缓存和 ACK 处理检查通过。
+- TIME-WAIT：重复 FIN 获得 ACK；当前测试确认 60 秒 deadline 保持不变（该行为是当前实现策略，不表示所有 RFC 场景已覆盖）。
+- SDK：私有 Release `octeon-sdk-5.1.0` 下载成功，SHA-256 校验成功；识别 Cavium GCC 4.7.0 / SDK Build 52，目标 `mips64-octeon-linux-gnu`。
+- OCTEON 完整构建：退出码 0；生成 `bin/pa220/u-boot-octeon_pa220.bin`，1,362,216 bytes。
+- 完整日志：`reports/pa220/cloud-validation/21-github-actions-validation.log`；摘要：`reports/pa220/cloud-validation/21-github-actions-validation.md`。
+
+### 状态分层
+
+| 项目 | 状态 |
+|---|---|
+| TCP Host focused regression | PASS（76/0） |
+| OCTEON SDK 下载及校验 | PASS |
+| OCTEON 完整交叉编译 | PASS |
+| 新增 TCP 代码 RAM 启动 | NOT RUN |
+| TCP 网络收发实机验证 | NOT RUN |
+| Web 生命周期 / HTTP parser | NOT IMPLEMENTED |
+
+因此，P5-1A.3 的 Host 回归与云端目标完整构建验证已完成；这不等于 TCP 网络接入或实机 TCP 服务已完成。
+
+## 下一工作单元：P5-1B
+
+按 P5-1 适配审计第 8 节，下一项必要工作是**最小 IPv4 TCP 分派接入**，而不是重做 TCP 状态机回归或完整构建：
+
+1. 在固定 PA-220 源码 `801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8` 上，针对 `NetReceive()` 已验证的 IPv4 校验、目的地址过滤和分片处理之后增加 TCP protocol 6 的窄分派入口。
+2. TCP 输入仅接收当前完整、非分片 IPv4 payload；再次核验 IPv4 header length / total length / TCP segment 长度边界，且不改变 ARP、ICMP、UDP 路径。
+3. 接口仅在显式 Web 服务注册时启用；默认关闭，不让现有 DHCP/Ping/TFTP 命令接收或处理 TCP。
+4. 不在本工作单元引入 TCP 输出、Ethernet 邻居管理、NetLoop 生命周期、HTTP parser 或 CLI 命令；这些分别留在后续子项。
+5. 以固定源码真实差异生成补丁，不手工编写/猜测 unified diff hunk 行数；完成后才运行针对性 Host/目标构建验证。
+
+P5-1B 尚未实施。不得将本节的 P5-1A.3 PASS 扩展解释为 P5-1 整体完成。
