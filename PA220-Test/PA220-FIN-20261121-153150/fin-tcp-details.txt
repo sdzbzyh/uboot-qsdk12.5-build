@@ -1,0 +1,2135 @@
+﻿Frame 50174: Packet, 66 bytes on wire (528 bits), 66 bytes captured (528 bits) on interface unknown, id 0
+    Section number: 1
+    Interface id: 0 (unknown)
+        Interface name: unknown
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 21, 2026 15:35:46.715737000 涓浗鏍囧噯鏃堕棿
+    UTC Arrival Time: Nov 21, 2026 07:35:46.715737000 UTC
+    Epoch Arrival Time: 1795246546.715737000
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 43.000 microseconds]
+    [Time since reference or first frame: 3 minutes, 56.252222000 seconds]
+    Frame Number: 50174
+    Frame Length: 66 bytes (528 bits)
+    Capture Length: 66 bytes (528 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:tcp]
+    Character encoding: ASCII (0)
+Ethernet II, Src: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e), Dst: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+    Destination: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 12]
+Internet Protocol Version 4, Src: 192.168.2.10, Dst: 192.168.2.2
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 52
+    Identification: 0xdd6c (56684)
+    010. .... = Flags: 0x2, Don't fragment
+        0... .... = Reserved bit: Not set
+        .1.. .... = Don't fragment: Set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 128
+    Protocol: TCP (6)
+    Header Checksum: 0x0000 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 192.168.2.10
+    Destination Address: 192.168.2.2
+    [Stream index: 1]
+Transmission Control Protocol, Src Port: 8111, Dst Port: 80, Seq: 0, Len: 0
+    Source Port: 8111
+    Destination Port: 80
+    [Stream index: 0]
+    [Stream Packet Number: 1]
+    [Conversation completeness: Incomplete (0)]
+        ..0. .... = RST: Absent
+        ...0 .... = FIN: Absent
+        .... 0... = Data: Absent
+        .... .0.. = ACK: Absent
+        .... ..0. = SYN-ACK: Absent
+        .... ...0 = SYN: Absent
+        [Completeness Flags: [ Null ]]
+    [TCP Segment Len: 0]
+    Sequence Number: 0    (relative sequence number)
+    Sequence Number (raw): 3019042319
+    [Next Sequence Number: 1    (relative sequence number)]
+    Acknowledgment Number: 0
+    Acknowledgment number (raw): 0
+    1000 .... = Header Length: 32 bytes (8)
+    Flags: 0x002 (SYN)
+        000. .... .... = Reserved: Not set
+        ...0 .... .... = Accurate ECN: Not set
+        .... 0... .... = Congestion Window Reduced: Not set
+        .... .0.. .... = ECN-Echo: Not set
+        .... ..0. .... = Urgent: Not set
+        .... ...0 .... = Acknowledgment: Not set
+        .... .... 0... = Push: Not set
+        .... .... .0.. = Reset: Not set
+        .... .... ..1. = Syn: Set
+            [Expert Info (Chat/Sequence): Connection establish request (SYN): server port 80]
+                [Connection establish request (SYN): server port 80]
+                [Severity level: Chat]
+                [Group: Sequence]
+        .... .... ...0 = Fin: Not set
+        [TCP Flags: 路路路路路路路路路路S路]
+    Window: 64240
+    [Calculated window size: 64240]
+    Checksum: 0x8583 [unverified]
+    [Checksum Status: Unverified]
+    Urgent Pointer: 0
+    Options: (12 bytes), Maximum segment size, No-Operation (NOP), Window scale, No-Operation (NOP), No-Operation (NOP), SACK permitted
+        TCP Option - Maximum segment size: 1460 bytes
+            Kind: Maximum Segment Size (2)
+            Length: 4
+            MSS Value: 1460
+        TCP Option - No-Operation (NOP)
+            Kind: No-Operation (1)
+        TCP Option - Window scale: 8 (multiply by 256)
+            Kind: Window Scale (3)
+            Length: 3
+            Shift count: 8
+            [Multiplier: 256]
+        TCP Option - No-Operation (NOP)
+            Kind: No-Operation (1)
+        TCP Option - No-Operation (NOP)
+            Kind: No-Operation (1)
+        TCP Option - SACK permitted
+            Kind: SACK Permitted (4)
+            Length: 2
+    [Timestamps]
+        [Time since first frame in this TCP stream: 0.000000000 seconds]
+        [Time since previous frame in this TCP stream: 0.000000000 seconds]
+    [Client Contiguous Streams: 0]
+    [Server Contiguous Streams: 1]
+
+Frame 50175: Packet, 60 bytes on wire (480 bits), 60 bytes captured (480 bits) on interface unknown, id 0
+    Section number: 1
+    Interface id: 0 (unknown)
+        Interface name: unknown
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 21, 2026 15:35:46.715813000 涓浗鏍囧噯鏃堕棿
+    UTC Arrival Time: Nov 21, 2026 07:35:46.715813000 UTC
+    Epoch Arrival Time: 1795246546.715813000
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 76.000 microseconds]
+    [Time delta from previous displayed frame: 76.000 microseconds]
+    [Time since reference or first frame: 3 minutes, 56.252298000 seconds]
+    Frame Number: 50175
+    Frame Length: 60 bytes (480 bits)
+    Capture Length: 60 bytes (480 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:tcp]
+    Character encoding: ASCII (0)
+Ethernet II, Src: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08), Dst: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+    Destination: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 12]
+    Padding: 0000
+Internet Protocol Version 4, Src: 192.168.2.2, Dst: 192.168.2.10
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 44
+    Identification: 0x0000 (0)
+    010. .... = Flags: 0x2, Don't fragment
+        0... .... = Reserved bit: Not set
+        .1.. .... = Don't fragment: Set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 255
+    Protocol: TCP (6)
+    Header Checksum: 0xf66e [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 192.168.2.2
+    Destination Address: 192.168.2.10
+    [Stream index: 1]
+Transmission Control Protocol, Src Port: 80, Dst Port: 8111, Seq: 0, Ack: 1, Len: 0
+    Source Port: 80
+    Destination Port: 8111
+    [Stream index: 0]
+    [Stream Packet Number: 2]
+    [Conversation completeness: Incomplete, SYN_SENT (1)]
+        ..0. .... = RST: Absent
+        ...0 .... = FIN: Absent
+        .... 0... = Data: Absent
+        .... .0.. = ACK: Absent
+        .... ..0. = SYN-ACK: Absent
+        .... ...1 = SYN: Present
+        [Completeness Flags: 路路路路路S]
+    [TCP Segment Len: 0]
+    Sequence Number: 0    (relative sequence number)
+    Sequence Number (raw): 3232239077
+    [Next Sequence Number: 1    (relative sequence number)]
+    Acknowledgment Number: 1    (relative ack number)
+    Acknowledgment number (raw): 3019042320
+    0110 .... = Header Length: 24 bytes (6)
+    Flags: 0x012 (SYN, ACK)
+        000. .... .... = Reserved: Not set
+        ...0 .... .... = Accurate ECN: Not set
+        .... 0... .... = Congestion Window Reduced: Not set
+        .... .0.. .... = ECN-Echo: Not set
+        .... ..0. .... = Urgent: Not set
+        .... ...1 .... = Acknowledgment: Set
+        .... .... 0... = Push: Not set
+        .... .... .0.. = Reset: Not set
+        .... .... ..1. = Syn: Set
+            [Expert Info (Chat/Sequence): Connection establish acknowledge (SYN+ACK): server port 80]
+                [Connection establish acknowledge (SYN+ACK): server port 80]
+                [Severity level: Chat]
+                [Group: Sequence]
+        .... .... ...0 = Fin: Not set
+        [TCP Flags: 路路路路路路路A路路S路]
+    Window: 4096
+    [Calculated window size: 4096]
+    Checksum: 0x75c5 [unverified]
+    [Checksum Status: Unverified]
+    Urgent Pointer: 0
+    Options: (4 bytes), Maximum segment size
+        TCP Option - Maximum segment size: 536 bytes
+            Kind: Maximum Segment Size (2)
+            Length: 4
+            MSS Value: 536
+        [Expert Info (Note/Protocol): The SYN packet does not contain a SACK PERM option]
+            [The SYN packet does not contain a SACK PERM option]
+            [Severity level: Note]
+            [Group: Protocol]
+    [Timestamps]
+        [Time since first frame in this TCP stream: 76.000 microseconds]
+        [Time since previous frame in this TCP stream: 76.000 microseconds]
+    [SEQ/ACK analysis]
+        [This is an ACK to the segment in frame: 50174]
+        [The RTT to ACK the segment was: 76.000 microseconds]
+    [Client Contiguous Streams: 1]
+    [Server Contiguous Streams: 1]
+
+Frame 50176: Packet, 54 bytes on wire (432 bits), 54 bytes captured (432 bits) on interface unknown, id 0
+    Section number: 1
+    Interface id: 0 (unknown)
+        Interface name: unknown
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 21, 2026 15:35:46.715920000 涓浗鏍囧噯鏃堕棿
+    UTC Arrival Time: Nov 21, 2026 07:35:46.715920000 UTC
+    Epoch Arrival Time: 1795246546.715920000
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 107.000 microseconds]
+    [Time delta from previous displayed frame: 107.000 microseconds]
+    [Time since reference or first frame: 3 minutes, 56.252405000 seconds]
+    Frame Number: 50176
+    Frame Length: 54 bytes (432 bits)
+    Capture Length: 54 bytes (432 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:tcp]
+    Character encoding: ASCII (0)
+Ethernet II, Src: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e), Dst: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+    Destination: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 12]
+Internet Protocol Version 4, Src: 192.168.2.10, Dst: 192.168.2.2
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 40
+    Identification: 0xdd6d (56685)
+    010. .... = Flags: 0x2, Don't fragment
+        0... .... = Reserved bit: Not set
+        .1.. .... = Don't fragment: Set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 128
+    Protocol: TCP (6)
+    Header Checksum: 0x0000 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 192.168.2.10
+    Destination Address: 192.168.2.2
+    [Stream index: 1]
+Transmission Control Protocol, Src Port: 8111, Dst Port: 80, Seq: 1, Ack: 1, Len: 0
+    Source Port: 8111
+    Destination Port: 80
+    [Stream index: 0]
+    [Stream Packet Number: 3]
+    [Conversation completeness: Incomplete, CLIENT_ESTABLISHED (3)]
+        ..0. .... = RST: Absent
+        ...0 .... = FIN: Absent
+        .... 0... = Data: Absent
+        .... .0.. = ACK: Absent
+        .... ..1. = SYN-ACK: Present
+        .... ...1 = SYN: Present
+        [Completeness Flags: 路路路路SS]
+    [TCP Segment Len: 0]
+    Sequence Number: 1    (relative sequence number)
+    Sequence Number (raw): 3019042320
+    [Next Sequence Number: 1    (relative sequence number)]
+    Acknowledgment Number: 1    (relative ack number)
+    Acknowledgment number (raw): 3232239078
+    0101 .... = Header Length: 20 bytes (5)
+    Flags: 0x010 (ACK)
+        000. .... .... = Reserved: Not set
+        ...0 .... .... = Accurate ECN: Not set
+        .... 0... .... = Congestion Window Reduced: Not set
+        .... .0.. .... = ECN-Echo: Not set
+        .... ..0. .... = Urgent: Not set
+        .... ...1 .... = Acknowledgment: Set
+        .... .... 0... = Push: Not set
+        .... .... .0.. = Reset: Not set
+        .... .... ..0. = Syn: Not set
+        .... .... ...0 = Fin: Not set
+        [TCP Flags: 路路路路路路路A路路路路]
+    Window: 65392
+    [Calculated window size: 65392]
+    [Window size scaling factor: -2 (no window scaling used)]
+    Checksum: 0x8577 [unverified]
+    [Checksum Status: Unverified]
+    Urgent Pointer: 0
+    [Timestamps]
+        [Time since first frame in this TCP stream: 183.000 microseconds]
+        [Time since previous frame in this TCP stream: 107.000 microseconds]
+    [SEQ/ACK analysis]
+        [This is an ACK to the segment in frame: 50175]
+        [The RTT to ACK the segment was: 107.000 microseconds]
+        [iRTT: 183.000 microseconds]
+    [Client Contiguous Streams: 1]
+    [Server Contiguous Streams: 1]
+
+Frame 50177: Packet, 54 bytes on wire (432 bits), 54 bytes captured (432 bits) on interface unknown, id 0
+    Section number: 1
+    Interface id: 0 (unknown)
+        Interface name: unknown
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 21, 2026 15:35:46.731051000 涓浗鏍囧噯鏃堕棿
+    UTC Arrival Time: Nov 21, 2026 07:35:46.731051000 UTC
+    Epoch Arrival Time: 1795246546.731051000
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 15.131000 milliseconds]
+    [Time delta from previous displayed frame: 15.131000 milliseconds]
+    [Time since reference or first frame: 3 minutes, 56.267536000 seconds]
+    Frame Number: 50177
+    Frame Length: 54 bytes (432 bits)
+    Capture Length: 54 bytes (432 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:tcp]
+    Character encoding: ASCII (0)
+Ethernet II, Src: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e), Dst: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+    Destination: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 12]
+Internet Protocol Version 4, Src: 192.168.2.10, Dst: 192.168.2.2
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 40
+    Identification: 0xdd6e (56686)
+    010. .... = Flags: 0x2, Don't fragment
+        0... .... = Reserved bit: Not set
+        .1.. .... = Don't fragment: Set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 128
+    Protocol: TCP (6)
+    Header Checksum: 0x0000 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 192.168.2.10
+    Destination Address: 192.168.2.2
+    [Stream index: 1]
+Transmission Control Protocol, Src Port: 8111, Dst Port: 80, Seq: 1, Ack: 1, Len: 0
+    Source Port: 8111
+    Destination Port: 80
+    [Stream index: 0]
+    [Stream Packet Number: 4]
+    [Conversation completeness: Incomplete, ESTABLISHED (7)]
+        ..0. .... = RST: Absent
+        ...0 .... = FIN: Absent
+        .... 0... = Data: Absent
+        .... .1.. = ACK: Present
+        .... ..1. = SYN-ACK: Present
+        .... ...1 = SYN: Present
+        [Completeness Flags: 路路路ASS]
+    [TCP Segment Len: 0]
+    Sequence Number: 1    (relative sequence number)
+    Sequence Number (raw): 3019042320
+    [Next Sequence Number: 2    (relative sequence number)]
+    Acknowledgment Number: 1    (relative ack number)
+    Acknowledgment number (raw): 3232239078
+    0101 .... = Header Length: 20 bytes (5)
+    Flags: 0x011 (FIN, ACK)
+        000. .... .... = Reserved: Not set
+        ...0 .... .... = Accurate ECN: Not set
+        .... 0... .... = Congestion Window Reduced: Not set
+        .... .0.. .... = ECN-Echo: Not set
+        .... ..0. .... = Urgent: Not set
+        .... ...1 .... = Acknowledgment: Set
+        .... .... 0... = Push: Not set
+        .... .... .0.. = Reset: Not set
+        .... .... ..0. = Syn: Not set
+        .... .... ...1 = Fin: Set
+            [Expert Info (Chat/Sequence): Connection finish (FIN)]
+                [Connection finish (FIN)]
+                [Severity level: Chat]
+                [Group: Sequence]
+        [TCP Flags: 路路路路路路路A路路路F]
+            [Expert Info (Note/Sequence): This frame initiates the connection closing]
+                [This frame initiates the connection closing]
+                [Severity level: Note]
+                [Group: Sequence]
+    Window: 65392
+    [Calculated window size: 65392]
+    [Window size scaling factor: -2 (no window scaling used)]
+    Checksum: 0x8577 [unverified]
+    [Checksum Status: Unverified]
+    Urgent Pointer: 0
+    [Timestamps]
+        [Time since first frame in this TCP stream: 15.314000 milliseconds]
+        [Time since previous frame in this TCP stream: 15.131000 milliseconds]
+    [Client Contiguous Streams: 1]
+    [Server Contiguous Streams: 1]
+
+Frame 50178: Packet, 60 bytes on wire (480 bits), 60 bytes captured (480 bits) on interface unknown, id 0
+    Section number: 1
+    Interface id: 0 (unknown)
+        Interface name: unknown
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 21, 2026 15:35:46.731131000 涓浗鏍囧噯鏃堕棿
+    UTC Arrival Time: Nov 21, 2026 07:35:46.731131000 UTC
+    Epoch Arrival Time: 1795246546.731131000
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 80.000 microseconds]
+    [Time delta from previous displayed frame: 80.000 microseconds]
+    [Time since reference or first frame: 3 minutes, 56.267616000 seconds]
+    Frame Number: 50178
+    Frame Length: 60 bytes (480 bits)
+    Capture Length: 60 bytes (480 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:tcp]
+    Character encoding: ASCII (0)
+Ethernet II, Src: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08), Dst: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+    Destination: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 12]
+    Padding: 000000000000
+Internet Protocol Version 4, Src: 192.168.2.2, Dst: 192.168.2.10
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 40
+    Identification: 0x0001 (1)
+    010. .... = Flags: 0x2, Don't fragment
+        0... .... = Reserved bit: Not set
+        .1.. .... = Don't fragment: Set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 255
+    Protocol: TCP (6)
+    Header Checksum: 0xf671 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 192.168.2.2
+    Destination Address: 192.168.2.10
+    [Stream index: 1]
+Transmission Control Protocol, Src Port: 80, Dst Port: 8111, Seq: 1, Ack: 2, Len: 0
+    Source Port: 80
+    Destination Port: 8111
+    [Stream index: 0]
+    [Stream Packet Number: 5]
+    [Conversation completeness: Complete, NO_DATA (23)]
+        ..0. .... = RST: Absent
+        ...1 .... = FIN: Present
+        .... 0... = Data: Absent
+        .... .1.. = ACK: Present
+        .... ..1. = SYN-ACK: Present
+        .... ...1 = SYN: Present
+        [Completeness Flags: 路F路ASS]
+    [TCP Segment Len: 0]
+    Sequence Number: 1    (relative sequence number)
+    Sequence Number (raw): 3232239078
+    [Next Sequence Number: 1    (relative sequence number)]
+    Acknowledgment Number: 2    (relative ack number)
+    Acknowledgment number (raw): 3019042321
+    0101 .... = Header Length: 20 bytes (5)
+    Flags: 0x010 (ACK)
+        000. .... .... = Reserved: Not set
+        ...0 .... .... = Accurate ECN: Not set
+        .... 0... .... = Congestion Window Reduced: Not set
+        .... .0.. .... = ECN-Echo: Not set
+        .... ..0. .... = Urgent: Not set
+        .... ...1 .... = Acknowledgment: Set
+        .... .... 0... = Push: Not set
+        .... .... .0.. = Reset: Not set
+        .... .... ..0. = Syn: Not set
+        .... .... ...0 = Fin: Not set
+        [TCP Flags: 路路路路路路路A路路路路]
+    Window: 4096
+    [Calculated window size: 4096]
+    [Window size scaling factor: -2 (no window scaling used)]
+    Checksum: 0x89e5 [unverified]
+    [Checksum Status: Unverified]
+    Urgent Pointer: 0
+    [Timestamps]
+        [Time since first frame in this TCP stream: 15.394000 milliseconds]
+        [Time since previous frame in this TCP stream: 80.000 microseconds]
+    [SEQ/ACK analysis]
+        [This is an ACK to the segment in frame: 50177]
+        [The RTT to ACK the segment was: 80.000 microseconds]
+        [iRTT: 183.000 microseconds]
+    [Client Contiguous Streams: 1]
+    [Server Contiguous Streams: 1]
+
+Frame 50179: Packet, 60 bytes on wire (480 bits), 60 bytes captured (480 bits) on interface unknown, id 0
+    Section number: 1
+    Interface id: 0 (unknown)
+        Interface name: unknown
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 21, 2026 15:35:46.731133000 涓浗鏍囧噯鏃堕棿
+    UTC Arrival Time: Nov 21, 2026 07:35:46.731133000 UTC
+    Epoch Arrival Time: 1795246546.731133000
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 2.000 microseconds]
+    [Time delta from previous displayed frame: 2.000 microseconds]
+    [Time since reference or first frame: 3 minutes, 56.267618000 seconds]
+    Frame Number: 50179
+    Frame Length: 60 bytes (480 bits)
+    Capture Length: 60 bytes (480 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:tcp]
+    Character encoding: ASCII (0)
+Ethernet II, Src: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08), Dst: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+    Destination: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 12]
+    Padding: 000000000000
+Internet Protocol Version 4, Src: 192.168.2.2, Dst: 192.168.2.10
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 40
+    Identification: 0x0002 (2)
+    010. .... = Flags: 0x2, Don't fragment
+        0... .... = Reserved bit: Not set
+        .1.. .... = Don't fragment: Set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 255
+    Protocol: TCP (6)
+    Header Checksum: 0xf670 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 192.168.2.2
+    Destination Address: 192.168.2.10
+    [Stream index: 1]
+Transmission Control Protocol, Src Port: 80, Dst Port: 8111, Seq: 1, Ack: 2, Len: 0
+    Source Port: 80
+    Destination Port: 8111
+    [Stream index: 0]
+    [Stream Packet Number: 6]
+    [Conversation completeness: Complete, NO_DATA (23)]
+        ..0. .... = RST: Absent
+        ...1 .... = FIN: Present
+        .... 0... = Data: Absent
+        .... .1.. = ACK: Present
+        .... ..1. = SYN-ACK: Present
+        .... ...1 = SYN: Present
+        [Completeness Flags: 路F路ASS]
+    [TCP Segment Len: 0]
+    Sequence Number: 1    (relative sequence number)
+    Sequence Number (raw): 3232239078
+    [Next Sequence Number: 2    (relative sequence number)]
+    Acknowledgment Number: 2    (relative ack number)
+    Acknowledgment number (raw): 3019042321
+    0101 .... = Header Length: 20 bytes (5)
+    Flags: 0x011 (FIN, ACK)
+        000. .... .... = Reserved: Not set
+        ...0 .... .... = Accurate ECN: Not set
+        .... 0... .... = Congestion Window Reduced: Not set
+        .... .0.. .... = ECN-Echo: Not set
+        .... ..0. .... = Urgent: Not set
+        .... ...1 .... = Acknowledgment: Set
+        .... .... 0... = Push: Not set
+        .... .... .0.. = Reset: Not set
+        .... .... ..0. = Syn: Not set
+        .... .... ...1 = Fin: Set
+            [Expert Info (Chat/Sequence): Connection finish (FIN)]
+                [Connection finish (FIN)]
+                [Severity level: Chat]
+                [Group: Sequence]
+        [TCP Flags: 路路路路路路路A路路路F]
+            [Expert Info (Note/Sequence): This frame undergoes the connection closing]
+                [This frame undergoes the connection closing]
+                [Severity level: Note]
+                [Group: Sequence]
+    Window: 4096
+    [Calculated window size: 4096]
+    [Window size scaling factor: -2 (no window scaling used)]
+    Checksum: 0x89e4 [unverified]
+    [Checksum Status: Unverified]
+    Urgent Pointer: 0
+    [Timestamps]
+        [Time since first frame in this TCP stream: 15.396000 milliseconds]
+        [Time since previous frame in this TCP stream: 2.000 microseconds]
+    [Client Contiguous Streams: 1]
+    [Server Contiguous Streams: 1]
+
+Frame 50180: Packet, 54 bytes on wire (432 bits), 54 bytes captured (432 bits) on interface unknown, id 0
+    Section number: 1
+    Interface id: 0 (unknown)
+        Interface name: unknown
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 21, 2026 15:35:46.731233000 涓浗鏍囧噯鏃堕棿
+    UTC Arrival Time: Nov 21, 2026 07:35:46.731233000 UTC
+    Epoch Arrival Time: 1795246546.731233000
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 100.000 microseconds]
+    [Time delta from previous displayed frame: 100.000 microseconds]
+    [Time since reference or first frame: 3 minutes, 56.267718000 seconds]
+    Frame Number: 50180
+    Frame Length: 54 bytes (432 bits)
+    Capture Length: 54 bytes (432 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:tcp]
+    Character encoding: ASCII (0)
+Ethernet II, Src: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e), Dst: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+    Destination: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 12]
+Internet Protocol Version 4, Src: 192.168.2.10, Dst: 192.168.2.2
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 40
+    Identification: 0xdd6f (56687)
+    010. .... = Flags: 0x2, Don't fragment
+        0... .... = Reserved bit: Not set
+        .1.. .... = Don't fragment: Set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 128
+    Protocol: TCP (6)
+    Header Checksum: 0x0000 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 192.168.2.10
+    Destination Address: 192.168.2.2
+    [Stream index: 1]
+Transmission Control Protocol, Src Port: 8111, Dst Port: 80, Seq: 2, Ack: 2, Len: 0
+    Source Port: 8111
+    Destination Port: 80
+    [Stream index: 0]
+    [Stream Packet Number: 7]
+    [Conversation completeness: Complete, NO_DATA (23)]
+        ..0. .... = RST: Absent
+        ...1 .... = FIN: Present
+        .... 0... = Data: Absent
+        .... .1.. = ACK: Present
+        .... ..1. = SYN-ACK: Present
+        .... ...1 = SYN: Present
+        [Completeness Flags: 路F路ASS]
+    [TCP Segment Len: 0]
+    Sequence Number: 2    (relative sequence number)
+    Sequence Number (raw): 3019042321
+    [Next Sequence Number: 2    (relative sequence number)]
+    Acknowledgment Number: 2    (relative ack number)
+    Acknowledgment number (raw): 3232239079
+    0101 .... = Header Length: 20 bytes (5)
+    Flags: 0x010 (ACK)
+        000. .... .... = Reserved: Not set
+        ...0 .... .... = Accurate ECN: Not set
+        .... 0... .... = Congestion Window Reduced: Not set
+        .... .0.. .... = ECN-Echo: Not set
+        .... ..0. .... = Urgent: Not set
+        .... ...1 .... = Acknowledgment: Set
+        .... .... 0... = Push: Not set
+        .... .... .0.. = Reset: Not set
+        .... .... ..0. = Syn: Not set
+        .... .... ...0 = Fin: Not set
+        [TCP Flags: 路路路路路路路A路路路路]
+    Window: 65392
+    [Calculated window size: 65392]
+    [Window size scaling factor: -2 (no window scaling used)]
+    Checksum: 0x8577 [unverified]
+    [Checksum Status: Unverified]
+    Urgent Pointer: 0
+    [Timestamps]
+        [Time since first frame in this TCP stream: 15.496000 milliseconds]
+        [Time since previous frame in this TCP stream: 100.000 microseconds]
+    [SEQ/ACK analysis]
+        [This is an ACK to the segment in frame: 50179]
+        [The RTT to ACK the segment was: 100.000 microseconds]
+        [iRTT: 183.000 microseconds]
+    [Client Contiguous Streams: 1]
+    [Server Contiguous Streams: 1]
+
+Frame 86948: Packet, 66 bytes on wire (528 bits), 66 bytes captured (528 bits) on interface unknown, id 0
+    Section number: 1
+    Interface id: 0 (unknown)
+        Interface name: unknown
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 21, 2026 15:38:52.820571000 涓浗鏍囧噯鏃堕棿
+    UTC Arrival Time: Nov 21, 2026 07:38:52.820571000 UTC
+    Epoch Arrival Time: 1795246732.820571000
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 43.545000 milliseconds]
+    [Time delta from previous displayed frame: 3 minutes, 6.089338000 seconds]
+    [Time since reference or first frame: 7 minutes, 2.357056000 seconds]
+    Frame Number: 86948
+    Frame Length: 66 bytes (528 bits)
+    Capture Length: 66 bytes (528 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:tcp]
+    Character encoding: ASCII (0)
+Ethernet II, Src: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e), Dst: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+    Destination: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 12]
+Internet Protocol Version 4, Src: 192.168.2.10, Dst: 192.168.2.2
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 52
+    Identification: 0xdd70 (56688)
+    010. .... = Flags: 0x2, Don't fragment
+        0... .... = Reserved bit: Not set
+        .1.. .... = Don't fragment: Set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 128
+    Protocol: TCP (6)
+    Header Checksum: 0x0000 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 192.168.2.10
+    Destination Address: 192.168.2.2
+    [Stream index: 1]
+Transmission Control Protocol, Src Port: 8140, Dst Port: 80, Seq: 0, Len: 0
+    Source Port: 8140
+    Destination Port: 80
+    [Stream index: 1]
+    [Stream Packet Number: 1]
+    [Conversation completeness: Incomplete (0)]
+        ..0. .... = RST: Absent
+        ...0 .... = FIN: Absent
+        .... 0... = Data: Absent
+        .... .0.. = ACK: Absent
+        .... ..0. = SYN-ACK: Absent
+        .... ...0 = SYN: Absent
+        [Completeness Flags: [ Null ]]
+    [TCP Segment Len: 0]
+    Sequence Number: 0    (relative sequence number)
+    Sequence Number (raw): 849617881
+    [Next Sequence Number: 1    (relative sequence number)]
+    Acknowledgment Number: 0
+    Acknowledgment number (raw): 0
+    1000 .... = Header Length: 32 bytes (8)
+    Flags: 0x002 (SYN)
+        000. .... .... = Reserved: Not set
+        ...0 .... .... = Accurate ECN: Not set
+        .... 0... .... = Congestion Window Reduced: Not set
+        .... .0.. .... = ECN-Echo: Not set
+        .... ..0. .... = Urgent: Not set
+        .... ...0 .... = Acknowledgment: Not set
+        .... .... 0... = Push: Not set
+        .... .... .0.. = Reset: Not set
+        .... .... ..1. = Syn: Set
+            [Expert Info (Chat/Sequence): Connection establish request (SYN): server port 80]
+                [Connection establish request (SYN): server port 80]
+                [Severity level: Chat]
+                [Group: Sequence]
+        .... .... ...0 = Fin: Not set
+        [TCP Flags: 路路路路路路路路路路S路]
+    Window: 64240
+    [Calculated window size: 64240]
+    Checksum: 0x8583 [unverified]
+    [Checksum Status: Unverified]
+    Urgent Pointer: 0
+    Options: (12 bytes), Maximum segment size, No-Operation (NOP), Window scale, No-Operation (NOP), No-Operation (NOP), SACK permitted
+        TCP Option - Maximum segment size: 1460 bytes
+            Kind: Maximum Segment Size (2)
+            Length: 4
+            MSS Value: 1460
+        TCP Option - No-Operation (NOP)
+            Kind: No-Operation (1)
+        TCP Option - Window scale: 8 (multiply by 256)
+            Kind: Window Scale (3)
+            Length: 3
+            Shift count: 8
+            [Multiplier: 256]
+        TCP Option - No-Operation (NOP)
+            Kind: No-Operation (1)
+        TCP Option - No-Operation (NOP)
+            Kind: No-Operation (1)
+        TCP Option - SACK permitted
+            Kind: SACK Permitted (4)
+            Length: 2
+    [Timestamps]
+        [Time since first frame in this TCP stream: 0.000000000 seconds]
+        [Time since previous frame in this TCP stream: 0.000000000 seconds]
+    [Client Contiguous Streams: 0]
+    [Server Contiguous Streams: 1]
+
+Frame 86949: Packet, 60 bytes on wire (480 bits), 60 bytes captured (480 bits) on interface unknown, id 0
+    Section number: 1
+    Interface id: 0 (unknown)
+        Interface name: unknown
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 21, 2026 15:38:52.820690000 涓浗鏍囧噯鏃堕棿
+    UTC Arrival Time: Nov 21, 2026 07:38:52.820690000 UTC
+    Epoch Arrival Time: 1795246732.820690000
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 119.000 microseconds]
+    [Time delta from previous displayed frame: 119.000 microseconds]
+    [Time since reference or first frame: 7 minutes, 2.357175000 seconds]
+    Frame Number: 86949
+    Frame Length: 60 bytes (480 bits)
+    Capture Length: 60 bytes (480 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:tcp]
+    Character encoding: ASCII (0)
+Ethernet II, Src: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08), Dst: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+    Destination: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 12]
+    Padding: 0000
+Internet Protocol Version 4, Src: 192.168.2.2, Dst: 192.168.2.10
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 44
+    Identification: 0x0003 (3)
+    010. .... = Flags: 0x2, Don't fragment
+        0... .... = Reserved bit: Not set
+        .1.. .... = Don't fragment: Set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 255
+    Protocol: TCP (6)
+    Header Checksum: 0xf66b [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 192.168.2.2
+    Destination Address: 192.168.2.10
+    [Stream index: 1]
+Transmission Control Protocol, Src Port: 80, Dst Port: 8140, Seq: 0, Ack: 1, Len: 0
+    Source Port: 80
+    Destination Port: 8140
+    [Stream index: 1]
+    [Stream Packet Number: 2]
+    [Conversation completeness: Incomplete, SYN_SENT (1)]
+        ..0. .... = RST: Absent
+        ...0 .... = FIN: Absent
+        .... 0... = Data: Absent
+        .... .0.. = ACK: Absent
+        .... ..0. = SYN-ACK: Absent
+        .... ...1 = SYN: Present
+        [Completeness Flags: 路路路路路S]
+    [TCP Segment Len: 0]
+    Sequence Number: 0    (relative sequence number)
+    Sequence Number (raw): 3232304614
+    [Next Sequence Number: 1    (relative sequence number)]
+    Acknowledgment Number: 1    (relative ack number)
+    Acknowledgment number (raw): 849617882
+    0110 .... = Header Length: 24 bytes (6)
+    Flags: 0x012 (SYN, ACK)
+        000. .... .... = Reserved: Not set
+        ...0 .... .... = Accurate ECN: Not set
+        .... 0... .... = Congestion Window Reduced: Not set
+        .... .0.. .... = ECN-Echo: Not set
+        .... ..0. .... = Urgent: Not set
+        .... ...1 .... = Acknowledgment: Set
+        .... .... 0... = Push: Not set
+        .... .... .0.. = Reset: Not set
+        .... .... ..1. = Syn: Set
+            [Expert Info (Chat/Sequence): Connection establish acknowledge (SYN+ACK): server port 80]
+                [Connection establish acknowledge (SYN+ACK): server port 80]
+                [Severity level: Chat]
+                [Group: Sequence]
+        .... .... ...0 = Fin: Not set
+        [TCP Flags: 路路路路路路路A路路S路]
+    Window: 4096
+    [Calculated window size: 4096]
+    Checksum: 0xc12b [unverified]
+    [Checksum Status: Unverified]
+    Urgent Pointer: 0
+    Options: (4 bytes), Maximum segment size
+        TCP Option - Maximum segment size: 536 bytes
+            Kind: Maximum Segment Size (2)
+            Length: 4
+            MSS Value: 536
+        [Expert Info (Note/Protocol): The SYN packet does not contain a SACK PERM option]
+            [The SYN packet does not contain a SACK PERM option]
+            [Severity level: Note]
+            [Group: Protocol]
+    [Timestamps]
+        [Time since first frame in this TCP stream: 119.000 microseconds]
+        [Time since previous frame in this TCP stream: 119.000 microseconds]
+    [SEQ/ACK analysis]
+        [This is an ACK to the segment in frame: 86948]
+        [The RTT to ACK the segment was: 119.000 microseconds]
+    [Client Contiguous Streams: 1]
+    [Server Contiguous Streams: 1]
+
+Frame 86950: Packet, 54 bytes on wire (432 bits), 54 bytes captured (432 bits) on interface unknown, id 0
+    Section number: 1
+    Interface id: 0 (unknown)
+        Interface name: unknown
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 21, 2026 15:38:52.820805000 涓浗鏍囧噯鏃堕棿
+    UTC Arrival Time: Nov 21, 2026 07:38:52.820805000 UTC
+    Epoch Arrival Time: 1795246732.820805000
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 115.000 microseconds]
+    [Time delta from previous displayed frame: 115.000 microseconds]
+    [Time since reference or first frame: 7 minutes, 2.357290000 seconds]
+    Frame Number: 86950
+    Frame Length: 54 bytes (432 bits)
+    Capture Length: 54 bytes (432 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:tcp]
+    Character encoding: ASCII (0)
+Ethernet II, Src: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e), Dst: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+    Destination: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 12]
+Internet Protocol Version 4, Src: 192.168.2.10, Dst: 192.168.2.2
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 40
+    Identification: 0xdd71 (56689)
+    010. .... = Flags: 0x2, Don't fragment
+        0... .... = Reserved bit: Not set
+        .1.. .... = Don't fragment: Set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 128
+    Protocol: TCP (6)
+    Header Checksum: 0x0000 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 192.168.2.10
+    Destination Address: 192.168.2.2
+    [Stream index: 1]
+Transmission Control Protocol, Src Port: 8140, Dst Port: 80, Seq: 1, Ack: 1, Len: 0
+    Source Port: 8140
+    Destination Port: 80
+    [Stream index: 1]
+    [Stream Packet Number: 3]
+    [Conversation completeness: Incomplete, CLIENT_ESTABLISHED (3)]
+        ..0. .... = RST: Absent
+        ...0 .... = FIN: Absent
+        .... 0... = Data: Absent
+        .... .0.. = ACK: Absent
+        .... ..1. = SYN-ACK: Present
+        .... ...1 = SYN: Present
+        [Completeness Flags: 路路路路SS]
+    [TCP Segment Len: 0]
+    Sequence Number: 1    (relative sequence number)
+    Sequence Number (raw): 849617882
+    [Next Sequence Number: 1    (relative sequence number)]
+    Acknowledgment Number: 1    (relative ack number)
+    Acknowledgment number (raw): 3232304615
+    0101 .... = Header Length: 20 bytes (5)
+    Flags: 0x010 (ACK)
+        000. .... .... = Reserved: Not set
+        ...0 .... .... = Accurate ECN: Not set
+        .... 0... .... = Congestion Window Reduced: Not set
+        .... .0.. .... = ECN-Echo: Not set
+        .... ..0. .... = Urgent: Not set
+        .... ...1 .... = Acknowledgment: Set
+        .... .... 0... = Push: Not set
+        .... .... .0.. = Reset: Not set
+        .... .... ..0. = Syn: Not set
+        .... .... ...0 = Fin: Not set
+        [TCP Flags: 路路路路路路路A路路路路]
+    Window: 65392
+    [Calculated window size: 65392]
+    [Window size scaling factor: -2 (no window scaling used)]
+    Checksum: 0x8577 [unverified]
+    [Checksum Status: Unverified]
+    Urgent Pointer: 0
+    [Timestamps]
+        [Time since first frame in this TCP stream: 234.000 microseconds]
+        [Time since previous frame in this TCP stream: 115.000 microseconds]
+    [SEQ/ACK analysis]
+        [This is an ACK to the segment in frame: 86949]
+        [The RTT to ACK the segment was: 115.000 microseconds]
+        [iRTT: 234.000 microseconds]
+    [Client Contiguous Streams: 1]
+    [Server Contiguous Streams: 1]
+
+Frame 86951: Packet, 54 bytes on wire (432 bits), 54 bytes captured (432 bits) on interface unknown, id 0
+    Section number: 1
+    Interface id: 0 (unknown)
+        Interface name: unknown
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 21, 2026 15:38:52.823393000 涓浗鏍囧噯鏃堕棿
+    UTC Arrival Time: Nov 21, 2026 07:38:52.823393000 UTC
+    Epoch Arrival Time: 1795246732.823393000
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 2.588000 milliseconds]
+    [Time delta from previous displayed frame: 2.588000 milliseconds]
+    [Time since reference or first frame: 7 minutes, 2.359878000 seconds]
+    Frame Number: 86951
+    Frame Length: 54 bytes (432 bits)
+    Capture Length: 54 bytes (432 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:tcp]
+    Character encoding: ASCII (0)
+Ethernet II, Src: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e), Dst: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+    Destination: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 12]
+Internet Protocol Version 4, Src: 192.168.2.10, Dst: 192.168.2.2
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 40
+    Identification: 0xdd72 (56690)
+    010. .... = Flags: 0x2, Don't fragment
+        0... .... = Reserved bit: Not set
+        .1.. .... = Don't fragment: Set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 128
+    Protocol: TCP (6)
+    Header Checksum: 0x0000 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 192.168.2.10
+    Destination Address: 192.168.2.2
+    [Stream index: 1]
+Transmission Control Protocol, Src Port: 8140, Dst Port: 80, Seq: 1, Ack: 1, Len: 0
+    Source Port: 8140
+    Destination Port: 80
+    [Stream index: 1]
+    [Stream Packet Number: 4]
+    [Conversation completeness: Incomplete, ESTABLISHED (7)]
+        ..0. .... = RST: Absent
+        ...0 .... = FIN: Absent
+        .... 0... = Data: Absent
+        .... .1.. = ACK: Present
+        .... ..1. = SYN-ACK: Present
+        .... ...1 = SYN: Present
+        [Completeness Flags: 路路路ASS]
+    [TCP Segment Len: 0]
+    Sequence Number: 1    (relative sequence number)
+    Sequence Number (raw): 849617882
+    [Next Sequence Number: 2    (relative sequence number)]
+    Acknowledgment Number: 1    (relative ack number)
+    Acknowledgment number (raw): 3232304615
+    0101 .... = Header Length: 20 bytes (5)
+    Flags: 0x011 (FIN, ACK)
+        000. .... .... = Reserved: Not set
+        ...0 .... .... = Accurate ECN: Not set
+        .... 0... .... = Congestion Window Reduced: Not set
+        .... .0.. .... = ECN-Echo: Not set
+        .... ..0. .... = Urgent: Not set
+        .... ...1 .... = Acknowledgment: Set
+        .... .... 0... = Push: Not set
+        .... .... .0.. = Reset: Not set
+        .... .... ..0. = Syn: Not set
+        .... .... ...1 = Fin: Set
+            [Expert Info (Chat/Sequence): Connection finish (FIN)]
+                [Connection finish (FIN)]
+                [Severity level: Chat]
+                [Group: Sequence]
+        [TCP Flags: 路路路路路路路A路路路F]
+            [Expert Info (Note/Sequence): This frame initiates the connection closing]
+                [This frame initiates the connection closing]
+                [Severity level: Note]
+                [Group: Sequence]
+    Window: 65392
+    [Calculated window size: 65392]
+    [Window size scaling factor: -2 (no window scaling used)]
+    Checksum: 0x8577 [unverified]
+    [Checksum Status: Unverified]
+    Urgent Pointer: 0
+    [Timestamps]
+        [Time since first frame in this TCP stream: 2.822000 milliseconds]
+        [Time since previous frame in this TCP stream: 2.588000 milliseconds]
+    [Client Contiguous Streams: 1]
+    [Server Contiguous Streams: 1]
+
+Frame 86952: Packet, 60 bytes on wire (480 bits), 60 bytes captured (480 bits) on interface unknown, id 0
+    Section number: 1
+    Interface id: 0 (unknown)
+        Interface name: unknown
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 21, 2026 15:38:52.823462000 涓浗鏍囧噯鏃堕棿
+    UTC Arrival Time: Nov 21, 2026 07:38:52.823462000 UTC
+    Epoch Arrival Time: 1795246732.823462000
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 69.000 microseconds]
+    [Time delta from previous displayed frame: 69.000 microseconds]
+    [Time since reference or first frame: 7 minutes, 2.359947000 seconds]
+    Frame Number: 86952
+    Frame Length: 60 bytes (480 bits)
+    Capture Length: 60 bytes (480 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:tcp]
+    Character encoding: ASCII (0)
+Ethernet II, Src: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08), Dst: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+    Destination: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 12]
+    Padding: 000000000000
+Internet Protocol Version 4, Src: 192.168.2.2, Dst: 192.168.2.10
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 40
+    Identification: 0x0004 (4)
+    010. .... = Flags: 0x2, Don't fragment
+        0... .... = Reserved bit: Not set
+        .1.. .... = Don't fragment: Set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 255
+    Protocol: TCP (6)
+    Header Checksum: 0xf66e [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 192.168.2.2
+    Destination Address: 192.168.2.10
+    [Stream index: 1]
+Transmission Control Protocol, Src Port: 80, Dst Port: 8140, Seq: 1, Ack: 2, Len: 0
+    Source Port: 80
+    Destination Port: 8140
+    [Stream index: 1]
+    [Stream Packet Number: 5]
+    [Conversation completeness: Complete, NO_DATA (23)]
+        ..0. .... = RST: Absent
+        ...1 .... = FIN: Present
+        .... 0... = Data: Absent
+        .... .1.. = ACK: Present
+        .... ..1. = SYN-ACK: Present
+        .... ...1 = SYN: Present
+        [Completeness Flags: 路F路ASS]
+    [TCP Segment Len: 0]
+    Sequence Number: 1    (relative sequence number)
+    Sequence Number (raw): 3232304615
+    [Next Sequence Number: 1    (relative sequence number)]
+    Acknowledgment Number: 2    (relative ack number)
+    Acknowledgment number (raw): 849617883
+    0101 .... = Header Length: 20 bytes (5)
+    Flags: 0x010 (ACK)
+        000. .... .... = Reserved: Not set
+        ...0 .... .... = Accurate ECN: Not set
+        .... 0... .... = Congestion Window Reduced: Not set
+        .... .0.. .... = ECN-Echo: Not set
+        .... ..0. .... = Urgent: Not set
+        .... ...1 .... = Acknowledgment: Set
+        .... .... 0... = Push: Not set
+        .... .... .0.. = Reset: Not set
+        .... .... ..0. = Syn: Not set
+        .... .... ...0 = Fin: Not set
+        [TCP Flags: 路路路路路路路A路路路路]
+    Window: 4096
+    [Calculated window size: 4096]
+    [Window size scaling factor: -2 (no window scaling used)]
+    Checksum: 0xd54b [unverified]
+    [Checksum Status: Unverified]
+    Urgent Pointer: 0
+    [Timestamps]
+        [Time since first frame in this TCP stream: 2.891000 milliseconds]
+        [Time since previous frame in this TCP stream: 69.000 microseconds]
+    [SEQ/ACK analysis]
+        [This is an ACK to the segment in frame: 86951]
+        [The RTT to ACK the segment was: 69.000 microseconds]
+        [iRTT: 234.000 microseconds]
+    [Client Contiguous Streams: 1]
+    [Server Contiguous Streams: 1]
+
+Frame 86953: Packet, 60 bytes on wire (480 bits), 60 bytes captured (480 bits) on interface unknown, id 0
+    Section number: 1
+    Interface id: 0 (unknown)
+        Interface name: unknown
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 21, 2026 15:38:52.823463000 涓浗鏍囧噯鏃堕棿
+    UTC Arrival Time: Nov 21, 2026 07:38:52.823463000 UTC
+    Epoch Arrival Time: 1795246732.823463000
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 1.000 microseconds]
+    [Time delta from previous displayed frame: 1.000 microseconds]
+    [Time since reference or first frame: 7 minutes, 2.359948000 seconds]
+    Frame Number: 86953
+    Frame Length: 60 bytes (480 bits)
+    Capture Length: 60 bytes (480 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:tcp]
+    Character encoding: ASCII (0)
+Ethernet II, Src: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08), Dst: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+    Destination: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 12]
+    Padding: 000000000000
+Internet Protocol Version 4, Src: 192.168.2.2, Dst: 192.168.2.10
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 40
+    Identification: 0x0005 (5)
+    010. .... = Flags: 0x2, Don't fragment
+        0... .... = Reserved bit: Not set
+        .1.. .... = Don't fragment: Set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 255
+    Protocol: TCP (6)
+    Header Checksum: 0xf66d [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 192.168.2.2
+    Destination Address: 192.168.2.10
+    [Stream index: 1]
+Transmission Control Protocol, Src Port: 80, Dst Port: 8140, Seq: 1, Ack: 2, Len: 0
+    Source Port: 80
+    Destination Port: 8140
+    [Stream index: 1]
+    [Stream Packet Number: 6]
+    [Conversation completeness: Complete, NO_DATA (23)]
+        ..0. .... = RST: Absent
+        ...1 .... = FIN: Present
+        .... 0... = Data: Absent
+        .... .1.. = ACK: Present
+        .... ..1. = SYN-ACK: Present
+        .... ...1 = SYN: Present
+        [Completeness Flags: 路F路ASS]
+    [TCP Segment Len: 0]
+    Sequence Number: 1    (relative sequence number)
+    Sequence Number (raw): 3232304615
+    [Next Sequence Number: 2    (relative sequence number)]
+    Acknowledgment Number: 2    (relative ack number)
+    Acknowledgment number (raw): 849617883
+    0101 .... = Header Length: 20 bytes (5)
+    Flags: 0x011 (FIN, ACK)
+        000. .... .... = Reserved: Not set
+        ...0 .... .... = Accurate ECN: Not set
+        .... 0... .... = Congestion Window Reduced: Not set
+        .... .0.. .... = ECN-Echo: Not set
+        .... ..0. .... = Urgent: Not set
+        .... ...1 .... = Acknowledgment: Set
+        .... .... 0... = Push: Not set
+        .... .... .0.. = Reset: Not set
+        .... .... ..0. = Syn: Not set
+        .... .... ...1 = Fin: Set
+            [Expert Info (Chat/Sequence): Connection finish (FIN)]
+                [Connection finish (FIN)]
+                [Severity level: Chat]
+                [Group: Sequence]
+        [TCP Flags: 路路路路路路路A路路路F]
+            [Expert Info (Note/Sequence): This frame undergoes the connection closing]
+                [This frame undergoes the connection closing]
+                [Severity level: Note]
+                [Group: Sequence]
+    Window: 4096
+    [Calculated window size: 4096]
+    [Window size scaling factor: -2 (no window scaling used)]
+    Checksum: 0xd54a [unverified]
+    [Checksum Status: Unverified]
+    Urgent Pointer: 0
+    [Timestamps]
+        [Time since first frame in this TCP stream: 2.892000 milliseconds]
+        [Time since previous frame in this TCP stream: 1.000 microseconds]
+    [Client Contiguous Streams: 1]
+    [Server Contiguous Streams: 1]
+
+Frame 86954: Packet, 54 bytes on wire (432 bits), 54 bytes captured (432 bits) on interface unknown, id 0
+    Section number: 1
+    Interface id: 0 (unknown)
+        Interface name: unknown
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 21, 2026 15:38:52.823539000 涓浗鏍囧噯鏃堕棿
+    UTC Arrival Time: Nov 21, 2026 07:38:52.823539000 UTC
+    Epoch Arrival Time: 1795246732.823539000
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 76.000 microseconds]
+    [Time delta from previous displayed frame: 76.000 microseconds]
+    [Time since reference or first frame: 7 minutes, 2.360024000 seconds]
+    Frame Number: 86954
+    Frame Length: 54 bytes (432 bits)
+    Capture Length: 54 bytes (432 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:tcp]
+    Character encoding: ASCII (0)
+Ethernet II, Src: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e), Dst: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+    Destination: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 12]
+Internet Protocol Version 4, Src: 192.168.2.10, Dst: 192.168.2.2
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 40
+    Identification: 0xdd73 (56691)
+    010. .... = Flags: 0x2, Don't fragment
+        0... .... = Reserved bit: Not set
+        .1.. .... = Don't fragment: Set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 128
+    Protocol: TCP (6)
+    Header Checksum: 0x0000 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 192.168.2.10
+    Destination Address: 192.168.2.2
+    [Stream index: 1]
+Transmission Control Protocol, Src Port: 8140, Dst Port: 80, Seq: 2, Ack: 2, Len: 0
+    Source Port: 8140
+    Destination Port: 80
+    [Stream index: 1]
+    [Stream Packet Number: 7]
+    [Conversation completeness: Complete, NO_DATA (23)]
+        ..0. .... = RST: Absent
+        ...1 .... = FIN: Present
+        .... 0... = Data: Absent
+        .... .1.. = ACK: Present
+        .... ..1. = SYN-ACK: Present
+        .... ...1 = SYN: Present
+        [Completeness Flags: 路F路ASS]
+    [TCP Segment Len: 0]
+    Sequence Number: 2    (relative sequence number)
+    Sequence Number (raw): 849617883
+    [Next Sequence Number: 2    (relative sequence number)]
+    Acknowledgment Number: 2    (relative ack number)
+    Acknowledgment number (raw): 3232304616
+    0101 .... = Header Length: 20 bytes (5)
+    Flags: 0x010 (ACK)
+        000. .... .... = Reserved: Not set
+        ...0 .... .... = Accurate ECN: Not set
+        .... 0... .... = Congestion Window Reduced: Not set
+        .... .0.. .... = ECN-Echo: Not set
+        .... ..0. .... = Urgent: Not set
+        .... ...1 .... = Acknowledgment: Set
+        .... .... 0... = Push: Not set
+        .... .... .0.. = Reset: Not set
+        .... .... ..0. = Syn: Not set
+        .... .... ...0 = Fin: Not set
+        [TCP Flags: 路路路路路路路A路路路路]
+    Window: 65392
+    [Calculated window size: 65392]
+    [Window size scaling factor: -2 (no window scaling used)]
+    Checksum: 0x8577 [unverified]
+    [Checksum Status: Unverified]
+    Urgent Pointer: 0
+    [Timestamps]
+        [Time since first frame in this TCP stream: 2.968000 milliseconds]
+        [Time since previous frame in this TCP stream: 76.000 microseconds]
+    [SEQ/ACK analysis]
+        [This is an ACK to the segment in frame: 86953]
+        [The RTT to ACK the segment was: 76.000 microseconds]
+        [iRTT: 234.000 microseconds]
+    [Client Contiguous Streams: 1]
+    [Server Contiguous Streams: 1]
+
+Frame 86955: Packet, 66 bytes on wire (528 bits), 66 bytes captured (528 bits) on interface unknown, id 0
+    Section number: 1
+    Interface id: 0 (unknown)
+        Interface name: unknown
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 21, 2026 15:38:53.007195000 涓浗鏍囧噯鏃堕棿
+    UTC Arrival Time: Nov 21, 2026 07:38:53.007195000 UTC
+    Epoch Arrival Time: 1795246733.007195000
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 183.656000 milliseconds]
+    [Time delta from previous displayed frame: 183.656000 milliseconds]
+    [Time since reference or first frame: 7 minutes, 2.543680000 seconds]
+    Frame Number: 86955
+    Frame Length: 66 bytes (528 bits)
+    Capture Length: 66 bytes (528 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:tcp]
+    Character encoding: ASCII (0)
+Ethernet II, Src: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e), Dst: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+    Destination: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 12]
+Internet Protocol Version 4, Src: 192.168.2.10, Dst: 192.168.2.2
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 52
+    Identification: 0xdd74 (56692)
+    010. .... = Flags: 0x2, Don't fragment
+        0... .... = Reserved bit: Not set
+        .1.. .... = Don't fragment: Set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 128
+    Protocol: TCP (6)
+    Header Checksum: 0x0000 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 192.168.2.10
+    Destination Address: 192.168.2.2
+    [Stream index: 1]
+Transmission Control Protocol, Src Port: 8141, Dst Port: 80, Seq: 0, Len: 0
+    Source Port: 8141
+    Destination Port: 80
+    [Stream index: 2]
+    [Stream Packet Number: 1]
+    [Conversation completeness: Incomplete (0)]
+        ..0. .... = RST: Absent
+        ...0 .... = FIN: Absent
+        .... 0... = Data: Absent
+        .... .0.. = ACK: Absent
+        .... ..0. = SYN-ACK: Absent
+        .... ...0 = SYN: Absent
+        [Completeness Flags: [ Null ]]
+    [TCP Segment Len: 0]
+    Sequence Number: 0    (relative sequence number)
+    Sequence Number (raw): 605791791
+    [Next Sequence Number: 1    (relative sequence number)]
+    Acknowledgment Number: 0
+    Acknowledgment number (raw): 0
+    1000 .... = Header Length: 32 bytes (8)
+    Flags: 0x002 (SYN)
+        000. .... .... = Reserved: Not set
+        ...0 .... .... = Accurate ECN: Not set
+        .... 0... .... = Congestion Window Reduced: Not set
+        .... .0.. .... = ECN-Echo: Not set
+        .... ..0. .... = Urgent: Not set
+        .... ...0 .... = Acknowledgment: Not set
+        .... .... 0... = Push: Not set
+        .... .... .0.. = Reset: Not set
+        .... .... ..1. = Syn: Set
+            [Expert Info (Chat/Sequence): Connection establish request (SYN): server port 80]
+                [Connection establish request (SYN): server port 80]
+                [Severity level: Chat]
+                [Group: Sequence]
+        .... .... ...0 = Fin: Not set
+        [TCP Flags: 路路路路路路路路路路S路]
+    Window: 64240
+    [Calculated window size: 64240]
+    Checksum: 0x8583 [unverified]
+    [Checksum Status: Unverified]
+    Urgent Pointer: 0
+    Options: (12 bytes), Maximum segment size, No-Operation (NOP), Window scale, No-Operation (NOP), No-Operation (NOP), SACK permitted
+        TCP Option - Maximum segment size: 1460 bytes
+            Kind: Maximum Segment Size (2)
+            Length: 4
+            MSS Value: 1460
+        TCP Option - No-Operation (NOP)
+            Kind: No-Operation (1)
+        TCP Option - Window scale: 8 (multiply by 256)
+            Kind: Window Scale (3)
+            Length: 3
+            Shift count: 8
+            [Multiplier: 256]
+        TCP Option - No-Operation (NOP)
+            Kind: No-Operation (1)
+        TCP Option - No-Operation (NOP)
+            Kind: No-Operation (1)
+        TCP Option - SACK permitted
+            Kind: SACK Permitted (4)
+            Length: 2
+    [Timestamps]
+        [Time since first frame in this TCP stream: 0.000000000 seconds]
+        [Time since previous frame in this TCP stream: 0.000000000 seconds]
+    [Client Contiguous Streams: 0]
+    [Server Contiguous Streams: 1]
+
+Frame 86956: Packet, 60 bytes on wire (480 bits), 60 bytes captured (480 bits) on interface unknown, id 0
+    Section number: 1
+    Interface id: 0 (unknown)
+        Interface name: unknown
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 21, 2026 15:38:53.007313000 涓浗鏍囧噯鏃堕棿
+    UTC Arrival Time: Nov 21, 2026 07:38:53.007313000 UTC
+    Epoch Arrival Time: 1795246733.007313000
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 118.000 microseconds]
+    [Time delta from previous displayed frame: 118.000 microseconds]
+    [Time since reference or first frame: 7 minutes, 2.543798000 seconds]
+    Frame Number: 86956
+    Frame Length: 60 bytes (480 bits)
+    Capture Length: 60 bytes (480 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:tcp]
+    Character encoding: ASCII (0)
+Ethernet II, Src: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08), Dst: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+    Destination: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 12]
+    Padding: 0000
+Internet Protocol Version 4, Src: 192.168.2.2, Dst: 192.168.2.10
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 44
+    Identification: 0x0006 (6)
+    010. .... = Flags: 0x2, Don't fragment
+        0... .... = Reserved bit: Not set
+        .1.. .... = Don't fragment: Set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 255
+    Protocol: TCP (6)
+    Header Checksum: 0xf668 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 192.168.2.2
+    Destination Address: 192.168.2.10
+    [Stream index: 1]
+Transmission Control Protocol, Src Port: 80, Dst Port: 8141, Seq: 0, Ack: 1, Len: 0
+    Source Port: 80
+    Destination Port: 8141
+    [Stream index: 2]
+    [Stream Packet Number: 2]
+    [Conversation completeness: Incomplete, SYN_SENT (1)]
+        ..0. .... = RST: Absent
+        ...0 .... = FIN: Absent
+        .... 0... = Data: Absent
+        .... .0.. = ACK: Absent
+        .... ..0. = SYN-ACK: Absent
+        .... ...1 = SYN: Present
+        [Completeness Flags: 路路路路路S]
+    [TCP Segment Len: 0]
+    Sequence Number: 0    (relative sequence number)
+    Sequence Number (raw): 3232370151
+    [Next Sequence Number: 1    (relative sequence number)]
+    Acknowledgment Number: 1    (relative ack number)
+    Acknowledgment number (raw): 605791792
+    0110 .... = Header Length: 24 bytes (6)
+    Flags: 0x012 (SYN, ACK)
+        000. .... .... = Reserved: Not set
+        ...0 .... .... = Accurate ECN: Not set
+        .... 0... .... = Congestion Window Reduced: Not set
+        .... .0.. .... = ECN-Echo: Not set
+        .... ..0. .... = Urgent: Not set
+        .... ...1 .... = Acknowledgment: Set
+        .... .... 0... = Push: Not set
+        .... .... .0.. = Reset: Not set
+        .... .... ..1. = Syn: Set
+            [Expert Info (Chat/Sequence): Connection establish acknowledge (SYN+ACK): server port 80]
+                [Connection establish acknowledge (SYN+ACK): server port 80]
+                [Severity level: Chat]
+                [Group: Sequence]
+        .... .... ...0 = Fin: Not set
+        [TCP Flags: 路路路路路路路A路路S路]
+    Window: 4096
+    [Calculated window size: 4096]
+    Checksum: 0x4d5b [unverified]
+    [Checksum Status: Unverified]
+    Urgent Pointer: 0
+    Options: (4 bytes), Maximum segment size
+        TCP Option - Maximum segment size: 536 bytes
+            Kind: Maximum Segment Size (2)
+            Length: 4
+            MSS Value: 536
+        [Expert Info (Note/Protocol): The SYN packet does not contain a SACK PERM option]
+            [The SYN packet does not contain a SACK PERM option]
+            [Severity level: Note]
+            [Group: Protocol]
+    [Timestamps]
+        [Time since first frame in this TCP stream: 118.000 microseconds]
+        [Time since previous frame in this TCP stream: 118.000 microseconds]
+    [SEQ/ACK analysis]
+        [This is an ACK to the segment in frame: 86955]
+        [The RTT to ACK the segment was: 118.000 microseconds]
+    [Client Contiguous Streams: 1]
+    [Server Contiguous Streams: 1]
+
+Frame 86957: Packet, 54 bytes on wire (432 bits), 54 bytes captured (432 bits) on interface unknown, id 0
+    Section number: 1
+    Interface id: 0 (unknown)
+        Interface name: unknown
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 21, 2026 15:38:53.007412000 涓浗鏍囧噯鏃堕棿
+    UTC Arrival Time: Nov 21, 2026 07:38:53.007412000 UTC
+    Epoch Arrival Time: 1795246733.007412000
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 99.000 microseconds]
+    [Time delta from previous displayed frame: 99.000 microseconds]
+    [Time since reference or first frame: 7 minutes, 2.543897000 seconds]
+    Frame Number: 86957
+    Frame Length: 54 bytes (432 bits)
+    Capture Length: 54 bytes (432 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:tcp]
+    Character encoding: ASCII (0)
+Ethernet II, Src: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e), Dst: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+    Destination: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 12]
+Internet Protocol Version 4, Src: 192.168.2.10, Dst: 192.168.2.2
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 40
+    Identification: 0xdd75 (56693)
+    010. .... = Flags: 0x2, Don't fragment
+        0... .... = Reserved bit: Not set
+        .1.. .... = Don't fragment: Set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 128
+    Protocol: TCP (6)
+    Header Checksum: 0x0000 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 192.168.2.10
+    Destination Address: 192.168.2.2
+    [Stream index: 1]
+Transmission Control Protocol, Src Port: 8141, Dst Port: 80, Seq: 1, Ack: 1, Len: 0
+    Source Port: 8141
+    Destination Port: 80
+    [Stream index: 2]
+    [Stream Packet Number: 3]
+    [Conversation completeness: Incomplete, CLIENT_ESTABLISHED (3)]
+        ..0. .... = RST: Absent
+        ...0 .... = FIN: Absent
+        .... 0... = Data: Absent
+        .... .0.. = ACK: Absent
+        .... ..1. = SYN-ACK: Present
+        .... ...1 = SYN: Present
+        [Completeness Flags: 路路路路SS]
+    [TCP Segment Len: 0]
+    Sequence Number: 1    (relative sequence number)
+    Sequence Number (raw): 605791792
+    [Next Sequence Number: 1    (relative sequence number)]
+    Acknowledgment Number: 1    (relative ack number)
+    Acknowledgment number (raw): 3232370152
+    0101 .... = Header Length: 20 bytes (5)
+    Flags: 0x010 (ACK)
+        000. .... .... = Reserved: Not set
+        ...0 .... .... = Accurate ECN: Not set
+        .... 0... .... = Congestion Window Reduced: Not set
+        .... .0.. .... = ECN-Echo: Not set
+        .... ..0. .... = Urgent: Not set
+        .... ...1 .... = Acknowledgment: Set
+        .... .... 0... = Push: Not set
+        .... .... .0.. = Reset: Not set
+        .... .... ..0. = Syn: Not set
+        .... .... ...0 = Fin: Not set
+        [TCP Flags: 路路路路路路路A路路路路]
+    Window: 65392
+    [Calculated window size: 65392]
+    [Window size scaling factor: -2 (no window scaling used)]
+    Checksum: 0x8577 [unverified]
+    [Checksum Status: Unverified]
+    Urgent Pointer: 0
+    [Timestamps]
+        [Time since first frame in this TCP stream: 217.000 microseconds]
+        [Time since previous frame in this TCP stream: 99.000 microseconds]
+    [SEQ/ACK analysis]
+        [This is an ACK to the segment in frame: 86956]
+        [The RTT to ACK the segment was: 99.000 microseconds]
+        [iRTT: 217.000 microseconds]
+    [Client Contiguous Streams: 1]
+    [Server Contiguous Streams: 1]
+
+Frame 86958: Packet, 54 bytes on wire (432 bits), 54 bytes captured (432 bits) on interface unknown, id 0
+    Section number: 1
+    Interface id: 0 (unknown)
+        Interface name: unknown
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 21, 2026 15:38:53.020228000 涓浗鏍囧噯鏃堕棿
+    UTC Arrival Time: Nov 21, 2026 07:38:53.020228000 UTC
+    Epoch Arrival Time: 1795246733.020228000
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 12.816000 milliseconds]
+    [Time delta from previous displayed frame: 12.816000 milliseconds]
+    [Time since reference or first frame: 7 minutes, 2.556713000 seconds]
+    Frame Number: 86958
+    Frame Length: 54 bytes (432 bits)
+    Capture Length: 54 bytes (432 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:tcp]
+    Character encoding: ASCII (0)
+Ethernet II, Src: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e), Dst: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+    Destination: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 12]
+Internet Protocol Version 4, Src: 192.168.2.10, Dst: 192.168.2.2
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 40
+    Identification: 0xdd76 (56694)
+    010. .... = Flags: 0x2, Don't fragment
+        0... .... = Reserved bit: Not set
+        .1.. .... = Don't fragment: Set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 128
+    Protocol: TCP (6)
+    Header Checksum: 0x0000 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 192.168.2.10
+    Destination Address: 192.168.2.2
+    [Stream index: 1]
+Transmission Control Protocol, Src Port: 8141, Dst Port: 80, Seq: 1, Ack: 1, Len: 0
+    Source Port: 8141
+    Destination Port: 80
+    [Stream index: 2]
+    [Stream Packet Number: 4]
+    [Conversation completeness: Incomplete, ESTABLISHED (7)]
+        ..0. .... = RST: Absent
+        ...0 .... = FIN: Absent
+        .... 0... = Data: Absent
+        .... .1.. = ACK: Present
+        .... ..1. = SYN-ACK: Present
+        .... ...1 = SYN: Present
+        [Completeness Flags: 路路路ASS]
+    [TCP Segment Len: 0]
+    Sequence Number: 1    (relative sequence number)
+    Sequence Number (raw): 605791792
+    [Next Sequence Number: 2    (relative sequence number)]
+    Acknowledgment Number: 1    (relative ack number)
+    Acknowledgment number (raw): 3232370152
+    0101 .... = Header Length: 20 bytes (5)
+    Flags: 0x011 (FIN, ACK)
+        000. .... .... = Reserved: Not set
+        ...0 .... .... = Accurate ECN: Not set
+        .... 0... .... = Congestion Window Reduced: Not set
+        .... .0.. .... = ECN-Echo: Not set
+        .... ..0. .... = Urgent: Not set
+        .... ...1 .... = Acknowledgment: Set
+        .... .... 0... = Push: Not set
+        .... .... .0.. = Reset: Not set
+        .... .... ..0. = Syn: Not set
+        .... .... ...1 = Fin: Set
+            [Expert Info (Chat/Sequence): Connection finish (FIN)]
+                [Connection finish (FIN)]
+                [Severity level: Chat]
+                [Group: Sequence]
+        [TCP Flags: 路路路路路路路A路路路F]
+            [Expert Info (Note/Sequence): This frame initiates the connection closing]
+                [This frame initiates the connection closing]
+                [Severity level: Note]
+                [Group: Sequence]
+    Window: 65392
+    [Calculated window size: 65392]
+    [Window size scaling factor: -2 (no window scaling used)]
+    Checksum: 0x8577 [unverified]
+    [Checksum Status: Unverified]
+    Urgent Pointer: 0
+    [Timestamps]
+        [Time since first frame in this TCP stream: 13.033000 milliseconds]
+        [Time since previous frame in this TCP stream: 12.816000 milliseconds]
+    [Client Contiguous Streams: 1]
+    [Server Contiguous Streams: 1]
+
+Frame 86959: Packet, 60 bytes on wire (480 bits), 60 bytes captured (480 bits) on interface unknown, id 0
+    Section number: 1
+    Interface id: 0 (unknown)
+        Interface name: unknown
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 21, 2026 15:38:53.020291000 涓浗鏍囧噯鏃堕棿
+    UTC Arrival Time: Nov 21, 2026 07:38:53.020291000 UTC
+    Epoch Arrival Time: 1795246733.020291000
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 63.000 microseconds]
+    [Time delta from previous displayed frame: 63.000 microseconds]
+    [Time since reference or first frame: 7 minutes, 2.556776000 seconds]
+    Frame Number: 86959
+    Frame Length: 60 bytes (480 bits)
+    Capture Length: 60 bytes (480 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:tcp]
+    Character encoding: ASCII (0)
+Ethernet II, Src: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08), Dst: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+    Destination: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 12]
+    Padding: 000000000000
+Internet Protocol Version 4, Src: 192.168.2.2, Dst: 192.168.2.10
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 40
+    Identification: 0x0007 (7)
+    010. .... = Flags: 0x2, Don't fragment
+        0... .... = Reserved bit: Not set
+        .1.. .... = Don't fragment: Set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 255
+    Protocol: TCP (6)
+    Header Checksum: 0xf66b [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 192.168.2.2
+    Destination Address: 192.168.2.10
+    [Stream index: 1]
+Transmission Control Protocol, Src Port: 80, Dst Port: 8141, Seq: 1, Ack: 2, Len: 0
+    Source Port: 80
+    Destination Port: 8141
+    [Stream index: 2]
+    [Stream Packet Number: 5]
+    [Conversation completeness: Complete, NO_DATA (23)]
+        ..0. .... = RST: Absent
+        ...1 .... = FIN: Present
+        .... 0... = Data: Absent
+        .... .1.. = ACK: Present
+        .... ..1. = SYN-ACK: Present
+        .... ...1 = SYN: Present
+        [Completeness Flags: 路F路ASS]
+    [TCP Segment Len: 0]
+    Sequence Number: 1    (relative sequence number)
+    Sequence Number (raw): 3232370152
+    [Next Sequence Number: 1    (relative sequence number)]
+    Acknowledgment Number: 2    (relative ack number)
+    Acknowledgment number (raw): 605791793
+    0101 .... = Header Length: 20 bytes (5)
+    Flags: 0x010 (ACK)
+        000. .... .... = Reserved: Not set
+        ...0 .... .... = Accurate ECN: Not set
+        .... 0... .... = Congestion Window Reduced: Not set
+        .... .0.. .... = ECN-Echo: Not set
+        .... ..0. .... = Urgent: Not set
+        .... ...1 .... = Acknowledgment: Set
+        .... .... 0... = Push: Not set
+        .... .... .0.. = Reset: Not set
+        .... .... ..0. = Syn: Not set
+        .... .... ...0 = Fin: Not set
+        [TCP Flags: 路路路路路路路A路路路路]
+    Window: 4096
+    [Calculated window size: 4096]
+    [Window size scaling factor: -2 (no window scaling used)]
+    Checksum: 0x617b [unverified]
+    [Checksum Status: Unverified]
+    Urgent Pointer: 0
+    [Timestamps]
+        [Time since first frame in this TCP stream: 13.096000 milliseconds]
+        [Time since previous frame in this TCP stream: 63.000 microseconds]
+    [SEQ/ACK analysis]
+        [This is an ACK to the segment in frame: 86958]
+        [The RTT to ACK the segment was: 63.000 microseconds]
+        [iRTT: 217.000 microseconds]
+    [Client Contiguous Streams: 1]
+    [Server Contiguous Streams: 1]
+
+Frame 86960: Packet, 60 bytes on wire (480 bits), 60 bytes captured (480 bits) on interface unknown, id 0
+    Section number: 1
+    Interface id: 0 (unknown)
+        Interface name: unknown
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 21, 2026 15:38:53.020292000 涓浗鏍囧噯鏃堕棿
+    UTC Arrival Time: Nov 21, 2026 07:38:53.020292000 UTC
+    Epoch Arrival Time: 1795246733.020292000
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 1.000 microseconds]
+    [Time delta from previous displayed frame: 1.000 microseconds]
+    [Time since reference or first frame: 7 minutes, 2.556777000 seconds]
+    Frame Number: 86960
+    Frame Length: 60 bytes (480 bits)
+    Capture Length: 60 bytes (480 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:tcp]
+    Character encoding: ASCII (0)
+Ethernet II, Src: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08), Dst: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+    Destination: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 12]
+    Padding: 000000000000
+Internet Protocol Version 4, Src: 192.168.2.2, Dst: 192.168.2.10
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 40
+    Identification: 0x0008 (8)
+    010. .... = Flags: 0x2, Don't fragment
+        0... .... = Reserved bit: Not set
+        .1.. .... = Don't fragment: Set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 255
+    Protocol: TCP (6)
+    Header Checksum: 0xf66a [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 192.168.2.2
+    Destination Address: 192.168.2.10
+    [Stream index: 1]
+Transmission Control Protocol, Src Port: 80, Dst Port: 8141, Seq: 1, Ack: 2, Len: 0
+    Source Port: 80
+    Destination Port: 8141
+    [Stream index: 2]
+    [Stream Packet Number: 6]
+    [Conversation completeness: Complete, NO_DATA (23)]
+        ..0. .... = RST: Absent
+        ...1 .... = FIN: Present
+        .... 0... = Data: Absent
+        .... .1.. = ACK: Present
+        .... ..1. = SYN-ACK: Present
+        .... ...1 = SYN: Present
+        [Completeness Flags: 路F路ASS]
+    [TCP Segment Len: 0]
+    Sequence Number: 1    (relative sequence number)
+    Sequence Number (raw): 3232370152
+    [Next Sequence Number: 2    (relative sequence number)]
+    Acknowledgment Number: 2    (relative ack number)
+    Acknowledgment number (raw): 605791793
+    0101 .... = Header Length: 20 bytes (5)
+    Flags: 0x011 (FIN, ACK)
+        000. .... .... = Reserved: Not set
+        ...0 .... .... = Accurate ECN: Not set
+        .... 0... .... = Congestion Window Reduced: Not set
+        .... .0.. .... = ECN-Echo: Not set
+        .... ..0. .... = Urgent: Not set
+        .... ...1 .... = Acknowledgment: Set
+        .... .... 0... = Push: Not set
+        .... .... .0.. = Reset: Not set
+        .... .... ..0. = Syn: Not set
+        .... .... ...1 = Fin: Set
+            [Expert Info (Chat/Sequence): Connection finish (FIN)]
+                [Connection finish (FIN)]
+                [Severity level: Chat]
+                [Group: Sequence]
+        [TCP Flags: 路路路路路路路A路路路F]
+            [Expert Info (Note/Sequence): This frame undergoes the connection closing]
+                [This frame undergoes the connection closing]
+                [Severity level: Note]
+                [Group: Sequence]
+    Window: 4096
+    [Calculated window size: 4096]
+    [Window size scaling factor: -2 (no window scaling used)]
+    Checksum: 0x617a [unverified]
+    [Checksum Status: Unverified]
+    Urgent Pointer: 0
+    [Timestamps]
+        [Time since first frame in this TCP stream: 13.097000 milliseconds]
+        [Time since previous frame in this TCP stream: 1.000 microseconds]
+    [Client Contiguous Streams: 1]
+    [Server Contiguous Streams: 1]
+
+Frame 86961: Packet, 54 bytes on wire (432 bits), 54 bytes captured (432 bits) on interface unknown, id 0
+    Section number: 1
+    Interface id: 0 (unknown)
+        Interface name: unknown
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Nov 21, 2026 15:38:53.020366000 涓浗鏍囧噯鏃堕棿
+    UTC Arrival Time: Nov 21, 2026 07:38:53.020366000 UTC
+    Epoch Arrival Time: 1795246733.020366000
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 74.000 microseconds]
+    [Time delta from previous displayed frame: 74.000 microseconds]
+    [Time since reference or first frame: 7 minutes, 2.556851000 seconds]
+    Frame Number: 86961
+    Frame Length: 54 bytes (432 bits)
+    Capture Length: 54 bytes (432 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:tcp]
+    Character encoding: ASCII (0)
+Ethernet II, Src: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e), Dst: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+    Destination: PaloAltoNetw_e1:be:08 (08:30:6b:e1:be:08)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: WistronInfoC_d4:e1:0e (3c:97:0e:d4:e1:0e)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 12]
+Internet Protocol Version 4, Src: 192.168.2.10, Dst: 192.168.2.2
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x00 (DSCP: CS0, ECN: Not-ECT)
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+    Total Length: 40
+    Identification: 0xdd77 (56695)
+    010. .... = Flags: 0x2, Don't fragment
+        0... .... = Reserved bit: Not set
+        .1.. .... = Don't fragment: Set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 128
+    Protocol: TCP (6)
+    Header Checksum: 0x0000 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 192.168.2.10
+    Destination Address: 192.168.2.2
+    [Stream index: 1]
+Transmission Control Protocol, Src Port: 8141, Dst Port: 80, Seq: 2, Ack: 2, Len: 0
+    Source Port: 8141
+    Destination Port: 80
+    [Stream index: 2]
+    [Stream Packet Number: 7]
+    [Conversation completeness: Complete, NO_DATA (23)]
+        ..0. .... = RST: Absent
+        ...1 .... = FIN: Present
+        .... 0... = Data: Absent
+        .... .1.. = ACK: Present
+        .... ..1. = SYN-ACK: Present
+        .... ...1 = SYN: Present
+        [Completeness Flags: 路F路ASS]
+    [TCP Segment Len: 0]
+    Sequence Number: 2    (relative sequence number)
+    Sequence Number (raw): 605791793
+    [Next Sequence Number: 2    (relative sequence number)]
+    Acknowledgment Number: 2    (relative ack number)
+    Acknowledgment number (raw): 3232370153
+    0101 .... = Header Length: 20 bytes (5)
+    Flags: 0x010 (ACK)
+        000. .... .... = Reserved: Not set
+        ...0 .... .... = Accurate ECN: Not set
+        .... 0... .... = Congestion Window Reduced: Not set
+        .... .0.. .... = ECN-Echo: Not set
+        .... ..0. .... = Urgent: Not set
+        .... ...1 .... = Acknowledgment: Set
+        .... .... 0... = Push: Not set
+        .... .... .0.. = Reset: Not set
+        .... .... ..0. = Syn: Not set
+        .... .... ...0 = Fin: Not set
+        [TCP Flags: 路路路路路路路A路路路路]
+    Window: 65392
+    [Calculated window size: 65392]
+    [Window size scaling factor: -2 (no window scaling used)]
+    Checksum: 0x8577 [unverified]
+    [Checksum Status: Unverified]
+    Urgent Pointer: 0
+    [Timestamps]
+        [Time since first frame in this TCP stream: 13.171000 milliseconds]
+        [Time since previous frame in this TCP stream: 74.000 microseconds]
+    [SEQ/ACK analysis]
+        [This is an ACK to the segment in frame: 86960]
+        [The RTT to ACK the segment was: 74.000 microseconds]
+        [iRTT: 217.000 microseconds]
+    [Client Contiguous Streams: 1]
+    [Server Contiguous Streams: 1]
+
