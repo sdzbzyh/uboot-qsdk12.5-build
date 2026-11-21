@@ -1,0 +1,25 @@
+UTC=2026-11-21T08:35:44Z
+COMMIT=ce25a52da8004a9b5646004dfe8e130dd065aa98
+cc (Ubuntu 15.2.0-16ubuntu1) 15.2.0
+In file included from /home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/u-boot/include/net/http_request.h:7,
+                 from /home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/u-boot/net/http_request.c:7:
+/home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/tests/host/http_request/stubs/linux/types.h:4:17: error: redefinition of typedef ‘u8’ [-Werror=pedantic]
+    4 | typedef uint8_t u8;
+      |                 ^~
+In file included from /home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/u-boot/net/http_request.c:6:
+/home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/tests/host/http_request/stubs/common.h:6:17: note: previous declaration of ‘u8’ with type ‘u8’ {aka ‘unsigned char’}
+    6 | typedef uint8_t u8;
+      |                 ^~
+/home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/tests/host/http_request/stubs/linux/types.h:5:18: error: redefinition of typedef ‘u16’ [-Werror=pedantic]
+    5 | typedef uint16_t u16;
+      |                  ^~~
+/home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/tests/host/http_request/stubs/common.h:7:18: note: previous declaration of ‘u16’ with type ‘u16’ {aka ‘short unsigned int’}
+    7 | typedef uint16_t u16;
+      |                  ^~~
+/home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/tests/host/http_request/stubs/linux/types.h:6:18: error: redefinition of typedef ‘u32’ [-Werror=pedantic]
+    6 | typedef uint32_t u32;
+      |                  ^~~
+/home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/tests/host/http_request/stubs/common.h:8:18: note: previous declaration of ‘u32’ with type ‘u32’ {aka ‘unsigned int’}
+    8 | typedef uint32_t u32;
+      |                  ^~~
+cc1: all warnings being treated as errors
