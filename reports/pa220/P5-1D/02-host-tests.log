@@ -1,1 +1,5 @@
-/home/runner/work/_temp/e7ca77d5-f429-4961-914c-60ed55c2f41d.sh: line 3: tests/host/tcp_ipv4_tx/run.sh: Permission denied
+tcp_ipv4_tx: PASS
+tcp_core_retry: PASS
+tcp_synack_tx: PASS
+pa220-tcp-ipv4-tx-test-close: /home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/tests/host/tcp_ipv4_tx/tcp_close_wait_test.c:84: main: Assertion `tcp_core_input(&c, peer_ip, local_ip, seg, sizeof(seg), 2, capture_emit, &cap) == 1' failed.
+Aborted (core dumped)
