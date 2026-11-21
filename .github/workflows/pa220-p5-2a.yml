@@ -64,8 +64,15 @@ jobs:
             file "$U/net/http_request.o"
             "$TC/bin/mips64-octeon-linux-gnu-readelf" -h "$U/net/http_request.o" | tee "$R/21-parser-object-elf-header.txt"
             "$TC/bin/mips64-octeon-linux-gnu-nm" -u "$U/net/http_request.o" | tee "$R/22-parser-object-undefined-symbols.txt"
-            "$TC/bin/mips64-octeon-linux-gnu-ld" -r "$U/net/http_request.o" -o "$R/http_request-linked.o"
+            "$GCC" -mabi=32 -mno-abicalls -fno-pic -nostdlib -Wl,-r "$U/net/http_request.o" -o "$R/http_request-linked.o"
             "$TC/bin/mips64-octeon-linux-gnu-readelf" -h "$R/http_request-linked.o" | tee "$R/25-linked-object-elf-header.txt"
+            cat > "$U/net/http_request_size.c" <<'EOF'
+            #include <common.h>
+            #include <net/http_request.h>
+            char pa220_http_request_parser_size[sizeof(struct http_request_parser)];
+            EOF
+            make -C "$U" V=1 net/http_request_size.o HOSTCC="$U/tools/hostcc-gnu89"
+            "$TC/bin/mips64-octeon-linux-gnu-nm" -S "$U/net/http_request_size.o" | tee "$R/27-parser-static-size.txt"
             sha256sum "$R/http_request-linked.o" | tee "$R/26-linked-object-sha256.txt"
             wc -c "$U/net/http_request.o" | tee "$R/23-parser-object-size.txt"
             sha256sum "$U/net/http_request.o" | tee "$R/24-parser-object-sha256.txt"
