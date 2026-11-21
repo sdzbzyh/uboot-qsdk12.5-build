@@ -128,7 +128,7 @@ int main(void)
 				rx, sizeof(rx)) == 0);
 	assert(captured_len == 60);
 	assert(!memcmp(captured, mac, 6));
-	assert(!memcmp(captured + 6, local_mac, 6));
+	assert(!memcmp(captured + 6, NetOurEther, 6));
 	assert(captured[12] == 0x08 && captured[13] == 0x00);
 	ip = captured + ETHER_HDR_SIZE;
 	assert(ip[0] == 0x45 && ip[9] == IPPROTO_TCP);
