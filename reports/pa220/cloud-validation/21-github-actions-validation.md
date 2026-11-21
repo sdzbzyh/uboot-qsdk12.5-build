@@ -18,3 +18,6 @@ The full command output is in [21-github-actions-validation.log](21-github-actio
 - TIME-WAIT duplicate FIN: ACK emitted; 60-second deadline preserved
 - OCTEON output: `bin/pa220/u-boot-octeon_pa220.bin`, 1,362,216 bytes
 - RAM boot / physical TCP network test: NOT RUN
+
+- Scope clarification: the full OCTEON build validated the PA-220 baseline plus patches 0001/0002; it did not compile the standalone TCP core source `u-boot/net/tcp.c` (no `net/tcp.o` build record).
+- TCP core OCTEON target-object compile/link: NOT RUN; tracked as the next required task before P5-1B.
