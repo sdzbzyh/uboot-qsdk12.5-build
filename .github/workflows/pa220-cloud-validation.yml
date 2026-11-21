@@ -1,17 +1,8 @@
 name: PA-220 cloud validation
 
 on:
+  # Legacy P5-1A Host/baseline workflow; run manually to avoid duplicate P5-1B builds.
   workflow_dispatch:
-  push:
-    branches:
-      - feature/pa220-ubootkit-web
-    paths:
-      - '.github/workflows/pa220-cloud-validation.yml'
-      - 'build-pa220.sh'
-      - 'u-boot/net/tcp.c'
-      - 'u-boot/include/net/tcp.h'
-      - 'reports/pa220/P5-1A.3/18-host-focused-protocol-retest.c'
-      - 'patches/pa220/**'
 
 permissions:
   contents: write

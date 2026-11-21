@@ -1,0 +1,293 @@
+name: PA-220 P5-1B integrated TCP build
+
+on:
+  push:
+    branches:
+      - feature/pa220-ubootkit-web
+    paths:
+      - '.github/workflows/pa220-p5-1b-integration.yml'
+      - 'patches/pa220/0003-pa220-native-ipv4-tcp-dispatch.patch'
+      - 'u-boot/net/tcp.c'
+      - 'u-boot/include/net/tcp.h'
+      - 'build-pa220.sh'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  integrated-build:
+    name: Apply P5-1B and verify final OCTEON ELF/map
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout integration branch
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: feature/pa220-ubootkit-web
+          fetch-depth: 0
+
+      - name: Apply pinned patch series and build/link PA-220
+        id: build
+        env:
+          GH_TOKEN: ${{ secrets.OCTEON_SDK_READ_TOKEN }}
+        shell: bash
+        run: |
+          set +e
+          REPORT_DIR="reports/pa220/P5-1B"
+          mkdir -p "$REPORT_DIR" external
+          LOG="$REPORT_DIR/10-octeon-integrated-build.log"
+          SUMMARY="$REPORT_DIR/10-octeon-integrated-build.md"
+          DOWNLOAD_RC=99
+          CHECKSUM_RC=99
+          SOURCE_RC=99
+          PATCH_RC=99
+          BUILD_RC=99
+          OBJECT_RC=99
+          LINK_RC=99
+          TOOLCHAIN_DIR=""
+          PA220_REPO_DIR="$GITHUB_WORKSPACE/external/pa220-openwrt"
+          UBOOT_DIR="$PA220_REPO_DIR/u-boot"
+
+          {
+            echo "========== PA-220 P5-1B INTEGRATED BUILD =========="
+            date -u '+UTC_DATE=%Y-%m-%dT%H:%M:%SZ'
+            echo "INTEGRATION_COMMIT=$(git rev-parse HEAD)"
+            echo "PA220_SOURCE_COMMIT=801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8"
+            echo
+            echo "========== SOURCE AND PATCH SHA-256 =========="
+            sha256sum patches/pa220/0001-pa220-read-only-maintenance-command.patch
+            sha256sum patches/pa220/0002-pa220-board-clock-readonly-diagnostics.patch
+            sha256sum patches/pa220/0003-pa220-native-ipv4-tcp-dispatch.patch
+            sha256sum u-boot/net/tcp.c u-boot/include/net/tcp.h
+            echo
+            echo "========== PRIVATE OCTEON SDK RELEASE =========="
+            mkdir -p "$RUNNER_TEMP/octeon-download" "$RUNNER_TEMP/octeon-sdk"
+            if [ -z "$GH_TOKEN" ]; then
+              echo "ERROR: OCTEON_SDK_READ_TOKEN unavailable"
+            else
+              gh release download octeon-sdk-5.1.0 --repo sdzbzyh/pa220-toolchains \
+                --pattern '*.tar.gz' --pattern '*.sha256' --dir "$RUNNER_TEMP/octeon-download"
+              DOWNLOAD_RC=$?
+            fi
+            echo "DOWNLOAD_RC=$DOWNLOAD_RC"
+            if [ "$DOWNLOAD_RC" -eq 0 ]; then
+              (cd "$RUNNER_TEMP/octeon-download" && sha256sum -c ./*.sha256)
+              CHECKSUM_RC=$?
+            fi
+            echo "CHECKSUM_RC=$CHECKSUM_RC"
+            if [ "$DOWNLOAD_RC" -eq 0 ] && [ "$CHECKSUM_RC" -eq 0 ]; then
+              ARCHIVE=$(find "$RUNNER_TEMP/octeon-download" -maxdepth 1 -type f -name '*.tar.gz' -print -quit)
+              tar -xzf "$ARCHIVE" -C "$RUNNER_TEMP/octeon-sdk"
+              EXTRACT_RC=$?
+            else
+              EXTRACT_RC=99
+            fi
+            echo "EXTRACT_RC=$EXTRACT_RC"
+            if [ "$EXTRACT_RC" -eq 0 ]; then
+              GCC_PATH=$(find "$RUNNER_TEMP/octeon-sdk" -path '*/bin/mips64-octeon-linux-gnu-gcc' -print -quit)
+            else
+              GCC_PATH=""
+            fi
+            if [ -n "$GCC_PATH" ]; then
+              TOOLCHAIN_DIR=$(dirname "$(dirname "$GCC_PATH")")
+              export PATH="$TOOLCHAIN_DIR/bin:$PATH"
+              export OCTEON_MODEL=OCTEON_CN70XX
+              "$GCC_PATH" --version | head -n 2
+              echo "TARGET=$("$GCC_PATH" -dumpmachine)"
+            else
+              echo "ERROR: OCTEON GCC missing from SDK"
+              DOWNLOAD_RC=97
+            fi
+
+            if [ -n "$TOOLCHAIN_DIR" ]; then
+              echo
+              echo "========== CHECK OUT FIXED PA-220 SOURCE =========="
+              git clone --filter=blob:none --no-checkout \
+                https://github.com/sdzbzyh/pa220-openwrt.git "$PA220_REPO_DIR"
+              CLONE_RC=$?
+              if [ "$CLONE_RC" -eq 0 ]; then
+                git -C "$PA220_REPO_DIR" fetch --depth=1 origin 801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8
+                FETCH_RC=$?
+              else
+                FETCH_RC=99
+              fi
+              if [ "$FETCH_RC" -eq 0 ]; then
+                git -C "$PA220_REPO_DIR" checkout --detach 801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8
+                CHECKOUT_RC=$?
+              else
+                CHECKOUT_RC=99
+              fi
+              ACTUAL_SOURCE=$(git -C "$PA220_REPO_DIR" rev-parse HEAD 2>/dev/null)
+              echo "CLONE_RC=$CLONE_RC FETCH_RC=$FETCH_RC CHECKOUT_RC=$CHECKOUT_RC"
+              echo "ACTUAL_SOURCE=$ACTUAL_SOURCE"
+              if [ "$CHECKOUT_RC" -eq 0 ] && [ "$ACTUAL_SOURCE" = "801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8" ]; then
+                SOURCE_RC=0
+              fi
+            fi
+            echo "SOURCE_RC=$SOURCE_RC"
+
+            if [ "$SOURCE_RC" -eq 0 ]; then
+              echo
+              echo "========== APPLY-CHECK AND APPLY 0001/0002/0003 =========="
+              PATCH_RC=0
+              for PATCH_FILE in "$GITHUB_WORKSPACE"/patches/pa220/*.patch; do
+                echo "PATCH_FILE=$PATCH_FILE"
+                git -C "$PA220_REPO_DIR" apply --check "$PATCH_FILE"
+                CHECK_RC=$?
+                echo "PATCH_CHECK_RC=$CHECK_RC"
+                if [ "$CHECK_RC" -ne 0 ]; then PATCH_RC=$CHECK_RC; break; fi
+                git -C "$PA220_REPO_DIR" apply "$PATCH_FILE"
+                APPLY_RC=$?
+                echo "PATCH_APPLY_RC=$APPLY_RC"
+                if [ "$APPLY_RC" -ne 0 ]; then PATCH_RC=$APPLY_RC; break; fi
+              done
+            fi
+            echo "PATCH_RC=$PATCH_RC"
+
+            if [ "$SOURCE_RC" -eq 0 ] && [ "$PATCH_RC" -eq 0 ] && [ -n "$TOOLCHAIN_DIR" ]; then
+              echo
+              echo "========== FULL PA-220 BUILD =========="
+              PA220_REPO_DIR="$PA220_REPO_DIR" ./build-pa220.sh "$TOOLCHAIN_DIR"
+              BUILD_RC=$?
+            fi
+            echo "BUILD_RC=$BUILD_RC"
+
+            if [ "$BUILD_RC" -eq 0 ]; then
+              echo
+              echo "========== TCP OBJECT AND LIBNET =========="
+              test -s "$UBOOT_DIR/net/tcp.o"; TCP_OBJECT_RC=$?
+              test -s "$UBOOT_DIR/net/libnet.o"; LIBNET_OBJECT_RC=$?
+              "$TOOLCHAIN_DIR/bin/mips64-octeon-linux-gnu-readelf" -h "$UBOOT_DIR/net/tcp.o" > "$REPORT_DIR/11-tcp-object-elf-header.txt"
+              OBJECT_ELF_RC=$?
+              "$TOOLCHAIN_DIR/bin/mips64-octeon-linux-gnu-nm" "$UBOOT_DIR/net/libnet.o" > "$REPORT_DIR/12-libnet-symbols.txt"
+              NM_LIBNET_RC=$?
+              for symbol in tcp_segment_parse tcp_checksum_ipv4_valid tcp_core_init tcp_core_listen tcp_core_input tcp_core_poll tcp_core_read tcp_core_write tcp_core_close tcp_core_link_anchor net_set_tcp_handler; do
+                grep -E " [Tt] $symbol$" "$REPORT_DIR/12-libnet-symbols.txt" >/dev/null
+                SYMBOL_RC=$?
+                echo "LIBNET_SYMBOL_$symbol=$SYMBOL_RC"
+                if [ "$SYMBOL_RC" -ne 0 ]; then OBJECT_RC=1; fi
+              done
+              if [ "$TCP_OBJECT_RC" -ne 0 ] || [ "$LIBNET_OBJECT_RC" -ne 0 ] || [ "$OBJECT_ELF_RC" -ne 0 ] || [ "$NM_LIBNET_RC" -ne 0 ]; then OBJECT_RC=1; fi
+              if [ "$OBJECT_RC" -ne 1 ]; then OBJECT_RC=0; fi
+              echo "TCP_OBJECT_RC=$TCP_OBJECT_RC LIBNET_OBJECT_RC=$LIBNET_OBJECT_RC OBJECT_ELF_RC=$OBJECT_ELF_RC"
+              echo "OBJECT_RC=$OBJECT_RC"
+
+              echo
+              echo "========== FINAL U-BOOT ELF, MAP AND SYMBOLS =========="
+              ELF="$UBOOT_DIR/u-boot-octeon_pa220"
+              MAP="$UBOOT_DIR/u-boot-octeon_pa220.map"
+              SYSTEM_MAP="$UBOOT_DIR/System-octeon_pa220.map"
+              test -s "$ELF"; ELF_RC=$?
+              test -s "$MAP"; MAP_RC=$?
+              test -s "$SYSTEM_MAP"; SYSTEM_MAP_RC=$?
+              echo "ELF_RC=$ELF_RC MAP_RC=$MAP_RC SYSTEM_MAP_RC=$SYSTEM_MAP_RC"
+              if [ "$ELF_RC" -eq 0 ] && [ "$MAP_RC" -eq 0 ] && [ "$SYSTEM_MAP_RC" -eq 0 ]; then
+                file "$ELF"
+                "$TOOLCHAIN_DIR/bin/mips64-octeon-linux-gnu-readelf" -h "$ELF" > "$REPORT_DIR/13-final-elf-header.txt"
+                "$TOOLCHAIN_DIR/bin/mips64-octeon-linux-gnu-nm" -n "$ELF" > "$REPORT_DIR/14-final-elf-symbols.txt"
+                grep -E 'net/libnet\.o|tcp_core_link_anchor|tcp_core_input|tcp_core_poll|tcp_core_write' "$MAP" > "$REPORT_DIR/15-tcp-link-map-extract.txt"
+                MAP_GREP_RC=$?
+                grep -E 'tcp_core_link_anchor|tcp_core_input|tcp_core_poll|tcp_core_write|net_set_tcp_handler' "$REPORT_DIR/14-final-elf-symbols.txt" > "$REPORT_DIR/16-tcp-final-elf-symbols.txt"
+                ELF_GREP_RC=$?
+                grep -E 'tcp_core_link_anchor|tcp_core_input|tcp_core_poll|tcp_core_write|net_set_tcp_handler' "$SYSTEM_MAP" > "$REPORT_DIR/17-tcp-system-map-extract.txt"
+                SYSTEM_GREP_RC=$?
+                for symbol in tcp_core_link_anchor tcp_core_input tcp_core_poll tcp_core_write net_set_tcp_handler; do
+                  grep -E " [Tt] $symbol$" "$REPORT_DIR/14-final-elf-symbols.txt" >/dev/null
+                  SYMBOL_RC=$?
+                  echo "FINAL_ELF_SYMBOL_$symbol=$SYMBOL_RC"
+                  if [ "$SYMBOL_RC" -ne 0 ]; then LINK_RC=1; fi
+                done
+                if [ "$MAP_GREP_RC" -ne 0 ] || [ "$ELF_GREP_RC" -ne 0 ] || [ "$SYSTEM_GREP_RC" -ne 0 ]; then LINK_RC=1; fi
+                if [ "$LINK_RC" -ne 1 ]; then LINK_RC=0; fi
+                sha256sum "$UBOOT_DIR/net/tcp.o" "$UBOOT_DIR/net/libnet.o" "$ELF" "$MAP" "$SYSTEM_MAP" "$UBOOT_DIR/u-boot-octeon_pa220.bin"
+                echo "MAP_GREP_RC=$MAP_GREP_RC ELF_GREP_RC=$ELF_GREP_RC SYSTEM_GREP_RC=$SYSTEM_GREP_RC"
+              else
+                LINK_RC=1
+              fi
+              echo "LINK_RC=$LINK_RC"
+            fi
+
+            echo
+            echo "========== FINAL STATUS =========="
+            echo "DOWNLOAD_RC=$DOWNLOAD_RC CHECKSUM_RC=$CHECKSUM_RC SOURCE_RC=$SOURCE_RC"
+            echo "PATCH_RC=$PATCH_RC BUILD_RC=$BUILD_RC OBJECT_RC=$OBJECT_RC LINK_RC=$LINK_RC"
+            echo "========== END =========="
+          } > "$LOG" 2>&1
+
+          cat "$LOG"
+          cat > "$SUMMARY" <<EOF
+          # PA-220 P5-1B integrated OCTEON build
+
+          - Integration commit: $(git rev-parse HEAD)
+          - PA-220 source: 801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8
+          - SDK: octeon-sdk-5.1.0 / Cavium GCC 4.7.0 / SDK Build 52
+          - SDK download/checksum: $DOWNLOAD_RC / $CHECKSUM_RC
+          - Exact source checkout: $SOURCE_RC
+          - Patch series apply-check/apply: $PATCH_RC
+          - Full PA-220 build: $BUILD_RC
+          - TCP object/libnet symbol verification: $OBJECT_RC
+          - Final U-Boot ELF/map/System.map verification: $LINK_RC
+
+          Full log: [10-octeon-integrated-build.log](10-octeon-integrated-build.log)
+          EOF
+          echo "download_rc=$DOWNLOAD_RC" >> "$GITHUB_OUTPUT"
+          echo "checksum_rc=$CHECKSUM_RC" >> "$GITHUB_OUTPUT"
+          echo "source_rc=$SOURCE_RC" >> "$GITHUB_OUTPUT"
+          echo "patch_rc=$PATCH_RC" >> "$GITHUB_OUTPUT"
+          echo "build_rc=$BUILD_RC" >> "$GITHUB_OUTPUT"
+          echo "object_rc=$OBJECT_RC" >> "$GITHUB_OUTPUT"
+          echo "link_rc=$LINK_RC" >> "$GITHUB_OUTPUT"
+
+      - name: Upload ELF, map, objects and reports
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: pa220-p5-1b-integrated-elf-map
+          path: |
+            reports/pa220/P5-1B/
+            external/pa220-openwrt/u-boot/net/tcp.o
+            external/pa220-openwrt/u-boot/net/libnet.o
+            external/pa220-openwrt/u-boot/u-boot-octeon_pa220
+            external/pa220-openwrt/u-boot/u-boot-octeon_pa220.map
+            external/pa220-openwrt/u-boot/System-octeon_pa220.map
+            external/pa220-openwrt/u-boot/u-boot-octeon_pa220.bin
+            bin/pa220/u-boot-octeon_pa220.bin
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Commit P5-1B evidence
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+sdzbzyh@users.noreply.github.com"
+          git add reports/pa220/P5-1B/
+          git diff --cached --quiet
+          if [ "$?" -eq 0 ]; then echo "No evidence to commit."; exit 0; fi
+          git commit -m "pa220: record P5-1B integrated ELF and link evidence"
+          if [ "$?" -ne 0 ]; then exit 1; fi
+          PUSHED=0
+          for attempt in 1 2 3 4; do
+            if git push origin HEAD:refs/heads/feature/pa220-ubootkit-web; then PUSHED=1; break; fi
+            git fetch origin feature/pa220-ubootkit-web
+            git rebase origin/feature/pa220-ubootkit-web
+            if [ "$?" -ne 0 ]; then echo "Rebase failed; evidence commit preserved."; exit 1; fi
+          done
+          [ "$PUSHED" -eq 1 ]
+
+      - name: Enforce integrated build and final link
+        if: always()
+        shell: bash
+        run: |
+          if [ "${{ steps.build.outputs.download_rc }}" != "0" ] ||
+             [ "${{ steps.build.outputs.checksum_rc }}" != "0" ] ||
+             [ "${{ steps.build.outputs.source_rc }}" != "0" ] ||
+             [ "${{ steps.build.outputs.patch_rc }}" != "0" ] ||
+             [ "${{ steps.build.outputs.build_rc }}" != "0" ] ||
+             [ "${{ steps.build.outputs.object_rc }}" != "0" ] ||
+             [ "${{ steps.build.outputs.link_rc }}" != "0" ]; then
+            echo "P5-1B integrated build/final link verification failed."
+            exit 1
+          fi
+          echo "P5-1B integrated build and final ELF/map symbols passed."
