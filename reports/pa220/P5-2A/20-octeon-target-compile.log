@@ -1,7 +1,7 @@
-UTC=2026-11-21T08:51:02Z
-INTEGRATION_COMMIT=5a02e0b7701cedab6e355f47d55f8f59679a2221
+UTC=2026-11-21T08:54:05Z
+INTEGRATION_COMMIT=3ff73d0627bcc7007e9f1d6ba8e705cc895330da
 PA220_SOURCE_PIN=801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8
-cf0fcd7765dde9af38ea4c87e8377d3db6f922d4e0b53a5b3741e77e884da18d  u-boot/net/http_request.c
+39df6e143456177bf345d13f747067ccd2eeb2492874a9bd918177d4a32cc970  u-boot/net/http_request.c
 305b2372b6661c625c5f80f8dccc96b11272cca64001ba5441c68772ad5a529a  u-boot/include/net/http_request.h
 octeon-sdk-5.1.0-tools-gcc-4.7.tar.gz: OK
 mips64-octeon-linux-gnu-gcc (Cavium Inc. Version: SDK_BUILD build 52) 4.7.0
@@ -142,7 +142,7 @@ ELF Header:
   Version:                           0x1
   Entry point address:               0x0
   Start of program headers:          0 (bytes into file)
-  Start of section headers:          14768 (bytes into file)
+  Start of section headers:          14832 (bytes into file)
   Flags:                             0x808b0025, noreorder, cpic, abi2, octeon, mips64r2
   Size of this header:               52 (bytes)
   Size of program headers:           0 (bytes)
@@ -165,7 +165,7 @@ ELF Header:
   Version:                           0x1
   Entry point address:               0x0
   Start of program headers:          0 (bytes into file)
-  Start of section headers:          14768 (bytes into file)
+  Start of section headers:          14836 (bytes into file)
   Flags:                             0x808b0025, noreorder, cpic, abi2, octeon, mips64r2
   Size of this header:               52 (bytes)
   Size of program headers:           0 (bytes)
@@ -227,7 +227,7 @@ In file included from /home/runner/work/_temp/pa220-source/u-boot/include/config
 /home/runner/work/_temp/pa220-source/u-boot/include/configs/octeon_pa220.h:15:0: note: this is the location of the previous definition
 make: Leaving directory '/home/runner/work/_temp/pa220-source/u-boot'
 000033a8 000033a8 C pa220_http_request_parser_size
-7e569b5a4183835617b75d0406a7cfd19cc02df3d02ae31b605a6936ad020156  reports/pa220/P5-2A/http_request-linked.o
-26800 /home/runner/work/_temp/pa220-source/u-boot/net/http_request.o
-9d0609254d6dd83c269d96080e0391b581d192693d16861039b807dd936b4d94  /home/runner/work/_temp/pa220-source/u-boot/net/http_request.o
+5ce690b203c403a8895cb6fcfb09bb4e9a74f7fc3b685bd28e079fc25b31ebc0  reports/pa220/P5-2A/http_request-linked.o
+26864 /home/runner/work/_temp/pa220-source/u-boot/net/http_request.o
+ae6d2491f5eea61bf70051ecd9bca9da5e91275e79020eae1f694592cdd0a008  /home/runner/work/_temp/pa220-source/u-boot/net/http_request.o
 TARGET_COMPILE_AND_RELOCATABLE_LINK=PASS
