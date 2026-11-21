@@ -198,3 +198,17 @@ Actions #3 的 1,362,216-byte 镜像证明 PA-220 **baseline + 0001/0002 现有�
 - TCP 网络接入、RAM 启动及实机网络验证：NOT RUN。
 
 **下一工作单元改为 P5-1A.3.1-T：独立 TCP core 的 OCTEON 目标对象编译验证。** 使用现有云端 SDK Release 和 PA-220 固定源码生成的配置/include 环境，不重复 Host 回归或完整 baseline 构建。只有该目标对象编译通过后，才进入 P5-1B 最小 IPv4 TCP 分派 hook。
+
+
+## P5-1A.3 目标对象验证完成与 P5-1B 交接（2026-11-21）
+
+专用 Actions run `44858430936` 已使用 Cavium GCC 4.7.0 / SDK Build 52，在固定 PA-220 源码配置下编译独立 TCP core 为 MIPS N32 OCTEON relocatable object：`net/tcp.o`，49,564 bytes，SHA-256 `16ccf75c9cb4e779753ee99fdfeadba21802e9d6a6ed009cb8b9d33da7240ca2`。配置、对象编译和 ELF inspection 均 PASS。完整证据见 `reports/pa220/P5-1A.3/20-octeon-tcp-object-compile.md`。
+
+当前 P5-1A 验证状态：
+- Host focused regression：PASS（76 passed / 0 failed）。
+- Standalone TCP core OCTEON target object compile：PASS。
+- PA-220 baseline full build：PASS。
+- TCP core 与 PA-220 U-Boot 的集成链接：NOT RUN（因为当前尚未将 TCP core 加入 PA-220 net/Makefile）。
+- RAM boot / physical TCP network: NOT RUN。
+
+下一工作单元 **P5-1B**：将 TCP core 源码和头文件通过真实源码差异补丁纳入 PA-220；增加仅在显式注册时启用的 IPv4 protocol 6 接收分派；保持 ARP/ICMP/UDP 原路径不变；随后执行实际 PA-220 完整构建，确认 `net/tcp.o` 编入并最终链接成功。此阶段不实现 Web 循环、TCP Ethernet 输出或 HTTP parser。
