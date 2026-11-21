@@ -14,7 +14,7 @@ diff --git a/u-boot/common/cmd_pa220_web.c b/u-boot/common/cmd_pa220_web.c
 new file mode 100644
 --- /dev/null
 +++ b/u-boot/common/cmd_pa220_web.c
-@@ -0,0 +1,142 @@
+@@ -0,0 +1,141 @@
 +/*
 + * PA-220 foreground Web/TCP lifecycle entry.
 + *
@@ -156,11 +156,10 @@ new file mode 100644
 +		eth_halt();
 +	return ret;
 +}
-+
 diff --git a/u-boot/board/octeon/pa220/pa220_board.c b/u-boot/board/octeon/pa220/pa220_board.c
 --- a/u-boot/board/octeon/pa220/pa220_board.c
 +++ b/u-boot/board/octeon/pa220/pa220_board.c
-@@ -415,41 +415,58 @@
+@@ -415,40 +415,57 @@
  	puts("DDR source : valid EEPROM DDR clock descriptor, otherwise PA-220 fallback; source is not retained.\n");
  }
  
@@ -219,4 +218,3 @@ diff --git a/u-boot/board/octeon/pa220/pa220_board.c b/u-boot/board/octeon/pa220
 -	   "pa220 clock   - show initialized CORE, SCLK and DDR clock values");
 +	   "pa220 clock   - show initialized CORE, SCLK and DDR clock values"
 +	   PA220_WEB_HELP);
- 

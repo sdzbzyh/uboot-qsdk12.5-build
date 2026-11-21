@@ -4,7 +4,7 @@ Status: IMPLEMENTATION COMMITTED; OCTEON target build pending.
 
 ## Scope
 
-This first implementation unit adds the explicit `pa220 web` foreground command and connects the P5-1B TCP RX registration API to the existing `tcp_core_connection` / `tcp_core_input()` / `tcp_core_poll()` interfaces.
+This first implementation unit adds the `web` subcommand to the existing PA-220 `pa220` command and connects the P5-1B TCP RX registration API to the existing `tcp_core_connection` / `tcp_core_input()` / `tcp_core_poll()` interfaces.
 
 - The command is compiled only when `CONFIG_CMD_NET` is enabled.
 - It follows the PA-220 `NetLoop()` Ethernet initialization order but owns a separate foreground `eth_rx()` loop.
@@ -29,7 +29,7 @@ This implementation therefore uses a fail-closed emit callback that returns an e
 
 ## P4 isolation
 
-P4 remains in progress as a separate workstream. Its latest checkpoint records P4-1/P4-2 static audit evidence only; DHCP/Ping hardware tests remain NOT RUN, and TFTP receive remains BLOCKED. This patch changes only `common/Makefile` and adds `common/cmd_pa220_web.c` to the fixed PA-220 source through patch 0004. It does not modify `net.c`, `net.h`, `net/Makefile`, P4 documents or P4 reports.
+P4 remains in progress as a separate workstream. Its latest checkpoint records P4-1/P4-2 static audit evidence only; DHCP/Ping hardware tests remain NOT RUN, and TFTP receive remains BLOCKED. This patch updates `common/Makefile`, adds `common/cmd_pa220_web.c`, and extends the existing `do_pa220()` dispatcher in `board/octeon/pa220/pa220_board.c` through patch 0004. It does not modify `net.c`, `net.h`, `net/Makefile`, P4 documents or P4 reports.
 
 ## Validation plan
 
