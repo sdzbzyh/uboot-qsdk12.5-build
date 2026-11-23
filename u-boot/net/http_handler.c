@@ -362,11 +362,7 @@ int http_handler_build(const struct http_request *request,
   error_len=sizeof(error_400)-1; goto error_response;
  }
  method_len=bounded_length(request->method,sizeof(request->method));
- uri_len=bounded_length(request->uri,sizeof(request->uri));
- if(!method_len||method_len==sizeof(request->method)||
-    !uri_len||uri_len==sizeof(request->uri)||
-    (!string_equal(request->version,"HTTP/1.0",8)&&
-     !string_equal(request->version,"HTTP/1.1",8))) {
+ if(!method_len||method_len==sizeof(request->method)) {
   status=HTTP_STATUS_400; error_body=error_400;
   error_len=sizeof(error_400)-1; goto error_response;
  }
@@ -375,11 +371,19 @@ int http_handler_build(const struct http_request *request,
    status=HTTP_STATUS_400; error_body=error_400;
    error_len=sizeof(error_400)-1; goto error_response;
   }
+ /* Recognize HEAD before URI/version errors so even error replies have no body. */
+ head_only=(method_len==4&&!memcmp(request->method,"HEAD",4));
+ uri_len=bounded_length(request->uri,sizeof(request->uri));
+ if(!uri_len||uri_len==sizeof(request->uri)||
+    (!string_equal(request->version,"HTTP/1.0",8)&&
+     !string_equal(request->version,"HTTP/1.1",8))) {
+  status=HTTP_STATUS_400; error_body=error_400;
+  error_len=sizeof(error_400)-1; goto error_response;
+ }
  if(!uri_valid(request->uri,uri_len)) {
   status=HTTP_STATUS_400; error_body=error_400;
   error_len=sizeof(error_400)-1; goto error_response;
  }
- head_only=string_equal(request->method,"HEAD",4);
  route=route_find(request->uri,uri_len);
  if(route<0) {
   status=HTTP_STATUS_404; error_body=error_404;

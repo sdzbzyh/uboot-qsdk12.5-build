@@ -166,7 +166,7 @@ int main(void)
 
  CHECK(parse_request("GET /api/status HTTP/1.1\r\n\r\n",&request)==0);
  rc=http_handler_build(&request,&info,out,24,&exact);
- CHECK(rc!=0&&exact==0);
+ CHECK(rc!=0&&exact==0&&out[0]==0);
  printf("18 undersized output buffer: PASS\n");
 
  CHECK(http_handler_build(&request,&info,out,sizeof(out),&exact)==0);
@@ -259,6 +259,28 @@ int main(void)
  CHECK(http_handler_build(&request,&info,out,sizeof(out),&exact)==0);
  CHECK(!has(out,exact,"octrgmii0"));
  printf("29 repeated calls have no state residue: PASS\n");
+
+
+ /* HEAD must suppress bodies for route misses and malformed targets. */
+ CHECK(parse_request("GET /missing HTTP/1.1\\r\\n\\r\\n",&request)==0);
+ CHECK(http_handler_build(&request,&info,get,sizeof(get),&get_len)==0);
+ CHECK(get_content_length(get,get_len,&cl_get)==0);
+ CHECK(parse_request("HEAD /missing HTTP/1.1\\r\\n\\r\\n",&request)==0);
+ CHECK(http_handler_build(&request,&info,head,sizeof(head),&head_len)==0);
+ CHECK(has(head,head_len,"404 Not Found"));
+ CHECK(get_content_length(head,head_len,&cl_head)==0&&cl_head==cl_get);
+ CHECK(split_body(head,head_len,&body,&body_len)==0&&body_len==0);
+ memset(&request,0,sizeof(request));
+ strcpy(request.method,"GET"); strcpy(request.uri,"/bad\\\\path");
+ strcpy(request.version,"HTTP/1.1");
+ CHECK(http_handler_build(&request,&info,get,sizeof(get),&get_len)==0);
+ CHECK(get_content_length(get,get_len,&cl_get)==0);
+ strcpy(request.method,"HEAD");
+ CHECK(http_handler_build(&request,&info,head,sizeof(head),&head_len)==0);
+ CHECK(has(head,head_len,"400 Bad Request"));
+ CHECK(get_content_length(head,head_len,&cl_head)==0&&cl_head==cl_get);
+ CHECK(split_body(head,head_len,&body,&body_len)==0&&body_len==0);
+ printf("30 HEAD error responses suppress body and retain GET length: PASS\\n");
 
  printf("Assertions: %d, failures: %d\n",assertions,failures);
  return failures?1:0;
