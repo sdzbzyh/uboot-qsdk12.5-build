@@ -2,17 +2,17 @@ Cloning into '/home/runner/work/_temp/pa220-p5-1d-patch-base'...
 From https://github.com/IronDemiGod/pa220-openwrt
  * branch            801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8 -> FETCH_HEAD
 HEAD is now at 801717b docs/BUILD.md: describe the PA-220 kernel patches
-[detached HEAD ed0d6fa] temporary baseline: accepted PA-220 P5-1C patch series
+[detached HEAD 6f6facc] temporary baseline: accepted PA-220 P5-1C patch series
  8 files changed, 1121 insertions(+)
  create mode 100644 u-boot/common/cmd_pa220_web.c
  create mode 100644 u-boot/include/net/tcp.h
  create mode 100644 u-boot/net/tcp.c
-25ca4536b135bb4e18d97249537842bd566a2a6b1e9cd1a49c73628b05011838  /home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/patches/pa220/0005-pa220-native-tcp-ipv4-ethernet-output.patch
- u-boot/common/cmd_pa220_web.c    | 116 +++++++++++++++++++++------
+5222ebef640653bf89ca7c0db4c86a80c3a83469d7371bf5d3b9acec214d1a34  /home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/patches/pa220/0005-pa220-native-tcp-ipv4-ethernet-output.patch
+ u-boot/common/cmd_pa220_web.c    | 319 ++++++++++++++++++++++++++++++++++-----
  u-boot/include/net.h             |   3 +-
- u-boot/include/net/tcp_ipv4_tx.h |  20 +++++
+ u-boot/include/net/tcp_ipv4_tx.h |  20 +++
  u-boot/net/Makefile              |   1 +
  u-boot/net/net.c                 |   2 +-
- u-boot/net/tcp.c                 |  16 +++-
- u-boot/net/tcp_ipv4_tx.c         | 168 +++++++++++++++++++++++++++++++++++++++
- 7 files changed, 296 insertions(+), 30 deletions(-)
+ u-boot/net/tcp.c                 |  16 +-
+ u-boot/net/tcp_ipv4_tx.c         | 168 +++++++++++++++++++++
+ 7 files changed, 482 insertions(+), 47 deletions(-)
