@@ -1,0 +1,13 @@
+UTC=2026-11-23T07:10:54Z
+INTEGRATION_COMMIT=db3d085154427aa94d3f3a7cb46550b1e507a3a3
+PA220_SOURCE_PIN=801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8
+59cb055433acf394b4a904c29232de30303c7f455d674283929c098f7b59680c  u-boot/net/http_handler.c
+9004a5ff7caffc2ef9613667985fc6e9b329af857c15fa24f494a19e1254c7e5  u-boot/net/http_handler_uboot.c
+82f96f310ab5b0e7530ddab244bffbe8a07eaec106c3428bbf5c96a3b5d1d852  u-boot/include/net/http_handler.h
+octeon-sdk-5.1.0-tools-gcc-4.7.tar.gz: OK
+mips64-octeon-linux-gnu-gcc (Cavium Inc. Version: SDK_BUILD build 52) 4.7.0
+Copyright (C) 2012 Free Software Foundation, Inc.
+TARGET=mips64-octeon-linux-gnu
+Cloning into '/home/runner/work/_temp/pa220-source'...
+HEAD is now at 801717b docs/BUILD.md: describe the PA-220 kernel patches
+cp: cannot create regular file '/home/runner/work/_temp/pa220-source/u-boot/include/net/http_request.h': No such file or directory
