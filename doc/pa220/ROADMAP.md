@@ -8,7 +8,7 @@
 | P1 | uBootKit 功能源码审计 | 已完成 A0～A5 固定源码静态审计；明确适配结论、风险和运行时待验证项 | 所有目标功能均有适配结论和证据来源；未构建/未实机验证项单独标记 |
 | P2 | PA-220 基线与构建复核 | 固定源码、补丁叠加、工具链、干净构建、关键对象静态核查和 RAM 启动 | **已完成（2026-11-19）**；未完成的只读硬件核查转入 P3，见 `reports/P2-COMPLETION-2026-11-19.md` |
 | P3 | CLI/只读诊断完善 | 板卡、内存、时钟、网络、存储、EEPROM、CPLD 只读信息 | 编译和 RAM 启动验证通过；无持久化写入 |
-| P4 | 网络维护基础 | MGT 网络配置、DHCP Client/Server 评估、下载服务 | 网络功能逐项可复现，退出服务后 CLI/autoboot 正常 |
+| P4 | 网络维护基础 | DHCP Client/Ping 实机验证与 TFTP 接收安全门 | **未完成/待恢复**；DHCP/Ping 实机验证未完成，统一 RAM validator 未实现，TFTP 接收保持 BLOCKED |
 | P5 | HTTP/Web 只读管理 | TCP 接入、前台生命周期、有界 HTTP parser、只读 URI handler 与实机验收 | **P5-2C 已完成（2026-11-23）**；云端/Host/实机证据见 `reports/pa220/P5-2C/ACCEPTANCE.md` |
 | P6 | RAM 文件接收与校验 | 上传、进度、大小限制、CRC/SHA、格式识别 | 上传仅影响 RAM，边界和错误路径通过测试 |
 | P7 | 固件解析与安装预览 | 固件格式解析、目标映射、dry-run 报告 | 不写存储即可完整展示安装计划 |
