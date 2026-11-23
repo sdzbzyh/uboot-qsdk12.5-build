@@ -12,7 +12,7 @@ static const u8 local_ip[4] = { 192, 0, 2, 1 };
 static const u8 peer_ip[4] = { 192, 0, 2, 2 };
 static const u8 peer_mac[6] = { 0x02, 0x11, 0x22, 0x33, 0x44, 0x55 };
 static const char request_text[] =
- "GET /api/status HTTP/1.1\r\nHost: host\r\n\r\n";
+ "GET /api/board HTTP/1.1\r\nHost: host\r\n\r\n";
 
 IPaddr_t NetOurIP;
 static struct eth_device device;
