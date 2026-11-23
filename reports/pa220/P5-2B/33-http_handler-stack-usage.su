@@ -1,0 +1,10 @@
+http_handler.c:50:12:bounded_length	0	static
+http_handler.c:294:12:header_cstr	48	static
+http_handler.c:154:12:string_equal	32	static
+http_handler.c:63:13:writer_bytes	32	static
+http_handler.c:73:13:writer_cstr	32	static
+http_handler.c:80:13:writer_u64	80	static
+http_handler.c:91:13:writer_json_string	96	static
+http_handler.c:301:12:header_u64	96	static
+http_handler.c:314:12:build_response	288	static
+http_handler.c:344:5:http_handler_build	1424	static
