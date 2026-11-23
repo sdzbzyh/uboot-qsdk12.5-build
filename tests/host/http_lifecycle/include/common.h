@@ -6,5 +6,6 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <linux/types.h>
+typedef unsigned char uchar;
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 #endif
