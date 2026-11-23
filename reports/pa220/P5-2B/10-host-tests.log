@@ -1,34 +1,15 @@
-UTC=2026-11-23T07:10:15Z
-COMMIT=8e0fadb4c179d74b66ed768fe16233e4dae1f9a5
+UTC=2026-11-23T07:10:33Z
+COMMIT=c72d9191974e1c72161231501a4934a178155897
 cc (Ubuntu 15.2.0-16ubuntu1) 15.2.0
-01 GET /: PASS
-02 HEAD /: PASS
-03 GET status: PASS
-04 HEAD status: PASS
-05 GET board: PASS
-06 GET memory: PASS
-07 GET network: PASS
-08 unknown URI: PASS
-09 prefix bypass: PASS
-10 extra path: PASS
-11 encoded path: PASS
-12 query string: PASS
-13 POST: PASS
-14 PUT: PASS
-15 DELETE: PASS
-16 HEAD body suppressed and GET length retained: PASS
-17 GET body bytes equal Content-Length: PASS
-18 undersized output buffer: PASS
-19 exact output boundary: PASS
-FAIL line 181: has(out,exact,"eth\\\"\\\\\\u000a")
-20 JSON escaping: PASS
-21 HTML escaping: PASS
-22 HTTP/1.0: PASS
-23 HTTP/1.1: PASS
-24 invalid Method: PASS
-25 invalid URI: PASS
-26 null request and unavailable info: PASS
-27 unavailable memory maps to 500: PASS
-28 U-Boot read-only data provider: PASS
-29 repeated calls have no state residue: PASS
-Assertions: 115, failures: 1
+/home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/tests/host/http_handler/test.c: In function ‘main’:
+/home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/tests/host/http_handler/test.c:180:76: error: stray ‘\’ in program
+  180 |  CHECK(parse_request("GET /api/network HTTP/1.1\\r\\n\\r\\n",&request)==0);\n CHECK(http_handler_build(&request,&info,out,sizeof(out),&exact)==0);
+      |                                                                            ^
+/home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/tests/host/http_handler/test.c:180:77: error: ‘n’ undeclared (first use in this function)
+  180 |  CHECK(parse_request("GET /api/network HTTP/1.1\\r\\n\\r\\n",&request)==0);\n CHECK(http_handler_build(&request,&info,out,sizeof(out),&exact)==0);
+      |                                                                             ^
+/home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/tests/host/http_handler/test.c:180:77: note: each undeclared identifier is reported only once for each function it appears in
+/home/runner/work/uboot-qsdk12.5-build/uboot-qsdk12.5-build/tests/host/http_handler/test.c:180:78: error: expected ‘;’ before ‘do’
+  180 |  CHECK(parse_request("GET /api/network HTTP/1.1\\r\\n\\r\\n",&request)==0);\n CHECK(http_handler_build(&request,&info,out,sizeof(out),&exact)==0);
+      |                                                                              ^
+      |                                                                              ;
