@@ -10,6 +10,49 @@
 #include <common.h>
 #include <net/tcp.h>
 
+/*
+ * Keep the complete public TCP core API reachable when the PA-220 final
+ * link uses --gc-sections. The native network layer references this table
+ * only when a TCP input handler is explicitly registered.
+ */
+struct tcp_core_link_refs {
+ int (*segment_parse)(const u8 *, u16, struct tcp_segment_view *);
+ u16 (*checksum_ipv4)(const u8 [4], const u8 [4], const u8 *, u16);
+ int (*checksum_ipv4_valid)(const u8 [4], const u8 [4], const u8 *, u16);
+ int (*seq_before)(u32, u32);
+ int (*seq_after)(u32, u32);
+ void (*init)(struct tcp_core_connection *);
+ int (*listen)(struct tcp_core_connection *, const u8 [4], u16, u32);
+ int (*input)(struct tcp_core_connection *, const u8 [4], const u8 [4],
+              const u8 *, u16, u32, tcp_core_emit_fn, void *);
+ int (*poll)(struct tcp_core_connection *, u32, tcp_core_emit_fn, void *);
+ int (*read)(struct tcp_core_connection *, u8 *, u16);
+ int (*write)(struct tcp_core_connection *, const u8 *, u16, u32,
+              tcp_core_emit_fn, void *);
+ int (*close)(struct tcp_core_connection *, u32, tcp_core_emit_fn, void *);
+};
+
+static const struct tcp_core_link_refs tcp_core_api_refs = {
+ .segment_parse = tcp_segment_parse,
+ .checksum_ipv4 = tcp_checksum_ipv4,
+ .checksum_ipv4_valid = tcp_checksum_ipv4_valid,
+ .seq_before = tcp_seq_before,
+ .seq_after = tcp_seq_after,
+ .init = tcp_core_init,
+ .listen = tcp_core_listen,
+ .input = tcp_core_input,
+ .poll = tcp_core_poll,
+ .read = tcp_core_read,
+ .write = tcp_core_write,
+ .close = tcp_core_close
+};
+
+const void *tcp_core_link_anchor(void)
+{
+ return &tcp_core_api_refs;
+}
+
+
 static u16 tcp_get_be16(const u8 *p)
 {
 	return ((u16)p[0] << 8) | p[1];
