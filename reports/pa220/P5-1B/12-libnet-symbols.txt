@@ -117,14 +117,16 @@
 00000000 b TftpTsize
 00000000 b TftpWriting
 00000000 T VLAN_to_string
-00000000 r __FUNCTION__.4878
+00000000 r __FUNCTION__.4879
 00000000 t __def_eth_init
 00000000 D _u_boot_list_2_env_clbk_2_bootfile
-00000000 b act.4958
+00000000 b act.4959
 00000000 b arp_packet_handler
 00000000 T arp_raw_request
 00000000 t basename
 00000000 W board_eth_init
+00000000 t bounded_length
+00000000 t build_response
 00000000 T cdp_receive
 00000000 t configure_wait
 00000000 b conflicts
@@ -138,8 +140,12 @@
 00000000 b dhcp_state
 00000000 b dirfh
 00000000 t dummy_handler
-00000000 b env_changed_id.4838
-00000000 b env_changed_id.4959
+00000000 b env_changed_id.4839
+00000000 b env_changed_id.4960
+00000000 r error_400
+00000000 r error_404
+00000000 r error_405
+00000000 r error_500
 00000004 C eth_current
 00000000 t eth_current_changed
 00000000 b eth_devices
@@ -162,18 +168,34 @@
 00000000 T eth_unregister
 00000000 T eth_write_hwaddr
 00000000 b filefh
-00000000 d first_call.4849
-00000000 b first_failed.4953
-00000000 b first_hole.4952
+00000000 d first_call.4850
+00000000 b first_failed.4954
+00000000 b first_hole.4953
 00000000 b fs_mounted
          U get_env_id
          U get_timer
          U getenv
 00000000 T getenv_VLAN
          U getenv_yesno
+00000000 t header_cstr
+00000000 t header_u64
+00000000 r hex.4511
+00000000 r hex.4538
+00000000 r home_prefix
+00000000 r home_suffix
+00000000 t http_equal_ci
+00000000 t http_find_crlf
+00000000 T http_handler_build
+00000000 T http_handler_get_device_info
+00000000 t http_is_hex
+00000000 t http_is_token
+00000000 T http_request_error_string
+00000000 T http_request_parser_feed
+00000000 T http_request_parser_init
+00000000 T http_request_parser_reset
          U hw_watchdog_reset
 00000000 t icmp_handler
-00000000 b index.4906
+00000000 b index.4907
 00000000 b ip
 00000000 T ip_to_string
 00000000 T link_local_receive_arp
@@ -185,6 +207,7 @@
          U memmove
          U memset
          U miiphy_init
+00000000 r names.4587
          U nc_input_packet
 00000000 b nclaims
 00000000 T net_auto_load
@@ -228,7 +251,7 @@
 00000000 T ping_receive
 00000000 T ping_start
 00000000 t ping_timeout
-00000000 b pkt_buff.4951
+00000000 b pkt_buff.4952
          U print_buffer
          U print_size
          U printf
@@ -237,6 +260,7 @@
          U rand_r
 00000000 T random_port
 00000000 b ready
+00000000 r routes
 00000000 t rpc_add_credentials
 00000000 b rpc_id
 00000000 t rpc_lookup_reply
@@ -258,6 +282,7 @@
          U strchr
          U strcmp
          U strcpy
+00000000 t string_equal
 00000000 T string_to_VLAN
          U string_to_ip
          U strlen
@@ -277,6 +302,11 @@
 00000000 T tcp_core_write
 00000000 t tcp_emit
 00000000 t tcp_ip_equal
+00000000 T tcp_ipv4_tx_clear
+00000000 T tcp_ipv4_tx_emit
+00000000 b tcp_ipv4_tx_frame
+00000000 T tcp_ipv4_tx_learn_peer
+00000000 T tcp_ipv4_tx_peer_matches
 00000000 r tcp_net_api_refs
 00000000 b tcp_packet_handler
 00000000 T tcp_segment_parse
@@ -292,7 +322,11 @@
 00000000 b time_start
 00000000 d timeout_ms
          U to_tm
-00000000 b total_len.4953
+00000000 b total_len.4954
          U udelay
 00000000 b udp_packet_handler
 00000000 t update_block_number
+00000000 t writer_bytes
+00000000 t writer_cstr
+00000000 t writer_json_string
+00000000 t writer_u64
