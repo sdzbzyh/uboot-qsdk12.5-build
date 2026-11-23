@@ -48,8 +48,8 @@ jobs:
             echo "UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
             echo "INTEGRATION_COMMIT=$(git rev-parse HEAD)"
             echo "CC=$(cc --version | head -n 1)"
-            test -x tests/host/http_lifecycle/run.sh
-            tests/host/http_lifecycle/run.sh
+            test -f tests/host/http_lifecycle/run.sh
+            bash tests/host/http_lifecycle/run.sh
           } 2>&1 | tee "$R/10-host-tests.log"
       - name: Upload Host evidence
         if: always()
