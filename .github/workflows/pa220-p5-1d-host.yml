@@ -12,6 +12,14 @@ on:
       - 'u-boot/net/tcp_ipv4_tx.c'
       - 'u-boot/include/net/tcp.h'
       - 'u-boot/include/net/tcp_ipv4_tx.h'
+      - 'u-boot/net/http_request.c'
+      - 'u-boot/net/http_handler.c'
+      - 'u-boot/net/http_handler_uboot.c'
+      - 'u-boot/include/net/http_request.h'
+      - 'u-boot/include/net/http_handler.h'
+      - 'scripts/generate-pa220-p5-2c-makefile-patch.py'
+      - 'tests/host/http_request/**'
+      - 'tests/host/http_handler/**'
       - 'tests/host/tcp_ipv4_tx/**'
       - 'build-pa220.sh'
   workflow_dispatch:
@@ -133,7 +141,7 @@ jobs:
             if [ "$BUILD_RC" -eq 0 ]; then
               echo
               echo "========== REQUIRED TARGET OBJECTS =========="
-              for obj in net/tcp.o net/tcp_ipv4_tx.o common/cmd_pa220_web.o; do
+              for obj in common/cmd_pa220_web.o net/tcp.o net/tcp_ipv4_tx.o net/http_request.o net/http_handler.o net/http_handler_uboot.o; do
                 test -s "$UBOOT_DIR/$obj"
                 OBJ_RC=$?
                 echo "OBJECT_$obj=$OBJ_RC"
@@ -164,7 +172,7 @@ jobs:
                 ELF_GREP_RC=$?
                 grep -E 'tcp_ipv4_tx_emit|tcp_ipv4_tx_learn_peer|do_pa220_web|tcp_core_input|tcp_core_poll|net_set_tcp_handler' "$SYSTEM_MAP" > "$REPORT_DIR/16-p5-1d-system-map-extract.txt"
                 SYSTEM_GREP_RC=$?
-                for symbol in tcp_ipv4_tx_emit tcp_ipv4_tx_learn_peer do_pa220_web tcp_core_input tcp_core_poll net_set_tcp_handler; do
+                for symbol in tcp_ipv4_tx_emit tcp_ipv4_tx_learn_peer do_pa220_web tcp_core_input tcp_core_poll net_set_tcp_handler http_request_parser_feed http_handler_build http_handler_get_device_info; do
                   grep -E " [Tt] $symbol$" "$REPORT_DIR/13-final-elf-symbols.txt" >/dev/null
                   SYMBOL_RC=$?
                   echo "FINAL_ELF_SYMBOL_$symbol=$SYMBOL_RC"
@@ -172,7 +180,7 @@ jobs:
                 done
                 if [ "$MAP_GREP_RC" -ne 0 ] || [ "$ELF_GREP_RC" -ne 0 ] || [ "$SYSTEM_GREP_RC" -ne 0 ]; then LINK_RC=1; fi
                 if [ "$LINK_RC" -ne 1 ]; then LINK_RC=0; fi
-                sha256sum "$UBOOT_DIR/net/tcp.o" "$UBOOT_DIR/net/tcp_ipv4_tx.o" "$UBOOT_DIR/common/cmd_pa220_web.o" "$ELF" "$MAP" "$SYSTEM_MAP" "$UBOOT_DIR/u-boot-octeon_pa220.bin"
+                sha256sum "$UBOOT_DIR/common/cmd_pa220_web.o" "$UBOOT_DIR/net/tcp.o" "$UBOOT_DIR/net/tcp_ipv4_tx.o" "$UBOOT_DIR/net/http_request.o" "$UBOOT_DIR/net/http_handler.o" "$UBOOT_DIR/net/http_handler_uboot.o" "$ELF" "$MAP" "$SYSTEM_MAP" "$UBOOT_DIR/u-boot-octeon_pa220.bin"
               else
                 LINK_RC=1
               fi
@@ -219,6 +227,11 @@ jobs:
             patches/pa220/0005-pa220-native-tcp-ipv4-ethernet-output.patch
             external/pa220-openwrt/u-boot/net/tcp.o
             external/pa220-openwrt/u-boot/net/tcp_ipv4_tx.o
+            external/pa220-openwrt/u-boot/net/http_request.o
+            external/pa220-openwrt/u-boot/net/http_handler.o
+            external/pa220-openwrt/u-boot/net/http_handler_uboot.o
+            external/pa220-openwrt/u-boot/include/net/Makefile
+            reports/pa220/P5-2C/0006-pa220-p5-2c-makefile-integration.patch
             external/pa220-openwrt/u-boot/common/cmd_pa220_web.o
             external/pa220-openwrt/u-boot/u-boot-octeon_pa220
             external/pa220-openwrt/u-boot/u-boot-octeon_pa220.map
