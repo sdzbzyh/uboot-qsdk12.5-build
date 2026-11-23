@@ -349,11 +349,13 @@ int http_handler_build(const struct http_request *request,
  const char *type="text/plain; charset=utf-8";
  u16 error_len=0,method_len,uri_len;
  int status=HTTP_STATUS_200,head_only=0,route=-1;
+ u8 body_storage[HTTP_HANDLER_TX_CAPACITY-HTTP_HANDLER_BODY_OFFSET];
  u16 i;
 
  if(!out_len) return -1;
  *out_len=0;
- if(!out||capacity<HTTP_HANDLER_BODY_OFFSET) return -1;
+ if(!out||!capacity) return -1;
+ if(capacity>HTTP_HANDLER_TX_CAPACITY) capacity=HTTP_HANDLER_TX_CAPACITY;
  out[0]=0;
  if(!request) {
   status=HTTP_STATUS_400; error_body=error_400;
@@ -403,8 +405,7 @@ int http_handler_build(const struct http_request *request,
  }
 
  type=routes[route].content_type;
- writer_init(&body,out+HTTP_HANDLER_BODY_OFFSET,
-             (u16)(capacity-HTTP_HANDLER_BODY_OFFSET));
+ writer_init(&body,body_storage,sizeof(body_storage));
  switch(route) {
  case 0: build_home(&body,info); break;
  case 1: build_status(&body,info); break;
@@ -415,18 +416,17 @@ int http_handler_build(const struct http_request *request,
  }
  /* A render/capacity failure is not a response: publish no partial bytes. */
  if(body.failed) return -1;
- if(build_response(request,status,type,out+HTTP_HANDLER_BODY_OFFSET,
+ if(build_response(request,status,type,body_storage,
                    body.length,head_only,out,capacity,out_len))
   return -1;
  return 0;
 
 error_response:
- writer_init(&body,out+HTTP_HANDLER_BODY_OFFSET,
-             (u16)(capacity-HTTP_HANDLER_BODY_OFFSET));
+ writer_init(&body,body_storage,sizeof(body_storage));
  writer_bytes(&body,error_body,error_len);
  if(body.failed) return -1;
  if(build_response(request,status,"text/plain; charset=utf-8",
-                   out+HTTP_HANDLER_BODY_OFFSET,body.length,head_only,
+                   body_storage,body.length,head_only,
                    out,capacity,out_len))
   return -1;
  return 0;
