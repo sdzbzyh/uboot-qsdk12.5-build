@@ -1,4 +1,6 @@
-# PA-220 P5-2C validation summary — interim
+# PA-220 P5-2C validation summary — interim (superseded)
+
+> **SUPERSEDED BY FINAL ACCEPTANCE (2026-11-23):** This report records an earlier intermediate workflow state and is retained for history only. Its `NOT COMPLETE` conclusion and `NOT RUN` entries do not describe the final P5-2C state. The final Host, full target build/link, and physical HTTP/TCP results are recorded in [`ACCEPTANCE.md`](ACCEPTANCE.md). Do not use this interim report as the current status.
 
 Date: 2026-11-23  
 Branch: `feature/pa220-ubootkit-web`  
