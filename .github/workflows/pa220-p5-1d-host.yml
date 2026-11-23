@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   integrated-build:
@@ -228,30 +228,8 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
-      - name: Commit P5-1D patch and evidence
-        if: always()
-        shell: bash
-        run: |
-          set -e
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add reports/pa220/P5-1D/
-          if [ -s patches/pa220/0005-pa220-native-tcp-ipv4-ethernet-output.patch ]; then
-            git add patches/pa220/0005-pa220-native-tcp-ipv4-ethernet-output.patch
-          fi
-          if ! git diff --cached --quiet; then
-            git commit -m "pa220: integrate P5-1D TCP IPv4 Ethernet output"
-            PUSHED=0
-            for attempt in 1 2 3 4; do
-              git fetch origin feature/pa220-ubootkit-web
-              if git rebase origin/feature/pa220-ubootkit-web && git push origin HEAD:refs/heads/feature/pa220-ubootkit-web; then
-                PUSHED=1
-                break
-              fi
-            done
-            [ "$PUSHED" -eq 1 ]
-          fi
-
+      # Evidence is retained as an immutable Actions Artifact. Do not push runner-generated
+      # reports/patches back to the shared branch: concurrent feature commits can conflict.
       - name: Enforce P5-1D acceptance
         if: always()
         shell: bash
