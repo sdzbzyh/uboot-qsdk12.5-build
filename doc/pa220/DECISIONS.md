@@ -81,7 +81,7 @@
 - 决策：PA-220 第一版 Web 仅由用户在 CLI 显式执行 `pa220 web` 启动；服务前台运行，Ctrl-C 退出并统一清理网络/TCP 状态。首版不自动进入 Web、不接管 autoboot、不后台常驻。
 - 理由：PA-220 U-Boot 2013.07 的 `NetLoop()` 是阻塞式协议状态机，UDP/ARP handler 与 timeout callback 为单例全局状态；不能直接复用 uBootKit 2016 的 failsafe/TCP 生命周期。
 - 影响：P5 必须单独实现 TCP 接收分派和服务轮询/cleanup；Web 与 DHCP/Ping/TFTP 等网络命令按串行使用，不并行抢占 NetLoop。首版仅允许 GET/HEAD 和经过审查的只读 handler；不提供命令执行、环境/存储/CPLD 写入、上传、安装或重启。
-- 状态：架构决策已记录；代码实现、编译、RAM 启动和实机验证均未完成。
+- 状态：架构约束持续有效；实现及验收状态由 D-013 和 `reports/pa220/P5-2C/ACCEPTANCE.md` 更新。P5-2C 已完成只读 Web 的 Host/目标构建/RAM 实机 HTTP 验收。
 
 
 ## D-013：P5-2C 实机验收边界与 P6 上传安全门
