@@ -9,7 +9,7 @@
 | P2 | PA-220 基线与构建复核 | 固定源码、补丁叠加、工具链、干净构建、关键对象静态核查和 RAM 启动 | **已完成（2026-11-19）**；未完成的只读硬件核查转入 P3，见 `reports/P2-COMPLETION-2026-11-19.md` |
 | P3 | CLI/只读诊断完善 | 板卡、内存、时钟、网络、存储、EEPROM、CPLD 只读信息 | 编译和 RAM 启动验证通过；无持久化写入 |
 | P4 | 网络维护基础 | MGT 网络配置、DHCP Client/Server 评估、下载服务 | 网络功能逐项可复现，退出服务后 CLI/autoboot 正常 |
-| P5 | HTTP/Web 只读管理 | 状态页、系统信息、网络与存储概览 | MGT 隔离网络访问；无写接口；压力/异常请求安全 |
+| P5 | HTTP/Web 只读管理 | TCP 接入、前台生命周期、有界 HTTP parser、只读 URI handler 与实机验收 | **P5-2C 已完成（2026-11-23）**；云端/Host/实机证据见 `reports/pa220/P5-2C/ACCEPTANCE.md` |
 | P6 | RAM 文件接收与校验 | 上传、进度、大小限制、CRC/SHA、格式识别 | 上传仅影响 RAM，边界和错误路径通过测试 |
 | P7 | 固件解析与安装预览 | 固件格式解析、目标映射、dry-run 报告 | 不写存储即可完整展示安装计划 |
 | P8 | eMMC 安装事务 | 备份/回退设计、分区写入、读回验证 | 专项审查和用户授权后，测试设备写入成功并可恢复 |
@@ -232,3 +232,34 @@ Actions #3 的 1,362,216-byte 镜像证明 PA-220 **baseline + 0001/0002 现有�
 **仍未验证：** RAM 启动、真实网口 TCP 接收/发送。P5-1B 只完成接收分派；没有 TCP Ethernet/IP 输出、MAC 邻居解析、前台 `pa220 web` 生命周期或 HTTP parser。
 
 **下一入口：P5-1C — 前台 Web 生命周期与 TCP core 连接管理集成。** 该阶段应显式注册/注销 TCP handler、建立单连接上下文并接入 `tcp_core_input()`；另行安排 RAM 启动和真实网口验证。不得将本阶段构建成功等同于实机网络通过。
+
+
+## 当前检查点与下一工作入口（2026-11-23）
+
+### P5 完成状态
+
+P5-1A 至 P5-1D 及 P5-2A、P5-2B、P5-2C 的阶段工作已完成；本轮正式验收以 `reports/pa220/P5-2C/ACCEPTANCE.md` 为准。P5-2C 包含：
+
+- Host Harness：29 scenarios、161 assertions、0 failures；前台 `pa220 web` 命令测试通过。
+- Cavium OCTEON N32 relocatable link 与 PA-220 完整 U-Boot 最终链接通过。
+- 云端 BIN：1,380,488 bytes；SHA-256 `825b0e56312da6f4158cd94a5e2da2796b188bfe5d9dcecb5928d9304ad67343`。
+- PA-220 实机通过 TFTP 将 Stage-3 镜像加载到 RAM 地址 `0x81000000` 后执行；Windows HTTP 测试 8/8 cases PASS，PCAPNG/TShark 输出支持 200/404/405 与关闭/RST 后新连接恢复行为。
+- 串口日志是会话记录重建，不是原始 UART capture；RST 连接在 HTTP payload 发送前 FIN，服务器回 400 后客户端 RST+ACK，不得描述为 RST 中断部分请求。
+
+### P4 状态未被 P5 取代
+
+P4 网络维护基础仍保留历史计划中的未完成项：DHCP Client/Ping 实机验证和统一 RAM 接收范围验证器。P5 的静态地址 HTTP 测试成功不等于 DHCP/Ping 或 TFTP 接收验证通过。不得将 P4 标记为 COMPLETE。
+
+### 下一开发入口：统一 RAM 写入前范围验证器
+
+进入 P6 文件接收前，先完成 P4-2/P6 共用的安全前置项：
+
+1. 基于固定 PA-220 源码和运行时 `cvmx_bootmem_find_named_block("__tmp_load")` descriptor，设计并实现 `octeon_load_range_check(uint64_t addr, uint64_t len)`。
+2. 采用 checked arithmetic 和半开区间检查；处理 cached/uncached/physical alias 规范化；每次使用前重新验证 descriptor，确认与相关 globals 一致。
+3. 证明目标区间不覆盖 U-Boot image、relocation、stack、GD、malloc、exception/bootmap/FDT 等保留区域；不得假定 `0x81000000` 是安全上传缓冲区。
+4. Host 测试覆盖零长度、溢出、回绕、边界相等、跨界、alias、descriptor 缺失/变化等拒绝路径；目标端执行 OCTEON 编译/最终链接和只读运行时核对。
+5. 在 validator 经 Host 与目标验证前，不开放 TFTP GET/Server 接收、HTTP upload/chunk 接收或 bootelf PT_LOAD/section 写入；不执行任何实际上传或持久化写入。
+
+验证器通过后，才进入 P6 RAM-only 文件接收与 CRC/SHA/格式识别。P7 固件解析和安装预览仍只做 dry-run；P8 eMMC 写入、P10 SPI 维护属于独立高风险阶段，必须另行审查和明确授权。
+
+**下一会话不要重做 P5-1/P5-2A/B/C，不要重新跑已通过的 Host/OCTEON/HTTP 测试。先恢复最新 HEAD，审查当前 validator 代码/调用点，再直接推进上述安全门。**
