@@ -1,5 +1,7 @@
 # PA-220 Maintenance U-Boot: 功能盘点与开发路线
 
+> **历史草案提示（2026-11-23）：** 本文件形成于 P5 HTTP 实现之前，后文 M0/M1 的“当前阶段”和“HTTP 未实现”等描述已过时。请以 [`doc/pa220/README.md`](pa220/README.md)、[`ROADMAP.md`](pa220/ROADMAP.md)、[`FEATURE-MATRIX.md`](pa220/FEATURE-MATRIX.md)、[`TEST-PLAN.md`](pa220/TEST-PLAN.md) 和 [`reports/pa220/P5-2C/ACCEPTANCE.md`](../reports/pa220/P5-2C/ACCEPTANCE.md) 为当前权威状态。原文保留作为历史功能盘点，不应据此重新执行已完成的 P5 工作。
+
 ## 目标
 
 在现有 PA-220 OCTEON U-Boot 2013.07 的基础上，逐步增加一套可通过串口和 MGT 网口使用的维护环境，覆盖只读诊断、网络管理、镜像接收与校验、eMMC 固件维护和启动管理。
