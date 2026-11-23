@@ -1,0 +1,92 @@
+name: PA-220 P5-2C OCTEON full integration build
+on:
+  push:
+    branches: [feature/pa220-ubootkit-web]
+    paths:
+      - '.github/workflows/pa220-p5-2c-octeon.yml'
+      - 'u-boot/common/cmd_pa220_web.c'
+      - 'u-boot/net/**'
+      - 'u-boot/include/net/**'
+      - 'patches/pa220/**'
+      - 'scripts/generate-pa220-p5-2c-makefile-patch.py'
+      - 'build-pa220.sh'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  octeon-full-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Download and verify pinned OCTEON SDK
+        env:
+          GH_TOKEN: ${{ secrets.OCTEON_SDK_READ_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          D="$RUNNER_TEMP/octeon-download"
+          S="$RUNNER_TEMP/octeon-sdk"
+          mkdir -p "$D" "$S" reports/pa220/P5-2C
+          test -n "$GH_TOKEN"
+          gh release download octeon-sdk-5.1.0 --repo sdzbzyh/pa220-toolchains --pattern '*.tar.gz' --pattern '*.sha256' --dir "$D"
+          (cd "$D" && sha256sum -c ./*.sha256)
+          A=$(find "$D" -maxdepth 1 -type f -name '*.tar.gz' -print -quit)
+          test -n "$A"
+          tar -xzf "$A" -C "$S"
+          GCC=$(find "$S" -path '*/bin/mips64-octeon-linux-gnu-gcc' -print -quit)
+          test -n "$GCC"
+          TC=$(dirname "$(dirname "$GCC")")
+          echo "OCTEON_TOOLCHAIN=$TC" >> "$GITHUB_ENV"
+          echo "$TC/bin" >> "$GITHUB_PATH"
+          "$GCC" --version | head -n 2
+          sha256sum "$A" | tee reports/pa220/P5-2C/00-sdk-sha256.txt
+      - name: Run pinned PA-220 integration and full U-Boot build
+        shell: bash
+        run: |
+          set -euo pipefail
+          R=reports/pa220/P5-2C
+          export OCTEON_MODEL=OCTEON_CN70XX
+          export PA220_REPO_DIR="$RUNNER_TEMP/pa220-openwrt"
+          export PA220_OUTPUT_DIR="$RUNNER_TEMP/pa220-output"
+          {
+            echo "INTEGRATION_COMMIT=$(git rev-parse HEAD)"
+            echo "PA220_SOURCE_PIN=801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8"
+            ./build-pa220.sh "$OCTEON_TOOLCHAIN"
+            U="$PA220_REPO_DIR/u-boot"
+            test -s "$U/u-boot-octeon_pa220"
+            test -s "$U/u-boot-octeon_pa220.map"
+            test -s "$U/System-octeon_pa220.map"
+            test -s "$U/u-boot-octeon_pa220.bin"
+            for O in common/cmd_pa220_web net/tcp net/tcp_ipv4_tx net/http_request net/http_handler net/http_handler_uboot; do
+              test -s "$U/$O.o"
+              "$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-readelf" -h "$U/$O.o" > "$R/$(basename "$O")-elf-header.txt"
+              "$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-nm" -u "$U/$O.o" > "$R/$(basename "$O")-undefined-symbols.txt"
+              sha256sum "$U/$O.o" >> "$R/10-object-sha256.txt"
+            done
+            "$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-gcc" -mabi=n32 -mabicalls -msoft-float -G 0 -nostdlib -Wl,-r \
+              "$U/common/cmd_pa220_web.o" "$U/net/tcp.o" "$U/net/tcp_ipv4_tx.o" \
+              "$U/net/http_request.o" "$U/net/http_handler.o" "$U/net/http_handler_uboot.o" \
+              -o "$R/pa220-http-lifecycle-n32.o"
+            "$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-readelf" -h "$R/pa220-http-lifecycle-n32.o" | tee "$R/20-n32-elf-header.txt"
+            "$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-nm" -u "$R/pa220-http-lifecycle-n32.o" | tee "$R/21-n32-undefined-symbols.txt"
+            "$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-readelf" -h "$U/u-boot-octeon_pa220" | tee "$R/30-final-elf-header.txt"
+            "$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-nm" -n "$U/u-boot-octeon_pa220" > "$R/31-final-symbols.txt"
+            grep -E ' [Tt] (do_pa220_web|tcp_core_input|tcp_core_poll|tcp_ipv4_tx_emit|http_request_parser_feed|http_handler_build)$' "$R/31-final-symbols.txt" | tee "$R/32-required-symbols.txt"
+            test "$(wc -l < "$R/32-required-symbols.txt")" -eq 6
+            sha256sum "$U/u-boot-octeon_pa220" "$U/u-boot-octeon_pa220.map" "$U/System-octeon_pa220.map" "$U/u-boot-octeon_pa220.bin" | tee "$R/33-final-artifact-sha256.txt"
+            echo "P5_2C_N32_RELOCATABLE_LINK=PASS"
+            echo "P5_2C_FULL_UBOOT_LINK=PASS"
+          } 2>&1 | tee "$R/20-full-build.log"
+      - name: Upload full-build evidence and image
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pa220-p5-2c-octeon-${{ github.sha }}
+          path: |
+            reports/pa220/P5-2C/
+            bin/pa220/u-boot-octeon_pa220.bin
+          if-no-files-found: warn
+          retention-days: 30
