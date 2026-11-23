@@ -127,4 +127,7 @@ int tcp_core_write(struct tcp_core_connection *conn, const u8 *data,
 int tcp_core_close(struct tcp_core_connection *conn, u32 now_ms,
 		   tcp_core_emit_fn emit, void *emit_arg);
 
+/* Referenced by the native U-Boot network dispatcher to retain the API table. */
+const void *tcp_core_link_anchor(void);
+
 #endif /* __PA220_NET_TCP_H__ */
