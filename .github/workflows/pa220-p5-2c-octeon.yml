@@ -87,6 +87,15 @@ jobs:
           name: pa220-p5-2c-octeon-${{ github.sha }}
           path: |
             reports/pa220/P5-2C/
-            bin/pa220/u-boot-octeon_pa220.bin
+            ${{ runner.temp }}/pa220-output/u-boot-octeon_pa220.bin
+            ${{ runner.temp }}/pa220-openwrt/u-boot/u-boot-octeon_pa220
+            ${{ runner.temp }}/pa220-openwrt/u-boot/u-boot-octeon_pa220.map
+            ${{ runner.temp }}/pa220-openwrt/u-boot/System-octeon_pa220.map
+            ${{ runner.temp }}/pa220-openwrt/u-boot/common/cmd_pa220_web.su
+            ${{ runner.temp }}/pa220-openwrt/u-boot/net/tcp.su
+            ${{ runner.temp }}/pa220-openwrt/u-boot/net/tcp_ipv4_tx.su
+            ${{ runner.temp }}/pa220-openwrt/u-boot/net/http_request.su
+            ${{ runner.temp }}/pa220-openwrt/u-boot/net/http_handler.su
+            ${{ runner.temp }}/pa220-openwrt/u-boot/net/http_handler_uboot.su
           if-no-files-found: warn
           retention-days: 30
