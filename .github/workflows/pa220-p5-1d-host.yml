@@ -230,7 +230,7 @@ jobs:
             external/pa220-openwrt/u-boot/net/http_request.o
             external/pa220-openwrt/u-boot/net/http_handler.o
             external/pa220-openwrt/u-boot/net/http_handler_uboot.o
-            external/pa220-openwrt/u-boot/include/net/Makefile
+            external/pa220-openwrt/u-boot/include/net/tcp.h\n            external/pa220-openwrt/u-boot/include/net/tcp_ipv4_tx.h\n            external/pa220-openwrt/u-boot/include/net/http_request.h\n            external/pa220-openwrt/u-boot/include/net/http_handler.h
             reports/pa220/P5-2C/0006-pa220-p5-2c-makefile-integration.patch
             external/pa220-openwrt/u-boot/common/cmd_pa220_web.o
             external/pa220-openwrt/u-boot/u-boot-octeon_pa220
