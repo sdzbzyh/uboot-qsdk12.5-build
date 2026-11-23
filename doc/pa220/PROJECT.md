@@ -80,3 +80,13 @@
 - 节点结束报告：提交、变更清单、测试结果、遗留问题和下一节点入口。
 
 每个会话原则上只推进一个节点。遇到资料不足时建立独立资料请求/研究任务，不用猜测填补空白。
+
+## 7. 当前项目状态（2026-11-23）
+
+- 当前集成分支：`feature/pa220-ubootkit-web`；本次文档审查基准提交：`47bef8cb78f7412b46b16007660228f1200c5447`（后续文档提交将推进分支 HEAD）。
+- PA-220 固定源码基线仍为 `801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`；未批准升级。
+- P5-2C 已完成：Host Harness 29 scenarios / 161 assertions / 0 failures；OCTEON N32 与完整 PA-220 最终链接通过；RAM 加载镜像后，实机 HTTP 客户端 8/8 cases PASS，PCAPNG/TShark 证据已归档。详见 `reports/pa220/P5-2C/ACCEPTANCE.md`。
+- 实机镜像为 Cavium OCTEON PA-220 Stage-3 BIN，仅用于原厂 U-Boot TFTP RAM 加载执行；不得作为通用升级包刷写。
+- 物理串口记录目前只有标注为 reconstructed 的会话重建件，不存在本轮原始 UART 录制；镜像哈希由用户在 TFTP 主机计算并与云端期望值一致，GitHub 上传副本尚未独立复算 SHA-256。
+- P4 网络维护基础（DHCP/Ping/TFTP 安全接收）未因 P5 实机 HTTP 通过而自动完成；历史 P4 计划中的运行时/实机验证缺口仍保留。
+- 下一开发入口应先实现并验证基于运行时 `__tmp_load` descriptor 的统一 `octeon_load_range_check(uint64_t addr, uint64_t len)`，作为后续 TFTP/HTTP/ELF 接收写入的共同安全门。此安全门通过前，所有文件接收和 segment 写入保持 BLOCKED。
