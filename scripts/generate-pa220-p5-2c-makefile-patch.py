@@ -41,8 +41,8 @@ def main():
     if not common.is_file() or not net.is_file():
         raise RuntimeError("pinned U-Boot Makefiles are missing")
     replace_once(
-        common, "# core command\n",
-        "# core command\nCOBJS-y += cmd_pa220_web.o\n"
+        common, "COBJS-y += cmd_boot.o\n",
+        "COBJS-y += cmd_boot.o\nCOBJS-y += cmd_pa220_web.o\n"
     )
     replace_once(
         net, "COBJS\t:= $(sort $(COBJS-y))\n",
