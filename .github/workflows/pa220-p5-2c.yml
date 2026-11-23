@@ -5,7 +5,9 @@ on:
     branches: [feature/pa220-ubootkit-web]
     paths:
       - '.github/workflows/pa220-p5-2c.yml'
+      - 'u-boot/common/cmd_pa220_web.c'
       - 'u-boot/net/tcp.c'
+      - 'u-boot/net/http_handler_uboot.c'
       - 'u-boot/net/http_request.c'
       - 'u-boot/net/http_handler.c'
       - 'u-boot/include/net/**'
