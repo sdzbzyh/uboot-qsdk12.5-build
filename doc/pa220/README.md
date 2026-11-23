@@ -12,6 +12,14 @@
 | [DECISIONS.md](DECISIONS.md) | 已确认的架构、安全和协作决策 |
 | [TEST-PLAN.md](TEST-PLAN.md) | 编译、静态检查、RAM 启动及硬件验证策略 |
 | [reports/P0-2026-11-18.md](reports/P0-2026-11-18.md) | P0 节点报告与仓库审计结果 |
+| [P5-2C 实机验收](../../reports/pa220/P5-2C/ACCEPTANCE.md) | P5-2C 云端、Host 与 PA-220 实机 HTTP/TCP 验收及证据边界 |
+
+## 当前项目检查点（2026-11-23）
+
+- 集成分支：`feature/pa220-ubootkit-web`。
+- P5-2C：云端构建、Host Harness 和 PA-220 RAM 启动后的实机 HTTP/TCP 验证已完成；正式结果以 [P5-2C ACCEPTANCE](../../reports/pa220/P5-2C/ACCEPTANCE.md) 为准。
+- 实机证据目录：[P5-2C physical-evidence](../../reports/pa220/P5-2C/physical-evidence/)。其中 `pa220-serial.log` 是会话记录重建件，不是原始 UART 录制。
+- 下一项工作应先处理统一 RAM 写入前范围验证器；在其完成并验证前，不得开放 TFTP/HTTP 文件接收或 ELF segment 写入。
 
 ## 相关既有文档
 
