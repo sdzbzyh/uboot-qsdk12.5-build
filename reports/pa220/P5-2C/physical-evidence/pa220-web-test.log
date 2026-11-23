@@ -1,0 +1,12 @@
+﻿2026-11-23T18:42:09.299+08:00 START target=192.168.2.2 port=80 timeout_ms=10000
+2026-11-23T18:42:09.480+08:00 NOTE foreground pa220 web must already be running; no boot/reset/config/flash operations are performed.
+2026-11-23T18:42:09.887+08:00 PASS method=GET path=/api/board status=200 body_bytes=111 eof=1
+2026-11-23T18:42:09.949+08:00 PASS method=GET path=/ status=200 body_bytes=381 eof=1
+2026-11-23T18:42:09.995+08:00 PASS method=GET path=/api/status status=200 body_bytes=38 eof=1
+2026-11-23T18:42:10.043+08:00 PASS method=GET path=/api/memory status=200 body_bytes=83 eof=1
+2026-11-23T18:42:10.089+08:00 PASS method=GET path=/api/network status=200 body_bytes=94 eof=1
+2026-11-23T18:42:10.137+08:00 PASS method=GET path=/not-found status=404 body_bytes=10 eof=1
+2026-11-23T18:42:10.182+08:00 PASS method=POST path=/api/status status=405 body_bytes=19 eof=1
+2026-11-23T18:42:10.707+08:00 RST_ABORT_SENT
+2026-11-23T18:42:10.754+08:00 PASS method=GET path=/api/status status=200 body_bytes=38 eof=1
+2026-11-23T18:42:10.757+08:00 SUMMARY PASS cases=8 rst_recovery=PASS
