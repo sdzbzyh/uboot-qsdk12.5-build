@@ -1,0 +1,150 @@
+PA-220 P5-2C SERIAL SESSION RECORD
+================================
+
+EVIDENCE CLASS: RECONSTRUCTED FROM CHAT SESSION
+NOT A RAW UART / SERIAL-TERMINAL CAPTURE
+
+This file was prepared at the user's request from commands and terminal output
+reported in the 2026-11-23 ChatGPT session. The original serial terminal log
+was not uploaded or available in the conversation. Therefore this file is a
+provenance-labelled reconstruction, not a byte-for-byte serial transcript.
+Only details explicitly present in the session record are included. Missing
+boot messages, command output, timestamps, and prompts are intentionally not
+invented.
+
+1. RAM image load and execution
+-------------------------------
+
+Reported U-Boot commands:
+
+  setenv ipaddr 192.168.2.2
+  setenv serverip 192.168.2.10
+  setenv ethact octrgmii0
+  tftpboot 0x81000000 u-boot-octeon_pa220.bin
+  inv_icache
+  go 0x81000000
+
+Reported TFTP result:
+  Loaded image size: 1,380,488 bytes
+  Hex size:          0x151088
+  Load address:      0x81000000
+
+The image was executed from RAM. This was not a flash operation.
+
+2. Running image identity
+-------------------------
+
+Reported output from the newly started image:
+
+  U-Boot 2013.07
+  Build time: Nov 23 2026 09:23:48
+  Toolchain: Cavium SDK gcc 4.7.0
+
+Reported environment values:
+
+  ipaddr=192.168.2.2
+  netmask=255.255.255.0
+  serverip=192.168.2.10
+  ethact=octrgmii0
+  ethaddr=08:30:6b:e1:be:00
+
+Reported image file identity on the Windows TFTP host:
+
+  File: u-boot-octeon_pa220.bin
+  Size: 1,380,488 bytes
+  SHA-256:
+  825b0e56312da6f4158cd94a5e2da2796b188bfe5d9dcecb5928d9304ad67343
+
+This SHA-256 matches the expected cloud-build image hash recorded in the
+P5-2C cloud acceptance record. The hash was reported from the Windows host;
+it was not recomputed from the GitHub-uploaded binary in this session.
+
+3. Board status reported by pa220 status
+----------------------------------------
+
+  Board type: 20021
+  DRAM:       8192 MiB
+  CPU:        1000 MHz
+  Ethernet:   octrgmii0 (primary)
+
+Read-only CPLD status values reported:
+
+  CPLD version:       7
+  Power/reg 1:        0xff
+  PHY reset reg 5:    0x04 (bit 2 asserted)
+  LED reg 6:          0x00
+  LED reg 7:          0x24
+  CPLD flash reg 0x0d:0x31
+
+These are recorded observations only. No CPLD writes were performed.
+
+4. Ethernet connectivity
+------------------------
+
+Reported link state:
+  Interface: octrgmii0
+  Speed:     1000 Mbps
+  Duplex:    Full
+
+The PA-220 successfully pinged the Windows peer 192.168.2.10.
+A receive diagnostic was also reported:
+  Receive error (code 11: rgmii rx), dropping
+
+The ping success is the connectivity result; the diagnostic is retained here
+rather than silently omitted.
+
+5. Foreground HTTP service
+-------------------------
+
+The user reported starting the foreground command:
+
+  pa220 web
+
+The service reported that it was listening on TCP port 80 and supported:
+  - one request per connection
+  - GET and HEAD methods
+  - five read-only URI handlers
+  - no keep-alive
+  - no pipelining
+  - no concurrent peers
+
+The foreground service remained running during the Windows HTTP test. The user
+confirmed that TShark was already displaying "Capturing on ..." in the capture
+window while the test was executed.
+
+6. Host-driven physical HTTP test result
+----------------------------------------
+
+The Windows test client was run against 192.168.2.2:80 while the PA-220
+foreground service was active. The separate client log records:
+
+  GET /api/board       -> 200
+  GET /                -> 200
+  GET /api/status      -> 200
+  GET /api/memory      -> 200
+  GET /api/network     -> 200
+  GET /not-found       -> 404
+  POST /api/status     -> 405
+  RST/abort exercise followed by successful GET /api/status -> 200
+
+Client summary:
+  SUMMARY PASS cases=8 rst_recovery=PASS
+
+Packet-analysis qualification:
+The abort-test TCP connection (client source port 5950) completed its
+handshake, then the client sent FIN before sending any HTTP request payload.
+The server returned HTTP 400; the client then sent RST+ACK. A new connection
+(source port 5951) subsequently sent GET /api/status and received HTTP 200.
+Accordingly, this evidence demonstrates reset/close handling followed by
+successful new-connection service; it does NOT demonstrate an RST interrupting
+a partially transmitted HTTP request.
+
+7. Safety / operation boundary
+------------------------------
+
+The reported test used a RAM-loaded Stage-3 image. No flash, saveenv, CPLD
+write, SPI/eMMC/NAND write, reset, reboot, or power-cycle was part of the
+reported HTTP test. The BIN is a Cavium OCTEON PA-220 Stage-3 image and must
+not be treated as a generic firmware-upgrade image.
+
+END OF RECONSTRUCTED SESSION RECORD
