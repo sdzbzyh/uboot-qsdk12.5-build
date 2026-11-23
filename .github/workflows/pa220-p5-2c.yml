@@ -1,0 +1,151 @@
+name: PA-220 P5-2C HTTP foreground lifecycle validation
+
+on:
+  push:
+    branches:
+      - feature/pa220-ubootkit-web
+    paths:
+      - '.github/workflows/pa220-p5-2c.yml'
+      - 'u-boot/common/cmd_pa220_web.c'
+      - 'u-boot/net/tcp.c'
+      - 'u-boot/include/net/tcp.h'
+      - 'u-boot/net/http_request.c'
+      - 'u-boot/include/net/http_request.h'
+      - 'u-boot/net/http_handler.c'
+      - 'u-boot/net/http_handler_uboot.c'
+      - 'u-boot/include/net/http_handler.h'
+      - 'tests/host/http_lifecycle/**'
+      - 'tests/host/http_request/**'
+      - 'tests/host/http_handler/**'
+      - 'patches/pa220/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pa220-p5-2c-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  host-lifecycle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact triggering commit
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Run independent P5-2C lifecycle harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          R=reports/pa220/P5-2C
+          mkdir -p "$R"
+          {
+            echo "UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "INTEGRATION_COMMIT=$(git rev-parse HEAD)"
+            echo "CC=$(cc --version | head -n 1)"
+            test -x tests/host/http_lifecycle/run.sh
+            tests/host/http_lifecycle/run.sh
+          } 2>&1 | tee "$R/10-host-tests.log"
+      - name: Upload Host evidence
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: pa220-p5-2c-host-${{ github.sha }}
+          path: reports/pa220/P5-2C/
+          if-no-files-found: warn
+          retention-days: 30
+
+  octeon-n32:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact triggering commit
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Download, verify SDK and compile P5-2C against pinned PA-220 source
+        env:
+          GH_TOKEN: ${{ secrets.OCTEON_SDK_READ_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          R=reports/pa220/P5-2C
+          D="$RUNNER_TEMP/octeon-download"
+          S="$RUNNER_TEMP/octeon-sdk"
+          SRC="$RUNNER_TEMP/pa220-openwrt"
+          mkdir -p "$R" "$D" "$S"
+          {
+            echo "UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "INTEGRATION_COMMIT=$(git rev-parse HEAD)"
+            echo "PA220_SOURCE_PIN=801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8"
+            echo "SDK_RELEASE=octeon-sdk-5.1.0"
+            test -n "$GH_TOKEN"
+            gh release download octeon-sdk-5.1.0 --repo sdzbzyh/pa220-toolchains --pattern '*.tar.gz' --pattern '*.sha256' --dir "$D"
+            (cd "$D" && sha256sum -c ./*.sha256)
+            A=$(find "$D" -maxdepth 1 -type f -name '*.tar.gz' -print -quit)
+            test -n "$A"
+            sha256sum "$A"
+            tar -xzf "$A" -C "$S"
+            GCC=$(find "$S" -path '*/bin/mips64-octeon-linux-gnu-gcc' -print -quit)
+            test -n "$GCC"
+            TC=$(dirname "$(dirname "$GCC")")
+            export PATH="$TC/bin:$PATH" OCTEON_MODEL=OCTEON_CN70XX
+            "$GCC" --version | head -n 2
+            echo "TARGET=$("$GCC" -dumpmachine)"
+            git clone --no-checkout https://github.com/IronDemiGod/pa220-openwrt.git "$SRC"
+            git -C "$SRC" checkout --detach 801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8
+            test "$(git -C "$SRC" rev-parse HEAD)" = 801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8
+            ROOT=$(git -C "$SRC/u-boot" rev-parse --show-toplevel)
+            for P in patches/pa220/*.patch; do
+              if git -C "$ROOT" apply --reverse --check "$GITHUB_WORKSPACE/$P" >/dev/null 2>&1; then
+                echo "ALREADY_APPLIED=$P"
+              else
+                git -C "$ROOT" apply --check "$GITHUB_WORKSPACE/$P"
+                git -C "$ROOT" apply "$GITHUB_WORKSPACE/$P"
+                echo "APPLIED=$P"
+              fi
+            done
+            U="$SRC/u-boot"
+            mkdir -p "$U/include/net"
+            cp u-boot/common/cmd_pa220_web.c "$U/common/cmd_pa220_web.c"
+            cp u-boot/net/tcp.c u-boot/net/tcp_ipv4_tx.c u-boot/net/http_request.c u-boot/net/http_handler.c u-boot/net/http_handler_uboot.c "$U/net/"
+            cp u-boot/include/net/tcp.h u-boot/include/net/tcp_ipv4_tx.h u-boot/include/net/http_request.h u-boot/include/net/http_handler.h "$U/include/net/"
+            echo "========== SOURCE HASHES =========="
+            sha256sum u-boot/common/cmd_pa220_web.c u-boot/net/tcp.c u-boot/net/tcp_ipv4_tx.c u-boot/net/http_request.c u-boot/net/http_handler.c u-boot/net/http_handler_uboot.c
+            make -C "$U" octeon_pa220_config HOSTCC="$U/tools/hostcc-gnu89"
+            make -C "$U" V=1 include/generated/generic-asm-offsets.h include/generated/asm-offsets.h HOSTCC="$U/tools/hostcc-gnu89"
+            make -C "$U" V=1 KCFLAGS=-fstack-usage common/cmd_pa220_web.o net/tcp.o net/tcp_ipv4_tx.o net/http_request.o net/http_handler.o net/http_handler_uboot.o HOSTCC="$U/tools/hostcc-gnu89"
+            for O in common/cmd_pa220_web net/tcp net/tcp_ipv4_tx net/http_request net/http_handler net/http_handler_uboot; do
+              test -s "$U/$O.o"
+              "$TC/bin/mips64-octeon-linux-gnu-readelf" -h "$U/$O.o" > "$R/$(basename "$O")-elf-header.txt"
+              "$TC/bin/mips64-octeon-linux-gnu-nm" -u "$U/$O.o" > "$R/$(basename "$O")-undefined-symbols.txt"
+              "$TC/bin/mips64-octeon-linux-gnu-size" "$U/$O.o" >> "$R/22-object-sizes.txt"
+              sha256sum "$U/$O.o" >> "$R/23-object-sha256.txt"
+            done
+            "$GCC" -mabi=n32 -mabicalls -msoft-float -G 0 -nostdlib -Wl,-r "$U/common/cmd_pa220_web.o" "$U/net/tcp.o" "$U/net/tcp_ipv4_tx.o" "$U/net/http_request.o" "$U/net/http_handler.o" "$U/net/http_handler_uboot.o" -o "$R/pa220-http-lifecycle-n32.o"
+            "$TC/bin/mips64-octeon-linux-gnu-readelf" -h "$R/pa220-http-lifecycle-n32.o" | tee "$R/24-n32-linked-elf-header.txt"
+            "$TC/bin/mips64-octeon-linux-gnu-nm" -u "$R/pa220-http-lifecycle-n32.o" | tee "$R/25-n32-undefined-symbols.txt"
+            if grep -E '(^|[[:space:]])(malloc|calloc|realloc|free)(@|$)' "$R/25-n32-undefined-symbols.txt"; then
+              echo "Unexpected dynamic allocation dependency" >&2
+              exit 1
+            fi
+            find "$U" -name '*.su' -maxdepth 5 -print -exec cp --parents {} "$R" \;
+            "$TC/bin/mips64-octeon-linux-gnu-size" "$R/pa220-http-lifecycle-n32.o" | tee "$R/26-linked-object-size.txt"
+            nm -S "$R/pa220-http-lifecycle-n32.o" > "$R/27-linked-symbol-sizes.txt"
+            sha256sum "$R/pa220-http-lifecycle-n32.o" | tee "$R/28-linked-object-sha256.txt"
+            echo "P5_2C_N32_RELOCATABLE_LINK=PASS"
+          } 2>&1 | tee "$R/20-octeon-build.log"
+      - name: Upload OCTEON evidence and objects
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: pa220-p5-2c-octeon-${{ github.sha }}
+          path: |
+            reports/pa220/P5-2C/
+            ${{ runner.temp }}/pa220-openwrt/u-boot/common/cmd_pa220_web.o
+            ${{ runner.temp }}/pa220-openwrt/u-boot/net/*.o
+          if-no-files-found: warn
+          retention-days: 30
