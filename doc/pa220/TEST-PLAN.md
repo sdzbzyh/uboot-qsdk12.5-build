@@ -284,3 +284,46 @@ P4-1 两份网络报告仅为既有静态源码审计，没有构建或实机网
 按 P4-1（最终构建配置）、P4-2（Ethernet 实际注册）、P4-3（DHCP-only）、P4-4（Ping 成功/超时/恢复）、P4-5（归档）的顺序推进。只复用已有构建资料，不重新构建；只在静态证据不足时索取最少的新实机输出。所有操作继续遵守 RAM-only 和禁止持久化写入约束。
 
 当前检查点：`reports/P4-CONTINUATION-2026-11-19.md`。
+
+
+## 12. P5-2C 实机 HTTP/TCP 验收（2026-11-23）
+
+### 测试环境
+
+- PA-220：`192.168.2.2/24`，Windows peer：`192.168.2.10/24`。
+- Ethernet：`octrgmii0`，1000 Mbps Full Duplex；PA-220 ping Windows peer 成功。
+- 镜像由原厂 U-Boot TFTP 加载至 RAM `0x81000000` 并执行；未写入任何持久化介质。
+- 前台服务：`pa220 web`，TCP port 80；服务运行期间 TShark 已开始抓包。
+
+### Host/目标构建验证
+
+- Host Harness：29 scenarios / 161 assertions / 0 failures；foreground command PASS。
+- OCTEON N32 relocatable link 与完整 PA-220 U-Boot final link PASS。
+- BIN：1,380,488 bytes；用户在 Windows TFTP 主机计算 SHA-256 `825b0e56312da6f4158cd94a5e2da2796b188bfe5d9dcecb5928d9304ad67343`，与云端构建记录一致。
+
+### 物理 HTTP 结果
+
+| 请求 | 状态码 | 结果 |
+|---|---:|---|
+| GET `/api/board` | 200 | PASS |
+| GET `/` | 200 | PASS |
+| GET `/api/status` | 200 | PASS |
+| GET `/api/memory` | 200 | PASS |
+| GET `/api/network` | 200 | PASS |
+| GET `/not-found` | 404 | PASS |
+| POST `/api/status` | 405 | PASS |
+| abort/reset exercise 后新连接 GET `/api/status` | 200 | PASS |
+
+客户端摘要：`SUMMARY PASS cases=8 rst_recovery=PASS`。PCAPNG 24,984 bytes；TShark export 15,846 bytes。详细 frame 分析、SHA-256 与证据限制见 `reports/pa220/P5-2C/ACCEPTANCE.md` 和 physical-evidence README。
+
+### 证据限定
+
+- abort 测试连接在任何 HTTP request payload 发送前先发 FIN；服务器返回 HTTP 400，客户端随后发 RST+ACK。新连接成功 GET `/api/status` 并收到 200。因此仅证明所观察到的 close/reset 流程及后续新连接恢复，不证明 RST 中断了部分 HTTP 请求。
+- `pa220-serial.log` 是基于会话中用户报告命令/输出生成的重建件，不是原始 UART/串口录制。
+- GitHub 上传的 BIN 文件大小与用户本地 TFTP 文件一致；用户本地 SHA-256 与云端期望值一致，但 GitHub 副本 SHA-256 未独立复算。
+
+### 安全边界与下一测试
+
+本次没有执行 `saveenv`、CPLD 写入、SPI/eMMC/NAND 写入、flash、reset、reboot 或 power-cycle。PA-220 Stage-3 BIN 不得刷写。
+
+下一阶段先实现并验证统一 `octeon_load_range_check(uint64_t addr, uint64_t len)`，其权威边界来自运行时 `__tmp_load` descriptor。完成 Host 边界测试和 OCTEON 目标编译/链接之前，TFTP/HTTP 文件接收及 ELF segment 写入均保持 BLOCKED。验证器通过后再进入 P6 RAM-only 文件接收；任何持久化写入仍需独立审批。
