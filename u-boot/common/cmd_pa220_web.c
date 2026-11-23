@@ -210,6 +210,9 @@ static void pa220_web_service_tx(u32 now)
 	}
 
 	/* All response bytes have been ACKed: only now may we send FIN. */
+	if (pa220_web_close_retry_deadline &&
+	    !pa220_web_time_reached(now, pa220_web_close_retry_deadline))
+		return;
 	if (!pa220_web_connection.pending) {
 		if (!tcp_core_close(&pa220_web_connection, now,
 				    tcp_ipv4_tx_emit, &pa220_web_peer)) {
