@@ -4,12 +4,16 @@ Date: 2026-11-23
 Branch: feature/pa220-ubootkit-web
 Cloud checkpoint: 384366d22223e3169f355476ca1eb7673612725c
 
+## Execution status (2026-11-23)
+
+This procedure was executed against the RAM-loaded PA-220 image. The final result is recorded in [`ACCEPTANCE.md`](ACCEPTANCE.md). The client test and packet capture passed for the exercised cases, but not every aspirational item in the original checklist is proven: specifically, the abort test did not send an RST during a partially transmitted HTTP request, and the serial file is a session reconstruction rather than an original UART recording. These limits must remain visible in any summary.
+
 ## Evidence boundary
 
 - P5-2C Host lifecycle: PASS (29 scenarios / 161 assertions).
 - OCTEON N32 relocatable link and complete PA-220 U-Boot build: PASS.
 - P5-1D physical Ethernet/TCP handshake and 10-byte payload ACK: PASS, 2026-11-21.
-- P5-2C physical HTTP 200 lifecycle: NOT YET VERIFIED.
+- P5-2C physical HTTP/TCP lifecycle: **EXECUTED; client 8/8 PASS**, with evidence qualifications in `ACCEPTANCE.md`.
 - The Host harness uses a deterministic Ethernet boundary and is not physical-device evidence.
 
 ## Known physical network from P5-1D evidence
