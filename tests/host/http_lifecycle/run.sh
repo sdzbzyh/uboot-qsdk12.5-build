@@ -5,6 +5,10 @@ TEST_DIR="$ROOT/tests/host/http_lifecycle"
 BUILD_DIR=$(mktemp -d "${TMPDIR:-/tmp}/pa220-p5-2c-host.XXXXXX")
 trap 'rm -rf "$BUILD_DIR"' EXIT
 CC=${CC:-cc}
+"$CC" -std=gnu99 -Wall -Wextra -fsyntax-only \
+  -I"$TEST_DIR/include" -I"$ROOT/u-boot/include" \
+  "$ROOT/u-boot/common/cmd_pa220_web.c" \
+  "$ROOT/u-boot/net/http_handler_uboot.c"
 "$CC" --version | head -n 1
 "$CC" -std=c99 -O2 -g -Wall -Wextra \
   -I"$TEST_DIR/include" -I"$ROOT/u-boot/include" \
