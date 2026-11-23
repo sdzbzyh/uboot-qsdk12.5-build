@@ -34,10 +34,6 @@ static void put32(u8 *p, u32 v)
 {
  p[0]=(u8)(v>>24); p[1]=(u8)(v>>16); p[2]=(u8)(v>>8); p[3]=(u8)v;
 }
-static u32 get32(const u8 *p)
-{
- return ((u32)p[0]<<24)|((u32)p[1]<<16)|((u32)p[2]<<8)|p[3];
-}
 
 static u16 make_segment(u8 *out, u16 sport, u16 dport, u32 seq, u32 ack,
                         u8 flags, u16 window, const u8 *payload, u16 plen)
@@ -287,6 +283,11 @@ static void test_28_handler_errors(void)
  CHECK(!memcmp(out,"HTTP/1.1 404",12));
 }
 
+static void test_29_tcp_link_anchor(void)
+{
+ CHECK(tcp_core_link_anchor()!=NULL);
+}
+
 int main(void)
 {
  void (*tests[])(void)={
@@ -299,7 +300,8 @@ int main(void)
  test_19_syn_retransmit,test_20_retry_exhaustion,test_21_idle_timeout,
  test_22_sequence_wrap_helpers,test_23_parser_fragmented,test_24_parser_bad_crlf,
  test_25_parser_reject_body_and_te,test_26_parser_reject_trailing,
- test_27_handler_routes_and_head,test_28_handler_errors
+ test_27_handler_routes_and_head,test_28_handler_errors,
+ test_29_tcp_link_anchor
  };
  unsigned i;
  for(i=0;i<ARRAY_SIZE(tests);i++) {
@@ -307,6 +309,6 @@ int main(void)
   tests[i]();
   printf("%02u %s\n",i+1,failures==before?"PASS":"FAIL");
  }
- printf("P5-2C HOST TESTS: %u checks, %u failures, 28 scenarios\n",checks,failures);
+ printf("P5-2C HOST TESTS: %u checks, %u failures, 29 scenarios\n",checks,failures);
  return failures?1:0;
 }
