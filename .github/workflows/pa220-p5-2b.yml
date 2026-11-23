@@ -156,6 +156,17 @@ jobs:
           | HEAD | same representation headers and Content-Length as GET, zero body bytes |
           All responses use Connection: close; no keep-alive, request body, file path, command or mutation route exists.
           EOF
+          cat > "$R/35-github-actions.md" <<EOF
+          # P5-2B GitHub Actions execution record
+          - Workflow: PA-220 P5-2B read-only HTTP URI handler
+          - Workflow file: .github/workflows/pa220-p5-2b.yml
+          - Run ID: $GITHUB_RUN_ID
+          - Run number: $GITHUB_RUN_NUMBER
+          - Event: $GITHUB_EVENT_NAME
+          - Checked-out commit: $(git rev-parse HEAD)
+          - Run URL: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
+          - The final job conclusion is retained by GitHub Actions at the run URL above.
+          EOF
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v7.0.1
