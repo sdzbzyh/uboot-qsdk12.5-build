@@ -113,6 +113,7 @@ jobs:
             cp u-boot/common/cmd_pa220_web.c "$U/common/cmd_pa220_web.c"
             cp u-boot/net/tcp.c u-boot/net/tcp_ipv4_tx.c u-boot/net/http_request.c u-boot/net/http_handler.c u-boot/net/http_handler_uboot.c "$U/net/"
             cp u-boot/include/net/tcp.h u-boot/include/net/tcp_ipv4_tx.h u-boot/include/net/http_request.h u-boot/include/net/http_handler.h "$U/include/net/"
+            python3 scripts/generate-pa220-p5-2c-makefile-patch.py --source-root "$SRC" --output "$R/0006-pa220-p5-2c-makefile-integration.patch"
             echo "========== SOURCE HASHES =========="
             sha256sum u-boot/common/cmd_pa220_web.c u-boot/net/tcp.c u-boot/net/tcp_ipv4_tx.c u-boot/net/http_request.c u-boot/net/http_handler.c u-boot/net/http_handler_uboot.c
             make -C "$U" octeon_pa220_config HOSTCC="$U/tools/hostcc-gnu89"
@@ -137,6 +138,40 @@ jobs:
             nm -S "$R/pa220-http-lifecycle-n32.o" > "$R/27-linked-symbol-sizes.txt"
             sha256sum "$R/pa220-http-lifecycle-n32.o" | tee "$R/28-linked-object-sha256.txt"
             echo "P5_2C_N32_RELOCATABLE_LINK=PASS"
+            echo "========== FULL PA-220 U-BOOT BUILD =========="
+            "$U/build.sh" "$TC" 2>&1 | tee "$R/30-full-uboot-build.log"
+            ELF="$U/u-boot-octeon_pa220"
+            MAP="$U/u-boot-octeon_pa220.map"
+            SYSTEM_MAP="$U/System-octeon_pa220.map"
+            BIN="$U/u-boot-octeon_pa220.bin"
+            test -s "$ELF" && test -s "$MAP" && test -s "$SYSTEM_MAP" && test -s "$BIN"
+            "$TC/bin/mips64-octeon-linux-gnu-readelf" -h "$ELF" | tee "$R/31-final-elf-header.txt"
+            "$TC/bin/mips64-octeon-linux-gnu-nm" -n "$ELF" > "$R/32-final-elf-symbols.txt"
+            grep -E ' [Tt] (do_pa220_web|tcp_core_input|tcp_core_poll|tcp_ipv4_tx_emit|http_request_parser_feed|http_handler_build)          } 2>&1 | tee "$R/20-octeon-build.log"
+      - name: Upload OCTEON evidence and objects
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: pa220-p5-2c-octeon-${{ github.sha }}
+          path: |
+            reports/pa220/P5-2C/
+            ${{ runner.temp }}/pa220-openwrt/u-boot/common/cmd_pa220_web.o
+            ${{ runner.temp }}/pa220-openwrt/u-boot/net/*.o
+            ${{ runner.temp }}/pa220-openwrt/u-boot/u-boot-octeon_pa220
+            ${{ runner.temp }}/pa220-openwrt/u-boot/u-boot-octeon_pa220.map
+            ${{ runner.temp }}/pa220-openwrt/u-boot/System-octeon_pa220.map
+            ${{ runner.temp }}/pa220-openwrt/u-boot/u-boot-octeon_pa220.bin
+          if-no-files-found: warn
+          retention-days: 30
+ "$R/32-final-elf-symbols.txt" | tee "$R/33-required-final-symbols.txt"
+            test "$(wc -l < "$R/33-required-final-symbols.txt")" -eq 6
+            "$TC/bin/mips64-octeon-linux-gnu-nm" -u "$ELF" > "$R/34-final-undefined-symbols.txt"
+            if grep -E '(^|[[:space:]])(malloc|calloc|realloc|free)(@|$)' "$R/34-final-undefined-symbols.txt"; then
+              echo "Unexpected dynamic allocation dependency in final U-Boot" >&2
+              exit 1
+            fi
+            sha256sum "$ELF" "$MAP" "$SYSTEM_MAP" "$BIN" | tee "$R/35-final-artifact-sha256.txt"
+            echo "P5_2C_FULL_UBOOT_LINK=PASS"
           } 2>&1 | tee "$R/20-octeon-build.log"
       - name: Upload OCTEON evidence and objects
         if: always()
