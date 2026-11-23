@@ -66,6 +66,7 @@ jobs:
             cp u-boot/net/http_request.c "$U/net/http_request.c"
             cp u-boot/net/http_handler.c "$U/net/http_handler.c"
             cp u-boot/net/http_handler_uboot.c "$U/net/http_handler_uboot.c"
+            mkdir -p "$U/include/net"
             cp u-boot/include/net/http_request.h "$U/include/net/http_request.h"
             cp u-boot/include/net/http_handler.h "$U/include/net/http_handler.h"
             make -C "$U" octeon_pa220_config HOSTCC="$U/tools/hostcc-gnu89"
