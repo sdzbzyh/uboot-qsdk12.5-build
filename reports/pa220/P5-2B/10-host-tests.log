@@ -1,5 +1,5 @@
-UTC=2026-11-23T07:09:19Z
-COMMIT=a762a785a41a5be5c452683807437777387bc46b
+UTC=2026-11-23T07:10:15Z
+COMMIT=8e0fadb4c179d74b66ed768fe16233e4dae1f9a5
 cc (Ubuntu 15.2.0-16ubuntu1) 15.2.0
 01 GET /: PASS
 02 HEAD /: PASS
@@ -19,7 +19,6 @@ cc (Ubuntu 15.2.0-16ubuntu1) 15.2.0
 16 HEAD body suppressed and GET length retained: PASS
 17 GET body bytes equal Content-Length: PASS
 18 undersized output buffer: PASS
-FAIL line 174: rc==0&&head_len==exact
 19 exact output boundary: PASS
 FAIL line 181: has(out,exact,"eth\\\"\\\\\\u000a")
 20 JSON escaping: PASS
@@ -32,4 +31,4 @@ FAIL line 181: has(out,exact,"eth\\\"\\\\\\u000a")
 27 unavailable memory maps to 500: PASS
 28 U-Boot read-only data provider: PASS
 29 repeated calls have no state residue: PASS
-Assertions: 115, failures: 2
+Assertions: 115, failures: 1
