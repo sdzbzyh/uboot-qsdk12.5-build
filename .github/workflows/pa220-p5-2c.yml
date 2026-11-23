@@ -18,6 +18,8 @@ on:
       - 'tests/host/http_request/**'
       - 'tests/host/http_handler/**'
       - 'patches/pa220/**'
+      - 'scripts/generate-pa220-p5-2c-makefile-patch.py'
+      - 'build-pa220.sh'
   workflow_dispatch:
 
 permissions:
