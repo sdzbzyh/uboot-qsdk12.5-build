@@ -114,3 +114,12 @@ Save raw PCAPNG, CSV export, client log, complete serial log, image SHA-256, and
 | Evidence | Matching serial log, PCAPNG, CSV, client log, image hash |
 
 Missing criteria remain FAIL or NOT TESTED. Host and cross-build results cannot substitute for physical evidence.
+
+## Additional historical physical FIN evidence (P5-1D follow-up)
+
+The repository also contains a later Windows capture/test set at PA220-Test/PA220-FIN-20261121-153150. The packet field export records two empty-payload TCP connections to 192.168.2.2:80:
+- Stream 1 (client port 8140): SYN, SYN-ACK, ACK, client FIN+ACK, server ACK, server FIN+ACK, final client ACK.
+- Stream 2 (client port 8141): the same orderly FIN exchange.
+- The client log records SERVER_EOF with zero response bytes on the first connection and SECOND_CONNECT_SUCCESS on the second.
+
+This is real physical evidence for TCP orderly close on an empty request and subsequent connection acceptance. It is not evidence for an HTTP request, HTTP response body, response ACK-drain ordering, or P5-2C application cleanup after a complete response. Those remain the purpose of the new P5-2C test.
