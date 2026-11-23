@@ -91,6 +91,11 @@ jobs:
             printf '%s\n' '#include <common.h>' '#include <net/http_handler.h>' 'char pa220_http_handler_response[HTTP_HANDLER_TX_CAPACITY];' 'char pa220_http_handler_info_size[sizeof(struct http_handler_info)];' > "$U/net/http_handler_size.c"
             make -C "$U" V=1 net/http_handler_size.o HOSTCC="$U/tools/hostcc-gnu89"
             "$TC/bin/mips64-octeon-linux-gnu-nm" -S "$U/net/http_handler_size.o" | tee "$R/28-static-buffer-size.txt"
+            test -s "$U/net/http_handler.su"
+            test -s "$U/net/http_handler_uboot.su"
+            cp "$U/net/http_handler.su" "$R/33-http_handler-stack-usage.su"
+            cp "$U/net/http_handler_uboot.su" "$R/34-http_handler_uboot-stack-usage.su"
+            cat "$R/33-http_handler-stack-usage.su" "$R/34-http_handler_uboot-stack-usage.su"
             sha256sum "$R/http-handler-linked.o" | tee "$R/29-linked-object-sha256.txt"
             echo TARGET_COMPILE_AND_N32_RELOCATABLE_LINK=PASS
           } 2>&1 | tee "$R/20-octeon-target-compile.log"
@@ -104,13 +109,23 @@ jobs:
           # PA-220 P5-2B bounded read-only URI handler
           - The P5-2A parser is consumed through struct http_request; parser sources and behavior are unchanged.
           - Handler is a separate module; P5-2C lifecycle integration is out of scope.
-          - Response storage is caller-owned and capped at 1460 bytes. Body staging uses a fixed 192-byte header reserve; response headers are assembled in a fixed array and the complete response size is checked before the output length is published.
+          - Response storage is caller-owned and capped at 1460 bytes. The handler uses a fixed 1268-byte stack body workspace and a fixed 192-byte stack header workspace. It copies the complete response to caller storage only after checking the total wire length; an undersized output buffer leaves output_length zero.
           - No heap allocation, filesystem access, shell command, environment lookup, storage write, reset, firmware update or persistent operation exists in this module.
           - URI matching is exact byte-for-byte against /, /api/status, /api/board, /api/memory, /api/network. Query strings are valid request-target syntax but do not match the allowlist (404). Valid percent escapes are never decoded and do not match a route (404). Prefixes and extra segments are 404. Invalid URI syntax is 400.
           - GET sends the body. HEAD has the same status, Content-Type and body-derived Content-Length as GET but sends zero body bytes. Other token-valid methods receive 405 and Allow: GET, HEAD.
           - HTTP/1.0 and HTTP/1.1 are accepted; response version follows the request. All responses use Connection: close.
           - Status mapping: malformed request representation 400; unmatched exact URI 404; unsupported method 405; unavailable required board/memory snapshot 500.
           - JSON strings escape quotes, backslashes and control bytes. Home-page board text is HTML escaped. String scans and writes are bounded.
+          EOF
+          cat > "$R/33-memory-usage.md" <<'EOF'
+          # P5-2B fixed memory accounting
+          - Maximum caller-owned HTTP TX buffer: 1460 bytes.
+          - Handler body workspace: 1268 bytes, fixed-size stack array.
+          - Response header workspace: 192 bytes, fixed-size stack array in the response builder.
+          - Combined nested body/header scratch: 1460 bytes, excluding small scalar/local metadata.
+          - U-Boot snapshot structure: 184 bytes on the target ABI, measured by a target ELF symbol.
+          - No writable global response cache and no heap allocator dependency; all request/response storage is caller-owned or fixed-size stack storage.
+          - Compiler stack-usage reports are archived as 33-http_handler-stack-usage.su and 34-http_handler_uboot-stack-usage.su.
           EOF
           cat > "$R/31-api-data-sources.md" <<'EOF'
           # P5-2B API fields and data provenance

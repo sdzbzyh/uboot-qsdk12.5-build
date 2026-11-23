@@ -287,7 +287,7 @@ static const char *reason(int status)
 
 static int header_bytes(char *h,u16 *n,const char *s,u16 count)
 {
- if (count>(u16)(HTTP_HANDLER_BODY_OFFSET-*n)) return -1;
+ if (count>(u16)(HTTP_HANDLER_HEADER_CAPACITY-*n)) return -1;
  memcpy(h+*n,s,count); *n+=count; return 0;
 }
 
@@ -315,7 +315,7 @@ static int build_response(const struct http_request *request,int status,
  const char *type,const u8 *body,u16 body_len,int head_only,
  u8 *out,u16 capacity,u16 *out_len)
 {
- char header[HTTP_HANDLER_BODY_OFFSET];
+ char header[HTTP_HANDLER_HEADER_CAPACITY];
  const char *version="HTTP/1.1";
  u16 n=0,total;
  if(request&&string_equal(request->version,"HTTP/1.0",8))
@@ -332,7 +332,7 @@ static int build_response(const struct http_request *request,int status,
  if(status==HTTP_STATUS_405&&header_cstr(header,&n,"Allow: GET, HEAD\r\n"))
   return -1;
  if(header_cstr(header,&n,"\r\n")) return -1;
- if(n>=HTTP_HANDLER_BODY_OFFSET||n>capacity||body_len>capacity-n)
+ if(n>=HTTP_HANDLER_HEADER_CAPACITY||n>capacity||body_len>capacity-n)
   return -1;
  total=(u16)(n+(head_only?0:body_len));
  if(!head_only&&body_len) memmove(out+n,body,body_len);
@@ -349,7 +349,7 @@ int http_handler_build(const struct http_request *request,
  const char *type="text/plain; charset=utf-8";
  u16 error_len=0,method_len,uri_len;
  int status=HTTP_STATUS_200,head_only=0,route=-1;
- u8 body_storage[HTTP_HANDLER_TX_CAPACITY-HTTP_HANDLER_BODY_OFFSET];
+ u8 body_storage[HTTP_HANDLER_TX_CAPACITY-HTTP_HANDLER_HEADER_CAPACITY];
  u16 i;
 
  if(!out_len) return -1;

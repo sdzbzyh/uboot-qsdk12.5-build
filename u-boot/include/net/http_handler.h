@@ -7,7 +7,7 @@
 #include <linux/types.h>
 #include <net/http_request.h>
 #define HTTP_HANDLER_TX_CAPACITY 1460
-#define HTTP_HANDLER_BODY_OFFSET 192
+#define HTTP_HANDLER_HEADER_CAPACITY 192
 #define HTTP_HANDLER_TEXT_MAX 64
 #define HTTP_INFO_MEMORY_VALID 0x01
 #define HTTP_INFO_ETH_PRESENT 0x02
