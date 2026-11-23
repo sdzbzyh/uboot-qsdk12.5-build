@@ -17,7 +17,7 @@
 |---|---|---|---|---|
 | 串口与 CLI | 命令行、命令帮助、脚本/菜单 | 串口 CLI、hush、bootmenu 已配置 | 已配置 | 验证交互和命令兼容性 |
 | 板卡信息 | SoC、板型、内存、时钟、启动状态展示 | 既有 pa220 只读补丁 | 已实现-待验证 | 构建后验证字段与寄存器读数 |
-| Web UI | 浏览器状态页、系统信息、网络设置 | 尚无 HTTP 管理服务 | 可适配-待实现 | 设计旧版网络栈 HTTP 服务与页面 |
+| Web UI | 浏览器状态页、系统信息、网络设置 | P5-2C 已实现只读 HTTP 服务与五个 GET URI；实机 HTTP 8/8 PASS | **实机通过（只读范围）** | 后续仅在 RAM validator 完成后评估上传；无命令执行/写入接口 |
 | DHCP Client | 自动获取 U-Boot 网络地址 | 已配置 | 已配置 | MGT 实机验证 |
 | DHCP Server | 给 PC/客户端分配地址 | 未实现 | 可适配-待实现 | 评估地址池、租约、冲突与报文处理 |
 | DHCP 报文过滤 | 防止上级 DHCP 报文干扰 | uBootKit 具有平台定制逻辑 | 需研究 | 确认 MGT 直连/桥接场景是否需要 |
@@ -309,3 +309,24 @@ PA-220 固定源码在独立干净 checkout 上完成完整构建，退出码为
 - 用户 Debian 13.7 构建主机及 Cavium GCC 4.7.0 / SDK Build 52 已由此前 P2/P3 实际编译记录确认存在，工具链路径为 `/home/debian/OCTEON-SDK/tools-gcc-4.7`。此前 P3 已在该主机完整构建成功。本轮尚未执行 TCP 对象编译；ChatGPT 当前临时容器不能直接访问用户主机，不能将容器内路径不存在误判为用户构建环境不存在。后续通过用户在既有主机执行命令完成验证。
 - 实际 TCP 源码已静态审查；宿主机测试桩尚未建立，协议测试执行数为 0（未执行）。发现 FIN 后 CLOSE-WAIT 仍可能接受后续数据、TIME-WAIT 缺少重复 FIN 专门处理两个待复现风险，尚未修复或宣称为已复现缺陷。
 - P5-1A 保持“已实现、待目标编译及协议验证”；不得进入 P5-1B，直至目标编译、协议测试及必要链接检查完成。
+
+
+## P5-2C 实机验收状态（2026-11-23）
+
+正式验收：`reports/pa220/P5-2C/ACCEPTANCE.md`；原始网络证据与 provenance 说明：`reports/pa220/P5-2C/physical-evidence/`。
+
+| 项目 | 状态 | 证据/边界 |
+|---|---|---|
+| TCP core Host focused regression | PASS | 76/76 assertions；历史 P5-1A 验证记录 |
+| TCP core OCTEON object / P5-1B integrated final link | PASS | Cavium GCC 4.7.0 / SDK 5.1.0；N32；完整 PA-220 link |
+| P5-2C Host Harness | PASS | 29 scenarios / 161 assertions / 0 failures |
+| 前台 `pa220 web` lifecycle | PASS | 显式启动、前台服务；不自动接管 autoboot |
+| HTTP GET allowlist | PASS | `/api/board`、`/`、`/api/status`、`/api/memory`、`/api/network` 均 200 |
+| 未知 URI / 不支持方法 | PASS | GET `/not-found` 为 404；POST `/api/status` 为 405 |
+| 物理 HTTP 客户端 | PASS | 8/8 cases；每个连接单请求后 EOF/close |
+| PCAPNG packet evidence | PASS | 可见 200/404/405、FIN/ACK、RST+ACK 与后续新连接 200 |
+| RST 对部分 HTTP 请求的中断 | NOT DEMONSTRATED | abort 流程先 FIN（无 HTTP payload），服务器回 400 后客户端 RST+ACK |
+| 原始 UART transcript | NOT AVAILABLE | `pa220-serial.log` 是明确标注的会话记录重建件 |
+| 上传/文件接收 | BLOCKED | 统一 `__tmp_load` 写入前 validator 尚未作为 P6 完成 |
+
+本次实机使用 RAM 加载 Stage-3 镜像；没有 saveenv、CPLD 写、SPI/eMMC/NAND 写、复位或重启。BIN 不得刷写。镜像 SHA-256 是用户在 Windows TFTP 主机计算并与云端期望值一致；GitHub 上传副本未在本次审查中独立重新计算 SHA-256。
