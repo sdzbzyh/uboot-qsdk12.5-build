@@ -1,6 +1,6 @@
 # PA-220 P4 计划：网络维护基础
 
-- 状态：**IN PROGRESS — 按用户 2026-11-19 最新指令恢复 P4**
+- 状态：**IN PROGRESS — DHCP/Ping 实机验证未完成；TFTP 接收安全门未完成（2026-11-23）**
 - 启动日期：2026-11-19
 - 集成分支：`feature/pa220-ubootkit-web`
 - PA-220 固定源码：`IronDemiGod/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
@@ -120,3 +120,31 @@
 安全边界继续有效：禁止 saveenv 和任何持久化写入；禁止 tftpboot/tftpsrv/tftpput；TFTP 接收/上传保持 BLOCKED。除非发现阻断性问题并获得用户明确同意，不重新构建镜像。
 
 注：本计划原第 3 节的 TFTP 安全审计/validator 内容仍是独立安全门，不因当前 P4-1 至 P4-5 编号调整而解除；未完成 validator 前不得开放任何 TFTP 接收路径。
+
+
+## 10. P4/P6 共用 RAM 写入前 validator 当前状态（2026-11-23）
+
+本节覆盖此前 P4 工作分解中的历史下一步描述；不代表 P4 已完成。
+
+### 已知状态
+
+- P5-2C 已完成 PA-220 RAM 启动后的实机 HTTP/TCP 验收，但这只证明固定静态地址下的 Web 服务，不证明 DHCP Client/Ping 功能通过。
+- DHCP Client、Ping 成功/超时/超时后接口恢复：仍未完成本阶段实机验收。
+- TFTP GET/Server 的接收路径仍然 BLOCKED；不得执行接收测试。
+- 当前补丁序列中尚无统一 `octeon_load_range_check()` 实现；当前代码树/补丁清单未发现 P4-2/P6 共用 RAM 写入前 validator。
+
+### 下一工作项
+
+在重新开放任何 TFTP/HTTP 文件接收或 ELF segment 写入之前，先实现并验证统一 validator：
+
+1. 唯一权威边界来自运行时 `cvmx_bootmem_find_named_block("__tmp_load")` descriptor；不得仅依赖 `loadaddr`、历史 globals 或固定地址。
+2. 处理 descriptor 缺失/变化、cached/uncached/physical alias、checked add、零长度、整数溢出、回绕和半开区间边界。
+3. 证明允许写入范围不覆盖 U-Boot image、relocation、stack、GD、malloc、exception/bootmap/FDT 等保留区。
+4. 在 Host Harness 中覆盖允许与拒绝路径，再使用 Cavium GCC 4.7.0 / OCTEON SDK 5.1.0 完成目标对象编译、完整链接和 map/symbol 检查。
+5. 设备重新上电后只进行必要的只读 descriptor 核对；不得为了本工作项刷写镜像或执行任何持久化写入。
+
+Validator 通过之前，TFTP GET/Server 接收、HTTP upload/chunk 和 bootelf PT_LOAD/section 写入均保持 BLOCKED。Validator 通过后才可进入 P6 RAM-only 文件接收及 CRC/SHA/格式识别。
+
+### P4 其他遗留项
+
+DHCP-only 测试必须在确认 `autoload=n` 后进行；Ping 成功、超时和超时后 Ethernet 接口恢复仍需单独验证。不得因 P5-2C HTTP 通过而关闭这些遗留项。P4 的实际完成状态必须分别记录，不得以 validator 编译通过替代 DHCP/Ping 实机验证。
