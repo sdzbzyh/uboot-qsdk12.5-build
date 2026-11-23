@@ -177,7 +177,7 @@ int main(void)
  printf("19 exact output boundary: PASS\n");
 
  strcpy(info.interface_name,"eth\"\\\n");
- CHECK(http_handler_build(&request,&info,out,sizeof(out),&exact)==0);
+ CHECK(parse_request("GET /api/network HTTP/1.1\\r\\n\\r\\n",&request)==0);\n CHECK(http_handler_build(&request,&info,out,sizeof(out),&exact)==0);
  CHECK(has(out,exact,"eth\\\"\\\\\\u000a"));
  printf("20 JSON escaping: PASS\n");
 
