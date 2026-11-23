@@ -1,0 +1,164 @@
+name: PA-220 P5-2B read-only HTTP URI handler
+on:
+  push:
+    branches: [feature/pa220-ubootkit-web]
+    paths:
+      - '.github/workflows/pa220-p5-2b.yml'
+      - 'u-boot/net/http_handler.c'
+      - 'u-boot/net/http_handler_uboot.c'
+      - 'u-boot/include/net/http_handler.h'
+      - 'u-boot/net/http_request.c'
+      - 'u-boot/include/net/http_request.h'
+      - 'tests/host/http_handler/**'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  host-and-octeon:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: feature/pa220-ubootkit-web
+          fetch-depth: 0
+      - name: Host response-byte regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          R=reports/pa220/P5-2B
+          mkdir -p "$R"
+          chmod +x tests/host/http_handler/run.sh
+          {
+            echo "UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "COMMIT=$(git rev-parse HEAD)"
+            cc --version | head -n 1
+            tests/host/http_handler/run.sh
+          } 2>&1 | tee "$R/10-host-tests.log"
+      - name: OCTEON target compile, N32 link and ABI audit
+        env:
+          GH_TOKEN: ${{ secrets.OCTEON_SDK_READ_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          R=reports/pa220/P5-2B
+          mkdir -p "$R" "$RUNNER_TEMP/octeon-download" "$RUNNER_TEMP/octeon-sdk"
+          {
+            echo "UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "INTEGRATION_COMMIT=$(git rev-parse HEAD)"
+            echo "PA220_SOURCE_PIN=801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8"
+            sha256sum u-boot/net/http_handler.c u-boot/net/http_handler_uboot.c u-boot/include/net/http_handler.h
+            test -n "$GH_TOKEN"
+            gh release download octeon-sdk-5.1.0 --repo sdzbzyh/pa220-toolchains --pattern '*.tar.gz' --pattern '*.sha256' --dir "$RUNNER_TEMP/octeon-download"
+            (cd "$RUNNER_TEMP/octeon-download" && sha256sum -c ./*.sha256)
+            A=$(find "$RUNNER_TEMP/octeon-download" -maxdepth 1 -name '*.tar.gz' -print -quit)
+            tar -xzf "$A" -C "$RUNNER_TEMP/octeon-sdk"
+            GCC=$(find "$RUNNER_TEMP/octeon-sdk" -path '*/bin/mips64-octeon-linux-gnu-gcc' -print -quit)
+            test -n "$GCC"
+            TC=$(dirname "$(dirname "$GCC")")
+            export PATH="$TC/bin:$PATH" OCTEON_MODEL=OCTEON_CN70XX
+            "$GCC" --version | head -n 2
+            echo "TARGET=$("$GCC" -dumpmachine)"
+            git clone --no-checkout https://github.com/IronDemiGod/pa220-openwrt.git "$RUNNER_TEMP/pa220-source"
+            git -C "$RUNNER_TEMP/pa220-source" checkout --detach 801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8
+            test "$(git -C "$RUNNER_TEMP/pa220-source" rev-parse HEAD)" = 801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8
+            U="$RUNNER_TEMP/pa220-source/u-boot"
+            cp u-boot/net/http_request.c "$U/net/http_request.c"
+            cp u-boot/net/http_handler.c "$U/net/http_handler.c"
+            cp u-boot/net/http_handler_uboot.c "$U/net/http_handler_uboot.c"
+            cp u-boot/include/net/http_request.h "$U/include/net/http_request.h"
+            cp u-boot/include/net/http_handler.h "$U/include/net/http_handler.h"
+            make -C "$U" octeon_pa220_config HOSTCC="$U/tools/hostcc-gnu89"
+            make -C "$U" V=1 include/generated/generic-asm-offsets.h include/generated/asm-offsets.h HOSTCC="$U/tools/hostcc-gnu89"
+            make -C "$U" V=1 net/http_request.o net/http_handler.o net/http_handler_uboot.o HOSTCC="$U/tools/hostcc-gnu89"
+            for O in http_request http_handler http_handler_uboot; do
+              test -s "$U/net/$O.o"
+              file "$U/net/$O.o"
+              "$TC/bin/mips64-octeon-linux-gnu-readelf" -h "$U/net/$O.o" > "$R/21-$O-elf-header.txt"
+              "$TC/bin/mips64-octeon-linux-gnu-nm" -u "$U/net/$O.o" > "$R/22-$O-undefined-symbols.txt"
+              wc -c "$U/net/$O.o" > "$R/23-$O-object-size.txt"
+              sha256sum "$U/net/$O.o" > "$R/24-$O-sha256.txt"
+            done
+            "$GCC" -mabi=n32 -mabicalls -msoft-float -G 0 -nostdlib -Wl,-r "$U/net/http_request.o" "$U/net/http_handler.o" "$U/net/http_handler_uboot.o" -o "$R/http-handler-linked.o"
+            "$TC/bin/mips64-octeon-linux-gnu-readelf" -h "$R/http-handler-linked.o" | tee "$R/25-linked-object-elf-header.txt"
+            "$TC/bin/mips64-octeon-linux-gnu-nm" -u "$R/http-handler-linked.o" | tee "$R/26-linked-object-undefined-symbols.txt"
+            if grep -E '(^|[[:space:]])(malloc|calloc|realloc|free)(@|$)' "$R/26-linked-object-undefined-symbols.txt"; then
+              echo "unexpected dynamic allocation dependency" >&2
+              exit 1
+            fi
+            "$TC/bin/mips64-octeon-linux-gnu-size" "$U/net/http_handler.o" "$U/net/http_handler_uboot.o" "$R/http-handler-linked.o" | tee "$R/27-object-size.txt"
+            printf '%s\n' '#include <common.h>' '#include <net/http_handler.h>' 'char pa220_http_handler_response[HTTP_HANDLER_TX_CAPACITY];' 'char pa220_http_handler_info_size[sizeof(struct http_handler_info)];' > "$U/net/http_handler_size.c"
+            make -C "$U" V=1 net/http_handler_size.o HOSTCC="$U/tools/hostcc-gnu89"
+            "$TC/bin/mips64-octeon-linux-gnu-nm" -S "$U/net/http_handler_size.o" | tee "$R/28-static-buffer-size.txt"
+            sha256sum "$R/http-handler-linked.o" | tee "$R/29-linked-object-sha256.txt"
+            echo TARGET_COMPILE_AND_N32_RELOCATABLE_LINK=PASS
+          } 2>&1 | tee "$R/20-octeon-target-compile.log"
+      - name: Archive design and API evidence
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          R=reports/pa220/P5-2B
+          cat > "$R/30-design.md" <<'EOF'
+          # PA-220 P5-2B bounded read-only URI handler
+          - The P5-2A parser is consumed through struct http_request; parser sources and behavior are unchanged.
+          - Handler is a separate module; P5-2C lifecycle integration is out of scope.
+          - Response storage is caller-owned and capped at 1460 bytes. Body staging uses a fixed 192-byte header reserve; response headers are assembled in a fixed array and the complete response size is checked before the output length is published.
+          - No heap allocation, filesystem access, shell command, environment lookup, storage write, reset, firmware update or persistent operation exists in this module.
+          - URI matching is exact byte-for-byte against /, /api/status, /api/board, /api/memory, /api/network. Query strings are valid request-target syntax but do not match the allowlist (404). Valid percent escapes are never decoded and do not match a route (404). Prefixes and extra segments are 404. Invalid URI syntax is 400.
+          - GET sends the body. HEAD has the same status, Content-Type and body-derived Content-Length as GET but sends zero body bytes. Other token-valid methods receive 405 and Allow: GET, HEAD.
+          - HTTP/1.0 and HTTP/1.1 are accepted; response version follows the request. All responses use Connection: close.
+          - Status mapping: malformed request representation 400; unmatched exact URI 404; unsupported method 405; unavailable required board/memory snapshot 500.
+          - JSON strings escape quotes, backslashes and control bytes. Home-page board text is HTML escaped. String scans and writes are bounded.
+          EOF
+          cat > "$R/31-api-data-sources.md" <<'EOF'
+          # P5-2B API fields and data provenance
+          | URI | Fields | Source |
+          |---|---|---|
+          | /api/status | state, uptime_ms | get_timer(0), same millisecond timer used by the PA-220 TCP lifecycle |
+          | /api/board | board, board_type, cpu, cpu_clock_hz | PA-220 board file identifies board type 20021; CN7130 from the PA-220 board/config; gd->cpu_clk |
+          | /api/memory | dram_start_bytes, dram_total_bytes, dram_total_mib | gd->bd->bi_memstart and gd->bd->bi_memsize; total is DRAM capacity, not free memory |
+          | /api/network | interface, device_state, mac, ip | eth_get_dev()->name/state/enetaddr and NetOurIP; no environment variables are read |
+          - MAC is emitted only if nonzero, non-broadcast and unicast.
+          - Interface state is the U-Boot driver's INIT/PASSIVE/ACTIVE state, not a claim about physical carrier/link.
+          - Missing Ethernet device, invalid MAC or unconfigured IP is represented as JSON null/unavailable, never fabricated.
+          - Board and CPU names are fixed hardware identifiers from the pinned PA-220 board support. Serial number is intentionally omitted.
+          EOF
+          cat > "$R/32-uri-status-policy.md" <<'EOF'
+          # P5-2B URI and HTTP status policy
+          | Input | Result |
+          |---|---|
+          | exact allowlist URI | route selected |
+          | query string | 404; no query semantics |
+          | valid percent encoding | never decoded; exact-match miss => 404 |
+          | prefix, suffix, extra path segment | 404 |
+          | malformed URI syntax, backslash, fragment, malformed percent escape | 400 |
+          | malformed method/version/request structure | 400 |
+          | valid method other than GET/HEAD on an allowed URI | 405 with Allow: GET, HEAD |
+          | missing required device/memory snapshot | 500 |
+          | output capacity too small | function error, output length zero, caller must not transmit |
+          | HEAD | same representation headers and Content-Length as GET, zero body bytes |
+          All responses use Connection: close; no keep-alive, request body, file path, command or mutation route exists.
+          EOF
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: pa220-p5-2b-readonly-http-handler
+          path: reports/pa220/P5-2B/
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Commit evidence
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/pa220/P5-2B/
+          if ! git diff --cached --quiet; then
+            git commit -m "pa220: archive P5-2B URI handler validation"
+            git fetch origin feature/pa220-ubootkit-web
+            git rebase origin/feature/pa220-ubootkit-web
+            git push origin HEAD:refs/heads/feature/pa220-ubootkit-web
+          fi
