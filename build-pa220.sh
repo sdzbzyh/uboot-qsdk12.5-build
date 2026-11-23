@@ -99,6 +99,25 @@ if [ -d "$PATCH_DIR" ]; then
     done
 fi
 
+# Stage the complete P5-2C production implementation into the pinned source.
+# The fixed source repository remains untouched; only this disposable checkout
+# is modified by the integration build.
+mkdir -p "$UBOOT_DIR/include/net"
+cp "$ROOT_DIR/u-boot/common/cmd_pa220_web.c" "$UBOOT_DIR/common/cmd_pa220_web.c"
+cp "$ROOT_DIR/u-boot/net/tcp.c" "$ROOT_DIR/u-boot/net/tcp_ipv4_tx.c" \
+   "$ROOT_DIR/u-boot/net/http_request.c" "$ROOT_DIR/u-boot/net/http_handler.c" \
+   "$ROOT_DIR/u-boot/net/http_handler_uboot.c" "$UBOOT_DIR/net/"
+cp "$ROOT_DIR/u-boot/include/net/tcp.h" \
+   "$ROOT_DIR/u-boot/include/net/tcp_ipv4_tx.h" \
+   "$ROOT_DIR/u-boot/include/net/http_request.h" \
+   "$ROOT_DIR/u-boot/include/net/http_handler.h" "$UBOOT_DIR/include/net/"
+
+# Generate the Makefile patch with Git's diff engine (never hand-count hunks).
+mkdir -p "$ROOT_DIR/reports/pa220/P5-2C"
+python3 "$ROOT_DIR/scripts/generate-pa220-p5-2c-makefile-patch.py" \
+    --source-root "$PA220_SOURCE_ROOT" \
+    --output "$ROOT_DIR/reports/pa220/P5-2C/0006-pa220-p5-2c-makefile-integration.patch"
+
 if [ -n "$TOOLCHAIN_DIR" ]; then
     "$UBOOT_DIR/build.sh" "$TOOLCHAIN_DIR"
 else
