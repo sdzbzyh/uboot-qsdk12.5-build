@@ -44,7 +44,7 @@ Source fix commit: `b0648b6e1312d45d6cf2f5b9ab8d34dacd072fe0`.
 
 ## Remaining boundary
 
-This establishes Host lifecycle behavior and cloud-side target integration/build. The Host foreground test uses a deterministic fake Ethernet boundary; the native Ethernet transmitter has separate P5-1D regression/target-build coverage. **Physical PA-220 Ethernet/TCP runtime validation is still required** before claiming hardware acceptance.
+This establishes Host lifecycle behavior and cloud-side target integration/build. The Host foreground test uses a deterministic fake Ethernet boundary; the native Ethernet transmitter has separate P5-1D regression/target-build coverage. **Physical P5-2C HTTP application validation is still required** before claiming P5-2C hardware acceptance.
 
 
 ## Physical validation status and preparation
@@ -69,4 +69,4 @@ Added:
 The test script requires the P5-2C foreground service to already be running. It does not boot, reset, configure, or flash the PA-220. Physical acceptance requires matching serial output, client log, PCAPNG, packet analysis, and the exact running image hash.
 
 
-A later P5-1D follow-up capture in \`PA220-Test/PA220-FIN-20261121-153150\` records two real TCP connections with empty payload: client FIN+ACK, server ACK, server FIN+ACK, and final client ACK. The Windows client log also records EOF on the first connection and successful establishment of a second connection. This is physical TCP close/listener-reacceptance evidence only; it does not verify HTTP parsing, response payload transmission, response ACK-drain ordering, or the P5-2C application lifecycle.
+A later P5-1D follow-up capture in `PA220-Test/PA220-FIN-20261121-153150` records two real TCP connections with empty payload: client FIN+ACK, server ACK, server FIN+ACK, and final client ACK. The Windows client log also records EOF on the first connection and successful establishment of a second connection. This is physical TCP close/listener-reacceptance evidence only; it does not verify HTTP parsing, response payload transmission, response ACK-drain ordering, or the P5-2C application lifecycle.
