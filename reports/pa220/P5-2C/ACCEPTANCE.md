@@ -51,19 +51,19 @@ This establishes Host lifecycle behavior and cloud-side target integration/build
 
 **P5-2C physical HTTP/TCP acceptance: NOT YET VERIFIED.** The Host harness and OCTEON build are cloud-side results only.
 
-A separate P5-1D physical test report exists at \`reports/pa220/P5-1D/30-physical-tcp-validation.md\`. It records real PA-220 Ethernet ARP, TCP SYN/SYN-ACK/ACK, and ACK of a 10-byte payload on 2026-11-21 using PA-220 \`192.168.2.2/24\`, Windows peer \`192.168.2.10/24\`, TCP port 80, interface \`octrgmii0\`, 1000 Mbps full duplex. This does not establish P5-2C HTTP parser/handler behavior.
+A separate P5-1D physical test report exists at `reports/pa220/P5-1D/30-physical-tcp-validation.md`. It records real PA-220 Ethernet ARP, TCP SYN/SYN-ACK/ACK, and ACK of a 10-byte payload on 2026-11-21 using PA-220 `192.168.2.2/24`, Windows peer `192.168.2.10/24`, TCP port 80, interface `octrgmii0`, 1000 Mbps full duplex. This does not establish P5-2C HTTP parser/handler behavior.
 
 The P5-2C build artifact was downloaded and inspected on 2026-11-23:
-- Artifact ZIP SHA-256: \`ab13f3b5540ac9bdf18aff898e921dd7992bdb0930980849e896e11d8bfa0283\`.
+- Artifact ZIP SHA-256: `ab13f3b5540ac9bdf18aff898e921dd7992bdb0930980849e896e11d8bfa0283`.
 - BIN size: 1,380,488 bytes.
-- BIN SHA-256: \`825b0e56312da6f4158cd94a5e2da2796b188bfe5d9dcecb5928d9304ad67343\`.
-- The binary begins with the Cavium \`BOOT\` header and is a PA-220 OCTEON Stage-3 image, not a generic firmware-upgrade image. **Do not flash this BIN.**
+- BIN SHA-256: `825b0e56312da6f4158cd94a5e2da2796b188bfe5d9dcecb5928d9304ad67343`.
+- The binary begins with the Cavium `BOOT` header and is a PA-220 OCTEON Stage-3 image, not a generic firmware-upgrade image. **Do not flash this BIN.**
 
-The repository's P5-1D physical report carries explicit safety constraints: do not reboot, reset, power-cycle, execute another \`go\`, write CPLD/SPI/eMMC/NAND, or restart the foreground service until its state has been confirmed and the user explicitly authorizes the action. These constraints remain in force. No board-side action was taken during this cloud preparation.
+The repository's P5-1D physical report carries explicit safety constraints: do not reboot, reset, power-cycle, execute another `go`, write CPLD/SPI/eMMC/NAND, or restart the foreground service until its state has been confirmed and the user explicitly authorizes the action. These constraints remain in force. No board-side action was taken during this cloud preparation.
 
 Added:
-- \`reports/pa220/P5-2C/PHYSICAL-TEST-PLAN.md\`: safe staged procedure and acceptance criteria.
-- \`scripts/Test-Pa220Web.ps1\`: one-request-per-connection HTTP client, client FIN/EOF and Content-Length checks, 200/404/405 cases, RST followed by recovery request.
-- \`scripts/Analyze-Pa220WebCapture.ps1\`: tshark packet-field CSV exporter.
+- `reports/pa220/P5-2C/PHYSICAL-TEST-PLAN.md`: safe staged procedure and acceptance criteria.
+- `scripts/Test-Pa220Web.ps1`: one-request-per-connection HTTP client, client FIN/EOF and Content-Length checks, 200/404/405 cases, RST followed by recovery request.
+- `scripts/Analyze-Pa220WebCapture.ps1`: tshark packet-field CSV exporter.
 
 The test script requires the P5-2C foreground service to already be running. It does not boot, reset, configure, or flash the PA-220. Physical acceptance requires matching serial output, client log, PCAPNG, packet analysis, and the exact running image hash.
