@@ -82,3 +82,14 @@
 - 理由：PA-220 U-Boot 2013.07 的 `NetLoop()` 是阻塞式协议状态机，UDP/ARP handler 与 timeout callback 为单例全局状态；不能直接复用 uBootKit 2016 的 failsafe/TCP 生命周期。
 - 影响：P5 必须单独实现 TCP 接收分派和服务轮询/cleanup；Web 与 DHCP/Ping/TFTP 等网络命令按串行使用，不并行抢占 NetLoop。首版仅允许 GET/HEAD 和经过审查的只读 handler；不提供命令执行、环境/存储/CPLD 写入、上传、安装或重启。
 - 状态：架构决策已记录；代码实现、编译、RAM 启动和实机验证均未完成。
+
+
+## D-013：P5-2C 实机验收边界与 P6 上传安全门
+
+- 日期：2026-11-23
+- 决策：P5-2C 的云端构建、Host Harness 和 PA-220 RAM 启动后的 HTTP/TCP 实机测试均已通过；正式证据见 `reports/pa220/P5-2C/ACCEPTANCE.md`。
+- 证据限定：本轮没有原始 UART 录制，归档的 `pa220-serial.log` 是明确标注的会话重建件；abort 流程是 FIN（无 HTTP payload）→ HTTP 400 → RST+ACK，随后新连接 GET 获得 200，不得描述为 RST 中断部分 HTTP 请求。
+- 决策：P5 第一版仍保持显式前台、单连接、单请求、只读 GET/HEAD 服务；不得增加任意命令执行、环境写入、CPLD/存储写入、上传、安装或重启。
+- 决策：任何 TFTP/HTTP 文件接收或 ELF PT_LOAD/section 写入之前，必须先实现并验证统一 `octeon_load_range_check(uint64_t addr, uint64_t len)`，唯一权威范围来自运行时 `__tmp_load` named-block descriptor；验证器通过前接收功能保持 BLOCKED。
+- 影响：下一工作单元先完成 validator 设计、Host 边界测试、OCTEON 目标编译/最终链接和只读运行时 descriptor 核对；通过后再进入 P6 RAM-only 接收。任何持久化写入仍属于独立高风险节点并需用户明确授权。
+- 状态：P5-2C ACCEPTED；P6 validator prerequisite NOT YET IMPLEMENTED/ACCEPTED。
