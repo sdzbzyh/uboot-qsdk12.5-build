@@ -1,5 +1,5 @@
-UTC=2026-11-23T07:16:10Z
-COMMIT=240defc157f87feba9249067d50fc3f31cfb63dd
+UTC=2026-11-23T07:17:08Z
+COMMIT=69d9d08e18ab9b877f5b734d29e596880098d566
 cc (Ubuntu 15.2.0-16ubuntu1) 15.2.0
 01 GET /: PASS
 02 HEAD /: PASS
@@ -30,8 +30,5 @@ cc (Ubuntu 15.2.0-16ubuntu1) 15.2.0
 27 unavailable memory maps to 500: PASS
 28 U-Boot read-only data provider: PASS
 29 repeated calls have no state residue: PASS
-FAIL line 265: parse_request("GET /missing HTTP/1.1\\r\\n\\r\\n",&request)==0
-FAIL line 268: parse_request("HEAD /missing HTTP/1.1\\r\\n\\r\\n",&request)==0
-FAIL line 270: has(head,head_len,"404 Not Found")
-FAIL line 272: split_body(head,head_len,&body,&body_len)==0&&body_len==0
-30 HEAD error responses suppress body and retain GET length: PASS\nAssertions: 130, failures: 4
+30 HEAD error responses suppress body and retain GET length: PASS
+Assertions: 130, failures: 0

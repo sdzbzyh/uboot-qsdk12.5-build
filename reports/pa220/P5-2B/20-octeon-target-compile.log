@@ -1,7 +1,7 @@
-UTC=2026-11-23T07:13:51Z
-INTEGRATION_COMMIT=084ef4782c6b494cb947ab0e7e5ed5f425c43394
+UTC=2026-11-23T07:17:11Z
+INTEGRATION_COMMIT=69d9d08e18ab9b877f5b734d29e596880098d566
 PA220_SOURCE_PIN=801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8
-f4e0b9ed3ec33aaf487660a5604f28cd92c34d0846bc58d21d6bd08cec750583  u-boot/net/http_handler.c
+57f94500024d38ffe4d4675a440613148251be54cb45d2b5d2917edd64a903fb  u-boot/net/http_handler.c
 9004a5ff7caffc2ef9613667985fc6e9b329af857c15fa24f494a19e1254c7e5  u-boot/net/http_handler_uboot.c
 bbcc892c54bfcafc87096480fc3938dd5e86f2fa2863c6fbb60025cca9f097f5  u-boot/include/net/http_handler.h
 octeon-sdk-5.1.0-tools-gcc-4.7.tar.gz: OK
@@ -247,7 +247,7 @@ ELF Header:
   Version:                           0x1
   Entry point address:               0x0
   Start of program headers:          0 (bytes into file)
-  Start of section headers:          47756 (bytes into file)
+  Start of section headers:          47456 (bytes into file)
   Flags:                             0x808b0025, noreorder, cpic, abi2, octeon, mips64r2
   Size of this header:               52 (bytes)
   Size of program headers:           0 (bytes)
@@ -332,5 +332,5 @@ http_handler.c:301:12:header_u64	96	static
 http_handler.c:314:12:build_response	288	static
 http_handler.c:344:5:http_handler_build	1424	static
 http_handler_uboot.c:12:5:http_handler_get_device_info	32	static
-3cbb2de8fc6799bf209197f44db55016f599798c4356a9be876a638f3ffc4627  reports/pa220/P5-2B/http-handler-linked.o
+ad469a11295cb68290106e8a2767c6aab539cd7f1418702828826659df7f147b  reports/pa220/P5-2B/http-handler-linked.o
 TARGET_COMPILE_AND_N32_RELOCATABLE_LINK=PASS
