@@ -1,0 +1,4 @@
+   text	   data	    bss	    dec	    hex	filename
+   5776	      0	      0	   5776	   1690	/home/runner/work/_temp/pa220-source/u-boot/net/http_handler.o
+    524	      0	      0	    524	    20c	/home/runner/work/_temp/pa220-source/u-boot/net/http_handler_uboot.o
+   9404	      0	      0	   9404	   24bc	reports/pa220/P5-2B/http-handler-linked.o

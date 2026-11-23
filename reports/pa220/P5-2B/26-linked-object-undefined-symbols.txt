@@ -1,0 +1,7 @@
+         U NetOurIP
+         U eth_current
+         U get_timer
+         U memcmp
+         U memcpy
+         U memmove
+         U memset
