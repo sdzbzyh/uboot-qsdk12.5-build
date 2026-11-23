@@ -1,12 +1,12 @@
 ========== PA-220 TCP CORE OCTEON OBJECT COMPILE ==========
-UTC_DATE=2026-11-21T04:21:34Z
+UTC_DATE=2026-11-23T09:21:01Z
 BRANCH=feature/pa220-ubootkit-web
-INTEGRATION_COMMIT=9bca5c0047c7be61408c8335aec9bebed438e40e
+INTEGRATION_COMMIT=b0648b6e1312d45d6cf2f5b9ab8d34dacd072fe0
 PA220_SOURCE_COMMIT=801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8
 
 ========== TCP SOURCE IDENTITY ==========
-f82e39fbd268970d33a3d22ed25eaa4cfc0a5cc2c52648d4e45be97a344f58d3  u-boot/net/tcp.c
-3593909580af16b3e4909d6af95a77bb759d3ffaeaf4caa3b9b879aa01b217f6  u-boot/include/net/tcp.h
+52b618f579008ffec9d5a73ef50684fef4f8440760080b41e46eedf55a1f26a8  u-boot/net/tcp.c
+bc634ffc9c0ea9de9a11bf2c8390aa87f86994bf4e0cc387f762746f3b9de69b  u-boot/include/net/tcp.h
 
 ========== SDK RELEASE DOWNLOAD ==========
 DOWNLOAD_RC=0
@@ -166,16 +166,16 @@ ELF Header:
   Version:                           0x1
   Entry point address:               0x0
   Start of program headers:          0 (bytes into file)
-  Start of section headers:          26280 (bytes into file)
+  Start of section headers:          28056 (bytes into file)
   Flags:                             0x808b0025, noreorder, cpic, abi2, octeon, mips64r2
   Size of this header:               52 (bytes)
   Size of program headers:           0 (bytes)
   Number of program headers:         0
   Size of section headers:           40 (bytes)
-  Number of section headers:         61
-  Section header string table index: 58
-OBJECT_SIZE=49796
-b5a371a7653c5760516280a3b116e34596cb9eb6c22ca53364437c3e63b25e25  /home/runner/work/_temp/pa220-source/u-boot/net/tcp.o
+  Number of section headers:         65
+  Section header string table index: 62
+OBJECT_SIZE=53096
+86a5539c08f95262807b9a0886b43811bd4c07114125cad340f2fb92fee77a41  /home/runner/work/_temp/pa220-source/u-boot/net/tcp.o
 
 ========== FINAL STATUS ==========
 DOWNLOAD_RC=0
