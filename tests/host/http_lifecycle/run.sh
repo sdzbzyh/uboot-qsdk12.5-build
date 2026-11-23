@@ -17,4 +17,15 @@ CC=${CC:-cc}
   "$ROOT/u-boot/net/http_request.c" \
   "$ROOT/u-boot/net/http_handler.c" \
   -o "$BUILD_DIR/test_http_lifecycle"
+
+"$CC" -std=gnu99 -O2 -g -Wall -Wextra \
+  -I"$TEST_DIR/include" -I"$ROOT/u-boot/include" \
+  "$TEST_DIR/test_foreground.c" \
+  "$ROOT/u-boot/common/cmd_pa220_web.c" \
+  "$ROOT/u-boot/net/tcp.c" \
+  "$ROOT/u-boot/net/http_request.c" \
+  "$ROOT/u-boot/net/http_handler.c" \
+  "$ROOT/u-boot/net/http_handler_uboot.c" \
+  -o "$BUILD_DIR/test_foreground"
+"$BUILD_DIR/test_foreground"
 "$BUILD_DIR/test_http_lifecycle"
