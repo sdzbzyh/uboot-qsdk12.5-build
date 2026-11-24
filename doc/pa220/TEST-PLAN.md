@@ -371,3 +371,41 @@ Actions：[run #45374041373](https://github.com/sdzbzyh/uboot-qsdk12.5-build/act
 2. 明确第一条接收路径、最大文件长度、校验算法、短包/重复包/超时/失败清理行为。
 3. 确保测试只向 RAM 的已验证区间写入；不执行 `saveenv` 或任何 SPI/eMMC/NAND/CPLD/EEPROM 写入。
 4. HTTP upload 与 ELF segment 写入必须分别完成设计和 Host/目标验证，不因 TFTP guard PASS 自动开放。
+
+
+## 15. P6-0 当前验证状态与设备只读预检（2026-11-24）
+
+本节覆盖本文件中较早的 P4-2 Host 32/121、目标构建待执行等历史状态。
+
+### 已有验证证据
+
+- Validator Host：42 scenarios / 161 assertions / 0 failures；GCC 与 ASan/UBSan PASS。
+- TFTP DATA guard Host：14 scenarios / 64 assertions / 0 failures；GCC 与 ASan/UBSan PASS。
+- OCTEON validator object、N32 relocatable link、修改后的 `tftp.o` 编译并进入 `libnet.o`、完整 U-Boot final link：PASS。
+- Generator idempotence：PASS。
+- Actions #45346000355、#45374041373、#45375848020 均 completed/success；最新 artifact ID `14910393863`。
+
+### 设备只读命令（仅在用户决定上电后）
+
+```text
+version
+bdinfo
+printenv autoload loadaddr ipaddr serverip ethact ethprime
+pa220 memory
+namedprint
+freeprint
+```
+
+完整保存 UART 原始输出。此前会话曾报告 `autoload=n` 和 `ethact=ethprime=octrgmii0`，但设备断电后的本轮仍应在启动后重新只读确认。不要在此阶段执行 `setenv`、`tftpboot`、`tftpsrv`、`tftpput`、`saveenv` 或复位命令。
+
+### 首个 GET 测试向量（尚未执行）
+
+- 4,096-byte ASCII payload：重复 `PA220-P6-TFTP-GET-TEST\\n` 并截断至 4,096 bytes。
+- CRC32：`e32b0c57`；SHA-256：`dac1fcd877c5ef356b2cdd44f6202f154a2d393cd458975b521ef6cfc05b8356`。
+- 目标 block size：512 bytes；需在接收 DATA 前确认协商结果。预期 8 个完整 DATA block，加 1 个零长度终止 block；最终长度 4,096 bytes。
+- 目标地址只能从 live `__tmp_load` descriptor 推导；先验证完整 `[T,T+4096)`，并确认不与 U-Boot/stack/GD/malloc/FDT/exception/其他 reserved block 重叠。禁止假定固定地址安全。
+- 接收完成后按 PA-220 的数据同步语义执行 `flush_dcache_range()`（syncw），再核对长度、CRC32、SHA-256 和只读文件头类型。
+
+**真实 GET 前的软件硬门：**完整文件 reservation、最大长度、接收完成/有效状态、超时/中断失败路径清理、CRC/SHA 和格式识别必须先完成 Host/目标验证。当前 guard 仅证明单个 DATA block 写入前检查，不证明失败传输不会留下被误认的有效文件。
+
+状态：live descriptor NOT RUN；实际 GET NOT RUN；Server/WRQ 与 PUT NOT RUN；HTTP upload/ELF segment 写入 BLOCKED；DHCP/Ping NOT RUN。设备保持断电状态，本轮不要求上电。
