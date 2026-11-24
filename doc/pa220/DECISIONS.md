@@ -104,3 +104,19 @@
 - 地址策略：bootmem descriptor 使用 physical base；输入统一规范化 physical/identity、KSEG0/KSEG1、XKPHYS CCA aliases。拒绝不支持的地址域、KSEG 跨段、XKPHYS 保留位、零长度、加法溢出及半开区间越界。
 - 并发前提：当前 U-Boot 前台单核命令模型下，次级核心停留在 idle loop，不存在并发 bootmem writer；若引入异步/多核 bootmem 修改，必须提供锁保护的原子 descriptor snapshot，不得继续依赖当前双读假设。
 - 状态：生产 validator 已实现；Host 32 scenarios / 121 assertions / 0 failures（普通 GCC、ASan/UBSan）；OCTEON 目标构建待 Actions。TFTP/HTTP/ELF 写入调用点尚未接入，继续 BLOCKED。
+
+
+## D-015：P6 首个 RAM-only 接收路径与当前门控（2026-11-24）
+
+- 决策：P6 首个真实接收路径固定为 PA-220 原生 TFTP GET/RRQ；不改为 HTTP upload。
+- 决策：P4-2 validator/TFTP DATA guard 的 Host 和 OCTEON 构建通过，不自动授权任何实际接收。实际 GET 必须等待 live `__tmp_load` descriptor/reserved-block 只读预检、完整文件 reservation/最大长度/校验/格式识别/失败有效状态管理及用户明确确认。
+- 决策：TFTP Server/WRQ、PUT、HTTP upload、ELF PT_LOAD/section 写入分开验收；HTTP 保持只读。
+- 证据：Actions #45346000355、#45374041373、#45375848020；最新 P4-2 验证提交 `20acf9790b6ee15ed758db7006eaee69af0f2bf2`；P6-0 审查报告 `reports/pa220/P6-0-SOURCE-REVIEW.md`。
+- 状态：P6 设计/预检准备；live descriptor 与实际接收 NOT RUN。所有持久化写入继续禁止。
+
+## D-016：首个 TFTP GET 测试向量（设计，不代表已执行）
+
+- 决策：首个测试文件采用 4,096-byte ASCII 数据，由重复字符串 `PA220-P6-TFTP-GET-TEST\\n` 截断生成；预期 CRC32 `e32b0c57`、SHA-256 `dac1fcd877c5ef356b2cdd44f6202f154a2d393cd458975b521ef6cfc05b8356`。
+- 目标 block size 为 512 bytes；确认协商值后，预期 8 个完整 DATA block 加 1 个零长度终止 block。
+- 目标地址必须由 live `__tmp_load` descriptor 推导并验证完整半开区间；不使用历史固定地址作为安全依据。
+- 状态：测试向量仅完成设计，未传输。
