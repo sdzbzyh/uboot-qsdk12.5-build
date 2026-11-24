@@ -2318,7 +2318,7 @@ c010ef80 t _gp
 c010ef94 d __got_end
 c010f2f0 R __dtb_begin
 c0111b15 R __dtb_end
-c012a2a0 r strength_str.143335
+c012a2f8 r strength_str.143335
 c013d500 r __func__.140731
 c013d518 r __func__.140857
 c013d538 r _cvmx_bootvector_data

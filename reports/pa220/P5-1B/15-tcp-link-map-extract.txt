@@ -406,20 +406,20 @@ NetTimeOffset       0x4               net/libnet.o
                 0x00000000c0192ab8        0x4 net/libnet.o
  COMMON         0x00000000c02bee4c        0x4 drivers/net/libnet.o
  COMMON         0x00000000c02ef508      0x124 net/libnet.o
-                0x0000000000004fc0      0x1e0 drivers/net/libnet.o
-                0x0000000000006878      0x638 net/libnet.o
- .debug_info    0x000000000028b8b5    0x130d6 drivers/net/libnet.o
- .debug_info    0x00000000002ebf91    0x1454a net/libnet.o
- .debug_abbrev  0x000000000002d5f2     0x11e7 drivers/net/libnet.o
- .debug_abbrev  0x000000000003923f     0x3c28 net/libnet.o
- .debug_line    0x0000000000074da4     0x2728 drivers/net/libnet.o
- .debug_line    0x000000000008aaf7     0x4da5 net/libnet.o
- .debug_frame   0x0000000000012da4      0x724 drivers/net/libnet.o
- .debug_frame   0x00000000000181e0     0x1524 net/libnet.o
- .debug_str     0x000000000003c959      0xc17 drivers/net/libnet.o
- .debug_str     0x0000000000043d39     0x18b0 net/libnet.o
- .debug_loc     0x0000000000153433     0x5404 drivers/net/libnet.o
- .debug_loc     0x000000000018c64c     0xa8ab net/libnet.o
+                0x0000000000004fe8      0x1e0 drivers/net/libnet.o
+                0x00000000000068a0      0x638 net/libnet.o
+ .debug_info    0x000000000028c7ac    0x130d6 drivers/net/libnet.o
+ .debug_info    0x00000000002ece88    0x1454a net/libnet.o
+ .debug_abbrev  0x000000000002d8c2     0x11e7 drivers/net/libnet.o
+ .debug_abbrev  0x000000000003950f     0x3c28 net/libnet.o
+ .debug_line    0x000000000007518c     0x2728 drivers/net/libnet.o
+ .debug_line    0x000000000008aedf     0x4da5 net/libnet.o
+ .debug_frame   0x0000000000012e0c      0x724 drivers/net/libnet.o
+ .debug_frame   0x0000000000018248     0x1524 net/libnet.o
+ .debug_str     0x000000000003ca84      0xc17 drivers/net/libnet.o
+ .debug_str     0x0000000000043e54     0x18b0 net/libnet.o
+ .debug_loc     0x000000000015390c     0x5404 drivers/net/libnet.o
+ .debug_loc     0x000000000018cb25     0xa8ab net/libnet.o
 LOAD drivers/net/libnet.o
 LOAD net/libnet.o
  .comment       0x0000000000000000       0xa2 drivers/net/libnet.o
@@ -428,5 +428,5 @@ LOAD net/libnet.o
                 0x0000000000000000        0x0 net/libnet.o
                 0x00000000000000a0       0x10 drivers/net/libnet.o
                 0x0000000000000170       0x10 net/libnet.o
- .debug_ranges  0x0000000000036a10     0x12d8 drivers/net/libnet.o
- .debug_ranges  0x000000000003e400     0x1810 net/libnet.o
+ .debug_ranges  0x0000000000036a58     0x12d8 drivers/net/libnet.o
+ .debug_ranges  0x000000000003e448     0x1810 net/libnet.o
