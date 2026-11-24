@@ -199,3 +199,13 @@ descriptor API 的静态实现返回函数内部 static、非 re-entrant 快照�
 ### P6 入口约束
 
 P4-2 的 validator 和 TFTP guard Host/目标编译门已通过，但不代表允许立即运行真实接收。P6 应先完成 RAM-only 接收设计、单一路径选择、容量/校验/失败清理定义；在任何实际传输之前，必须先对设备做只读启动和 descriptor/reserved-block 核对。禁止 saveenv 和所有持久化存储写入。详细证据见 `reports/pa220/P4-2/IMPLEMENTATION.md`。
+
+## 13. Fixed-source TFTP path inventory (2026-11-24)
+
+- `u-boot/net/tftp.c` is the only TFTP protocol implementation. OCTEON `cmd_octeon_tftp.c` is only a command alias to `do_tftpb`.
+- The only receive-side RAM `memcpy` is in `store_block()`. TFTP GET/RRQ and TFTP Server/WRQ DATA share one `TFTP_DATA` handler and one `store_block()` call; multicast receive shares it too.
+- Both block-wrap update call sites are guarded against arithmetic failure.
+- TFTP PUT's `load_block()` reads from local `save_addr` into outbound packet data; it does not write received bytes into RAM. Source-read range/confidentiality is a separate risk and is not covered by this receive validator.
+- Optional `CONFIG_SYS_DIRECT_FLASH_TFTP` retains a `flash_write()` branch in `store_block()`. The CN70XX validator runs before the RAM/flash branch and rejects non-RAM destinations; the flash configuration/path is not runtime-tested and must remain unused.
+
+See `reports/pa220/P4-2/IMPLEMENTATION.md` for the generated patch hash and Host/target evidence.

@@ -13,6 +13,7 @@
 | [TEST-PLAN.md](TEST-PLAN.md) | 编译、静态检查、RAM 启动及硬件验证策略 |
 | [reports/P0-2026-11-18.md](reports/P0-2026-11-18.md) | P0 节点报告与仓库审计结果 |
 | [P5-2C 实机验收](../../reports/pa220/P5-2C/ACCEPTANCE.md) | P5-2C 云端、Host 与 PA-220 实机 HTTP/TCP 验收及证据边界 |
+| [P6 RAM-only 接收计划](P6-PLAN.md) | 以 TFTP GET 为首个路径的 RAM-only 接收预检、验收与安全边界 |
 | [P4-2 validator / TFTP guard 验收](../../reports/pa220/P4-2/IMPLEMENTATION.md) | 统一 RAM validator、TFTP DATA pre-write guard 的 Host/目标构建证据及未完成事项 |
 
 ## 当前项目检查点（2026-11-24）
@@ -22,7 +23,7 @@
 - P4-2：生产 RAM validator Host 42/161 与 OCTEON N32/full U-Boot link PASS；TFTP DATA guard Host 14/64，目标 `tftp.o` 编译并进入 `libnet.o`。正式结果以 [P4-2 IMPLEMENTATION](../../reports/pa220/P4-2/IMPLEMENTATION.md) 为准。
 - 真实 TFTP 接收尚未测试；PA-220 仍保持断电，尚未做 live `__tmp_load` descriptor 只读核对。
 - HTTP 仍只读，HTTP 上传与 ELF segment 写入保持 BLOCKED；DHCP/Ping 实机验证仍未完成。
-- 下一阶段为 P6 RAM-only 接收设计与实现；任何实际传输前，必须先做设备只读 descriptor / reserved-block 核对。禁止持久化写入。
+- P6 已进入设计/验收准备；首个路径选为 TFTP GET。任何实际传输前，必须先做设备只读 descriptor / reserved-block 核对并确认 autoload=n；当前仍禁止实际接收和持久化写入。详见 [P6-PLAN](P6-PLAN.md)。
 
 ## 相关既有文档
 

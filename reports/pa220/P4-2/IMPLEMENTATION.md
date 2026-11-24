@@ -84,6 +84,22 @@ Actions:
 - [Validator + TFTP guard Host and OCTEON build run #45374041373](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45374041373), commit `908a58f43017f3e252b3ce0c613b4630072203e9`.
 - Latest artifact ID: `14909658286`; name `pa220-p4-2-ram-validator-908a58f43017f3e252b3ce0c613b4630072203e9`; ZIP SHA-256 `d3cd880db8be404327a9fc953ea096a8362145bacbd52541e9ad02e77d7ab6d0`.
 
+### Fixed-source TFTP path inventory
+
+A recursive tree check at the pinned PA-220 source commit found only three TFTP-related files:
+- `u-boot/net/tftp.c`: protocol implementation.
+- `u-boot/net/tftp.h`: protocol declarations.
+- `u-boot/arch/mips/cpu/octeon/commands/cmd_octeon_tftp.c`: the OCTEON `tftp` command is only an alias for `do_tftpb`; it contains no separate receive implementation.
+
+Within `u-boot/net/tftp.c`:
+- The only receive-side RAM copy is the `memcpy((void *)(load_addr + offset), src, len)` inside `store_block()`. The DATA handler has exactly one `store_block(TftpBlock - 1, pkt + 2, len)` call.
+- TFTP GET/RRQ and TFTP Server/WRQ both deliver DATA through the same `TFTP_DATA` handler and therefore the same guarded `store_block()` call. Multicast receive also shares this store function.
+- Both `update_block_number()` call sites are rewritten to stop processing when checked block-wrap arithmetic fails.
+- TFTP PUT uses `load_block()` to copy bytes from local `save_addr` into an outbound packet. That is a RAM read, not a receive-side RAM write; source-read confidentiality/range protection is not covered by this validator. PUT remains outside this acceptance.
+- The optional `CONFIG_SYS_DIRECT_FLASH_TFTP` branch contains `flash_write()`. The generated CN70XX guard validates the destination against the live RAM reservation before either the RAM copy or this branch, so non-RAM destinations fail closed. The direct-flash configuration and flash path were not runtime-tested; persistent writes remain prohibited.
+
+This inventory is source-level evidence at the fixed commit, not proof of runtime protocol behavior.
+
 ## Explicitly not validated / still blocked
 
 - No PA-220 runtime `__tmp_load` descriptor re-check has been performed after this build.
