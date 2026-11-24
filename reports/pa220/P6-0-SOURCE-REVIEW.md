@@ -196,3 +196,12 @@ A follow-up trace of the fixed-source command/network lifecycle found a P6-speci
 - Therefore, if a previous transfer succeeded and a later GET writes some DATA blocks but then fails (for example on a later out-of-range block or timeout), the old metadata pair can remain while the buffer contains a partial new file.
 
 This is not a failure of the P4-2 per-block range check; it is an unimplemented P6 transfer-result lifecycle requirement. It must be fixed before the first real GET: invalidate the volatile `filesize` and `fileaddr` result markers before a GET can write any DATA, fail closed if invalidation cannot be completed, and only let the normal successful completion path publish new metadata. Do not call `saveenv`; this must remain an in-RAM environment update only. The host test must cover both old markers present, successful invalidation, each individual invalidation failure, and confirmation that both deletion attempts occur. This fix and its target integration are **NOT IMPLEMENTED / NOT VERIFIED** at this checkpoint.
+
+
+## 12. Actions path-filter correction and run-list limitation
+
+The earlier P4-2 workflow push filter included `doc/pa220/**` and `reports/pa220/P4-2/**`. The documentation synchronization in this session consisted of separate GitHub contents commits; those documentation pushes matched the old path filter and may have caused unnecessary P4-2 workflow executions. This was avoidable and is recorded as a process mistake.
+
+The workflow filter was subsequently narrowed in commit `16924dd143287a8bd099fec5d5835dc866e60673`: documentation/report paths and the workflow file itself were removed from the push `paths` list. Source, test, generator and build-script changes still trigger the validation workflow; manual `workflow_dispatch` remains available. This change is intended to prevent future documentation-only re-runs.
+
+The available GitHub connector's `fetch_commit_workflow_runs` endpoint returns PR-triggered runs only; it does not enumerate push-triggered repository runs. Therefore this session cannot truthfully provide IDs/results for any additional documentation-triggered runs. The three known P4-2 runs listed in Section 6 were individually verified successful. Do not assume that no additional runs occurred.
