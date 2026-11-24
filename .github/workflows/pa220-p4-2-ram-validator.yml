@@ -42,6 +42,12 @@ jobs:
           } 2>&1 | tee "$R/10-host-tests.log"
           test "$(grep -c 'cases=42 assertions=161 failures=0' "$R/10-host-tests.log")" -eq 2
 
+      - name: Run TFTP DATA pre-write Host Harness against production store_block
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash tests/pa220/tftp-guard/run.sh
+
       - name: Download and verify pinned OCTEON SDK
         env:
           GH_TOKEN: ${{ secrets.OCTEON_SDK_READ_TOKEN }}

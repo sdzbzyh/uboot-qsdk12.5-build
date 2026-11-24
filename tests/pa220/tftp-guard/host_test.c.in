@@ -1,0 +1,167 @@
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+#include <limits.h>
+
+typedef uint32_t ulong;
+typedef unsigned char uchar;
+
+#define NETLOOP_FAIL 1
+#define TFTP_SEQUENCE_SIZE ((ulong)(1U << 16))
+
+static ulong TftpBlkSize;
+static ulong TftpBlockWrapOffset;
+static ulong load_addr;
+static ulong NetBootFileXferSize;
+static unsigned long long allowed_base;
+static unsigned long long allowed_size;
+static unsigned int validator_calls;
+static unsigned int memcpy_calls;
+static uintptr_t memcpy_dest;
+static unsigned int memcpy_len;
+static int net_state;
+static unsigned int assertions;
+static unsigned int cases;
+static unsigned int failures;
+
+static void check(int ok, const char *label)
+{
+    assertions++;
+    if (!ok) {
+        failures++;
+        printf("FAIL: %s\n", label);
+    }
+}
+
+static void net_set_state(int state)
+{
+    net_state = state;
+}
+
+int octeon_load_range_check(uint64_t addr, uint64_t len)
+{
+    validator_calls++;
+    if (!len || addr < allowed_base || len > allowed_size ||
+        addr - allowed_base > allowed_size - len)
+        return -1;
+    return 0;
+}
+
+static void *host_memcpy(void *dest, const void *src, size_t len)
+{
+    (void)src;
+    memcpy_calls++;
+    memcpy_dest = (uintptr_t)dest;
+    memcpy_len = (unsigned int)len;
+    return dest;
+}
+
+#define memcpy host_memcpy
+/*__STORE_BLOCK__*/
+#undef memcpy
+
+static void reset_fixture(void)
+{
+    TftpBlkSize = 512;
+    TftpBlockWrapOffset = 0;
+    load_addr = 0x20000000U;
+    NetBootFileXferSize = 0;
+    allowed_base = 0x20000000ULL;
+    allowed_size = 0x10000000ULL;
+    validator_calls = 0;
+    memcpy_calls = 0;
+    memcpy_dest = 0;
+    memcpy_len = 0;
+    net_state = 0;
+}
+
+static void expect_accept(const char *name, int block, unsigned int len,
+                          uintptr_t expected_dest, unsigned int expected_checks)
+{
+    unsigned int old_writes = memcpy_calls;
+    unsigned int old_checks = validator_calls;
+    cases++;
+    check(store_block(block, (uchar *)"test", len) == 0, name);
+    check(memcpy_calls == old_writes + (len ? 1U : 0U),
+          "accepted DATA has expected copy count");
+    check(validator_calls == old_checks + expected_checks,
+          "accepted DATA has expected validator count");
+    if (len) {
+        check(memcpy_dest == expected_dest, "accepted DATA destination");
+        check(memcpy_len == len, "accepted DATA length");
+    }
+    check(net_state == 0, "accepted DATA does not fail net loop");
+}
+
+static void expect_reject(const char *name, int block, unsigned int len)
+{
+    unsigned int old_writes = memcpy_calls;
+    unsigned int old_checks = validator_calls;
+    cases++;
+    check(store_block(block, (uchar *)"test", len) != 0, name);
+    check(memcpy_calls == old_writes, "rejected DATA performs no memcpy");
+    check(net_state == NETLOOP_FAIL, "rejected DATA fails net loop");
+    check(validator_calls >= old_checks, "validator counter remains monotonic");
+}
+
+int main(void)
+{
+    reset_fixture();
+    expect_accept("first DATA block", 0, 64, 0x20000000U, 1);
+
+    reset_fixture();
+    load_addr = 0x2fffffe0U;
+    expect_accept("last bytes exactly at exclusive end", 0, 32,
+                  0x2fffffe0U, 1);
+
+    reset_fixture();
+    TftpBlockWrapOffset = TftpBlkSize;
+    expect_accept("block sequence wrap offset", -1, 64,
+                  0x20000000U, 1);
+
+    reset_fixture();
+    expect_accept("zero-length terminal DATA block", 0, 0,
+                  0, 0);
+
+    reset_fixture();
+    load_addr = 0x1fffffffU;
+    expect_reject("destination starts before __tmp_load", 0, 64);
+
+    reset_fixture();
+    load_addr = 0x2fffffe0U;
+    expect_reject("destination crosses __tmp_load end", 0, 64);
+
+    reset_fixture();
+    expect_reject("block payload exceeds negotiated block size", 0, 513);
+
+    reset_fixture();
+    TftpBlkSize = 0;
+    expect_reject("zero negotiated block size", 0, 64);
+
+    reset_fixture();
+    expect_reject("negative block other than wrap sentinel", -2, 64);
+
+    reset_fixture();
+    expect_reject("wrap sentinel without prior wrap offset", -1, 64);
+
+    reset_fixture();
+    expect_reject("32-bit target ulong destination overflow", 0x7fffffff, 64);
+
+    reset_fixture();
+    allowed_base = 0x21000000ULL;
+    expect_reject("validator rejects destination inside arithmetic range", 0, 64);
+
+    reset_fixture();
+    TftpBlockWrapOffset = 0xfffffff0U;
+    expect_reject("wrapped offset plus load address overflows target ulong", 0, 64);
+
+    reset_fixture();
+    load_addr = 0x20000000U;
+    TftpBlkSize = 1468;
+    expect_accept("maximum Ethernet DATA block size", 0, 1468,
+                  0x20000000U, 1);
+
+    printf("HOST TFTP GUARD: cases=%u assertions=%u failures=%u writes=%u validator_calls=%u\n",
+           cases, assertions, failures, memcpy_calls, validator_calls);
+    return failures ? 1 : 0;
+}
