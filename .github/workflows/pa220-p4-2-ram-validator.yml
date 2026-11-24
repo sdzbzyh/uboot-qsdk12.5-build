@@ -84,14 +84,20 @@ jobs:
             test -s "$U/u-boot-octeon_pa220.map"
             test -s "$U/System-octeon_pa220.map"
             test -s "$U/u-boot-octeon_pa220.bin"
+            cp "$O" "$R/octeon_load_range.o"
+            cp "$U/u-boot-octeon_pa220" "$R/u-boot-octeon_pa220"
+            cp "$U/u-boot-octeon_pa220.map" "$R/u-boot-octeon_pa220.map"
+            cp "$U/System-octeon_pa220.map" "$R/System-octeon_pa220.map"
+            cp "$U/u-boot-octeon_pa220.bin" "$R/u-boot-octeon_pa220.bin"
             RDL="$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-readelf"
             NM="$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-nm"
             SIZE="$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-size"
             OBJDUMP="$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-objdump"
             "$RDL" -h "$O" | tee "$R/30-validator-object-elf-header.txt"
-            grep -q 'ELF64' "$R/30-validator-object-elf-header.txt"
+            grep -q 'ELF32' "$R/30-validator-object-elf-header.txt"
             grep -q 'big endian' "$R/30-validator-object-elf-header.txt"
             grep -qi 'abi2' "$R/30-validator-object-elf-header.txt"
+            grep -qi 'octeon' "$R/30-validator-object-elf-header.txt"
             "$RDL" -A "$O" > "$R/31-validator-object-attributes.txt"
             "$NM" -u "$O" | tee "$R/32-validator-object-undefined.txt"
             "$NM" -g "$O" | tee "$R/33-validator-object-symbols.txt"
@@ -99,25 +105,29 @@ jobs:
             "$SIZE" "$O" | tee "$R/34-validator-object-size.txt"
             "$OBJDUMP" -f "$O" | tee "$R/35-validator-object-file.txt"
             "$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-gcc" \
-              -mabi=n32 -mabicalls -msoft-float -G 0 -nostdlib -Wl,-r \
+              -mabi=n32 -EB -march=octeon2 -mabicalls -msoft-float -G 0 -nostdlib -Wl,-r \
               "$O" -o "$R/pa220-load-range-validator-n32.o"
             "$RDL" -h "$R/pa220-load-range-validator-n32.o" | tee "$R/36-validator-n32-relocatable-link.txt"
+            grep -q 'ELF32' "$R/36-validator-n32-relocatable-link.txt"
+            grep -q 'big endian' "$R/36-validator-n32-relocatable-link.txt"
+            grep -qi 'abi2' "$R/36-validator-n32-relocatable-link.txt"
             "$NM" -n "$U/u-boot-octeon_pa220" > "$R/40-final-symbols.txt"
             grep -E ' [Tt] octeon_load_range_check$' "$R/40-final-symbols.txt" | tee "$R/41-validator-final-symbol.txt"
             grep -q 'octeon_load_range.o' "$U/u-boot-octeon_pa220.map"
             grep -E 'cvmx_bootmem_find_named_block|load_reserved_addr|load_reserved_size|octeon_load_range_check' \
               "$R/40-final-symbols.txt" | tee "$R/42-validator-dependency-symbols.txt"
             "$RDL" -h "$U/u-boot-octeon_pa220" | tee "$R/43-final-elf-header.txt"
-            cp "$O" "$R/octeon_load_range.o"
-            cp "$U/u-boot-octeon_pa220" "$R/u-boot-octeon_pa220"
-            cp "$U/u-boot-octeon_pa220.map" "$R/u-boot-octeon_pa220.map"
-            cp "$U/System-octeon_pa220.map" "$R/System-octeon_pa220.map"
-            cp "$U/u-boot-octeon_pa220.bin" "$R/u-boot-octeon_pa220.bin"
+            grep -q 'ELF32' "$R/43-final-elf-header.txt"
+            grep -q 'big endian' "$R/43-final-elf-header.txt"
+            grep -qi 'abi2' "$R/43-final-elf-header.txt"
+            grep -qi 'octeon' "$R/43-final-elf-header.txt"
+            grep -q 'octeon_load_range_check' "$U/System-octeon_pa220.map"
             sha256sum "$R/octeon_load_range.o" \
               "$R/pa220-load-range-validator-n32.o" \
               "$R/u-boot-octeon_pa220" "$R/u-boot-octeon_pa220.map" \
               "$R/System-octeon_pa220.map" "$R/u-boot-octeon_pa220.bin" \
               "$R/0001-pa220-load-range-makefile.patch" \
+              "$R/0002-pa220-tftp-prewrite-guard.patch" \
               | tee "$R/50-artifact-sha256.txt"
             echo "P4_2_HOST=PASS"
             echo "P4_2_OCTEON_VALIDATOR_OBJECT=PASS"
