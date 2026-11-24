@@ -41,3 +41,13 @@
 - **实机验证通过**：必须附带设备、镜像版本、测试步骤和原始结果；仅编译通过不算。
 
 所有涉及持久化存储的功能，必须单独标注风险与验证状态。默认遵循 RAM-only 测试原则。
+
+
+## P6-0 源码审查与当前交接（2026-11-24）
+
+- 当前远端分支 HEAD（审查开始时）：`1a318fd562cdb3b475d92abdc5768b436cf154fd`；用户此前记录的 `4168cbd5...` 已是祖先检查点，P4-2 验证提交为 `20acf979...`。
+- P4-2 三次 Actions（#45346000355、#45374041373、#45375848020）均已核实成功；最新 artifact 为 `14910393863`，SHA-256 与 P4-2 报告一致。
+- P6-0 已完成当前分支 validator、固定 PA-220 TFTP 源码、构建入口、生成器和正式文档审查。报告：[P6-0 SOURCE REVIEW](../../reports/pa220/P6-0-SOURCE-REVIEW.md)。
+- P6 当前仍为设计/预检准备；live `__tmp_load` descriptor NOT RUN，TFTP GET 实际接收 NOT RUN。设备报告为断电，本轮未要求上电。
+- P6 首个路径仍为 TFTP GET；HTTP 保持只读。TFTP Server/WRQ、PUT、HTTP 上传和 ELF segment 写入均未获得实机接收验收。
+- 当前执行容器没有本地仓库 checkout，因此用户 Debian 工作区的 clean/dirty 状态未核实；远端分支 SHA 和提交差异已核实。
