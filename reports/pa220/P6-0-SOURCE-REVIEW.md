@@ -184,3 +184,15 @@ Therefore the real TFTP GET is **NOT AUTHORIZED / NOT RUN** at this checkpoint. 
 - DHCP/Ping physical verification: NOT RUN.
 - Device: reported powered off.
 - Persistent writes: prohibited.
+
+
+## 11. Additional P6 finding: stale TFTP result metadata on failure
+
+A follow-up trace of the fixed-source command/network lifecycle found a P6-specific failure-state gap:
+
+- `u-boot/common/cmd_net.c::do_tftpb()` dispatches GET through `netboot_common(TFTPGET, ...)`.
+- `u-boot/net/net.c::NetLoop()` writes `filesize` and `fileaddr` only in the `NETLOOP_SUCCESS` case, when `NetBootFileXferSize > 0`.
+- The `NETLOOP_FAIL` case runs `net_cleanup_loop()`, invalidates the last protocol and returns, but does not clear prior `filesize` / `fileaddr` values.
+- Therefore, if a previous transfer succeeded and a later GET writes some DATA blocks but then fails (for example on a later out-of-range block or timeout), the old metadata pair can remain while the buffer contains a partial new file.
+
+This is not a failure of the P4-2 per-block range check; it is an unimplemented P6 transfer-result lifecycle requirement. It must be fixed before the first real GET: invalidate the volatile `filesize` and `fileaddr` result markers before a GET can write any DATA, fail closed if invalidation cannot be completed, and only let the normal successful completion path publish new metadata. Do not call `saveenv`; this must remain an in-RAM environment update only. The host test must cover both old markers present, successful invalidation, each individual invalidation failure, and confirmation that both deletion attempts occur. This fix and its target integration are **NOT IMPLEMENTED / NOT VERIFIED** at this checkpoint.
