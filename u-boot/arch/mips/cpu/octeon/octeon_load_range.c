@@ -16,11 +16,20 @@
 #endif
 
 #ifndef PA220_LOAD_RANGE_HOST_TEST
+#ifndef CONFIG_OCTEON_CN70XX
+#error "PA-220 RAM range validator requires the fixed CN70XX DDR map"
+#endif
 DECLARE_GLOBAL_DATA_PTR;
 #endif
 
 extern ulong load_reserved_addr;
 extern ulong load_reserved_size;
+
+#define PA220_DDR0_BASE 0x000000000ULL
+#define PA220_DDR0_SIZE 0x010000000ULL
+#define PA220_DDR1_BASE 0x020000000ULL
+#define PA220_DDR2_BASE 0x030000000ULL
+#define PA220_DDR2_SIZE 0x7d0000000ULL
 
 #define OCTEON_LOAD_U64_MAX             (~0ULL)
 #define OCTEON_LOAD_LOW_RESERVED_SIZE  (1ULL << 20)
@@ -63,24 +72,24 @@ static int octeon_load_normalize_addr(uint64_t addr, uint64_t *physical,
 		low = (uint32_t)addr;
 		if (low >= 0x80000000U && low < 0xa0000000U) {
 			*physical = low & 0x1fffffffU;
-			if (*physical >= OCTEON_DDR0_SIZE &&
-			    *physical < OCTEON_DDR1_BASE)
+			if (*physical >= PA220_DDR0_SIZE &&
+			    *physical < PA220_DDR1_BASE)
 				return -1;
 			*alias_remaining = 0xa0000000ULL - low;
-			if (*physical < OCTEON_DDR0_SIZE &&
-			    *alias_remaining > OCTEON_DDR0_SIZE - *physical)
-				*alias_remaining = OCTEON_DDR0_SIZE - *physical;
+			if (*physical < PA220_DDR0_SIZE &&
+			    *alias_remaining > PA220_DDR0_SIZE - *physical)
+				*alias_remaining = PA220_DDR0_SIZE - *physical;
 			return 0;
 		}
 		if (low >= 0xa0000000U && low < 0xc0000000U) {
 			*physical = low & 0x1fffffffU;
-			if (*physical >= OCTEON_DDR0_SIZE &&
-			    *physical < OCTEON_DDR1_BASE)
+			if (*physical >= PA220_DDR0_SIZE &&
+			    *physical < PA220_DDR1_BASE)
 				return -1;
 			*alias_remaining = 0xc0000000ULL - low;
-			if (*physical < OCTEON_DDR0_SIZE &&
-			    *alias_remaining > OCTEON_DDR0_SIZE - *physical)
-				*alias_remaining = OCTEON_DDR0_SIZE - *physical;
+			if (*physical < PA220_DDR0_SIZE &&
+			    *alias_remaining > PA220_DDR0_SIZE - *physical)
+				*alias_remaining = PA220_DDR0_SIZE - *physical;
 			return 0;
 		}
 
@@ -89,12 +98,12 @@ static int octeon_load_normalize_addr(uint64_t addr, uint64_t *physical,
 			return -1;
 
 		/* 32-bit identity aliases are only valid in the board DDR map. */
-		if (low < OCTEON_DDR0_SIZE) {
+		if (low < PA220_DDR0_SIZE) {
 			*physical = low;
-			*alias_remaining = OCTEON_DDR0_SIZE - low;
+			*alias_remaining = PA220_DDR0_SIZE - low;
 			return 0;
 		}
-		if (low >= OCTEON_DDR1_BASE && low < 0x80000000U) {
+		if (low >= PA220_DDR1_BASE && low < 0x80000000U) {
 			*physical = low;
 			*alias_remaining = 0x80000000ULL - low;
 			return 0;
@@ -125,7 +134,7 @@ static int octeon_load_ranges_overlap(uint64_t a_start, uint64_t a_end,
  * Prove that a named-block descriptor lies in physical DDR, not in the
  * boot-bus hole or beyond the installed RAM.  For CN70XX, DDR0 is followed
  * by the 256 MiB boot-bus aperture; DDR1 and DDR2 are contiguous from
- * OCTEON_DDR1_BASE.  gd->ram_size is the runtime total across those regions.
+ * PA220_DDR1_BASE.  gd->ram_size is the runtime total across those regions.
  * This validates the descriptor itself; __tmp_load remains the sole write
  * window authority.
  */
@@ -140,9 +149,9 @@ static int octeon_load_is_dram_range(uint64_t base, uint64_t end)
 	if (!ram_size)
 		return -1;
 
-	ddr0_size = ram_size < OCTEON_DDR0_SIZE ?
-		    ram_size : OCTEON_DDR0_SIZE;
-	ddr0_end = OCTEON_DDR0_BASE + ddr0_size;
+	ddr0_size = ram_size < PA220_DDR0_SIZE ?
+		    ram_size : PA220_DDR0_SIZE;
+	ddr0_end = PA220_DDR0_BASE + ddr0_size;
 	/* DDR0_BASE is zero; end <= ddr0_end also proves base is in DDR0. */
 	if (end <= ddr0_end)
 		return 0;
@@ -150,15 +159,15 @@ static int octeon_load_is_dram_range(uint64_t base, uint64_t end)
 	if (ram_size <= ddr0_size)
 		return -1;
 	high_size = ram_size - ddr0_size;
-	if (OCTEON_DDR1_BASE > OCTEON_LOAD_U64_MAX - high_size ||
-	    OCTEON_DDR2_BASE > OCTEON_LOAD_U64_MAX - OCTEON_DDR2_SIZE)
+	if (PA220_DDR1_BASE > OCTEON_LOAD_U64_MAX - high_size ||
+	    PA220_DDR2_BASE > OCTEON_LOAD_U64_MAX - PA220_DDR2_SIZE)
 		return -1;
-	high_end = OCTEON_DDR1_BASE + high_size;
-	max_ddr_end = OCTEON_DDR2_BASE + OCTEON_DDR2_SIZE;
+	high_end = PA220_DDR1_BASE + high_size;
+	max_ddr_end = PA220_DDR2_BASE + PA220_DDR2_SIZE;
 	if (high_end > max_ddr_end)
 		return -1;
 
-	if (base >= OCTEON_DDR1_BASE && end <= high_end)
+	if (base >= PA220_DDR1_BASE && end <= high_end)
 		return 0;
 	return -1;
 }

@@ -8,12 +8,11 @@ typedef unsigned long ulong;
 #define CVMX_BOOTMEM_NAME_LEN 128
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 #define OCTEON_BOOTLOADER_LOAD_MEM_NAME "__tmp_load"
-#define OCTEON_DDR0_BASE 0x000000000ULL
-#define OCTEON_DDR0_SIZE 0x010000000ULL
-#define OCTEON_DDR1_BASE 0x020000000ULL
-#define OCTEON_DDR1_SIZE 0x010000000ULL
-#define OCTEON_DDR2_BASE 0x030000000ULL
-#define OCTEON_DDR2_SIZE 0x7d0000000ULL
+#define PA220_DDR0_BASE 0x000000000ULL
+#define PA220_DDR0_SIZE 0x010000000ULL
+#define PA220_DDR1_BASE 0x020000000ULL
+#define PA220_DDR2_BASE 0x030000000ULL
+#define PA220_DDR2_SIZE 0x7d0000000ULL
 typedef struct cvmx_bootmem_named_block_desc {
 	uint64_t base_addr;
 	uint64_t size;
