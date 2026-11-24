@@ -280,3 +280,17 @@ P4 网络维护基础仍保留历史计划中的未完成项：DHCP Client/Ping 
 - 权威证据：[Actions run #45374041373](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45374041373)，集成提交 `908a58f43017f3e252b3ce0c613b4630072203e9`；报告 `reports/pa220/P4-2/IMPLEMENTATION.md`。
 
 **仍未通过/未运行：** PA-220 runtime descriptor 只读核对、真实 TFTP GET/Server 接收、HTTP 上传、ELF segment 写入、DHCP/Ping 实机测试。P4 不得标记 COMPLETE；P6 仅可进入受控设计/实现，实际接收测试须等设备上电后的只读内存布局核对和独立授权。
+
+
+## 当前阶段状态覆盖（2026-11-24，P6-0）
+
+本节覆盖本路线图中较早的 P4-2 / P6 状态描述；历史记录保留作为审计轨迹。
+
+- **P4-2：代码、Host、OCTEON 编译/链接及生成器幂等性均 PASS。** 权威 Actions：#45346000355、#45374041373、#45375848020；最新验证提交 `20acf9790b6ee15ed758db7006eaee69af0f2bf2`，当前分支 HEAD 在本次审查开始时为 `1a318fd562cdb3b475d92abdc5768b436cf154fd`。
+- **P6：设计/源码审查和只读预检准备进行中。** 首个路径为 TFTP GET/RRQ；实际接收 NOT RUN。live `__tmp_load` descriptor NOT RUN，设备报告断电。
+- P4-2 TFTP guard 是每个 DATA block 的写入前保护，不等同于完整文件 reservation、SHA-256/CRC 验收、格式识别或失败后有效状态管理。上述 P6 软件门仍需完成。
+- DHCP Client/Ping 实机验证 NOT RUN；P4 overall 不得标记 COMPLETE。
+- HTTP 上传、ELF PT_LOAD/section 写入仍 BLOCKED；TFTP Server/WRQ 和 PUT 不在首轮 GET 实机验收范围。
+- 本轮没有重跑 P4-2 测试，没有进行实际文件传输，也没有任何持久化写入。
+
+详细源码审查、测试向量和只读命令见 `reports/pa220/P6-0-SOURCE-REVIEW.md`。
