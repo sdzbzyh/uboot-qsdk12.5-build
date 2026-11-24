@@ -142,10 +142,9 @@ static int octeon_load_is_dram_range(uint64_t base, uint64_t end)
 
 	ddr0_size = ram_size < OCTEON_DDR0_SIZE ?
 		    ram_size : OCTEON_DDR0_SIZE;
-	if (OCTEON_DDR0_BASE > OCTEON_LOAD_U64_MAX - ddr0_size)
-		return -1;
 	ddr0_end = OCTEON_DDR0_BASE + ddr0_size;
-	if (base >= OCTEON_DDR0_BASE && end <= ddr0_end)
+	/* DDR0_BASE is zero; end <= ddr0_end also proves base is in DDR0. */
+	if (end <= ddr0_end)
 		return 0;
 
 	if (ram_size <= ddr0_size)
