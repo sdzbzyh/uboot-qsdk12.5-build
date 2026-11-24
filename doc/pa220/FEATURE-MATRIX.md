@@ -338,3 +338,26 @@ PA-220 固定源码在独立干净 checkout 上完成完整构建，退出码为
 - 当前不是完整上传功能：TFTP store_block()、HTTP payload/chunk、ELF64 PT_LOAD/section 写入尚未接入 validator。
 - OCTEON 目标对象、N32 relocatable link、完整 U-Boot final link 和符号/map 检查待 Actions。
 - 在目标验证及调用点接入/回归完成前，TFTP 接收、HTTP 上传和任意 ELF segment 写入仍为 BLOCKED。
+
+
+## P4-2 / P6 状态覆盖（2026-11-24）
+
+本节为当前状态权威覆盖；较早的 32/121 Host 和目标构建待执行记录属于历史进度。
+
+| 功能/门 | 当前状态 | 证据边界 |
+|---|---|---|
+| 统一 RAM validator | **已实现；Host PASS** | 42 scenarios / 161 assertions / 0 failures；GCC + ASan/UBSan |
+| TFTP DATA pre-write guard | **已实现；Host PASS** | 14 scenarios / 64 assertions / 0 failures；测试导入生成器中的生产函数模板，非完整 TFTP 会话 |
+| OCTEON validator object / N32 link | **PASS** | Cavium SDK 5.1.0；Actions #45375848020 |
+| TFTP `tftp.o` / `libnet.o` 集成 | **编译/链接 PASS** | 不代表网络接收成功 |
+| 完整 PA-220 U-Boot final link | **PASS** | ELF/map/System.map 符号检查 |
+| TFTP patch generator idempotence | **PASS** | Actions #45375848020 |
+| live `__tmp_load` descriptor | **NOT RUN** | 设备报告断电 |
+| TFTP GET 实际接收 | **NOT RUN / BLOCKED** | 等待只读 descriptor 预检及 P6 完整文件生命周期软件门 |
+| TFTP Server/WRQ | **NOT RUN** | 不属于首轮 GET 验收 |
+| TFTP PUT | **NOT RUN** | 本地 RAM source read 不属于 receive guard 覆盖范围 |
+| HTTP upload | **BLOCKED** | HTTP 保持只读 |
+| ELF PT_LOAD/section 写入保护 | **BLOCKED** | 尚无独立 destination/source validator 集成验收 |
+| DHCP Client / Ping 实机 | **NOT RUN** | P4 遗留项 |
+
+Actions #45346000355、#45374041373、#45375848020 均成功；最新 artifact ID `14910393863`。详细证据与 P6-0 源码审查见 `reports/pa220/P4-2/IMPLEMENTATION.md` 和 `reports/pa220/P6-0-SOURCE-REVIEW.md`。
