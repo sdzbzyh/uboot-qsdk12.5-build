@@ -40,7 +40,7 @@ jobs:
             cc --version | head -n 1
             bash tests/pa220/ram-range/run.sh
           } 2>&1 | tee "$R/10-host-tests.log"
-          grep -q 'cases=32 assertions=121 failures=0' "$R/10-host-tests.log"
+          test "$(grep -c 'cases=42 assertions=161 failures=0' "$R/10-host-tests.log")" -eq 2
 
       - name: Download and verify pinned OCTEON SDK
         env:
@@ -113,7 +113,7 @@ jobs:
             grep -qi 'abi2' "$R/36-validator-n32-relocatable-link.txt"
             "$NM" -n "$U/u-boot-octeon_pa220" > "$R/40-final-symbols.txt"
             grep -E ' [Tt] octeon_load_range_check$' "$R/40-final-symbols.txt" | tee "$R/41-validator-final-symbol.txt"
-            grep -q 'octeon_load_range.o' "$U/u-boot-octeon_pa220.map"
+            grep -q 'octeon_load_range_check' "$U/u-boot-octeon_pa220.map"
             grep -E 'cvmx_bootmem_find_named_block|load_reserved_addr|load_reserved_size|octeon_load_range_check' \
               "$R/40-final-symbols.txt" | tee "$R/42-validator-dependency-symbols.txt"
             "$RDL" -h "$U/u-boot-octeon_pa220" | tee "$R/43-final-elf-header.txt"

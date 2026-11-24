@@ -61,6 +61,7 @@ static void reset_fixture(void)
 	board_data.bi_uboot_ram_addr = UBOOT_BASE;
 	board_data.bi_uboot_ram_used_size = UBOOT_SIZE;
 	global_data.bd = &board_data;
+	global_data.ram_size = 0x200000000ULL;
 	load_reserved_addr = (ulong)LOAD_BASE; load_reserved_size = (ulong)LOAD_SIZE;
 	add_block("__uboot_code_data", UBOOT_BASE, UBOOT_SIZE);
 	add_block("__tmp_load", LOAD_BASE, LOAD_SIZE);
@@ -68,6 +69,9 @@ static void reset_fixture(void)
 	add_block("__fdt", 0x00080000ULL, 0x00020000ULL);
 	add_block("idle-core-loop", 0x000ffff0ULL, 0x10ULL);
 	add_block("__low_reserved", 0, 0x00100000ULL);
+	add_block("__tmp_uboot_exception", 0x00070000ULL, 0x10000ULL);
+	add_block("__bootloader_env", 0x000a0000ULL, 0x10000ULL);
+	add_block("__mac_meminfo", 0x000b0000ULL, 0x1000ULL);
 }
 const cvmx_bootmem_named_block_desc_t *
 cvmx_bootmem_find_named_block(const char *name)
@@ -130,8 +134,23 @@ static void expect_state_reject(const char *name)
 	check(!memcmp(saved, write_guard, sizeof(saved)),
 	      "invalid state leaves destination unchanged");
 }
+static void expect_state_reject_at(const char *name, uint64_t addr, uint64_t len)
+{
+	unsigned int before = writes; unsigned char saved[sizeof(write_guard)];
+	memcpy(saved, write_guard, sizeof(saved)); cases++;
+	check(octeon_load_range_check(addr, len) != 0, name);
+	check(guarded_write(addr, len) != 0, "invalid descriptor blocks guarded write");
+	check(writes == before, "invalid descriptor performs no write");
+	check(!memcmp(saved, write_guard, sizeof(saved)),
+	      "invalid descriptor leaves destination unchanged");
+}
 int main(void)
 {
+	static const char * const extra_reserved[] = {
+		"__tmp_uboot_exception", "__fdt", "__bootloader_env",
+		"__low_reserved", "__mac_meminfo", "idle-core-loop"
+	};
+	unsigned int i;
 	reset_fixture(); expect_pass("legal interior range", LOAD_BASE + 0x100, 0x100);
 	reset_fixture(); expect_pass("start exactly at allowed base", LOAD_BASE, 1);
 	reset_fixture(); expect_pass("end exactly at allowed end", LOAD_BASE + LOAD_SIZE - 16, 16);
@@ -195,6 +214,36 @@ int main(void)
 	load_reserved_addr = 0x01000000UL; load_reserved_size = 0x10000UL;
 	remove_block("__tmp_reserved_linux");
 	expect_pass("uncached KSEG1 alias normalization", 0xa1000020ULL, 0x20);
+
+	for (i = 0; i < ARRAY_SIZE(extra_reserved); i++) {
+		reset_fixture();
+		remove_block(extra_reserved[i]);
+		add_block(extra_reserved[i], LOAD_BASE + 0x1000, 0x1000);
+		expect_state_reject(extra_reserved[i]);
+	}
+	reset_fixture();
+	remove_block("__tmp_load");
+	add_block("__tmp_load", 0x18000000ULL, 0x1000ULL);
+	load_reserved_addr = 0x18000000UL; load_reserved_size = 0x1000UL;
+	expect_state_reject_at("named descriptor in boot-bus hole",
+			       0x8000000018000100ULL, 0x20);
+	reset_fixture();
+	remove_block("__tmp_load");
+	add_block("__tmp_load", 0x0ffff000ULL, 0x2000ULL);
+	load_reserved_addr = 0x0ffff000UL; load_reserved_size = 0x2000UL;
+	remove_block("__tmp_reserved_linux");
+	expect_state_reject_at("named descriptor crosses DDR0/boot-bus boundary",
+			       0x800000000ffff100ULL, 0x20);
+	reset_fixture();
+	global_data.ram_size = 0x40000000ULL;
+	remove_block("__tmp_load");
+	add_block("__tmp_load", 0x60000000ULL, 0x1000ULL);
+	load_reserved_addr = 0x60000000UL; load_reserved_size = 0x1000UL;
+	expect_state_reject_at("named descriptor exceeds runtime RAM size",
+			       0x8000000060000100ULL, 0x20);
+	reset_fixture();
+	global_data.ram_size = 0;
+	expect_state_reject("runtime RAM size unavailable");
 	printf("HOST RAM RANGE: cases=%u assertions=%u failures=%u writes=%u\n",
 	       cases, assertions, failures, writes);
 	return failures ? 1 : 0;
