@@ -151,7 +151,7 @@ jobs:
           R=reports/pa220/P4-2
           BEFORE=$(sha256sum "$R/0002-pa220-tftp-prewrite-guard.patch" | awk '{print $1}')
           python3 scripts/generate-pa220-load-range-makefile-patch.py \
-            --source-root "$PA220_REPO_DIR" \
+            --source-root "$RUNNER_TEMP/pa220-openwrt" \
             --output "$R/0001-pa220-load-range-makefile.patch"
           AFTER=$(sha256sum "$R/0002-pa220-tftp-prewrite-guard.patch" | awk '{print $1}')
           test "$BEFORE" = "$AFTER"
