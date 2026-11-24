@@ -38,7 +38,7 @@ jobs:
             echo "INTEGRATION_COMMIT=$(git rev-parse HEAD)"
             echo "PA220_SOURCE_PIN=801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8"
             cc --version | head -n 1
-            tests/pa220/ram-range/run.sh
+            bash tests/pa220/ram-range/run.sh
           } 2>&1 | tee "$R/10-host-tests.log"
           grep -q 'cases=32 assertions=121 failures=0' "$R/10-host-tests.log"
 
