@@ -4,15 +4,12 @@ on:
   push:
     branches: [feature/pa220-ubootkit-web]
     paths:
-      - '.github/workflows/pa220-p4-2-ram-validator.yml'
       - 'u-boot/arch/mips/cpu/octeon/octeon_load_range.c'
       - 'u-boot/arch/mips/include/asm/arch-octeon/octeon_load_range.h'
       - 'tests/pa220/ram-range/**'
       - 'tests/pa220/tftp-guard/**'
       - 'scripts/generate-pa220-load-range-makefile-patch.py'
       - 'build-pa220.sh'
-      - 'doc/pa220/**'
-      - 'reports/pa220/P4-2/**'
   workflow_dispatch:
 
 permissions:
