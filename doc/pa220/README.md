@@ -13,13 +13,16 @@
 | [TEST-PLAN.md](TEST-PLAN.md) | 编译、静态检查、RAM 启动及硬件验证策略 |
 | [reports/P0-2026-11-18.md](reports/P0-2026-11-18.md) | P0 节点报告与仓库审计结果 |
 | [P5-2C 实机验收](../../reports/pa220/P5-2C/ACCEPTANCE.md) | P5-2C 云端、Host 与 PA-220 实机 HTTP/TCP 验收及证据边界 |
+| [P4-2 validator / TFTP guard 验收](../../reports/pa220/P4-2/IMPLEMENTATION.md) | 统一 RAM validator、TFTP DATA pre-write guard 的 Host/目标构建证据及未完成事项 |
 
-## 当前项目检查点（2026-11-23）
+## 当前项目检查点（2026-11-24）
 
 - 集成分支：`feature/pa220-ubootkit-web`。
 - P5-2C：云端构建、Host Harness 和 PA-220 RAM 启动后的实机 HTTP/TCP 验证已完成；正式结果以 [P5-2C ACCEPTANCE](../../reports/pa220/P5-2C/ACCEPTANCE.md) 为准。
-- 实机证据目录：[P5-2C physical-evidence](../../reports/pa220/P5-2C/physical-evidence/)。其中 `pa220-serial.log` 是会话记录重建件，不是原始 UART 录制。
-- 下一项工作应先处理统一 RAM 写入前范围验证器；在其完成并验证前，不得开放 TFTP/HTTP 文件接收或 ELF segment 写入。
+- P4-2：生产 RAM validator Host 42/161 与 OCTEON N32/full U-Boot link PASS；TFTP DATA guard Host 14/64，目标 `tftp.o` 编译并进入 `libnet.o`。正式结果以 [P4-2 IMPLEMENTATION](../../reports/pa220/P4-2/IMPLEMENTATION.md) 为准。
+- 真实 TFTP 接收尚未测试；PA-220 仍保持断电，尚未做 live `__tmp_load` descriptor 只读核对。
+- HTTP 仍只读，HTTP 上传与 ELF segment 写入保持 BLOCKED；DHCP/Ping 实机验证仍未完成。
+- 下一阶段为 P6 RAM-only 接收设计与实现；任何实际传输前，必须先做设备只读 descriptor / reserved-block 核对。禁止持久化写入。
 
 ## 相关既有文档
 

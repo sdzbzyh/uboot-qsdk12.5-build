@@ -8,7 +8,7 @@
 | P1 | uBootKit 功能源码审计 | 已完成 A0～A5 固定源码静态审计；明确适配结论、风险和运行时待验证项 | 所有目标功能均有适配结论和证据来源；未构建/未实机验证项单独标记 |
 | P2 | PA-220 基线与构建复核 | 固定源码、补丁叠加、工具链、干净构建、关键对象静态核查和 RAM 启动 | **已完成（2026-11-19）**；未完成的只读硬件核查转入 P3，见 `reports/P2-COMPLETION-2026-11-19.md` |
 | P3 | CLI/只读诊断完善 | 板卡、内存、时钟、网络、存储、EEPROM、CPLD 只读信息 | 编译和 RAM 启动验证通过；无持久化写入 |
-| P4 | 网络维护基础 | DHCP Client/Ping 实机验证与 TFTP 接收安全门 | **IN PROGRESS**；2026-11-24 生产 validator 已实现，Host 32 cases/121 assertions/0 failures；OCTEON 目标构建待验证；TFTP/HTTP/ELF 调用点未接入，接收保持 BLOCKED；DHCP/Ping 未完成 |
+| P4 | 网络维护基础 | DHCP Client/Ping 实机验证与 TFTP 接收安全门 | **IN PROGRESS**；P4-2 validator Host 42/161、OCTEON N32 对象/完整 U-Boot 链接 PASS；TFTP store_block guard Host 14/64、tftp.o 编译及 libnet.o 链接 PASS；实际接收仍 BLOCKED；DHCP/Ping 实机验证未完成 |
 | P5 | HTTP/Web 只读管理 | TCP 接入、前台生命周期、有界 HTTP parser、只读 URI handler 与实机验收 | **P5-2C 已完成（2026-11-23）**；云端/Host/实机证据见 `reports/pa220/P5-2C/ACCEPTANCE.md` |
 | P6 | RAM 文件接收与校验 | 上传、进度、大小限制、CRC/SHA、格式识别 | 上传仅影响 RAM，边界和错误路径通过测试 |
 | P7 | 固件解析与安装预览 | 固件格式解析、目标映射、dry-run 报告 | 不写存储即可完整展示安装计划 |
@@ -268,3 +268,15 @@ P4 网络维护基础仍保留历史计划中的未完成项：DHCP Client/Ping 
 ### P4-2 validator 实施进度（2026-11-24）
 
 生产 validator 已加入集成树；Host Harness 32 scenarios / 121 assertions / 0 failures，ASan/UBSan 回归通过。专用 Actions 将使用固定 PA-220 源码基线与 Cavium OCTEON SDK 5.1.0 完成目标对象、N32 relocatable link 和完整 U-Boot final link。当前不把 Host PASS 写成目标 PASS；TFTP/HTTP/ELF 写入调用点仍未接入，全部 BLOCKED。详细记录：reports/pa220/P4-2/IMPLEMENTATION.md。
+
+
+## P4-2 / P6 状态更正（2026-11-24）
+
+本节覆盖本路线图中此前 P4-2 的旧状态描述。
+
+- 生产 `octeon_load_range_check()` Host Harness：42 scenarios / 161 assertions / 0 failures；普通 GCC 与 ASan/UBSan 均通过。
+- TFTP DATA `store_block()` guard Host Harness：14 scenarios / 64 assertions / 0 failures；普通 GCC 与 ASan/UBSan 均通过。测试编译的是 patch generator 使用的同一生产函数文本，并用 mock validator / intercepted memcpy 检查拒绝路径无写入。
+- CN70XX 修改后的 `tftp.c` 已编译为 `tftp.o` 并进入 `libnet.o`；validator OCTEON object、N32 relocatable link、完整 PA-220 U-Boot final link 均通过。
+- 权威证据：[Actions run #45374041373](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45374041373)，集成提交 `908a58f43017f3e252b3ce0c613b4630072203e9`；报告 `reports/pa220/P4-2/IMPLEMENTATION.md`。
+
+**仍未通过/未运行：** PA-220 runtime descriptor 只读核对、真实 TFTP GET/Server 接收、HTTP 上传、ELF segment 写入、DHCP/Ping 实机测试。P4 不得标记 COMPLETE；P6 仅可进入受控设计/实现，实际接收测试须等设备上电后的只读内存布局核对和独立授权。

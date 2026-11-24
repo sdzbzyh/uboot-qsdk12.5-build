@@ -1,69 +1,102 @@
 # P4-2 Unified RAM Write-Range Validator — Implementation Record
 
 Date: 2026-11-24
-Integration repository: sdzbzyh/uboot-qsdk12.5-build
-Branch baseline: feature/pa220-ubootkit-web
-Pre-change HEAD: 4168cbd5fa285e8a93a40e195e7bff09ab965024
-Fixed PA-220 source: IronDemiGod/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8
+Integration repository: `sdzbzyh/uboot-qsdk12.5-build`
+Branch: `feature/pa220-ubootkit-web`
+Verified integration commit: `908a58f43017f3e252b3ce0c613b4630072203e9`
+Validator implementation baseline: `fce0485d1f1eaeeac5cc1732d5822077cfa68a20`
+Fixed PA-220 source: `sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
 
-## Scope
+## Status
 
-Implemented the independent production validator interface:
+**P4-2 validator Host and OCTEON build: PASS. TFTP DATA pre-write guard Host and OCTEON compile/link: PASS. Actual TFTP receive: NOT RUN. P4 overall: IN PROGRESS. P6: NOT STARTED.**
 
-    int octeon_load_range_check(uint64_t addr, uint64_t len);
+The current result supersedes the earlier 32/121 Host result and the earlier `PENDING Actions execution` text. The authoritative validation is GitHub Actions run [#45374041373](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45374041373), checked out at integration commit `908a58f43017f3e252b3ce0c613b4630072203e9`.
 
-No TFTP, HTTP upload, ELF loader, DHCP, Ping, or persistent-storage behavior was enabled or tested in this change.
+## Production validator
 
-## Production implementation
+Public interface:
 
-- Source: u-boot/arch/mips/cpu/octeon/octeon_load_range.c
-- Header: u-boot/arch/mips/include/asm/arch-octeon/octeon_load_range.h
-- The only writable interval is obtained from cvmx_bootmem_find_named_block(OCTEON_BOOTLOADER_LOAD_MEM_NAME), where the fixed source defines the name as __tmp_load.
-- The API returns a pointer to a function-static, non-reentrant descriptor snapshot. The validator copies base, size and name immediately, then obtains a second snapshot and compares it.
-- The descriptor must have the expected name, nonzero base/size and a non-overflowing end. load_reserved_addr/load_reserved_size are consistency checks only.
-- __uboot_code_data must match gd->bd->bi_uboot_ram_addr/bi_uboot_ram_used_size. This reservation includes U-Boot code/data, malloc, stack, board/global data and boot parameters.
-- The complete candidate load block is rejected if it overlaps the fixed low 1 MiB or any present known reserved named block: Linux reserved, U-Boot exception, FDT, bootloader environment, low reserved, MAC memory info or idle-core loop.
-- Address normalization accepts the PA-220 identity/physical form, KSEG0/KSEG1 aliases and XKPHYS CCA aliases. Unsupported 64-bit virtual/IO forms, KSEG segment crossings and XKPHYS MBZ bits are rejected.
-- All range decisions use checked arithmetic and half-open intervals. No write occurs in the validator.
+```c
+int octeon_load_range_check(uint64_t addr, uint64_t len);
+```
 
-## Host Harness
+Sources:
+- `u-boot/arch/mips/cpu/octeon/octeon_load_range.c`
+- `u-boot/arch/mips/include/asm/arch-octeon/octeon_load_range.h`
 
-The Host Harness compiles the production C file itself with mocked platform dependencies.
-
-    HOST RAM RANGE: cases=32 assertions=121 failures=0 writes=1
-
-- GCC C99, -Wall -Wextra -Werror: PASS
-- AddressSanitizer + UndefinedBehaviorSanitizer: PASS
-- Rejected requests: guarded destination unchanged and write counter unchanged.
-- Covered descriptor missing/invalid/name mismatch/change, globals mismatch, boundary equality, overflow/wrap, zero length, alias normalization, KSEG crossing, reserved overlap and U-Boot reservation mismatch/overlap.
-
-## Source-derived safety evidence
-
-- cvmx_bootmem_find_named_block() returns a pointer to a function-static descriptor object; the source documents that it is not re-entrant.
-- board_octeon.c allocates the U-Boot physical reservation as named block __uboot_code_data using the live board-info base and used size. This range covers code/data, malloc, stack, bd, gd and boot parameters.
-- The fixed memory map reserves the low 1 MiB for bootloader structures, FDT/exception/bootmem metadata.
-- __tmp_load is allocated through the bootmem named-block allocator; the Linux reserved block is allocated separately through the same allocator.
-- For the default 8 GiB PA-220 configuration, source formulas yield the default load reservation physical interval [0x20000000, 0x30000000); this value is documentation only and is not hard-coded into the validator.
-- KSEG0 alias 0x81000000 normalizes to physical 0x01000000, which is outside the default load window and inside the default Linux-reserved region.
+Implementation properties:
+- The authoritative writable interval is queried at runtime from `cvmx_bootmem_find_named_block(OCTEON_BOOTLOADER_LOAD_MEM_NAME)`, whose fixed-source name is `__tmp_load`.
+- Descriptor base, size and name are copied immediately into a function-static snapshot; a second lookup is compared to detect a changed descriptor.
+- Descriptor name, nonzero base/size, checked end arithmetic and consistency with `load_reserved_addr/load_reserved_size` are validated.
+- `__uboot_code_data` must agree with `gd->bd->bi_uboot_ram_addr/bi_uboot_ram_used_size`; this reservation covers U-Boot code/data, malloc, stack, board/global data and boot parameters.
+- The load window is rejected if it overlaps the low 1 MiB or a present known reserved named block: Linux reserved, U-Boot exception, FDT, bootloader environment, low reserved, MAC memory info or idle-core loop.
+- 32-bit identity/physical, KSEG0/KSEG1 and XKPHYS CCA aliases are normalized. Unsupported 64-bit virtual/IO forms, KSEG segment crossings and XKPHYS MBZ bits are rejected.
+- Checked arithmetic and half-open intervals are used. Zero length, overflow, wraparound and out-of-window ranges are rejected. The validator itself performs no write.
 
 ### Descriptor concurrency limitation
 
-The fixed API performs the named-block lookup under its internal lock, releases that lock, then copies fields into its static snapshot. The validator therefore does not claim an atomic snapshot against arbitrary concurrent bootmem writers. The current U-Boot foreground command model is serialized; secondary cores are brought to an idle loop and do not run bootmem writers. If asynchronous/multi-core bootmem mutation is introduced, this implementation must be replaced with a lock-protected snapshot API.
+The fixed API performs the named-block lookup under its internal lock, releases that lock, then copies fields into its static snapshot. The validator does not claim an atomic snapshot against arbitrary concurrent bootmem writers. It relies on the current foreground U-Boot command model being serialized and secondary cores remaining idle. If asynchronous or multi-core bootmem mutation is introduced, this must be replaced by a lock-protected snapshot API.
 
-## Explicitly BLOCKED
+## Host validation
 
-- TFTP store_block() still has no call to the validator before its RAM memcpy.
-- HTTP remains read-only; no payload reservation or chunk writer exists.
-- OCTEON ELF64 PT_LOAD and section fallback still write without calling the validator. Its separate little-endian tail-width issue remains for ELF hardening.
-- No receive path was enabled or tested.
-- DHCP Client and Ping hardware verification remain incomplete.
+### Validator Host Harness
 
-## Target build
+`tests/pa220/ram-range/run.sh` compiles the production validator C source itself against mocked platform dependencies.
 
-A dedicated GitHub Actions workflow has been added to run the production Host Harness, download and checksum the pinned Cavium OCTEON SDK 5.1.0, copy the production validator into the fixed PA-220 source checkout, generate the OCTEON Makefile diff using git diff against the actual pinned source, build the validator object and complete PA-220 U-Boot, and inspect N32/ELF ABI, undefined symbols, object size, final ELF, map, System.map and SHA-256.
+- Normal GCC run: `cases=42 assertions=161 failures=0`
+- ASan + UBSan run: `cases=42 assertions=161 failures=0`
+- Both outputs are asserted by the workflow.
+- Rejected ranges leave the guarded destination unchanged and do not increment the write count.
 
-Target build and final-link status are PENDING Actions execution at the time of this report. This report does not claim target PASS.
+### TFTP DATA pre-write Host Harness
 
-## Device safety
+`tests/pa220/tftp-guard/run.sh` imports the `STORE_BLOCK` function text from `scripts/generate-pa220-load-range-makefile-patch.py`, inserts that exact production function into a minimal host harness, and compiles/runs it with a mocked validator and intercepted `memcpy`.
 
-PA-220 remains powered off. No saveenv, SPI/eMMC/NAND/CPLD/EEPROM writes, flash, reset, reboot, power-cycle or file-receive test was performed.
+- Normal GCC run: `cases=14 assertions=64 failures=0`
+- ASan + UBSan run: `cases=14 assertions=64 failures=0`
+- Covered: valid first block, exact exclusive-end boundary, wrapped block offset, zero-length terminal block, below-window, cross-end, oversized payload, zero block size, invalid negative block, wrap underflow, target-width overflow, validator rejection and maximum Ethernet block size.
+- The harness proves that rejected DATA blocks do not reach the intercepted copy. It is a focused function-level harness; it does not emulate a complete TFTP UDP session or the entire `TftpHandler`.
+
+## TFTP production integration and target evidence
+
+The generator `scripts/generate-pa220-load-range-makefile-patch.py`:
+1. Verifies the exact fixed PA-220 source commit.
+2. Adds the validator header to the fixed source `u-boot/net/tftp.c`.
+3. Replaces `store_block()` with a CN70XX-specific path that checks block-size validity, block index multiplication, wrap offset, destination addition and target `ulong` width before calling `octeon_load_range_check(dest64, len)`.
+4. Calls the validator before the RAM `memcpy`; an error sets `NETLOOP_FAIL` and returns without copying.
+5. Adds checked block-wrap arithmetic and updates the two wrap call sites and the DATA store call site with fail-closed handling.
+6. Generates the TFTP patch using `git diff --binary`, not hand-edited hunk counts.
+
+The generator modifies only the disposable PA-220 checkout created by `build-pa220.sh`; the generated patch is retained in the Actions artifact, not committed as a standalone patch under `patches/pa220/`.
+
+Run #45374041373 confirms:
+- The generated TFTP patch SHA-256 is `464e54a49f7a4b761c743280faa35a0c7bcfbe8b7124015385c90eea6fc30e38`.
+- The generated Makefile patch SHA-256 is `7de64ed7e0cd5e6f16761f1d1ad0bd60dafde929bbf8384d69b75e722cce751d`.
+- The modified production `tftp.c` compiled as `tftp.o`; `tftp.o` was included in `libnet.o`.
+- The production validator object is ELF32, big-endian, N32 ABI, OCTEON; object text size is 1,440 bytes.
+- Standalone N32 relocatable link passed.
+- Complete PA-220 U-Boot final link passed; validator symbol was checked in the final ELF, map and System.map.
+- SDK 5.1.0 GCC 4.7.0 archive checksum verification passed.
+
+Actions:
+- [Validator-only baseline run #45346000355](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45346000355), commit `fce0485d1f1eaeeac5cc1732d5822077cfa68a20`.
+- [Validator + TFTP guard Host and OCTEON build run #45374041373](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45374041373), commit `908a58f43017f3e252b3ce0c613b4630072203e9`.
+- Latest artifact ID: `14909658286`; name `pa220-p4-2-ram-validator-908a58f43017f3e252b3ce0c613b4630072203e9`; ZIP SHA-256 `d3cd880db8be404327a9fc953ea096a8362145bacbd52541e9ad02e77d7ab6d0`.
+
+## Explicitly not validated / still blocked
+
+- No PA-220 runtime `__tmp_load` descriptor re-check has been performed after this build.
+- No TFTP GET, TFTP Server/WRQ, or TFTP PUT transfer was run. No actual DATA packet was received and no live RAM write was attempted.
+- No HTTP upload/payload/chunk writer exists; HTTP remains read-only.
+- OCTEON ELF64 PT_LOAD and section-fallback writes are not guarded by this validator; the separate ELF64 tail-width issue remains.
+- DHCP Client and Ping runtime tests remain incomplete.
+- PA-220 remains powered off. No saveenv, SPI/eMMC/NAND/CPLD/EEPROM write, flash, reset, reboot, power-cycle or device receive test was performed.
+
+## Next stage gate
+
+P4-2's code/Host/target-build gates are now satisfied. This does **not** authorize a real receive test. Before P6 RAM-only receive acceptance:
+1. Perform read-only PA-220 boot/runtime checks and confirm the live `__tmp_load` descriptor, its aliases and reserved-block separation.
+2. Select one receive path and define a bounded RAM-only test plan, file size, checksum and failure cleanup behavior.
+3. Keep HTTP upload and ELF writes disabled until their own pre-write reservations and tests are implemented.
+4. Do not perform persistent-storage writes. Any such operation remains a separate stage requiring explicit review and authorization.

@@ -47,7 +47,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          bash tests/pa220/tftp-guard/run.sh
+          mkdir -p reports/pa220/P4-2
+          bash tests/pa220/tftp-guard/run.sh 2>&1 | tee reports/pa220/P4-2/11-tftp-host-tests.log
+          test "$(grep -c 'HOST TFTP GUARD: cases=14 assertions=64 failures=0' reports/pa220/P4-2/11-tftp-host-tests.log)" -eq 2
 
       - name: Download and verify pinned OCTEON SDK
         env:

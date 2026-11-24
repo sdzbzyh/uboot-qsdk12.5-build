@@ -119,7 +119,7 @@
 | `namedprint` / `freeprint` | PASS | 13 个 named blocks、两个 free blocks；关键相邻边界经半开区间核算一致 |
 | TLV EEPROM/I2C 只读内容 | PASS | 五个 tuple、checksum、END `0xffff`、终止偏移 `0x9a` 已完成只读核查；无写入 |
 | 网络/存储扩展只读诊断 | NOT RUN | P3 后续工作 |
-| 任意地址 RAM 上传安全性 | BLOCKED | cached/uncached/physical alias 与统一 pre-write validator 尚未完成；不得开放上传 |
+| 任意地址 RAM 上传安全性 | BLOCKED | validator 与 TFTP DATA pre-write guard 已通过 Host/目标编译；真实接收尚未测试，HTTP/ELF 写入点仍未接入；须先做设备只读 descriptor 核对 |
 
 本轮没有执行任何持久化介质写入、named block 分配/释放或 DRAM 测试。（历史检查点）当时 P3 仍进行中；最终收尾以第 7 节为准。
 
@@ -178,7 +178,7 @@
 - CORE/SCLK 是 reset CSR multiplier 派生值；DDR 的 gd->mem_clk 在 DRAM init 后可能由 CN70XX IPD/DCLK counter ratio 动态测量。0002 patch 统一 NOTE 不准确，见 P3-H050。
 - Ethernet 物理 link 状态 NOT VERIFIED；不将 ethact 当作 carrier 状态。
 - eMMC 初始化/信息查询仍 BLOCKED；USB 枚举 NOT VERIFIED。
-- 统一 RAM 写入 validator `octeon_load_range_check(uint64_t addr, uint64_t len)` 尚未实现；cached/uncached/physical alias、RAM 边界、整数溢出/地址回绕仍未收敛。TFTP/HTTP/ELF 接收安全性保持 BLOCKED。
+- 统一 RAM 写入 validator `octeon_load_range_check(uint64_t addr, uint64_t len)` 已实现并通过 Host/目标构建；TFTP DATA pre-write guard 已通过 Host 与目标编译。真实 TFTP 接收仍 BLOCKED；HTTP/ELF 写入点尚未接入。
 - P1 中 LOAD MemSiz 与 `uboot_end` 4-byte 差异、RAM 镜像 CRC 变化等非阻断风险继续保留，P3 完成不代表这些风险已解决。
 
 本阶段没有执行 `saveenv`、EEPROM/TLV 写入、CPLD 写入、SPI/eMMC/NAND/USB block 写入/擦除、`bootloaderupdate`、`namedalloc`、`namedfree` 或 `mtest`。
@@ -241,7 +241,7 @@
 | 运行时 autoload/ethact/ethprime/device list | NOT RUN | 待串口只读核验 |
 | DHCP-only 实机测试 | NOT RUN | 必须先确认 autoload=n |
 | Ping 成功/超时/接口恢复实机测试 | NOT RUN | 待 DHCP 阶段后执行 |
-| TFTP 接收 / Server / PUT 实机测试 | BLOCKED | validator 未实现；禁止执行 |
+| TFTP 接收 / Server / PUT 实机测试 | BLOCKED | validator 与 store_block guard 已通过 Host/目标编译，但无实际网络接收测试；先做设备只读 descriptor 核对 |
 
 本批仅进行固定源码只读审计和文档更新；未构建、未运行 DHCP/Ping/TFTP、未修改持久化环境或存储。下一步先从既有构建目录读取配置快照，再读取串口运行时网络环境。
 
@@ -326,7 +326,7 @@ P4-1 两份网络报告仅为既有静态源码审计，没有构建或实机网
 
 本次没有执行 `saveenv`、CPLD 写入、SPI/eMMC/NAND 写入、flash、reset、reboot 或 power-cycle。PA-220 Stage-3 BIN 不得刷写。
 
-下一阶段先实现并验证统一 `octeon_load_range_check(uint64_t addr, uint64_t len)`，其权威边界来自运行时 `__tmp_load` descriptor。完成 Host 边界测试和 OCTEON 目标编译/链接之前，TFTP/HTTP 文件接收及 ELF segment 写入均保持 BLOCKED。验证器通过后再进入 P6 RAM-only 文件接收；任何持久化写入仍需独立审批。
+P4-2 validator 与 TFTP DATA guard 的 Host/目标构建门已通过，详见文末 2026-11-24 状态更正。实际 TFTP/HTTP 文件接收及 ELF segment 写入仍保持 BLOCKED；进入 P6 前先做设备只读 `__tmp_load` descriptor 核对，并完成单一路径 RAM-only 接收设计。任何持久化写入仍需独立审批。
 
 
 ## P4-2 统一 RAM 写入范围 validator Host 测试（2026-11-24）
@@ -345,3 +345,29 @@ P4-1 两份网络报告仅为既有静态源码审计，没有构建或实机网
 覆盖合法起止边界、越界、跨界、零长度、checked-add 溢出/回绕、descriptor 缺失/无效/名称错误/变化、globals 不一致、physical/KSEG0/KSEG1/XKPHYS alias、KSEG 跨段、XKPHYS 保留位、Linux reserved、U-Boot relocation reservation 和 descriptor end overflow。
 
 OCTEON SDK 5.1.0 目标对象编译、N32 relocatable link、完整 PA-220 U-Boot final link、ELF/map/System.map 检查：待专用 Actions 执行。TFTP/HTTP/ELF 调用点尚未接入，未执行任何接收/加载测试；设备保持断电。
+
+
+## 14. P4-2 最新验证状态与 P6 接收前置条件（2026-11-24）
+
+本节覆盖此前有关 validator 尚未实现、目标构建待执行的旧状态描述。
+
+| 项目 | 当前结果 | 证据边界 |
+|---|---|---|
+| 生产 RAM validator Host | PASS：42 scenarios / 161 assertions / 0 failures | 生产 C 源码本身；GCC 与 ASan/UBSan |
+| TFTP DATA `store_block()` Host | PASS：14 scenarios / 64 assertions / 0 failures | 编译 patch generator 中同一生产函数文本；mock validator / intercepted memcpy；非完整协议测试 |
+| OCTEON validator object | PASS | ELF32 big-endian N32 OCTEON，text 1,440 bytes |
+| N32 relocatable link | PASS | Actions #45374041373 |
+| 完整 PA-220 U-Boot final link | PASS | final ELF / map / System.map 符号检查通过 |
+| 修改后的 TFTP `tftp.c` | PASS（compile/link） | 编译为 `tftp.o` 并进入 `libnet.o` |
+| PA-220 runtime `__tmp_load` descriptor | NOT RUN | 设备保持断电 |
+| TFTP GET/Server 实际接收 | BLOCKED / NOT RUN | 未接收数据包、未实际写 RAM |
+| HTTP 上传 / ELF PT_LOAD 写入 | BLOCKED | 尚无相应 validator 接入实现 |
+| DHCP / Ping 实机验证 | NOT RUN | P4 遗留项 |
+
+Actions：[run #45374041373](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45374041373)，集成 commit `908a58f43017f3e252b3ce0c613b4630072203e9`。
+
+**P6 实际接收测试前置条件：**
+1. 设备上电后只读确认 live `__tmp_load` descriptor、地址 alias、大小和保留区不重叠；不得执行接收命令。
+2. 明确第一条接收路径、最大文件长度、校验算法、短包/重复包/超时/失败清理行为。
+3. 确保测试只向 RAM 的已验证区间写入；不执行 `saveenv` 或任何 SPI/eMMC/NAND/CPLD/EEPROM 写入。
+4. HTTP upload 与 ELF segment 写入必须分别完成设计和 Host/目标验证，不因 TFTP guard PASS 自动开放。

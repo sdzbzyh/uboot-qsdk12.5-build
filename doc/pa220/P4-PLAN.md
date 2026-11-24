@@ -1,6 +1,6 @@
 # PA-220 P4 计划：网络维护基础
 
-- 状态：**IN PROGRESS — Host validator PASS（32 cases/121 assertions）；OCTEON 目标构建待验证；DHCP/Ping 未完成**
+- 状态：**IN PROGRESS — P4-2 validator Host 42/161 + OCTEON full link PASS；TFTP guard Host 14/64 + tftp.o target compile PASS；实际接收与 DHCP/Ping 实机验证未完成**
 - 启动日期：2026-11-19
 - 集成分支：`feature/pa220-ubootkit-web`
 - PA-220 固定源码：`IronDemiGod/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
@@ -175,3 +175,27 @@ tests/pa220/ram-range/run.sh 编译生产 validator C 文件本身。结果：32
 - DHCP/Ping 实机验证仍未完成。
 
 descriptor API 的静态实现返回函数内部 static、非 re-entrant 快照；底层查找锁在复制 static 快照字段之前已释放。当前实现立即复制并双读比较，依赖 U-Boot 前台单核命令模型及其他核心停留在 idle loop、没有并发 bootmem writer 的源码约束。若以后引入异步/多核 bootmem 写入，必须重新设计为锁保护的原子快照接口，不能沿用该假设。
+
+
+## 12. P4-2 验证状态更正与 P6 入口（2026-11-24）
+
+本节覆盖第 10、11 节中有关 validator 尚未完成、TFTP 调用点尚未接入、目标构建待验证的旧状态。
+
+### 已完成
+
+- `octeon_load_range_check()` 生产代码 Host Harness：42 scenarios / 161 assertions / 0 failures；GCC 与 ASan/UBSan 均通过。
+- TFTP DATA `store_block()` guard 已由 `scripts/generate-pa220-load-range-makefile-patch.py` 接入固定 PA-220 源码的临时构建树。该路径先做 checked arithmetic / target-width 检查，再在 RAM memcpy 前调用 validator；拒绝时设置 `NETLOOP_FAIL` 并不复制。
+- TFTP guard Host Harness：14 scenarios / 64 assertions / 0 failures；GCC 与 ASan/UBSan 均通过。测试使用生成器的同一 `STORE_BLOCK` 函数文本、mock validator 和 intercepted memcpy。
+- Actions #45374041373 已验证 OCTEON validator object、N32 relocatable link、完整 U-Boot final link；修改后的 `tftp.c` 编译为 `tftp.o` 并进入 `libnet.o`。
+
+### 仍然 BLOCKED / NOT RUN
+
+- TFTP GET、TFTP Server/WRQ 实际网络接收，以及任何实际 DATA RAM 写入均未测试。
+- HTTP 仍为只读；没有 HTTP upload/chunk writer。
+- ELF64 PT_LOAD / section fallback 写入仍未接入 validator。
+- 尚未重新上电读取 PA-220 的运行时 `__tmp_load` descriptor；设备保持断电。
+- DHCP Client、Ping 成功/超时/接口恢复的实机验证仍未完成。
+
+### P6 入口约束
+
+P4-2 的 validator 和 TFTP guard Host/目标编译门已通过，但不代表允许立即运行真实接收。P6 应先完成 RAM-only 接收设计、单一路径选择、容量/校验/失败清理定义；在任何实际传输之前，必须先对设备做只读启动和 descriptor/reserved-block 核对。禁止 saveenv 和所有持久化存储写入。详细证据见 `reports/pa220/P4-2/IMPLEMENTATION.md`。
