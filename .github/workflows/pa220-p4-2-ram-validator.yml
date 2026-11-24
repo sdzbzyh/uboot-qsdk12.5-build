@@ -1,0 +1,135 @@
+name: PA-220 P4-2 unified RAM write-range validator
+
+on:
+  push:
+    branches: [feature/pa220-ubootkit-web]
+    paths:
+      - '.github/workflows/pa220-p4-2-ram-validator.yml'
+      - 'u-boot/arch/mips/cpu/octeon/octeon_load_range.c'
+      - 'u-boot/arch/mips/include/asm/arch-octeon/octeon_load_range.h'
+      - 'tests/pa220/ram-range/**'
+      - 'scripts/generate-pa220-load-range-makefile-patch.py'
+      - 'build-pa220.sh'
+      - 'doc/pa220/**'
+      - 'reports/pa220/P4-2/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validator-host-and-octeon:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact triggering commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Run Host Harness against production validator source
+        shell: bash
+        run: |
+          set -euo pipefail
+          R=reports/pa220/P4-2
+          mkdir -p "$R"
+          {
+            echo "UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "INTEGRATION_COMMIT=$(git rev-parse HEAD)"
+            echo "PA220_SOURCE_PIN=801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8"
+            cc --version | head -n 1
+            tests/pa220/ram-range/run.sh
+          } 2>&1 | tee "$R/10-host-tests.log"
+          grep -q 'cases=32 assertions=121 failures=0' "$R/10-host-tests.log"
+
+      - name: Download and verify pinned OCTEON SDK
+        env:
+          GH_TOKEN: ${{ secrets.OCTEON_SDK_READ_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          D="$RUNNER_TEMP/octeon-download"
+          S="$RUNNER_TEMP/octeon-sdk"
+          mkdir -p "$D" "$S" reports/pa220/P4-2
+          test -n "$GH_TOKEN"
+          gh release download octeon-sdk-5.1.0 --repo sdzbzyh/pa220-toolchains --pattern '*.tar.gz' --pattern '*.sha256' --dir "$D"
+          (cd "$D" && sha256sum -c ./*.sha256)
+          A=$(find "$D" -maxdepth 1 -type f -name '*.tar.gz' -print -quit)
+          test -n "$A"
+          tar -xzf "$A" -C "$S"
+          GCC=$(find "$S" -path '*/bin/mips64-octeon-linux-gnu-gcc' -print -quit)
+          test -n "$GCC"
+          TC=$(dirname "$(dirname "$GCC")")
+          echo "OCTEON_TOOLCHAIN=$TC" >> "$GITHUB_ENV"
+          echo "$TC/bin" >> "$GITHUB_PATH"
+          "$GCC" --version | head -n 2 | tee reports/pa220/P4-2/20-octeon-toolchain.txt
+          sha256sum "$A" | tee reports/pa220/P4-2/21-sdk-sha256.txt
+
+      - name: Build production validator object and complete PA-220 U-Boot
+        shell: bash
+        run: |
+          set -euo pipefail
+          R=reports/pa220/P4-2
+          export OCTEON_MODEL=OCTEON_CN70XX
+          export PA220_REPO_DIR="$RUNNER_TEMP/pa220-openwrt"
+          export PA220_OUTPUT_DIR="$RUNNER_TEMP/pa220-output"
+          {
+            echo "INTEGRATION_COMMIT=$(git rev-parse HEAD)"
+            echo "PA220_SOURCE_PIN=801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8"
+            ./build-pa220.sh "$OCTEON_TOOLCHAIN"
+            U="$PA220_REPO_DIR/u-boot"
+            O="$U/arch/mips/cpu/octeon/octeon_load_range.o"
+            test -s "$O"
+            test -s "$U/u-boot-octeon_pa220"
+            test -s "$U/u-boot-octeon_pa220.map"
+            test -s "$U/System-octeon_pa220.map"
+            test -s "$U/u-boot-octeon_pa220.bin"
+            RDL="$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-readelf"
+            NM="$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-nm"
+            SIZE="$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-size"
+            OBJDUMP="$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-objdump"
+            "$RDL" -h "$O" | tee "$R/30-validator-object-elf-header.txt"
+            grep -q 'ELF64' "$R/30-validator-object-elf-header.txt"
+            grep -q 'big endian' "$R/30-validator-object-elf-header.txt"
+            grep -qi 'abi2' "$R/30-validator-object-elf-header.txt"
+            "$RDL" -A "$O" > "$R/31-validator-object-attributes.txt"
+            "$NM" -u "$O" | tee "$R/32-validator-object-undefined.txt"
+            "$NM" -g "$O" | tee "$R/33-validator-object-symbols.txt"
+            grep -q 'octeon_load_range_check' "$R/33-validator-object-symbols.txt"
+            "$SIZE" "$O" | tee "$R/34-validator-object-size.txt"
+            "$OBJDUMP" -f "$O" | tee "$R/35-validator-object-file.txt"
+            "$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-gcc" \
+              -mabi=n32 -mabicalls -msoft-float -G 0 -nostdlib -Wl,-r \
+              "$O" -o "$R/pa220-load-range-validator-n32.o"
+            "$RDL" -h "$R/pa220-load-range-validator-n32.o" | tee "$R/36-validator-n32-relocatable-link.txt"
+            "$NM" -n "$U/u-boot-octeon_pa220" > "$R/40-final-symbols.txt"
+            grep -E ' [Tt] octeon_load_range_check$' "$R/40-final-symbols.txt" | tee "$R/41-validator-final-symbol.txt"
+            grep -q 'octeon_load_range.o' "$U/u-boot-octeon_pa220.map"
+            grep -E 'cvmx_bootmem_find_named_block|load_reserved_addr|load_reserved_size|octeon_load_range_check' \
+              "$R/40-final-symbols.txt" | tee "$R/42-validator-dependency-symbols.txt"
+            "$RDL" -h "$U/u-boot-octeon_pa220" | tee "$R/43-final-elf-header.txt"
+            cp "$O" "$R/octeon_load_range.o"
+            cp "$U/u-boot-octeon_pa220" "$R/u-boot-octeon_pa220"
+            cp "$U/u-boot-octeon_pa220.map" "$R/u-boot-octeon_pa220.map"
+            cp "$U/System-octeon_pa220.map" "$R/System-octeon_pa220.map"
+            cp "$U/u-boot-octeon_pa220.bin" "$R/u-boot-octeon_pa220.bin"
+            sha256sum "$R/octeon_load_range.o" \
+              "$R/pa220-load-range-validator-n32.o" \
+              "$R/u-boot-octeon_pa220" "$R/u-boot-octeon_pa220.map" \
+              "$R/System-octeon_pa220.map" "$R/u-boot-octeon_pa220.bin" \
+              "$R/0001-pa220-load-range-makefile.patch" \
+              | tee "$R/50-artifact-sha256.txt"
+            echo "P4_2_HOST=PASS"
+            echo "P4_2_OCTEON_VALIDATOR_OBJECT=PASS"
+            echo "P4_2_N32_RELOCATABLE_LINK=PASS"
+            echo "P4_2_FULL_UBOOT_FINAL_LINK=PASS"
+          } 2>&1 | tee "$R/29-octeon-full-build.log"
+
+      - name: Upload validator, build and audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pa220-p4-2-ram-validator-${{ github.sha }}
+          path: reports/pa220/P4-2/
+          if-no-files-found: warn
+          retention-days: 60

@@ -111,12 +111,21 @@ cp "$ROOT_DIR/u-boot/include/net/tcp.h" \
    "$ROOT_DIR/u-boot/include/net/tcp_ipv4_tx.h" \
    "$ROOT_DIR/u-boot/include/net/http_request.h" \
    "$ROOT_DIR/u-boot/include/net/http_handler.h" "$UBOOT_DIR/include/net/"
+mkdir -p "$UBOOT_DIR/arch/mips/cpu/octeon" \
+         "$UBOOT_DIR/arch/mips/include/asm/arch-octeon"
+cp "$ROOT_DIR/u-boot/arch/mips/cpu/octeon/octeon_load_range.c" \
+   "$UBOOT_DIR/arch/mips/cpu/octeon/octeon_load_range.c"
+cp "$ROOT_DIR/u-boot/arch/mips/include/asm/arch-octeon/octeon_load_range.h" \
+   "$UBOOT_DIR/arch/mips/include/asm/arch-octeon/octeon_load_range.h"
 
 # Generate the Makefile patch with Git's diff engine (never hand-count hunks).
 mkdir -p "$ROOT_DIR/reports/pa220/P5-2C"
 python3 "$ROOT_DIR/scripts/generate-pa220-p5-2c-makefile-patch.py" \
     --source-root "$PA220_SOURCE_ROOT" \
     --output "$ROOT_DIR/reports/pa220/P5-2C/0006-pa220-p5-2c-makefile-integration.patch"
+python3 "$ROOT_DIR/scripts/generate-pa220-load-range-makefile-patch.py" \
+    --source-root "$PA220_SOURCE_ROOT" \
+    --output "$ROOT_DIR/reports/pa220/P4-2/0001-pa220-load-range-makefile.patch"
 
 if [ -n "$TOOLCHAIN_DIR" ]; then
     "$UBOOT_DIR/build.sh" "$TOOLCHAIN_DIR"

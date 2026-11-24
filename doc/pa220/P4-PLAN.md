@@ -1,6 +1,6 @@
 # PA-220 P4 计划：网络维护基础
 
-- 状态：**IN PROGRESS — DHCP/Ping 实机验证未完成；TFTP 接收安全门未完成（2026-11-23）**
+- 状态：**IN PROGRESS — Host validator PASS（32 cases/121 assertions）；OCTEON 目标构建待验证；DHCP/Ping 未完成**
 - 启动日期：2026-11-19
 - 集成分支：`feature/pa220-ubootkit-web`
 - PA-220 固定源码：`IronDemiGod/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
@@ -131,7 +131,7 @@
 - P5-2C 已完成 PA-220 RAM 启动后的实机 HTTP/TCP 验收，但这只证明固定静态地址下的 Web 服务，不证明 DHCP Client/Ping 功能通过。
 - DHCP Client、Ping 成功/超时/超时后接口恢复：仍未完成本阶段实机验收。
 - TFTP GET/Server 的接收路径仍然 BLOCKED；不得执行接收测试。
-- 当前补丁序列中尚无统一 `octeon_load_range_check()` 实现；当前代码树/补丁清单未发现 P4-2/P6 共用 RAM 写入前 validator。
+- 2026-11-24：生产 octeon_load_range_check(uint64_t addr, uint64_t len) 已加入集成树；Host Harness 对生产源码执行 32 个场景、121 assertions，0 failures（普通 GCC 与 ASan/UBSan 均通过）。OCTEON N32 对象编译及完整 U-Boot 链接仍待专用 Actions 验证。
 
 ### 下一工作项
 
@@ -143,8 +143,35 @@
 4. 在 Host Harness 中覆盖允许与拒绝路径，再使用 Cavium GCC 4.7.0 / OCTEON SDK 5.1.0 完成目标对象编译、完整链接和 map/symbol 检查。
 5. 设备重新上电后只进行必要的只读 descriptor 核对；不得为了本工作项刷写镜像或执行任何持久化写入。
 
-Validator 通过之前，TFTP GET/Server 接收、HTTP upload/chunk 和 bootelf PT_LOAD/section 写入均保持 BLOCKED。Validator 通过后才可进入 P6 RAM-only 文件接收及 CRC/SHA/格式识别。
+当前只有 validator 本体及 Host Harness；尚未把检查调用接入 TFTP store_block()、HTTP payload/chunk 或 ELF64 PT_LOAD/section 写入点。因此这些写入路径继续 BLOCKED，不得执行接收或加载测试。Host PASS 不等于目标端 PASS；待 OCTEON 对象、N32 relocatable link、完整 U-Boot final link 和符号/map 检查完成后，再单独评估最小调用点接入。
 
 ### P4 其他遗留项
 
 DHCP-only 测试必须在确认 `autoload=n` 后进行；Ping 成功、超时和超时后 Ethernet 接口恢复仍需单独验证。不得因 P5-2C HTTP 通过而关闭这些遗留项。P4 的实际完成状态必须分别记录，不得以 validator 编译通过替代 DHCP/Ping 实机验证。
+
+
+## 11. P4-2 统一 RAM validator 实施记录（2026-11-24）
+
+### 已完成的生产实现
+
+- 新增 u-boot/arch/mips/cpu/octeon/octeon_load_range.c 与公开头文件 octeon_load_range.h。
+- 每次调用查询运行时 cvmx_bootmem_find_named_block(OCTEON_BOOTLOADER_LOAD_MEM_NAME)；立即复制 static descriptor 的 base/size/name，并连续查询两次比较快照。
+- descriptor 必须存在、名称正确、base/size 有效且 base+size 不溢出；load_reserved_addr/load_reserved_size 仅作一致性检查。
+- __uboot_code_data descriptor 必须与 gd->bd->bi_uboot_ram_addr/bi_uboot_ram_used_size 一致；该 reservation 覆盖 U-Boot code/data、malloc、stack、bd、gd 和 boot parameters。
+- 对低 1 MiB、__tmp_reserved_linux、__tmp_uboot_exception、__fdt、__bootloader_env、__low_reserved、__mac_meminfo、idle-core-loop 执行保留区重叠检查。
+- 支持 32-bit identity/physical、KSEG0/KSEG1 和 XKPHYS CCA alias 规范化；拒绝不支持的地址域、KSEG 跨段、XKPHYS MBZ 非零。
+- 使用 checked-add 与减法式半开区间验证；零长度、越界、回绕和溢出全部拒绝。
+
+### Host 结果
+
+tests/pa220/ram-range/run.sh 编译生产 validator C 文件本身。结果：32 scenarios、121 assertions、0 failures；普通 GCC 和 ASan/UBSan 均通过。所有拒绝场景均通过 guarded-write 检查，目标缓冲区未改变。
+
+### 仍未完成
+
+- OCTEON SDK 5.1.0 / GCC 4.7.0 目标对象编译和 ABI 检查待 Actions。
+- N32 relocatable link、完整 PA-220 U-Boot final link、ELF/map/System.map 检查待 Actions。
+- TFTP、HTTP、ELF 写入调用点尚未接入，全部保持 BLOCKED。
+- 尚未进行 PA-220 运行时 descriptor 核对；设备保持断电。
+- DHCP/Ping 实机验证仍未完成。
+
+descriptor API 的静态实现返回函数内部 static、非 re-entrant 快照；底层查找锁在复制 static 快照字段之前已释放。当前实现立即复制并双读比较，依赖 U-Boot 前台单核命令模型及其他核心停留在 idle loop、没有并发 bootmem writer 的源码约束。若以后引入异步/多核 bootmem 写入，必须重新设计为锁保护的原子快照接口，不能沿用该假设。

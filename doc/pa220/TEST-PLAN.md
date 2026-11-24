@@ -327,3 +327,21 @@ P4-1 两份网络报告仅为既有静态源码审计，没有构建或实机网
 本次没有执行 `saveenv`、CPLD 写入、SPI/eMMC/NAND 写入、flash、reset、reboot 或 power-cycle。PA-220 Stage-3 BIN 不得刷写。
 
 下一阶段先实现并验证统一 `octeon_load_range_check(uint64_t addr, uint64_t len)`，其权威边界来自运行时 `__tmp_load` descriptor。完成 Host 边界测试和 OCTEON 目标编译/链接之前，TFTP/HTTP 文件接收及 ELF segment 写入均保持 BLOCKED。验证器通过后再进入 P6 RAM-only 文件接收；任何持久化写入仍需独立审批。
+
+
+## P4-2 统一 RAM 写入范围 validator Host 测试（2026-11-24）
+
+生产源文件：u-boot/arch/mips/cpu/octeon/octeon_load_range.c。Host Harness 直接编译该生产文件，并以 mock bootmem descriptor、load globals 和 gd->bd 提供平台状态。
+
+| 项目 | 结果 |
+|---|---:|
+| 场景数 | 32 |
+| Assertions | 121 |
+| Failures | 0 |
+| 普通 GCC 编译/执行 | PASS |
+| ASan + UBSan 编译/执行 | PASS |
+| 拒绝路径 guarded-write | 全部无写入 |
+
+覆盖合法起止边界、越界、跨界、零长度、checked-add 溢出/回绕、descriptor 缺失/无效/名称错误/变化、globals 不一致、physical/KSEG0/KSEG1/XKPHYS alias、KSEG 跨段、XKPHYS 保留位、Linux reserved、U-Boot relocation reservation 和 descriptor end overflow。
+
+OCTEON SDK 5.1.0 目标对象编译、N32 relocatable link、完整 PA-220 U-Boot final link、ELF/map/System.map 检查：待专用 Actions 执行。TFTP/HTTP/ELF 调用点尚未接入，未执行任何接收/加载测试；设备保持断电。

@@ -8,7 +8,7 @@
 | P1 | uBootKit 功能源码审计 | 已完成 A0～A5 固定源码静态审计；明确适配结论、风险和运行时待验证项 | 所有目标功能均有适配结论和证据来源；未构建/未实机验证项单独标记 |
 | P2 | PA-220 基线与构建复核 | 固定源码、补丁叠加、工具链、干净构建、关键对象静态核查和 RAM 启动 | **已完成（2026-11-19）**；未完成的只读硬件核查转入 P3，见 `reports/P2-COMPLETION-2026-11-19.md` |
 | P3 | CLI/只读诊断完善 | 板卡、内存、时钟、网络、存储、EEPROM、CPLD 只读信息 | 编译和 RAM 启动验证通过；无持久化写入 |
-| P4 | 网络维护基础 | DHCP Client/Ping 实机验证与 TFTP 接收安全门 | **未完成/待恢复**；DHCP/Ping 实机验证未完成，统一 RAM validator 未实现，TFTP 接收保持 BLOCKED |
+| P4 | 网络维护基础 | DHCP Client/Ping 实机验证与 TFTP 接收安全门 | **IN PROGRESS**；2026-11-24 生产 validator 已实现，Host 32 cases/121 assertions/0 failures；OCTEON 目标构建待验证；TFTP/HTTP/ELF 调用点未接入，接收保持 BLOCKED；DHCP/Ping 未完成 |
 | P5 | HTTP/Web 只读管理 | TCP 接入、前台生命周期、有界 HTTP parser、只读 URI handler 与实机验收 | **P5-2C 已完成（2026-11-23）**；云端/Host/实机证据见 `reports/pa220/P5-2C/ACCEPTANCE.md` |
 | P6 | RAM 文件接收与校验 | 上传、进度、大小限制、CRC/SHA、格式识别 | 上传仅影响 RAM，边界和错误路径通过测试 |
 | P7 | 固件解析与安装预览 | 固件格式解析、目标映射、dry-run 报告 | 不写存储即可完整展示安装计划 |
@@ -66,7 +66,7 @@ P1-A0～A5 的固定源码静态审计已完成。P1 完成仅表示源码调用
 1. **锁定构建输入**：确认集成仓库仍在 `feature/pa220-ubootkit-web`；PA-220 固定源码仍为 `801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`；uBootKit 固定审计源码仍为 `9ce315735ac88fd0a7c7697bc527a8616ed0a972`；确认补丁顺序、工具链版本和构建脚本，不修改两个固定源码仓库或 main。
 2. **干净构建**：执行 `build-pa220.sh`，保存完整日志、最终 `.config`、工具链版本、map/ELF、`uboot_end`、产物大小和 SHA256。构建失败先修复构建确定性，不用未验证的硬件猜测补丁。
 3. **构建产物静态核对**：确认 `CONFIG_CMD_OCTEON_ELF` 和 `cmd_elf64.o` 的实际编入情况；确认 `load_elf64_image`、`flush_cache`、`flush_dcache_range`、`cvmx_bootmem_find_named_block` 等目标符号/对象；记录 linker 与 relocation 计算所需符号。
-4. **RAM 启动**：优先使用原厂 Stage2 的 TFTP 将新 Stage3 加载到 RAM 测试，不执行 SPI/eMMC/NAND/EEPROM 写入。统一 pre-write validator 尚未实现前，不把新 U-Boot 自己的 TFTP 接收路径用于任意 RAM 地址的安全上传。
+4. **RAM 启动**：优先使用原厂 Stage2 的 TFTP 将新 Stage3 加载到 RAM 测试，不执行 SPI/eMMC/NAND/EEPROM 写入。validator 本体虽已实现且 Host PASS，但 OCTEON 目标验证及 TFTP 调用点接入尚未完成；不得把新 U-Boot 自己的 TFTP 接收路径用于任意 RAM 地址的安全上传。
 5. **只读运行时确认**：记录启动日志中的 DRAM 容量、Stack Pointer、Base DRAM address、TLB map size（若有）；执行 `bdinfo`；执行 `printenv loadaddr octeon_reserved_mem_load_base octeon_reserved_mem_load_size`；通过只读 named-block 查询确认 `__tmp_load` descriptor 的 base/size，并记录最终 relocation 地址及使用长度。若现有 CLI 没有 named-block 只读显示命令，将其列入 P3 只读诊断，不为此阻塞 P2。
 6. **TLV EEPROM 只读确认**：按 P1-A5 文档执行 `i2c dev 0`、`i2c probe 57`，并只读读取 offset 0、0x100、0x200 等窗口；记录 END tuple/MAC/board descriptor/clock tuple。严禁 eeprom write / TLV set/delete。
 7. **P2 验收**：干净环境构建成功，产物头/大小/hash/map 记录完整；RAM 启动结果与只读运行时数据分开记录。编译成功不得标记为实机通过。
@@ -121,7 +121,7 @@ P2 未完成的 `__tmp_load` 运行时 descriptor、板级只读命令、TLV EEP
 - PA-220：`IronDemiGod/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
 - uBootKit：`chenxin527/uboot-qsdk12.5-build@9ce315735ac88fd0a7c7697bc527a8616ed0a972`
 
-首批源码审计已确认 PA-220 已具备 DHCP Client、Ping、TFTP GET/PUT/Server 的旧版实现；DHCP Client 和 Ping 以验证现有实现为主，不直接移植另一代 U-Boot 代码。TFTP 接收路径直接 memcpy 到 `load_addr + offset`，尚无统一 RAM validator，禁止启用未经验证的任意地址接收。uBootKit 的 IPQ/FDT/TrustZone 地址限制不适用于 PA-220。
+首批源码审计已确认 PA-220 已具备 DHCP Client、Ping、TFTP GET/PUT/Server 的旧版实现；DHCP Client 和 Ping 以验证现有实现为主，不直接移植另一代 U-Boot 代码。TFTP 接收路径仍直接 memcpy 到 load_addr + offset，尚未调用新 validator；禁止启用未经验证的任意地址接收。uBootKit 的 IPQ/FDT/TrustZone 地址限制不适用于 PA-220。
 
 P4 计划及首批审计见 `P4-PLAN.md`、`reports/P4-NETWORK-BASELINE-AUDIT-2026-11-19.md`。当前仅完成源码审计，尚未进行 P4 构建或网口实机验证。
 
@@ -141,7 +141,7 @@ P3 未解决风险继续保留；阶段状态更正不等于风险关闭。
 - DHCP/Ping/TFTP 首批协议和命令路径：`reports/P4-NETWORK-BASELINE-AUDIT-2026-11-19.md`。
 - MGT AGL 注册、配置条件、NetLoop/DHCP/Ping 生命周期：`reports/P4-1-NETWORK-DRIVER-NETLOOP-AUDIT-2026-11-19.md`。
 
-当前仍缺最终构建 `.config`/ `include/autoconf.mk` 证据及串口运行时环境/设备列表；DHCP 和 Ping 实机测试 NOT RUN。下一步复用既有构建目录只读检查配置，再进行受控串口检查。未确认 `autoload=n` 前不执行 DHCP。TFTP 接收、TFTP Server 与 TFTP PUT 暂不实测；统一 RAM validator 未实现前禁止接收。
+当前仍缺最终构建 `.config`/ `include/autoconf.mk` 证据及串口运行时环境/设备列表；DHCP 和 Ping 实机测试 NOT RUN。下一步复用既有构建目录只读检查配置，再进行受控串口检查。未确认 `autoload=n` 前不执行 DHCP。TFTP 接收、TFTP Server 与 TFTP PUT 暂不实测；validator 目标验证和写入点接入完成前继续禁止接收。
 
 
 ## 当前阶段控制覆盖（2026-11-19 最新用户指令）
@@ -263,3 +263,8 @@ P4 网络维护基础仍保留历史计划中的未完成项：DHCP Client/Ping 
 验证器通过后，才进入 P6 RAM-only 文件接收与 CRC/SHA/格式识别。P7 固件解析和安装预览仍只做 dry-run；P8 eMMC 写入、P10 SPI 维护属于独立高风险阶段，必须另行审查和明确授权。
 
 **下一会话不要重做 P5-1/P5-2A/B/C，不要重新跑已通过的 Host/OCTEON/HTTP 测试。先恢复最新 HEAD，审查当前 validator 代码/调用点，再直接推进上述安全门。**
+
+
+### P4-2 validator 实施进度（2026-11-24）
+
+生产 validator 已加入集成树；Host Harness 32 scenarios / 121 assertions / 0 failures，ASan/UBSan 回归通过。专用 Actions 将使用固定 PA-220 源码基线与 Cavium OCTEON SDK 5.1.0 完成目标对象、N32 relocatable link 和完整 U-Boot final link。当前不把 Host PASS 写成目标 PASS；TFTP/HTTP/ELF 写入调用点仍未接入，全部 BLOCKED。详细记录：reports/pa220/P4-2/IMPLEMENTATION.md。

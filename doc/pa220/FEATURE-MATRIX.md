@@ -247,7 +247,7 @@
 - **PA-220 Cache API**：`flush_cache()` 实际执行全局同步并失效 I/D-cache；`flush_dcache_range()` 实际执行 `syncw`；`invalidate_dcache_range()` 是空实现。不可按 API 名称推断为逐行范围 flush。
 - **bootm**：镜像 load/decompress 完成后调用 `flush_cache()`；OS handoff hook 本身不执行另一个 cache-range 操作。
 - **bootelf**：loader 每个 segment/section 写入后调用 `flush_cache()`；`do_bootelf_exec()` 本身不再 flush，也不走 `arch_preboot_os()` 临时块释放路径。
-- **统一 RAM validator**：TFTP 每 block、HTTP 每 chunk、HTTP 完整 payload reservation、ELF 每个 segment 均在 memcpy/memset 前检查；唯一边界来源为运行时 `__tmp_load` descriptor。当前只是设计结论，尚未实现/编译/实测。
+- **统一 RAM validator**：生产函数 octeon_load_range_check(uint64_t addr, uint64_t len) 已实现；Host Harness 32 scenarios / 121 assertions / 0 failures（含 ASan/UBSan）。运行时 __tmp_load descriptor 为唯一写入窗口，检查 globals 一致性、U-Boot reservation、已知 named reserved blocks、地址 alias 和溢出。OCTEON 目标编译/完整链接待 Actions；TFTP/HTTP/ELF 写入调用点尚未接入，全部保持 BLOCKED。
 - TFTP/HTTP payload 完成后的数据同步与 ELF/bootm 执行代码的 I/D-cache 维护必须区分；不得为每个网络 chunk 调用 PA-220 的全局 `flush_cache()`。
 
 
@@ -330,3 +330,11 @@ PA-220 固定源码在独立干净 checkout 上完成完整构建，退出码为
 | 上传/文件接收 | BLOCKED | 统一 `__tmp_load` 写入前 validator 尚未作为 P6 完成 |
 
 本次实机使用 RAM 加载 Stage-3 镜像；没有 saveenv、CPLD 写、SPI/eMMC/NAND 写、复位或重启。BIN 不得刷写。镜像 SHA-256 是用户在 Windows TFTP 主机计算并与云端期望值一致；GitHub 上传副本未在本次审查中独立重新计算 SHA-256。
+
+
+## P4-2 validator 实施状态（2026-11-24）
+
+- 生产 validator 与 Host Harness 已加入集成仓库；Host 32/121/0 PASS。
+- 当前不是完整上传功能：TFTP store_block()、HTTP payload/chunk、ELF64 PT_LOAD/section 写入尚未接入 validator。
+- OCTEON 目标对象、N32 relocatable link、完整 U-Boot final link 和符号/map 检查待 Actions。
+- 在目标验证及调用点接入/回归完成前，TFTP 接收、HTTP 上传和任意 ELF segment 写入仍为 BLOCKED。

@@ -93,3 +93,14 @@
 - 决策：任何 TFTP/HTTP 文件接收或 ELF PT_LOAD/section 写入之前，必须先实现并验证统一 `octeon_load_range_check(uint64_t addr, uint64_t len)`，唯一权威范围来自运行时 `__tmp_load` named-block descriptor；验证器通过前接收功能保持 BLOCKED。
 - 影响：下一工作单元先完成 validator 设计、Host 边界测试、OCTEON 目标编译/最终链接和只读运行时 descriptor 核对；通过后再进入 P6 RAM-only 接收。任何持久化写入仍属于独立高风险节点并需用户明确授权。
 - 状态：P5-2C ACCEPTED；P6 validator prerequisite NOT YET IMPLEMENTED/ACCEPTED。
+
+
+## D-014：统一 RAM validator 的 descriptor 快照与保留区证明
+
+- 日期：2026-11-24
+- 决策：生产 validator 只允许当前 cvmx_bootmem_find_named_block("__tmp_load") descriptor 指定的物理半开区间；每次调用立即复制 static descriptor 的字段，并连续读取两次确认 base/size/name 未变化。
+- 理由：固定源码的 __cvmx_bootmem_find_named_block_flags() 返回函数内部 static descriptor，API 明确非 re-entrant；底层 named-block 查找锁在该函数复制字段前已释放，不能保存返回指针或声称它是原始 named-block 表条目。
+- 保留区证明：board_octeon.c 将 U-Boot 的 bi_uboot_ram_addr/bi_uboot_ram_used_size 以 __uboot_code_data named block 再次登记；该 reservation 覆盖代码/data、malloc、stack、bd、gd 和 boot parameters。validator 要求该 named block 与 gd->bd 精确一致，并排除低 1 MiB、Linux reserved、FDT、exception、bootloader environment 等已知 named blocks。
+- 地址策略：bootmem descriptor 使用 physical base；输入统一规范化 physical/identity、KSEG0/KSEG1、XKPHYS CCA aliases。拒绝不支持的地址域、KSEG 跨段、XKPHYS 保留位、零长度、加法溢出及半开区间越界。
+- 并发前提：当前 U-Boot 前台单核命令模型下，次级核心停留在 idle loop，不存在并发 bootmem writer；若引入异步/多核 bootmem 修改，必须提供锁保护的原子 descriptor snapshot，不得继续依赖当前双读假设。
+- 状态：生产 validator 已实现；Host 32 scenarios / 121 assertions / 0 failures（普通 GCC、ASan/UBSan）；OCTEON 目标构建待 Actions。TFTP/HTTP/ELF 写入调用点尚未接入，继续 BLOCKED。
