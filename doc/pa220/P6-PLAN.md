@@ -5,7 +5,7 @@
 - 集成分支：`feature/pa220-ubootkit-web`
 - 固定 PA-220 源码：`sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
 - P4-2 前置证据：[IMPLEMENTATION.md](../../reports/pa220/P4-2/IMPLEMENTATION.md)
-- 最新 P4-2 Actions：[run #45374720114](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45374720114)
+- 最新 P4-2 Actions：[run #45375848020](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45375848020)
 
 ## 1. P6 目标与边界
 

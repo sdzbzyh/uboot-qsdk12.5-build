@@ -3,13 +3,13 @@
 Date: 2026-11-24
 Integration repository: `sdzbzyh/uboot-qsdk12.5-build`
 Branch: `feature/pa220-ubootkit-web`
-Verified integration commit: `908a58f43017f3e252b3ce0c613b4630072203e9`
+Latest verified integration commit: `20acf9790b6ee15ed758db7006eaee69af0f2bf2`
 Validator implementation baseline: `fce0485d1f1eaeeac5cc1732d5822077cfa68a20`
 Fixed PA-220 source: `sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
 
 ## Status
 
-**P4-2 validator Host and OCTEON build: PASS. TFTP DATA pre-write guard Host and OCTEON compile/link: PASS. Actual TFTP receive: NOT RUN. P4 overall: IN PROGRESS. P6: NOT STARTED.**
+**P4-2 validator Host and OCTEON build: PASS. TFTP DATA pre-write guard Host and OCTEON compile/link: PASS. TFTP patch generation idempotence: PASS. Actual TFTP receive: NOT RUN. P4 overall: IN PROGRESS. P6 design/preflight preparation: STARTED; receive implementation/test: NOT RUN.**
 
 The current result supersedes the earlier 32/121 Host result and the earlier `PENDING Actions execution` text. The authoritative validation is GitHub Actions run [#45374041373](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45374041373), checked out at integration commit `908a58f43017f3e252b3ce0c613b4630072203e9`.
 
@@ -70,7 +70,7 @@ The generator `scripts/generate-pa220-load-range-makefile-patch.py`:
 
 The generator modifies only the disposable PA-220 checkout created by `build-pa220.sh`; the generated patch is retained in the Actions artifact, not committed as a standalone patch under `patches/pa220/`.
 
-Run #45374041373 confirms:
+Run #45375848020 confirms:
 - The generated TFTP patch SHA-256 is `464e54a49f7a4b761c743280faa35a0c7bcfbe8b7124015385c90eea6fc30e38`.
 - The generated Makefile patch SHA-256 is `7de64ed7e0cd5e6f16761f1d1ad0bd60dafde929bbf8384d69b75e722cce751d`.
 - The modified production `tftp.c` compiled as `tftp.o`; `tftp.o` was included in `libnet.o`.
@@ -82,7 +82,8 @@ Run #45374041373 confirms:
 Actions:
 - [Validator-only baseline run #45346000355](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45346000355), commit `fce0485d1f1eaeeac5cc1732d5822077cfa68a20`.
 - [Validator + TFTP guard Host and OCTEON build run #45374041373](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45374041373), commit `908a58f43017f3e252b3ce0c613b4630072203e9`.
-- Latest artifact ID: `14909658286`; name `pa220-p4-2-ram-validator-908a58f43017f3e252b3ce0c613b4630072203e9`; ZIP SHA-256 `d3cd880db8be404327a9fc953ea096a8362145bacbd52541e9ad02e77d7ab6d0`.
+- [Idempotent generator + full validation run #45375848020](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45375848020), commit `20acf9790b6ee15ed758db7006eaee69af0f2bf2`.
+- Latest artifact ID: `14910393863`; name `pa220-p4-2-ram-validator-20acf9790b6ee15ed758db7006eaee69af0f2bf2`; ZIP SHA-256 `8003d3160733133269efd05ee74bc5eecc7decdbd70b4f8855bd1e15cc8f27f1`.
 
 ### Fixed-source TFTP path inventory
 
@@ -99,6 +100,13 @@ Within `u-boot/net/tftp.c`:
 - The optional `CONFIG_SYS_DIRECT_FLASH_TFTP` branch contains `flash_write()`. The generated CN70XX guard validates the destination against the live RAM reservation before either the RAM copy or this branch, so non-RAM destinations fail closed. The direct-flash configuration and flash path were not runtime-tested; persistent writes remain prohibited.
 
 This inventory is source-level evidence at the fixed commit, not proof of runtime protocol behavior.
+
+
+## Patch generator repeatability
+
+`scripts/generate-pa220-load-range-makefile-patch.py` now accepts both original and already-guarded TFTP call sites. Re-running it against the same modified pinned-source checkout is idempotent: it does not duplicate changes, and the generated TFTP patch SHA-256 remains `464e54a49f7a4b761c743280faa35a0c7bcfbe8b7124015385c90eea6fc30e38`.
+
+Actions #45375848020 runs the generator a second time after the full build and asserts that the TFTP patch SHA-256 is unchanged. The idempotence step passed.
 
 ## Explicitly not validated / still blocked
 
