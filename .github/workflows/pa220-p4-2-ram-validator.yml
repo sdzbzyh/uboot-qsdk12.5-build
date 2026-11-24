@@ -8,6 +8,7 @@ on:
       - 'u-boot/arch/mips/cpu/octeon/octeon_load_range.c'
       - 'u-boot/arch/mips/include/asm/arch-octeon/octeon_load_range.h'
       - 'tests/pa220/ram-range/**'
+      - 'tests/pa220/tftp-guard/**'
       - 'scripts/generate-pa220-load-range-makefile-patch.py'
       - 'build-pa220.sh'
       - 'doc/pa220/**'

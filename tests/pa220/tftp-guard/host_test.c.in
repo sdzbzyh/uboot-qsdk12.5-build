@@ -1,3 +1,4 @@
+#define CONFIG_OCTEON_CN70XX 1
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>

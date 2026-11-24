@@ -19,8 +19,8 @@ if template.count("/*__STORE_BLOCK__*/") != 1:
 source = template.replace("/*__STORE_BLOCK__*/", module.STORE_BLOCK)
 pathlib.Path(sys.argv[2]).write_text(source)
 PY
-cc -std=c99 -Wall -Wextra -Werror -O2 "$OUT.c" -o "$OUT"
+cc -std=c99 -Wall -Wextra -Werror -Wno-int-to-pointer-cast -O2 "$OUT.c" -o "$OUT"
 "$OUT"
-cc -std=c99 -Wall -Wextra -Werror -O1 -g -fsanitize=address,undefined \
+cc -std=c99 -Wall -Wextra -Werror -Wno-int-to-pointer-cast -O1 -g -fsanitize=address,undefined \
   -fno-omit-frame-pointer "$OUT.c" -o "$OUT-sanitized"
 ASAN_OPTIONS=detect_leaks=0:abort_on_error=1 "$OUT-sanitized"
