@@ -1,8 +1,8 @@
  .text.do_pa220_web
-                0x00000000c00b75c4                do_pa220_web
+                0x00000000c00b7c2c                do_pa220_web
  .text.net_set_tcp_handler
-                0x00000000c0106834                net_set_tcp_handler
+                0x00000000c0108b9c                net_set_tcp_handler
  .text.tcp_core_poll
-                0x00000000c0109a94                tcp_core_poll
+                0x00000000c010bdfc                tcp_core_poll
  .text.tcp_core_input
-                0x00000000c0109dc8                tcp_core_input
+                0x00000000c010c148                tcp_core_input
