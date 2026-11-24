@@ -193,22 +193,30 @@ def main():
             "\n/* The TFTP get or put is complete */", UPDATE_BLOCK)
 
     lines = tftp_text.splitlines(keepends=True)
-    wrap_calls = 0
-    store_calls = 0
+    wrap_new = 0
+    wrap_existing = 0
+    store_new = 0
+    store_existing = 0
     for index, line in enumerate(lines):
-        if line.strip() == "update_block_number();":
+        stripped = line.strip()
+        if stripped == "update_block_number();":
             indent = line[:len(line) - len(line.lstrip())]
             lines[index] = (indent + "if (update_block_number())\n" +
                             indent + "\tbreak;\n")
-            wrap_calls += 1
-        elif line.strip() == "store_block(TftpBlock - 1, pkt + 2, len);":
+            wrap_new += 1
+        elif stripped == "if (update_block_number())":
+            wrap_existing += 1
+        elif stripped == "store_block(TftpBlock - 1, pkt + 2, len);":
             indent = line[:len(line) - len(line.lstrip())]
             lines[index] = (indent + "if (store_block((int)TftpBlock - 1, "
                             "pkt + 2, len))\n" + indent + "\treturn;\n")
-            store_calls += 1
-    if wrap_calls != 2 or store_calls != 1:
-        raise RuntimeError("unexpected TFTP call-site counts: wrap=%d store=%d" %
-                           (wrap_calls, store_calls))
+            store_new += 1
+        elif stripped == "if (store_block((int)TftpBlock - 1, pkt + 2, len))":
+            store_existing += 1
+    if wrap_new + wrap_existing != 2 or store_new + store_existing != 1:
+        raise RuntimeError(
+            "unexpected TFTP call-site counts: wrap=%d+%d store=%d+%d" %
+            (wrap_new, wrap_existing, store_new, store_existing))
     tftp_text = "".join(lines)
     if tftp_text.count("octeon_load_range_check(dest64") != 1:
         raise RuntimeError("TFTP DATA pre-write validator call missing or duplicated")

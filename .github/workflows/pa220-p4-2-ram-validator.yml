@@ -144,6 +144,17 @@ jobs:
             echo "P4_2_FULL_UBOOT_FINAL_LINK=PASS"
           } 2>&1 | tee "$R/29-octeon-full-build.log"
 
+      - name: Verify TFTP patch generator is idempotent on the modified source tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          R=reports/pa220/P4-2
+          BEFORE=$(sha256sum "$R/0002-pa220-tftp-prewrite-guard.patch" | awk '{print $1}')
+          python3 scripts/generate-pa220-load-range-makefile-patch.py \
+            --source-root "$PA220_REPO_DIR" \
+            --output "$R/0001-pa220-load-range-makefile.patch"
+          AFTER=$(sha256sum "$R/0002-pa220-tftp-prewrite-guard.patch" | awk '{print $1}')
+          test "$BEFORE" = "$AFTER"
       - name: Upload validator, build and audit evidence
         if: always()
         uses: actions/upload-artifact@v4
