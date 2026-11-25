@@ -52,7 +52,7 @@ static void make_elf32(uchar *p, unsigned len, unsigned phoff)
 {
 	unsigned i;for(i=0;i<len;i++)p[i]=0;
 	p[0]=0x7f;p[1]='E';p[2]='L';p[3]='F';p[4]=1;p[5]=2;p[6]=1;
-	put_be32(p+28,phoff);put_le16(p+40,52);put_le16(p+42,32);put_le16(p+44,1);
+	put_be32(p+20,1);put_be32(p+28,phoff);put_le16(p+40,52);put_le16(p+42,32);put_le16(p+44,1);
 	/* ELF fields are target-endian; the tested ELF is big-endian. */
 	p[40]=0;p[41]=52;p[42]=0;p[43]=32;p[44]=0;p[45]=1;
 }
@@ -60,7 +60,7 @@ static void make_elf64le(uchar *p, unsigned len)
 {
 	unsigned i;for(i=0;i<len;i++)p[i]=0;
 	p[0]=0x7f;p[1]='E';p[2]='L';p[3]='F';p[4]=2;p[5]=1;p[6]=1;
-	put_le64(p+32,64);put_le16(p+52,64);put_le16(p+54,56);put_le16(p+56,1);
+	put_le32(p+20,1);put_le64(p+32,64);put_le16(p+52,64);put_le16(p+54,56);put_le16(p+56,1);
 }
 static void reset(void)
 {
