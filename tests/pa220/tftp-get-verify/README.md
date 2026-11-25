@@ -27,3 +27,5 @@ The CI target gate verifies the generated P6-1C patch, compiles the modified OCT
 The Actions job reports separate build-output, artifact-copy, object-ELF and N32-link gates so a failure is localized to the exact validation stage.
 
 The patch file is checked by the generator's own idempotence branch; the workflow does not duplicate that check with a second path-sensitive shell test.
+
+CI idempotence output is intentionally limited to the repeat-run marker and patch digest; first-generation feature markers are read from the original build log.
