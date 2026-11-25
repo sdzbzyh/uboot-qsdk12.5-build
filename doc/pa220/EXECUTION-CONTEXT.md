@@ -83,15 +83,15 @@ Host 测试直接编译生产 helper，并从同一生成器注入生产 GET gat
 
 ### P6-1B：完整文件 reservation 与接收失败状态 — SOFTWARE ACCEPTED（2026-11-25）
 
-- 固定 PA-220 源码 `801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`，集成验证提交 `79b2c943bb852a3b125c59d1f8e4a556c3de1c52`。
+- 固定 PA-220 源码 `801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`，集成验证提交 `fc6f60ca28418f74a418456cd1144a5c4f0f017a`。
 - 默认最大文件长度 32 MiB（`CONFIG_PA220_TFTP_MAX_FILE_SIZE` 可覆盖）；在 RRQ 发送前对整个最大半开区间执行 P4-2 validator reservation。
 - DATA 写入前校验连续 offset、剩余 reservation 和长度；提交接收字节数时再次 checked arithmetic；TFTP `tsize` 采用有上限的十进制解析。
 - 状态明确区分 IDLE/ACTIVE/COMPLETE/FAILED。reservation、越界/乱序、超长、写入失败、TFTP ERROR、超时、ICMP 中断、完成长度/tsize 不一致以及 `do_tftpb()` 返回时的 Ctrl-C/abort 均进入失败状态并清零部分长度、再次失效旧元数据。
 - PUT 与 Server/WRQ 不调用 GET helper；PUT 的旧 tsize 解析和行为保留；不调用 `saveenv`。
 - Host 14 cases / 26 assertions / 0 failures；GCC 与 ASan/UBSan 均 PASS。
 - Cavium SDK 5.1.0 / GCC 4.7.0；OCTEON `tftp.o`、`cmd_net.o`、N32 relocatable link、完整 U-Boot final link 均 PASS。
-- Actions [#45595467013](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45595467013) SUCCESS；完整证据见 `reports/pa220/P6-1B/ACCEPTANCE.md`。
-- 独立补丁由 `git diff --binary` 生成：TFTP 接收状态补丁 SHA-256 `12c3fd97347cef03b6fd8dc66e9a43fd63d314193e598c00dcbe9857072a3621`；GET abort hook 补丁 SHA-256 `71a1e403dd0988add42c8b229332dc6379e65c437de3c1e057158977398c8ccc`。
+- Actions [#45595798808](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45595467013) SUCCESS；完整证据见 `reports/pa220/P6-1B/ACCEPTANCE.md`。
+- 独立补丁由 `git diff --binary` 生成：TFTP 接收状态补丁 SHA-256 `e3dba0c7fdfce6364a93998d94ea823a8d0307e92656b51a4619e7ffeca509b5`；GET abort hook 补丁 SHA-256 `71a1e403dd0988add42c8b229332dc6379e65c437de3c1e057158977398c8ccc`。
 - 未执行真实 TFTP GET、未传输文件、未调用 `saveenv`、未写入任何持久化介质。
 
 下一步 P6-1C：实现并验证接收后 SHA-256/CRC32 与只读格式识别。其后再执行 P6-A live `__tmp_load` descriptor 只读预检；P6-B 真实 RAM-only GET 仍需独立软件门和明确开始确认。
