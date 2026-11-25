@@ -243,6 +243,7 @@
 00000000 t nfs_umountall_reply
 00000000 t nfs_umountall_req
 00000000 b nprobes
+         U octeon_load_range_check
 00000000 t on_bootfile
 00000000 b packet_icmp_handler
          U panic

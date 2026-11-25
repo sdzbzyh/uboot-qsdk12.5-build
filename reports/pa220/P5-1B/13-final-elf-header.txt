@@ -10,7 +10,7 @@ ELF Header:
   Version:                           0x1
   Entry point address:               0xc0000000
   Start of program headers:          52 (bytes into file)
-  Start of section headers:          7738092 (bytes into file)
+  Start of section headers:          7742352 (bytes into file)
   Flags:                             0x808b0025, noreorder, cpic, abi2, octeon, mips64r2
   Size of this header:               52 (bytes)
   Size of program headers:           32 (bytes)
