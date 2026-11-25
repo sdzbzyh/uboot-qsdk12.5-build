@@ -50,12 +50,13 @@ jobs:
           grep -q P6-1B_ALREADY_GENERATED=verified "$R/22-generator-idempotence.log"
           U="$PA220_REPO_DIR/u-boot"; O="$U/net/tftp.o"
           test -s "$O" && test -s "$U/u-boot-octeon_pa220" && test -s "$U/u-boot-octeon_pa220.map" && test -s "$U/System-octeon_pa220.map" && test -s "$U/u-boot-octeon_pa220.bin"
+          test -s "$R/0005-pa220-tftp-get-abort-hook.patch"
           cp "$O" "$R/tftp.o"; cp "$U/u-boot-octeon_pa220" "$R/"; cp "$U/u-boot-octeon_pa220.map" "$R/"; cp "$U/System-octeon_pa220.map" "$R/"; cp "$U/u-boot-octeon_pa220.bin" "$R/"
           RDL="$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-readelf"; "$RDL" -h "$O" | tee "$R/30-tftp-object-elf-header.txt"
           "$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-gcc" -mabi=n32 -EB -march=octeon2 -mabicalls -msoft-float -G 0 -nostdlib -Wl,-r "$O" -o "$R/tftp-n32-relocatable.o"
           "$RDL" -h "$R/tftp-n32-relocatable.o" | tee "$R/31-tftp-n32-relocatable-link.txt"
           grep -q 'TFTP GET failed:' "$R/29-octeon-full-build.log"
-          sha256sum "$R/tftp.o" "$R/tftp-n32-relocatable.o" "$R/u-boot-octeon_pa220" "$R/u-boot-octeon_pa220.map" "$R/System-octeon_pa220.map" "$R/u-boot-octeon_pa220.bin" "$R/0004-pa220-tftp-get-full-reservation.patch" | tee "$R/50-artifact-sha256.txt"
+          sha256sum "$R/tftp.o" "$R/tftp-n32-relocatable.o" "$R/u-boot-octeon_pa220" "$R/u-boot-octeon_pa220.map" "$R/System-octeon_pa220.map" "$R/u-boot-octeon_pa220.bin" "$R/0004-pa220-tftp-get-full-reservation.patch" "$R/0005-pa220-tftp-get-abort-hook.patch" | tee "$R/50-artifact-sha256.txt"
           echo P6_1B_TFTP_OBJECT=PASS; echo P6_1B_N32_RELOCATABLE_LINK=PASS; echo P6_1B_FULL_UBOOT_FINAL_LINK=PASS
       - name: Upload P6-1B evidence and build artifacts
         if: always()
