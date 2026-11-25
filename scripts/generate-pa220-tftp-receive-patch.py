@@ -51,7 +51,7 @@ def main():
  if git(root,"rev-parse","HEAD").strip()!=PIN: raise RuntimeError("wrong PA-220 source pin")
  path=root/TFTP; out=pathlib.Path(a.output); s=path.read_text()
  if "tftp_get_reserve(void)" in s:
-  if not out.is_file() or "tftp_get_reserve" not in out.read_text(): raise RuntimeError("missing P6-1B patch")
+  if not out.is_file() or "tftp_get_reserve" not in out.read_text() or not out.with_name("0005-pa220-tftp-get-abort-hook.patch").is_file() or "TftpGetAbort" not in out.with_name("0005-pa220-tftp-get-abort-hook.patch").read_text(): raise RuntimeError("missing P6-1B production patches")
   print("P6-1B_ALREADY_GENERATED=verified"); print("PATCH="+str(out)); print("PATCH_SHA256="+hashlib.sha256(out.read_bytes()).hexdigest()); print("DIFF_GENERATED_BY=git diff --binary"); return 0
  for x in ["static inline int\nstore_block(","if (len && octeon_load_range_check(dest64, (uint64_t)len))","static void tftp_complete(void)\n{","static void\nrestart(const char *msg)","void TftpStart(enum proto_t protocol)","case TFTP_ERROR:","case TFTP_OACK:","if (store_block((int)TftpBlock - 1, pkt + 2, len))"]:
   if x not in s: raise RuntimeError("missing source anchor "+x)
