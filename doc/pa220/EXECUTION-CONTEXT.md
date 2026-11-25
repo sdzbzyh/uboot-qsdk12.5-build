@@ -6,7 +6,7 @@
 
 - 集成仓库：`sdzbzyh/uboot-qsdk12.5-build`
 - 分支：`feature/pa220-ubootkit-web`
-- 本文件建立时 HEAD：`8105ff0cf1da7e3aaf5c2b9c6b628947eb260be6`
+- 本文件建立时 HEAD：`8105ff0cf1da7e3aaf5c2b9c6b628947eb260be6`（历史记录；当前执行 HEAD 见最新提交）
 - PA-220 固定源码：`sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
 - uBootKit 评估基线：`chenxin527/uboot-qsdk12.5-build@9ce315735ac88fd0a7c7697bc527a8616ed0a972`
 - 目标：OCTEON III CN7130、MIPS64 BE、N32、Cavium SDK 5.1.0、U-Boot 2013.07、原厂 Stage 2 加载自定义 Stage 3。
@@ -16,7 +16,7 @@
 
 P6 RAM-only 文件接收。首条接收路径为 TFTP GET/RRQ。
 
-P6-0 已完成源码审查。当前发现但尚未实现的首个缺口：TFTP GET 失败后，旧的 `filesize` / `fileaddr` 可能残留，导致部分新数据被误认为有效文件。下一步直接实施 P6-1A，不重新开展已完成的源码盘点。
+P6-0 已完成源码审查。当前发现但尚未实现的首个缺口：TFTP GET 失败后，旧的 `filesize` / `fileaddr` 可能残留，导致部分新数据被误认为有效文件。下一步直接实施 P6-1A，不重新开展已完成的源码盘点。\n\nP6-1A 已进入实现与自动验证：生产 helper 与 GET 专属 gate 由 `scripts/generate-pa220-tftp-validity-patch.py` 从固定源码生成；Host 测试位于 `tests/pa220/tftp-validity/`；独立 Actions 工作流为 `.github/workflows/pa220-p6-1a-tftp-validity.yml`。实际 PASS 状态以本轮 Actions 及 `reports/pa220/P6-1A/` 证据为准。
 
 ### P6-1A 设计要点
 

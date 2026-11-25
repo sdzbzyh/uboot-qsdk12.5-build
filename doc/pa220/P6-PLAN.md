@@ -137,3 +137,19 @@ P6-A 只读设备预检通过并不单独授权接收。首个真实 GET 还必�
 ### 当前后续交付
 
 完成 P6 软件接收生命周期和校验安全门后，按需要安排设备只读预检及 RAM-only 接收测试。最终 Web 页面另按 `doc/pa220/WEB-UI-DESIGN.md` 实施，视觉参考 uBootKit Argon 风格；Web UI 不因视觉参考而开放未经验证的写功能。
+
+
+## 10. P6-1A 实施记录（2026-11-25）
+
+### 固定源码 API 语义
+固定 PA-220 源码 `u-boot/common/cmd_nvedit.c` 的 `_do_env_set()` 删除分支对 `hdelete_r()` 返回值取反；`setenv(name, NULL)` 在变量存在且删除成功时返回 0，变量不存在或删除失败时返回 1。因此生产 helper 先用 `getenv()` 检查变量是否存在，再检查删除返回值。
+
+### 实现范围
+- 生产 helper：`tftp_invalidate_get_metadata()`，分别尝试删除 `filesize` 与 `fileaddr`，不因第一项失败而跳过第二项；最后再次确认两项均不存在。
+- GET/RRQ：仅在 `TftpStart()` 的 GET 分支、设置 RRQ 状态及发送请求之前调用 helper。任一失效失败时设置 `NETLOOP_FAIL` 并返回，不启动 RRQ。
+- PUT 与 Server/WRQ：不调用 helper，不改变发送和服务行为。
+- 不调用 `saveenv`；正常成功接收后的元数据发布路径不变。
+- 生成器在固定源码工作树中生成 P6-1A 独立 unified diff，所有 diff 由 `git diff --binary` 产生。
+
+### 验收状态
+本节描述实现设计；Host、ASan/UBSan、TFTP object、N32 relocatable link 和完整 U-Boot final link 的 PASS/FAIL 只依据 `reports/pa220/P6-1A/` 的实际 Actions 证据填写。无日志/产物不得标记 PASS。P6-1A 不构成真实 TFTP GET 授权，后续仍须完成 P6 软件门及 live descriptor 预检。

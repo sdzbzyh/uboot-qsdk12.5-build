@@ -126,6 +126,10 @@ python3 "$ROOT_DIR/scripts/generate-pa220-p5-2c-makefile-patch.py" \
 python3 "$ROOT_DIR/scripts/generate-pa220-load-range-makefile-patch.py" \
     --source-root "$PA220_SOURCE_ROOT" \
     --output "$ROOT_DIR/reports/pa220/P4-2/0001-pa220-load-range-makefile.patch"
+mkdir -p "$ROOT_DIR/reports/pa220/P6-1A"
+python3 "$ROOT_DIR/scripts/generate-pa220-tftp-validity-patch.py" \
+    --source-root "$PA220_SOURCE_ROOT" \
+    --output "$ROOT_DIR/reports/pa220/P6-1A/0003-pa220-tftp-get-metadata-validity.patch"
 
 if [ -n "$TOOLCHAIN_DIR" ]; then
     "$UBOOT_DIR/build.sh" "$TOOLCHAIN_DIR"

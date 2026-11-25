@@ -1,0 +1,116 @@
+name: PA-220 P6-1A TFTP GET metadata validity
+
+on:
+  push:
+    branches: [feature/pa220-ubootkit-web]
+    paths:
+      - 'scripts/generate-pa220-tftp-validity-patch.py'
+      - 'tests/pa220/tftp-validity/**'
+      - 'build-pa220.sh'
+      - '.github/workflows/pa220-p6-1a-tftp-validity.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  p6-1a-host-and-octeon:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact triggering commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Host production-helper tests (GCC and ASan/UBSan)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p reports/pa220/P6-1A
+          {
+            echo "INTEGRATION_COMMIT=$(git rev-parse HEAD)"
+            echo "PA220_SOURCE_PIN=801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8"
+            cc --version | head -n 1
+            bash tests/pa220/tftp-validity/run.sh
+          } 2>&1 | tee reports/pa220/P6-1A/10-host-tests.log
+          test "$(grep -c 'HOST TFTP VALIDITY: cases=6 .* failures=0' reports/pa220/P6-1A/10-host-tests.log)" -eq 2
+
+      - name: Download and verify Cavium OCTEON SDK 5.1.0
+        env:
+          GH_TOKEN: ${{ secrets.OCTEON_SDK_READ_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          D="$RUNNER_TEMP/octeon-download"
+          S="$RUNNER_TEMP/octeon-sdk"
+          mkdir -p "$D" "$S" reports/pa220/P6-1A
+          test -n "$GH_TOKEN"
+          gh release download octeon-sdk-5.1.0 --repo sdzbzyh/pa220-toolchains --pattern '*.tar.gz' --pattern '*.sha256' --dir "$D"
+          (cd "$D" && sha256sum -c ./*.sha256)
+          A=$(find "$D" -maxdepth 1 -type f -name '*.tar.gz' -print -quit)
+          test -n "$A"
+          tar -xzf "$A" -C "$S"
+          GCC=$(find "$S" -path '*/bin/mips64-octeon-linux-gnu-gcc' -print -quit)
+          test -n "$GCC"
+          TC=$(dirname "$(dirname "$GCC")")
+          echo "OCTEON_TOOLCHAIN=$TC" >> "$GITHUB_ENV"
+          echo "$TC/bin" >> "$GITHUB_PATH"
+          "$GCC" --version | head -n 2 | tee reports/pa220/P6-1A/20-octeon-toolchain.txt
+          sha256sum "$A" | tee reports/pa220/P6-1A/21-sdk-sha256.txt
+
+      - name: Generate P6-1A patch and build complete pinned PA-220 U-Boot
+        shell: bash
+        run: |
+          set -euo pipefail
+          R=reports/pa220/P6-1A
+          export OCTEON_MODEL=OCTEON_CN70XX
+          export PA220_REPO_DIR="$RUNNER_TEMP/pa220-openwrt"
+          export PA220_OUTPUT_DIR="$RUNNER_TEMP/pa220-output"
+          ./build-pa220.sh "$OCTEON_TOOLCHAIN" 2>&1 | tee "$R/29-octeon-full-build.log"
+          U="$PA220_REPO_DIR/u-boot"
+          O="$U/net/tftp.o"
+          test -s "$O"
+          test -s "$U/u-boot-octeon_pa220"
+          test -s "$U/u-boot-octeon_pa220.map"
+          test -s "$U/System-octeon_pa220.map"
+          test -s "$U/u-boot-octeon_pa220.bin"
+          cp "$O" "$R/tftp.o"
+          cp "$U/u-boot-octeon_pa220" "$R/u-boot-octeon_pa220"
+          cp "$U/u-boot-octeon_pa220.map" "$R/u-boot-octeon_pa220.map"
+          cp "$U/System-octeon_pa220.map" "$R/System-octeon_pa220.map"
+          cp "$U/u-boot-octeon_pa220.bin" "$R/u-boot-octeon_pa220.bin"
+          cp "$R/0003-pa220-tftp-get-metadata-validity.patch" "$R/"
+          RDL="$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-readelf"
+          NM="$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-nm"
+          "$RDL" -h "$O" | tee "$R/30-tftp-object-elf-header.txt"
+          grep -q 'ELF32' "$R/30-tftp-object-elf-header.txt"
+          grep -q 'big endian' "$R/30-tftp-object-elf-header.txt"
+          grep -qi 'abi2' "$R/30-tftp-object-elf-header.txt"
+          "$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-gcc" \
+            -mabi=n32 -EB -march=octeon2 -mabicalls -msoft-float -G 0 -nostdlib -Wl,-r \
+            "$O" -o "$R/tftp-n32-relocatable.o"
+          "$RDL" -h "$R/tftp-n32-relocatable.o" | tee "$R/31-tftp-n32-relocatable-link.txt"
+          grep -q 'ELF32' "$R/31-tftp-n32-relocatable-link.txt"
+          grep -q 'big endian' "$R/31-tftp-n32-relocatable-link.txt"
+          grep -qi 'abi2' "$R/31-tftp-n32-relocatable-link.txt"
+          "$NM" -a "$U/u-boot-octeon_pa220" | grep 'tftp_invalidate_get_metadata' | tee "$R/32-helper-final-symbol.txt"
+          grep -q 'tftp_invalidate_get_metadata' "$U/u-boot-octeon_pa220.map"
+          grep -q 'tftp_invalidate_get_metadata' "$U/System-octeon_pa220.map"
+          sha256sum "$R/tftp.o" "$R/tftp-n32-relocatable.o" \
+            "$R/u-boot-octeon_pa220" "$R/u-boot-octeon_pa220.map" \
+            "$R/System-octeon_pa220.map" "$R/u-boot-octeon_pa220.bin" \
+            "$R/0003-pa220-tftp-get-metadata-validity.patch" \
+            | tee "$R/50-artifact-sha256.txt"
+          echo "P6_1A_TFTP_OBJECT=PASS"
+          echo "P6_1A_N32_RELOCATABLE_LINK=PASS"
+          echo "P6_1A_FULL_UBOOT_FINAL_LINK=PASS"
+
+      - name: Upload P6-1A evidence and build artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pa220-p6-1a-tftp-validity-${{ github.sha }}
+          path: reports/pa220/P6-1A/
+          if-no-files-found: warn
+          retention-days: 60

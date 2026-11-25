@@ -1,0 +1,163 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define NETLOOP_FAIL 1
+#define TEST_ENV_COUNT 2
+
+static const char *names[TEST_ENV_COUNT] = { "filesize", "fileaddr" };
+static char *values[TEST_ENV_COUNT];
+static int fail_delete[TEST_ENV_COUNT];
+static unsigned delete_calls[TEST_ENV_COUNT];
+static unsigned assertions, cases, failures;
+static unsigned rrq_count;
+static int net_state;
+static unsigned saveenv_calls;
+
+static void check(int ok, const char *label)
+{
+	assertions++;
+	if (!ok) {
+		failures++;
+		printf("FAIL: %s\n", label);
+	}
+}
+
+static int index_of(const char *name)
+{
+	int i;
+	for (i = 0; i < TEST_ENV_COUNT; i++)
+		if (!strcmp(name, names[i]))
+			return i;
+	return -1;
+}
+
+static char *mock_getenv(const char *name)
+{
+	int i = index_of(name);
+	return i < 0 ? NULL : values[i];
+}
+
+static int mock_setenv(const char *name, const char *value)
+{
+	int i = index_of(name);
+	(void)value;
+	if (i < 0)
+		return 1;
+	delete_calls[i]++;
+	if (fail_delete[i])
+		return 1;
+	values[i] = NULL;
+	return 0;
+}
+
+static void mock_net_set_state(int state) { net_state = state; }
+static int mock_saveenv(void) { saveenv_calls++; return 0; }
+
+#define getenv mock_getenv
+#define setenv mock_setenv
+/*__HELPER__*/
+#undef getenv
+#undef setenv
+
+static void reset_fixture(int have_size, int have_addr)
+{
+	int i;
+	values[0] = have_size ? (char *)"0x1000" : NULL;
+	values[1] = have_addr ? (char *)"0x20000000" : NULL;
+	for (i = 0; i < TEST_ENV_COUNT; i++) {
+		fail_delete[i] = 0;
+		delete_calls[i] = 0;
+	}
+	rrq_count = 0;
+	net_state = 0;
+	saveenv_calls = 0;
+}
+
+static void start_get(void)
+{
+	if (tftp_invalidate_get_metadata()) {
+		mock_net_set_state(NETLOOP_FAIL);
+		return;
+	}
+	rrq_count++;
+}
+
+static void test_success(void)
+{
+	reset_fixture(1, 1);
+	cases++;
+	check(tftp_invalidate_get_metadata() == 0, "both old markers deleted");
+	check(values[0] == NULL && values[1] == NULL, "both markers absent");
+	check(delete_calls[0] == 1 && delete_calls[1] == 1,
+	      "both independent deletion attempts made");
+	check(saveenv_calls == 0, "no saveenv call");
+}
+
+static void test_filesize_failure_still_deletes_fileaddr(void)
+{
+	reset_fixture(1, 1);
+	fail_delete[0] = 1;
+	cases++;
+	check(tftp_invalidate_get_metadata() != 0, "filesize deletion failure rejected");
+	check(delete_calls[0] == 1 && delete_calls[1] == 1,
+	      "fileaddr attempted after filesize failure");
+	check(values[0] != NULL && values[1] == NULL,
+	      "failed filesize remains but fileaddr is removed");
+	check(saveenv_calls == 0, "no saveenv after first deletion failure");
+}
+
+static void test_fileaddr_failure(void)
+{
+	reset_fixture(1, 1);
+	fail_delete[1] = 1;
+	cases++;
+	check(tftp_invalidate_get_metadata() != 0, "fileaddr deletion failure rejected");
+	check(delete_calls[0] == 1 && delete_calls[1] == 1,
+	      "both deletions attempted when second fails");
+	check(values[0] == NULL && values[1] != NULL,
+	      "only failed fileaddr remains");
+}
+
+static void test_absent_markers(void)
+{
+	reset_fixture(0, 0);
+	cases++;
+	check(tftp_invalidate_get_metadata() == 0, "already absent markers accepted");
+	check(delete_calls[0] == 0 && delete_calls[1] == 0,
+	      "nonexistent markers are not passed to setenv");
+}
+
+static void test_get_fail_closed(void)
+{
+	reset_fixture(1, 1);
+	fail_delete[0] = 1;
+	cases++;
+	start_get();
+	check(rrq_count == 0, "GET RRQ not started after invalidation failure");
+	check(net_state == NETLOOP_FAIL, "GET failure sets NETLOOP_FAIL");
+	check(delete_calls[1] == 1, "second invalidation attempted before GET rejection");
+}
+
+static void test_get_starts_after_success(void)
+{
+	reset_fixture(1, 1);
+	cases++;
+	start_get();
+	check(rrq_count == 1, "GET proceeds after both markers invalidated");
+	check(values[0] == NULL && values[1] == NULL, "GET starts with no stale markers");
+	check(net_state == 0, "successful invalidation does not fail net loop");
+}
+
+int main(void)
+{
+	test_success();
+	test_filesize_failure_still_deletes_fileaddr();
+	test_fileaddr_failure();
+	test_absent_markers();
+	test_get_fail_closed();
+	test_get_starts_after_success();
+	printf("HOST TFTP VALIDITY: cases=%u assertions=%u failures=%u saveenv_calls=%u\n",
+	       cases, assertions, failures, saveenv_calls);
+	return failures ? 1 : 0;
+}
