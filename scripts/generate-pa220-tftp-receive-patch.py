@@ -22,6 +22,19 @@ static int tftp_get_check_block(uint64_t off,unsigned len)
  return 0;
 }
 static void tftp_get_commit_block(unsigned len) { TftpGetReceivedSize+=(ulong)len; }
+static int tftp_get_parse_tsize(const char *p, ulong *size)
+{
+ uint64_t value=0, limit=(uint64_t)CONFIG_PA220_TFTP_MAX_FILE_SIZE;
+ if (!p || !*p || !size) return -1;
+ while (*p) {
+  uint64_t digit;
+  if (*p<'0' || *p>'9') return -1;
+  digit=(uint64_t)(*p-'0');
+  if (digit>limit || value>(limit-digit)/10) return -1;
+  value=value*10+digit; p++;
+ }
+ *size=(ulong)value; return 0;
+}
 static int tftp_get_finish(void)
 {
  if (TftpGetState!=TFTP_GET_ACTIVE || TftpGetReceivedSize>TftpGetReservedSize || NetBootFileXferSize!=TftpGetReceivedSize
@@ -70,7 +83,8 @@ def main():
   s=rep(s,'range_error:\n\tprintf("TFTP: rejecting DATA block (offset overflow or outside __tmp_load)\\n");\n\tnet_set_state(NETLOOP_FAIL);\n\treturn -1;','range_error:\n\tif (TftpGetState == TFTP_GET_ACTIVE)\n\t\ttftp_get_fail("DATA block exceeds reservation or is non-sequential");\n\telse {\n\t\tprintf("TFTP: rejecting DATA block (offset overflow or outside __tmp_load)\\n");\n\t\tnet_set_state(NETLOOP_FAIL);\n\t}\n\treturn -1;',"range failure")
   s=rep(s,'\tprintf("\\n%s; starting again\\n", msg);','\tif (TftpGetState == TFTP_GET_ACTIVE) { tftp_get_fail(msg); return; }\n\tprintf("\\n%s; starting again\\n", msg);',"restart")
   s=rep(s,"static void tftp_complete(void)\n{","static void tftp_complete(void)\n{\n\tif (TftpGetState == TFTP_GET_ACTIVE && tftp_get_finish())\n\t\treturn;","completion")
-  s=rep(s,"\t\t}\n#ifdef CONFIG_MCAST_TFTP\n\t\tparse_multicast_oack","\t\t}\n#ifdef CONFIG_TFTP_TSIZE\n\t\tif (TftpGetState == TFTP_GET_ACTIVE && TftpTsize > TftpGetReservedSize) { tftp_get_fail(\"server tsize exceeds maximum\"); break; }\n#endif\n#ifdef CONFIG_MCAST_TFTP\n\t\tparse_multicast_oack","OACK size")
+    s=rep(s,"TftpTsize = simple_strtoul((char *)pkt+i+6, NULL, 10);","if (TftpGetState == TFTP_GET_ACTIVE) {\n\t\t\t\t\tif (tftp_get_parse_tsize((char *)pkt+i+6, &TftpTsize)) {\n\t\t\t\t\t\ttftp_get_fail(\"invalid or oversized server tsize\");\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t} else {\n\t\t\t\t\tTftpTsize = simple_strtoul((char *)pkt+i+6, NULL, 10);\n\t\t\t\t}","checked tsize parse")
+s=rep(s,"\t\t}\n#ifdef CONFIG_MCAST_TFTP\n\t\tparse_multicast_oack","\t\t}\n#ifdef CONFIG_TFTP_TSIZE\n\t\tif (TftpGetState == TFTP_GET_ACTIVE && TftpTsize > TftpGetReservedSize) { tftp_get_fail(\"server tsize exceeds maximum\"); break; }\n#endif\n#ifdef CONFIG_MCAST_TFTP\n\t\tparse_multicast_oack","OACK size")
   s=rep(s,"\t\t\t\tNetStartAgain();\n\t\t\t\tbreak;","\t\t\t\tif (TftpGetState == TFTP_GET_ACTIVE) tftp_get_fail(\"first DATA block is not block 1\");\n\t\t\t\telse NetStartAgain();\n\t\t\t\tbreak;","first block")
   s=rep(s,"\tcase TFTP_ERROR:\n\t\tprintf(","\tcase TFTP_ERROR:\n\t\tif (TftpGetState == TFTP_GET_ACTIVE) { tftp_get_fail(\"server TFTP ERROR\"); break; }\n\t\tprintf(","TFTP ERROR")
   ic="\tif (type == ICMP_NOT_REACH && code == ICMP_NOT_REACH_PORT) {"
