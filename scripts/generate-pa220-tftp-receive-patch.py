@@ -75,6 +75,7 @@ def main():
   git(root,"read-tree","HEAD",env=env); git(root,"add","--",str(TFTP),env=env)
   s=rep(s,"static inline int\nstore_block(",GET_STATE_HELPERS+"\nstatic inline int\nstore_block(","state helpers")
   s=s.replace("static int TftpTsize;","static ulong TftpTsize;")
+  s=s.replace('debug("size = %s, %d\\n",', 'debug("size = %s, %lu\\n",')
   s=rep(s,'\t\tprintf("Load address: 0x%lx\\n", load_addr);','\t\tprintf("Load address: 0x%lx\\n", load_addr);\n\t\tif (tftp_get_reserve()) {\n\t\t\ttftp_get_fail("unable to reserve complete maximum file range");\n\t\t\treturn;\n\t\t}',"GET reservation")
   s=rep(s,"\tTftpRemoteIP = NetServerIP;","\tTftpGetState = TFTP_GET_IDLE;\n\tTftpRemoteIP = NetServerIP;","TftpStart reset")
   s=rep(s,'\t\tif (tftp_invalidate_get_metadata()) {\n\t\t\tputs("\\nTFTP GET: unable to invalidate previous file metadata; refusing request\\n");\n\t\t\tnet_set_state(NETLOOP_FAIL);\n\t\t\treturn;\n\t\t}', '\t\tif (tftp_invalidate_get_metadata()) {\n\t\t\ttftp_get_fail("unable to invalidate previous file metadata");\n\t\t\treturn;\n\t\t}', "P6-1A GET failure state")
