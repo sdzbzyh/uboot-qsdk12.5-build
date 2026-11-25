@@ -177,7 +177,7 @@ P6-1A 仅完成 GET 开始前旧元数据失效，不构成真实 TFTP GET 授�
 
 ### 验收证据
 
-- Actions [#45595798808](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45595467013)：SUCCESS；验证提交 fc6f60ca28418f74a418456cd1144a5c4f0f017a。
+- Actions [#45595798808](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45595798808)：SUCCESS；验证提交 fc6f60ca28418f74a418456cd1144a5c4f0f017a。
 - Host Harness 直接注入生产 GET_STATE_HELPERS：14 cases / 26 assertions / 0 failures；GCC 和 ASan/UBSan 均通过。
 - Cavium SDK 5.1.0，GCC 4.7.0；SDK archive SHA-256：cd8cd3232078094c89accf32a82a13e7847e3466c94e9b5e12dd11b741102d99。
 - OCTEON tftp.o 与 N32 relocatable object 均为 ELF32 big-endian、ABI2；完整 U-Boot final link 成功。
