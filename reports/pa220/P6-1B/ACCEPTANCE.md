@@ -6,7 +6,7 @@
 - Branch: `feature/pa220-ubootkit-web`
 - Validated integration commit: `fc6f60ca28418f74a418456cd1144a5c4f0f017a`
 - Fixed PA-220 source: `sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
-- Actions: [run #45595798808](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45595467013) — **SUCCESS**
+- Actions: [run #45595798808](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45595798808) — **SUCCESS**
 
 ## Scope
 
