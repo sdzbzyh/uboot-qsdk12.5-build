@@ -51,7 +51,9 @@ static int mock_setenv(const char *name, const char *value)
 	return 0;
 }
 
-static void mock_net_set_state(int state) { net_state = state; }
+static void net_set_state(int state) { net_state = state; }
+int mock_saveenv(void) { saveenv_calls++; return 0; }
+#define saveenv mock_saveenv
 
 #define getenv mock_getenv
 #define setenv mock_setenv

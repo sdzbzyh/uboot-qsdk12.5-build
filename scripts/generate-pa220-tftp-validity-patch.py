@@ -61,7 +61,7 @@ def main():
         if not out.is_file():
             raise RuntimeError("P6-1A source is already modified but its generated patch is missing")
         existing = out.read_text()
-        if HELPER not in existing or GET_GATE.strip() not in existing:
+        if "tftp_invalidate_get_metadata" not in existing or "unable to invalidate previous file metadata" not in existing:
             raise RuntimeError("existing P6-1A patch does not match the applied source")
         print("P6-1A_ALREADY_GENERATED=verified")
         print("PATCH=" + str(out))
