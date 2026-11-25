@@ -50,6 +50,7 @@ jobs:
           python3 scripts/generate-pa220-tftp-receive-patch.py --source-root "$PA220_REPO_DIR" --output "$R/0004-pa220-tftp-get-full-reservation.patch" | tee "$R/22-generator-idempotence.log"
           grep -q P6-1B_ALREADY_GENERATED=verified "$R/22-generator-idempotence.log"
           grep -q CTRL_C_ABORT_HOOK=verified "$R/22-generator-idempotence.log"
+          grep -q CHECKED_BYTE_COUNT_COMMIT=verified "$R/22-generator-idempotence.log"
           U="$PA220_REPO_DIR/u-boot"; O="$U/net/tftp.o"
           test -s "$O" && test -s "$U/common/cmd_net.o" && test -s "$U/u-boot-octeon_pa220" && test -s "$U/u-boot-octeon_pa220.map" && test -s "$U/System-octeon_pa220.map" && test -s "$U/u-boot-octeon_pa220.bin"
           test -s "$R/0005-pa220-tftp-get-abort-hook.patch"
