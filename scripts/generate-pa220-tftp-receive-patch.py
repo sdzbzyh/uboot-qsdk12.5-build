@@ -62,6 +62,7 @@ def main():
   s=s.replace("static int TftpTsize;","static ulong TftpTsize;")
   s=rep(s,'\t\tprintf("Load address: 0x%lx\\n", load_addr);','\t\tprintf("Load address: 0x%lx\\n", load_addr);\n\t\tif (tftp_get_reserve()) {\n\t\t\ttftp_get_fail("unable to reserve complete maximum file range");\n\t\t\treturn;\n\t\t}',"GET reservation")
   s=rep(s,"\tTftpRemoteIP = NetServerIP;","\tTftpGetState = TFTP_GET_IDLE;\n\tTftpRemoteIP = NetServerIP;","TftpStart reset")
+  s=rep(s,'\t\tif (tftp_invalidate_get_metadata()) {\n\t\t\tputs("\\nTFTP GET: unable to invalidate previous file metadata; refusing request\\n");\n\t\t\tnet_set_state(NETLOOP_FAIL);\n\t\t\treturn;\n\t\t}', '\t\tif (tftp_invalidate_get_metadata()) {\n\t\t\ttftp_get_fail("unable to invalidate previous file metadata");\n\t\t\treturn;\n\t\t}', "P6-1A GET failure state")
   s=rep(s,"\tTftpState = STATE_RECV_WRQ;","\tTftpGetState = TFTP_GET_IDLE;\n\tTftpState = STATE_RECV_WRQ;","WRQ reset")
   s=rep(s,"\tif (len && octeon_load_range_check(dest64, (uint64_t)len))\n\t\tgoto range_error;","\tif (len && octeon_load_range_check(dest64, (uint64_t)len))\n\t\tgoto range_error;\n\tif (TftpGetState == TFTP_GET_ACTIVE && tftp_get_check_block(offset64, len))\n\t\tgoto range_error;","block check")
   s=rep(s,"\tif (NetBootFileXferSize < newsize)\n\t\tNetBootFileXferSize = newsize;\n\treturn 0;","\tif (TftpGetState == TFTP_GET_ACTIVE)\n\t\ttftp_get_commit_block(len);\n\tif (NetBootFileXferSize < newsize)\n\t\tNetBootFileXferSize = newsize;\n\treturn 0;","block commit")
