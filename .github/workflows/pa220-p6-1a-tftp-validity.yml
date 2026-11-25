@@ -6,7 +6,6 @@ on:
     paths:
       - 'scripts/generate-pa220-tftp-validity-patch.py'
       - 'tests/pa220/tftp-validity/**'
-      - 'build-pa220.sh'
       - '.github/workflows/pa220-p6-1a-tftp-validity.yml'
   workflow_dispatch:
 
