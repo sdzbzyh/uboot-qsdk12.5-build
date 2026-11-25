@@ -19,6 +19,7 @@ int main(void){
  reset();tftp_get_reserve();cases++;check(tftp_get_check_block(0,512)==0,"first block");tftp_get_commit_block(512);check(tftp_get_check_block(512,512)==0,"sequential block");tftp_get_commit_block(512);check(TftpGetReceivedSize==1024,"received count");
  reset();tftp_get_reserve();cases++;check(tftp_get_check_block(512,512)!=0,"out of order rejected");
  reset();tftp_get_reserve();TftpGetReceivedSize=TftpGetReservedSize;cases++;check(tftp_get_check_block(TftpGetReceivedSize,1)!=0,"maximum plus one rejected");
+ reset();tftp_get_reserve();TftpGetReceivedSize=TftpGetReservedSize;cases++;check(tftp_get_commit_block(1)!=0&&TftpGetReceivedSize==TftpGetReservedSize,"byte-count commit overflow rejected");
  reset();tftp_get_reserve();TftpGetReceivedSize=TftpGetReservedSize-1;cases++;check(tftp_get_check_block(TftpGetReceivedSize,2)!=0,"cross-end block rejected");
  reset();tftp_get_reserve();TftpGetReceivedSize=4096;NetBootFileXferSize=4096;cases++;check(tftp_get_finish()==0&&TftpGetState==TFTP_GET_COMPLETE,"complete file accepted");
  reset();tftp_get_reserve();TftpGetReceivedSize=4096;NetBootFileXferSize=4096;cases++;check(tftp_get_check_block(4096,0)==0,"zero-length terminal DATA block accepted");tftp_get_commit_block(0);check(TftpGetReceivedSize==4096,"terminal block does not change total length");
