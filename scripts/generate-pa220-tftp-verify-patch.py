@@ -57,10 +57,10 @@ static const char *tftp_get_format_name(int format)
  */
 static int tftp_get_classify(const uchar *p, uint64_t len, int *format)
 {
-	uint64_t off, count, entsize, table_bytes;
+	uint64_t off, count, entsize, table_bytes, shoff;
 	uint32_t total, version, last_version, struct_off, strings_off;
 	uint32_t reserve_off, struct_size, strings_size, payload_size;
-	uint16_t ehsize, phentsize, phnum;
+	uint16_t ehsize, phentsize, phnum, shentsize, shnum;
 	int little, elf_class;
 
 	if (!p || !format || !len)
@@ -93,7 +93,7 @@ static int tftp_get_classify(const uchar *p, uint64_t len, int *format)
 		if (total < 40 || (uint64_t)total > len ||
 		    version < 16 || version > 17 ||
 		    last_version < 16 || last_version > version ||
-		    reserve_off < 40 || reserve_off > total ||
+		    reserve_off < 40 || reserve_off > total || total - reserve_off < 16 ||
 		    struct_off < 40 || struct_off > total ||
 		    strings_off < 40 || strings_off > total ||
 		    struct_size > total - struct_off ||
@@ -118,6 +118,9 @@ static int tftp_get_classify(const uchar *p, uint64_t len, int *format)
 				return -1;
 			ehsize = tftp_get_rd16(p + 40, little);
 			off = tftp_get_rd32(p + 28, little);
+			shoff = tftp_get_rd32(p + 32, little);
+			shentsize = tftp_get_rd16(p + 46, little);
+			shnum = tftp_get_rd16(p + 48, little);
 			phentsize = tftp_get_rd16(p + 42, little);
 			phnum = tftp_get_rd16(p + 44, little);
 			if (ehsize != 52 || (phnum && phentsize < 32))
@@ -128,12 +131,17 @@ static int tftp_get_classify(const uchar *p, uint64_t len, int *format)
 				return -1;
 			ehsize = tftp_get_rd16(p + 52, little);
 			off = tftp_get_rd64(p + 32, little);
+			shoff = tftp_get_rd64(p + 40, little);
+			shentsize = tftp_get_rd16(p + 58, little);
+			shnum = tftp_get_rd16(p + 60, little);
 			phentsize = tftp_get_rd16(p + 54, little);
 			phnum = tftp_get_rd16(p + 56, little);
 			if (ehsize != 64 || (phnum && phentsize < 56))
 				return -1;
 			*format = TFTP_GET_FORMAT_ELF64;
 		}
+		if (tftp_get_rd32(p + 20, little) != 1)
+			return -1;
 		if (phnum) {
 			if (!phentsize || off > len)
 				return -1;
@@ -145,6 +153,14 @@ static int tftp_get_classify(const uchar *p, uint64_t len, int *format)
 			if (table_bytes > len - off)
 				return -1;
 		} else if (off > len) {
+			return -1;
+		}
+		if (shnum) {
+			uint64_t min_shentsize = (elf_class == 1) ? 40 : 64;
+			if (shentsize < min_shentsize || shoff > len ||
+			    (uint64_t)shnum > (len - shoff) / shentsize)
+				return -1;
+		} else if (shoff > len) {
 			return -1;
 		}
 		return 0;
