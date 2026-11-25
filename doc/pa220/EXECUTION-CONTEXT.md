@@ -7,7 +7,7 @@
 - 集成仓库：`sdzbzyh/uboot-qsdk12.5-build`
 - 分支：`feature/pa220-ubootkit-web`
 - 本文件建立时 HEAD：`8105ff0cf1da7e3aaf5c2b9c6b628947eb260be6`（历史记录）
-- 当前远端 HEAD：`89bccb83c8e2dad2ed76bbafcd2e132be1a20045`
+- 当前远端 HEAD：`7503f421e82dc16f0343b4092eb86458a181647f`
 - PA-220 固定源码：`sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
 - uBootKit 评估基线：`chenxin527/uboot-qsdk12.5-build@9ce315735ac88fd0a7c7697bc527a8616ed0a972`
 - 目标：OCTEON III CN7130、MIPS64 BE、N32、Cavium SDK 5.1.0、U-Boot 2013.07、原厂 Stage 2 加载自定义 Stage 3。
