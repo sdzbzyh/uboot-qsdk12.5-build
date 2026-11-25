@@ -219,6 +219,14 @@ static int tftp_get_finish_verified(const uchar *data, uint64_t size)
 }
 '''
 
+GET_VERIFY_FINISH = r'''static int tftp_get_finish_verified(const uchar *data, uint64_t size);
+static int tftp_get_finish(void)
+{
+ return tftp_get_finish_verified((const uchar *)(uintptr_t)load_addr,
+                                (uint64_t)TftpGetReceivedSize);
+}
+'''
+
 def git(root, *args, env=None):
     return subprocess.run(["git", "-C", str(root), *args], check=True,
                           stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -281,12 +289,7 @@ def main():
  TftpGetState=TFTP_GET_COMPLETE; return 0;
 }
 '''
-        new_finish = '''static int tftp_get_finish_verified(const uchar *data, uint64_t size);\nstatic int tftp_get_finish(void)
-{
- return tftp_get_finish_verified((const uchar *)(uintptr_t)load_addr,
-                                (uint64_t)TftpGetReceivedSize);
-}
-'''
+        new_finish = GET_VERIFY_FINISH
         source = rep(source, old_finish, new_finish, "verified completion gate")
 
         path.write_text(source)
