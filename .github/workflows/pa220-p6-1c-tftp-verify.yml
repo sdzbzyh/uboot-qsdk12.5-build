@@ -49,8 +49,8 @@ jobs:
           ./build-pa220.sh "$OCTEON_TOOLCHAIN" 2>&1 | tee "$R/29-octeon-full-build.log"
           python3 scripts/generate-pa220-tftp-verify-patch.py --source-root "$PA220_REPO_DIR" --output "$R/0006-pa220-tftp-get-verification.patch" | tee "$R/22-generator-idempotence.log"
           grep -q P6-1C_ALREADY_GENERATED=verified "$R/22-generator-idempotence.log"
-          grep -q P6_1C_SHA256_CRC32=integrated "$R/22-generator-idempotence.log"
-          grep -q P6_1C_READ_ONLY_FORMATS=legacy-uImage,FIT-FDT,ELF32,ELF64 "$R/22-generator-idempotence.log"
+          grep -q P6_1C_SHA256_CRC32=integrated "$R/29-octeon-full-build.log"
+          grep -q P6_1C_READ_ONLY_FORMATS=legacy-uImage,FIT-FDT,ELF32,ELF64 "$R/29-octeon-full-build.log"
           U="$PA220_REPO_DIR/u-boot"; O="$U/net/tftp.o"
           for F in "$O" "$U/common/cmd_net.o" "$U/u-boot-octeon_pa220" "$U/u-boot-octeon_pa220.map" "$U/System-octeon_pa220.map" "$U/u-boot-octeon_pa220.bin"; do
             if [ ! -s "$F" ]; then echo "MISSING_BUILD_OUTPUT=$F"; ls -la "$(dirname "$F")"; exit 1; fi
