@@ -57,7 +57,7 @@ P6-B 只验证 TFTP GET，不代表 TFTP Server/WRQ、PUT、HTTP upload 或 ELF 
 
 ## 5. P6-C：校验与格式识别（P6-1C SOFTWARE ACCEPTED）
 
-P6-1B 已完成最大文件长度、完整 reservation、DATA block/offset/总长度 checked arithmetic，以及超时/中断/越界/失败状态管理。首次真实接收前仍须完成：
+P6-1A、P6-1B、P6-1C 的软件门均已完成。P6-1C 的实现范围与边界如下：
 
 - 接收结束后使用固定源码中的 sha256_csum_wd() 和 crc32_wd() 计算 SHA-256/CRC32，输出长度、digest 和格式类型；当前 TFTP GET 不协商可信预期 digest，因此这些值用于可信主机端比对，不单独构成真实性认证。
 - 格式识别仅做只读 magic/header 检查：legacy uImage、FIT/FDT、ELF32/ELF64；检查文件长度、固定 header 边界、声明大小、FDT block 范围和 ELF program/section table 范围；不调用 loader、不执行、不写介质。
@@ -122,6 +122,8 @@ P6-A 只读设备预检通过并不单独授权接收。首个真实 GET 还必�
 
 ### P6-1B：完整文件 reservation 与接收失败状态 — SOFTWARE ACCEPTED
 
+P6-1B 已完成生产实现、Host GCC/ASan/UBSan、OCTEON object、N32 relocatable link、完整 U-Boot final link 和独立补丁重复生成验证。P6-1B 不授权真实 TFTP GET；后续接收仍须经过 P6-1A/B/C 软件门和 P6-A live descriptor 只读预检。
+
 ### P6-1C：接收后 SHA-256/CRC32 与只读格式识别 — SOFTWARE ACCEPTED
 
 - Actions [#45600860179](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45600860179)：SUCCESS；验证提交 b366a278ec15445a60f12441739d172b94392e3e。
@@ -132,7 +134,6 @@ P6-A 只读设备预检通过并不单独授权接收。首个真实 GET 还必�
 - P6-1C patch SHA-256：34941096eef9983fe7f951bb29c88e88e31f7d29d330ea4118fd83fcf5a9b32b；tftp.o SHA-256：bec5e494f7e5efee894fa23e902ead5894c468fc40159e25569daeeec549d433。
 - 完整证据见 reports/pa220/P6-1C/ACCEPTANCE.md。未执行真实 TFTP GET、未传输文件、未调用 saveenv、未写持久化介质。
 
-P6-1B 已完成生产实现、Host GCC/ASan/UBSan、OCTEON object、N32 relocatable link、完整 U-Boot final link 和独立补丁重复生成验证。P6-1B 仍不授权真实 TFTP GET；实际接收继续等待 P6-1C 校验/格式识别和 P6-A live descriptor 只读预检。
 
 ### 实机测试安排更新
 
