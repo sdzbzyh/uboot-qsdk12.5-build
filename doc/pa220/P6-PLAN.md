@@ -119,9 +119,9 @@ P6-A 只读设备预检通过并不单独授权接收。首个真实 GET 还必�
 - 固定 PA-220 源码 OCTEON `tftp.o`、N32 relocatable link、完整 U-Boot final link 均通过。
 - 正式证据：[#45588666611](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45588666611)；完整记录见 [P6-1A ACCEPTANCE](../../reports/pa220/P6-1A/ACCEPTANCE.md)。
 
-### 下一工作单元：P6-1B
+### P6-1B：完整文件 reservation 与接收失败状态 — SOFTWARE ACCEPTED
 
-先完成完整文件 reservation、最大总长度、checked block/offset arithmetic 与超时/中断失败状态管理的生产实现及 Host/目标验证。P6-1A 只清除了旧结果元数据，不代表完整文件接收生命周期已经安全，也不授权真实 TFTP GET。
+P6-1B 已完成生产实现、Host GCC/ASan/UBSan、OCTEON object、N32 relocatable link、完整 U-Boot final link 和独立补丁重复生成验证。P6-1B 仍不授权真实 TFTP GET；实际接收继续等待 P6-1C 校验/格式识别和 P6-A live descriptor 只读预检。
 
 ### 实机测试安排更新
 
@@ -164,3 +164,29 @@ P6-A 只读设备预检通过并不单独授权接收。首个真实 GET 还必�
 - 完整测试、SDK、对象、链接产物哈希见 `reports/pa220/P6-1A/ACCEPTANCE.md`。
 
 P6-1A 仅完成 GET 开始前旧元数据失效，不构成真实 TFTP GET 授权；完整文件 reservation、最大长度、失败状态、校验/格式识别及 live descriptor 预检仍未完成。
+
+## 11. P6-1B 实施与验收记录（2026-11-25）
+
+### 生产实现
+
+- 默认最大文件长度为 32 MiB，通过 CONFIG_PA220_TFTP_MAX_FILE_SIZE 可配置；GET 在发送 RRQ 前使用 P4-2 validator 对完整最大区间进行 reservation。
+- DATA 写入前检查 block 对应 offset 必须等于已接收总长度，并检查 len 不超过 reservation 剩余空间；写入后以再次 checked 的 commit 更新总长度。
+- TFTP tsize 以有界十进制解析器处理，拒绝非数字、空值和超过最大长度的值；最终完成时比较 tsize、NetBootFileXferSize 和实际累计长度。
+- 接收状态包含 IDLE、ACTIVE、COMPLETE、FAILED。失败路径覆盖 reservation 失败、metadata gate 失败、越界/乱序/超长、目标写入失败、TFTP ERROR、超时/restart、ICMP 中断、首块错误、完成长度不一致及 do_tftpb 返回时的 Ctrl-C/abort。
+- 失败统一清零 NetBootFileXferSize、清除接收状态并再次失效 filesize/fileaddr；不会把部分文件标记为成功。PUT 与 Server/WRQ 不进入 GET helper；PUT 的 tsize 解析行为保留；不调用 saveenv。
+
+### 验收证据
+
+- Actions [#45595467013](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45595467013)：SUCCESS；验证提交 79b2c943bb852a3b125c59d1f8e4a556c3de1c52。
+- Host Harness 直接注入生产 GET_STATE_HELPERS：14 cases / 26 assertions / 0 failures；GCC 和 ASan/UBSan 均通过。
+- Cavium SDK 5.1.0，GCC 4.7.0；SDK archive SHA-256：cd8cd3232078094c89accf32a82a13e7847e3466c94e9b5e12dd11b741102d99。
+- OCTEON tftp.o 与 N32 relocatable object 均为 ELF32 big-endian、ABI2；完整 U-Boot final link 成功。
+- P6-1B patch SHA-256：12c3fd97347cef03b6fd8dc66e9a43fd63d314193e598c00dcbe9857072a3621；GET abort patch SHA-256：71a1e403dd0988add42c8b229332dc6379e65c437de3c1e057158977398c8ccc。两者均由 git diff --binary 生成。
+- tftp.o SHA-256：6a73d4637bbf9ebc6fb83e014f5f70bb10e232b2bb6f25536ecd82dfc7816a48；cmd_net.o：4412f25a65989c4007655eb446ca91df53801a905596ef78d1ecea108b12820a；N32 relocatable：f9ffc7b4c5c61c6eade7e902762d3da07b9d70cc40f10d80714d122b88930e52。
+- 完整 U-Boot：ba41216fa5749d1ed9ffc5b4730a348aee099ee440e9085a8afa91818af0db3c；map：cec340e456ac8e29afcc29c73c1d639afdc575e1139593d11c67cee99f94495c；System map：e7f19bcee44b0859b0588e058480662be62b5fe3b3a2cb865fa27abfbcc40a76；BIN：d1b75257bb64faba3f8643e9655ff405ca71e57bde291e7767473c1841415354。
+- 构建日志存在 PA-220 基线配置中既有宏重定义 warnings；无新增 P6-1B 编译错误，目标与最终链接均成功。
+
+### 未执行事项与下一步
+
+- 未执行真实 TFTP GET、未传输文件、未调用 saveenv，未写入 SPI/eMMC/NAND/EEPROM/CPLD/flash。
+- 下一软件工作单元为 P6-1C：接收后 SHA-256/CRC32 与只读格式识别；随后执行 P6-A live __tmp_load descriptor 只读预检。P6-B 真实 RAM-only GET 需等待全部软件门和用户明确开始确认。
