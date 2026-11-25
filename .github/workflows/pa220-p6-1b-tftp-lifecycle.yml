@@ -1,0 +1,67 @@
+name: PA-220 P6-1B full-file TFTP GET reservation and failure lifecycle
+on:
+  push:
+    branches: [feature/pa220-ubootkit-web]
+    paths:
+      - 'scripts/generate-pa220-tftp-receive-patch.py'
+      - 'tests/pa220/tftp-get-lifecycle/**'
+      - 'build-pa220.sh'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  p6-1b-host-and-octeon:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact triggering commit
+        uses: actions/checkout@v4
+        with:
+          ref: \${{ github.sha }}
+          fetch-depth: 0
+      - name: Host production lifecycle tests (GCC and ASan/UBSan)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p reports/pa220/P6-1B
+          { echo "INTEGRATION_COMMIT=$(git rev-parse HEAD)"; bash tests/pa220/tftp-get-lifecycle/run.sh; } 2>&1 | tee reports/pa220/P6-1B/10-host-tests.log
+          test "$(grep -c 'HOST TFTP GET LIFECYCLE: cases=11 .* failures=0' reports/pa220/P6-1B/10-host-tests.log)" -eq 2
+      - name: Download and verify Cavium OCTEON SDK 5.1.0
+        env:
+          GH_TOKEN: \${{ secrets.OCTEON_SDK_READ_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          D="$RUNNER_TEMP/octeon-download"; S="$RUNNER_TEMP/octeon-sdk"; mkdir -p "$D" "$S" reports/pa220/P6-1B
+          test -n "$GH_TOKEN"
+          gh release download octeon-sdk-5.1.0 --repo sdzbzyh/pa220-toolchains --pattern '*.tar.gz' --pattern '*.sha256' --dir "$D"
+          (cd "$D" && sha256sum -c ./*.sha256)
+          A=$(find "$D" -maxdepth 1 -name '*.tar.gz' -print -quit); tar -xzf "$A" -C "$S"
+          GCC=$(find "$S" -path '*/bin/mips64-octeon-linux-gnu-gcc' -print -quit); TC=$(dirname "$(dirname "$GCC")")
+          echo "OCTEON_TOOLCHAIN=$TC" >> "$GITHUB_ENV"; echo "$TC/bin" >> "$GITHUB_PATH"
+          "$GCC" --version | head -n 2 | tee reports/pa220/P6-1B/20-octeon-toolchain.txt
+          sha256sum "$A" | tee reports/pa220/P6-1B/21-sdk-sha256.txt
+      - name: Build full PA-220 image and verify patch repeatability
+        shell: bash
+        run: |
+          set -euo pipefail
+          R=reports/pa220/P6-1B; export OCTEON_MODEL=OCTEON_CN70XX PA220_REPO_DIR="$RUNNER_TEMP/pa220-openwrt" PA220_OUTPUT_DIR="$RUNNER_TEMP/pa220-output"
+          ./build-pa220.sh "$OCTEON_TOOLCHAIN" 2>&1 | tee "$R/29-octeon-full-build.log"
+          python3 scripts/generate-pa220-tftp-receive-patch.py --source-root "$PA220_REPO_DIR" --output "$R/0004-pa220-tftp-get-full-reservation.patch" | tee "$R/22-generator-idempotence.log"
+          grep -q P6-1B_ALREADY_GENERATED=verified "$R/22-generator-idempotence.log"
+          U="$PA220_REPO_DIR/u-boot"; O="$U/net/tftp.o"
+          test -s "$O" && test -s "$U/u-boot-octeon_pa220" && test -s "$U/u-boot-octeon_pa220.map" && test -s "$U/System-octeon_pa220.map" && test -s "$U/u-boot-octeon_pa220.bin"
+          cp "$O" "$R/tftp.o"; cp "$U/u-boot-octeon_pa220" "$R/"; cp "$U/u-boot-octeon_pa220.map" "$R/"; cp "$U/System-octeon_pa220.map" "$R/"; cp "$U/u-boot-octeon_pa220.bin" "$R/"
+          RDL="$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-readelf"; "$RDL" -h "$O" | tee "$R/30-tftp-object-elf-header.txt"
+          "$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-gcc" -mabi=n32 -EB -march=octeon2 -mabicalls -msoft-float -G 0 -nostdlib -Wl,-r "$O" -o "$R/tftp-n32-relocatable.o"
+          "$RDL" -h "$R/tftp-n32-relocatable.o" | tee "$R/31-tftp-n32-relocatable-link.txt"
+          grep -q 'TFTP GET failed:' "$R/29-octeon-full-build.log"
+          sha256sum "$R/tftp.o" "$R/tftp-n32-relocatable.o" "$R/u-boot-octeon_pa220" "$R/u-boot-octeon_pa220.map" "$R/System-octeon_pa220.map" "$R/u-boot-octeon_pa220.bin" "$R/0004-pa220-tftp-get-full-reservation.patch" | tee "$R/50-artifact-sha256.txt"
+          echo P6_1B_TFTP_OBJECT=PASS; echo P6_1B_N32_RELOCATABLE_LINK=PASS; echo P6_1B_FULL_UBOOT_FINAL_LINK=PASS
+      - name: Upload P6-1B evidence and build artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pa220-p6-1b-tftp-lifecycle-\${{ github.sha }}
+          path: reports/pa220/P6-1B/
+          if-no-files-found: warn
+          retention-days: 60
