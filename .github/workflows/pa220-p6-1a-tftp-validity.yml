@@ -80,9 +80,7 @@ jobs:
           cp "$U/u-boot-octeon_pa220.map" "$R/u-boot-octeon_pa220.map"
           cp "$U/System-octeon_pa220.map" "$R/System-octeon_pa220.map"
           cp "$U/u-boot-octeon_pa220.bin" "$R/u-boot-octeon_pa220.bin"
-          cp "$R/0003-pa220-tftp-get-metadata-validity.patch" "$R/"
           RDL="$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-readelf"
-          NM="$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-nm"
           "$RDL" -h "$O" | tee "$R/30-tftp-object-elf-header.txt"
           grep -q 'ELF32' "$R/30-tftp-object-elf-header.txt"
           grep -q 'big endian' "$R/30-tftp-object-elf-header.txt"
@@ -94,9 +92,7 @@ jobs:
           grep -q 'ELF32' "$R/31-tftp-n32-relocatable-link.txt"
           grep -q 'big endian' "$R/31-tftp-n32-relocatable-link.txt"
           grep -qi 'abi2' "$R/31-tftp-n32-relocatable-link.txt"
-          "$NM" -a "$U/u-boot-octeon_pa220" | grep 'tftp_invalidate_get_metadata' | tee "$R/32-helper-final-symbol.txt"
-          grep -q 'tftp_invalidate_get_metadata' "$U/u-boot-octeon_pa220.map"
-          grep -q 'tftp_invalidate_get_metadata' "$U/System-octeon_pa220.map"
+          strings "$O" | grep -F "TFTP GET: unable to invalidate previous file metadata" | tee "$R/32-get-fail-closed-string.txt"
           sha256sum "$R/tftp.o" "$R/tftp-n32-relocatable.o" \
             "$R/u-boot-octeon_pa220" "$R/u-boot-octeon_pa220.map" \
             "$R/System-octeon_pa220.map" "$R/u-boot-octeon_pa220.bin" \
