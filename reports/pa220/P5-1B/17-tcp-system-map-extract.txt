@@ -1,5 +1,5 @@
-c010905c T net_set_tcp_handler
-c010c158 T tcp_core_write
-c010c2bc T tcp_core_poll
-c010c608 T tcp_core_input
-c010cb54 T tcp_core_link_anchor
+c0109060 T net_set_tcp_handler
+c010c15c T tcp_core_write
+c010c2c0 T tcp_core_poll
+c010c60c T tcp_core_input
+c010cb58 T tcp_core_link_anchor

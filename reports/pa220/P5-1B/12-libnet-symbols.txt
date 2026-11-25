@@ -16,6 +16,7 @@
 00000000 t CDPTimeout
 00000000 r CDP_SNAP_hdr
 00000000 t CDP_compute_csum
+00000000 r CSWTCH.145
 00000000 t DhcpExtended
 00000000 t DhcpHandler
 00000000 t DhcpOptionsProcess
@@ -98,6 +99,10 @@
 00000000 b TftpBlockWrap
 00000000 b TftpBlockWrapOffset
 00000000 b TftpFinalBlock
+00000000 T TftpGetAbort
+00000000 b TftpGetReceivedSize
+00000000 b TftpGetReservedSize
+00000000 b TftpGetState
 00000000 t TftpHandler
 00000000 b TftpLastBlock
 00000000 b TftpNumchars
@@ -132,6 +137,7 @@
 00000000 b conflicts
 00000000 T copy_filename
 00000000 W cpu_eth_init
+         U crc32_wd
          U ctrlc
 00000000 b deadline_ms
 00000000 b default_filename
@@ -171,6 +177,7 @@
 00000000 d first_call.4850
 00000000 b first_failed.4954
 00000000 b first_hole.4953
+         U flush_dcache_range
 00000000 b fs_mounted
          U get_env_id
          U get_timer
@@ -261,6 +268,7 @@
          U rand_r
 00000000 T random_port
 00000000 b ready
+00000000 t restart
 00000000 r routes
 00000000 t rpc_add_credentials
 00000000 b rpc_id
@@ -273,6 +281,7 @@
 00000000 b seed
          U setenv
          U setenv_hex
+         U sha256_csum_wd
          U show_boot_progress
          U simple_strtol
          U simple_strtoul
@@ -317,6 +326,11 @@
 00000000 T tcp_seq_before
 00000000 t tftp_complete
 00000000 b tftp_filename
+00000000 t tftp_get_check_block
+00000000 t tftp_get_fail
+00000000 t tftp_get_rd16
+00000000 t tftp_get_rd32
+00000000 t tftp_invalidate_get_metadata
 00000000 b timeDelta
 00000000 b timeHandler
 00000000 b timeStart
