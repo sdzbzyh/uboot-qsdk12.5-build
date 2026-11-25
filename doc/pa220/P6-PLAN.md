@@ -55,14 +55,14 @@ P6 只负责将一个文件接收到经验证的 RAM 区间，并对接收结果
 
 P6-B 只验证 TFTP GET，不代表 TFTP Server/WRQ、PUT、HTTP upload 或 ELF loader 写入安全。
 
-## 5. P6-C：校验与格式识别（P6-1C 后续软件门）
+## 5. P6-C：校验与格式识别（P6-1C SOFTWARE ACCEPTED）
 
 P6-1B 已完成最大文件长度、完整 reservation、DATA block/offset/总长度 checked arithmetic，以及超时/中断/越界/失败状态管理。首次真实接收前仍须完成：
 
-- 接收结束后计算 SHA-256（首选）和/或 CRC32，输出长度、校验值、格式类型。
-- 格式识别仅做只读 magic/header 检查（例如 legacy uImage、FIT/FDT、ELF）；不解析后即执行、不写介质。
-- 校验不匹配或格式不支持时明确标记 FAILED，清除/作废部分接收结果，不得发布有效文件元数据。
-- 完成 P6-1C Host 与 OCTEON 验证后，才进入 P6-A live descriptor 只读预检；之后 P6-B 才考虑真实 RAM-only TFTP GET。
+- 接收结束后使用固定源码中的 sha256_csum_wd() 和 crc32_wd() 计算 SHA-256/CRC32，输出长度、digest 和格式类型；当前 TFTP GET 不协商可信预期 digest，因此这些值用于可信主机端比对，不单独构成真实性认证。
+- 格式识别仅做只读 magic/header 检查：legacy uImage、FIT/FDT、ELF32/ELF64；检查文件长度、固定 header 边界、声明大小、FDT block 范围和 ELF program/section table 范围；不调用 loader、不执行、不写介质。
+- 长度/状态检查失败、格式不支持或 header 越界时明确进入 FAILED，清除/作废接收结果并失效 filesize/fileaddr，不得发布有效文件元数据。
+- P6-1C Host GCC/ASan/UBSan、OCTEON object、N32 relocatable link 和完整 U-Boot final link 已验收；下一步进入 P6-A live descriptor 只读预检。P6-B 真实 RAM-only TFTP GET 仍须另行确认。
 
 ## 6. 明确不在 P6 首轮范围内
 
@@ -86,9 +86,10 @@ P6-1B 已完成最大文件长度、完整 reservation、DATA block/offset/总�
 ### 固定测试文件（设计，不代表已传输）
 
 - 文件长度：4,096 bytes。
-- 内容：重复 ASCII 字符串 `PA220-P6-TFTP-GET-TEST\\n`，截断到恰好 4,096 bytes。
-- CRC32（IEEE）：`e32b0c57`。
-- SHA-256：`dac1fcd877c5ef356b2cdd44f6202f154a2d393cd458975b521ef6cfc05b8356`。
+- 内容：64-byte legacy uImage header + 4,032-byte inert ASCII payload；ih_os=0（invalid）、ih_type=0（invalid），不具备可执行镜像类型；文件只用于 RAM-only 接收与指纹比对，不作为启动镜像。
+- uImage ih_size=`4032`，ih_hcrc=`1b1e2ee7`，ih_dcrc=`705c16e0`。
+- CRC32（IEEE，完整 4,096-byte 文件）：`cde0b20d`。
+- SHA-256（完整文件）：`0649bd6d56764ed2d09f3fdf84f9b84cf33e51d75001f0fe95a0cb254d6a2d24`。
 - 目标 block size：512 bytes，必须从实际协商结果/接收端日志确认；如果实际值不是 512，先停止并重新计算预期 block 数，不得套用旧预期。
 - 512-byte block 下预期：8 个完整 DATA block + 第 9 个零长度终止 DATA block；最终文件长度 4,096 bytes。
 
@@ -121,6 +122,16 @@ P6-A 只读设备预检通过并不单独授权接收。首个真实 GET 还必�
 
 ### P6-1B：完整文件 reservation 与接收失败状态 — SOFTWARE ACCEPTED
 
+### P6-1C：接收后 SHA-256/CRC32 与只读格式识别 — SOFTWARE ACCEPTED
+
+- Actions [#45600860179](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45600860179)：SUCCESS；验证提交 b366a278ec15445a60f12441739d172b94392e3e。
+- Host GCC：17 cases / 31 assertions / 0 failures；ASan/UBSan：17 / 31 / 0。
+- 生产代码调用 flush_dcache_range()、crc32_wd()、sha256_csum_wd()；只读识别 legacy uImage、FIT/FDT、ELF32/ELF64，并检查长度及 header/table 边界。
+- 不支持/损坏格式和长度状态失败进入 FAILED，清零接收长度并失效 filesize/fileaddr；有效状态只在 digest 计算及格式识别后发布。
+- Cavium SDK 5.1.0 / GCC 4.7.0；OCTEON tftp.o、N32 relocatable link、完整 U-Boot final link 均 PASS。
+- P6-1C patch SHA-256：34941096eef9983fe7f951bb29c88e88e31f7d29d330ea4118fd83fcf5a9b32b；tftp.o SHA-256：bec5e494f7e5efee894fa23e902ead5894c468fc40159e25569daeeec549d433。
+- 完整证据见 reports/pa220/P6-1C/ACCEPTANCE.md。未执行真实 TFTP GET、未传输文件、未调用 saveenv、未写持久化介质。
+
 P6-1B 已完成生产实现、Host GCC/ASan/UBSan、OCTEON object、N32 relocatable link、完整 U-Boot final link 和独立补丁重复生成验证。P6-1B 仍不授权真实 TFTP GET；实际接收继续等待 P6-1C 校验/格式识别和 P6-A live descriptor 只读预检。
 
 ### 实机测试安排更新
@@ -139,7 +150,7 @@ P6-1B 已完成生产实现、Host GCC/ASan/UBSan、OCTEON object、N32 relocata
 
 ### 当前后续交付
 
-完成 P6-1B 及后续 P6 软件接收生命周期和校验安全门后，按需要安排设备只读预检及 RAM-only 接收测试。最终 Web 页面另按 `doc/pa220/WEB-UI-DESIGN.md` 实施，视觉参考 uBootKit Argon 风格；Web UI 不因视觉参考而开放未经验证的写功能。
+P6-1A、P6-1B、P6-1C 软件门均已完成；下一步先安排 P6-A live descriptor/DRAM/reservation 只读预检。P6-A 通过并获得单独确认后，才考虑 RAM-only TFTP GET。最终 Web 页面另按 `doc/pa220/WEB-UI-DESIGN.md` 实施，视觉参考 uBootKit Argon 风格；Web UI 不因视觉参考而开放未经验证的写功能。
 
 
 ## 10. P6-1A 实施记录（2026-11-25）
