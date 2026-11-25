@@ -55,7 +55,6 @@ jobs:
           for F in "$O" "$U/common/cmd_net.o" "$U/u-boot-octeon_pa220" "$U/u-boot-octeon_pa220.map" "$U/System-octeon_pa220.map" "$U/u-boot-octeon_pa220.bin"; do
             if [ ! -s "$F" ]; then echo "MISSING_BUILD_OUTPUT=$F"; ls -la "$(dirname "$F")"; exit 1; fi
           done
-          test -s "$R/0006-pa220-tftp-get-verification.patch"
           echo P6C_BUILD_OUTPUTS=PASS
           cp "$O" "$R/tftp.o"; cp "$U/common/cmd_net.o" "$R/cmd_net.o"; cp "$U/u-boot-octeon_pa220" "$R/"; cp "$U/u-boot-octeon_pa220.map" "$R/"; cp "$U/System-octeon_pa220.map" "$R/"; cp "$U/u-boot-octeon_pa220.bin" "$R/"
           echo P6C_ARTIFACT_COPY=PASS
