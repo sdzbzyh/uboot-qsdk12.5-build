@@ -1,6 +1,6 @@
 # PA-220 P6 计划：RAM-only 文件接收与校验
 
-- 状态：**P6 已进入设计/验收准备；未开放实际接收；未执行任何文件传输**
+- 状态：**P6-1A 软件门 ACCEPTED；P6 整体未开放实际接收；未执行任何文件传输**
 - 日期：2026-11-24
 - 集成分支：`feature/pa220-ubootkit-web`
 - 固定 PA-220 源码：`sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
@@ -109,16 +109,19 @@ P6-A 只读设备预检通过并不单独授权接收。首个真实 GET 还必�
 
 本节优先于本计划前文中与当前授权不一致的旧状态说明；旧内容保留为当时决策和审计记录。
 
-### P6-1A：TFTP GET 失败元数据生命周期
+### P6-1A：TFTP GET 开始前失效旧接收元数据 — ACCEPTED
 
-当前首项工作是修复 GET 开始前的旧结果失效：
+- 生产 helper `tftp_invalidate_get_metadata()` 独立尝试删除 `filesize` 与 `fileaddr`，最后重新读取确认两项均不存在。
+- 只在 `TftpStart()` 的 GET/RRQ 分支、RRQ 启动之前调用；失效失败设置 `NETLOOP_FAIL` 并拒绝 GET。
+- 不调用 `saveenv`；PUT 与 `TftpStartServer()` 的 Server/WRQ 路径不受补丁影响；正常成功接收后的元数据发布路径未修改。
+- Host 测试直接编译生产 helper，并注入同一生成器中的生产 GET gate 代码：6 cases / 19 assertions / 0 failures；普通 GCC 和 ASan/UBSan 均通过。
+- 独立补丁生成器已在同一修改后源码树重复运行，输出 `P6-1A_ALREADY_GENERATED=verified`，patch SHA-256 保持一致。
+- 固定 PA-220 源码 OCTEON `tftp.o`、N32 relocatable link、完整 U-Boot final link 均通过。
+- 正式证据：[#45588666611](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45588666611)；完整记录见 [P6-1A ACCEPTANCE](../../reports/pa220/P6-1A/ACCEPTANCE.md)。
 
-- 只对 TFTP GET/RRQ 执行；PUT 与 Server/WRQ 行为不变。
-- 在任何 DATA 写入前，确保旧 `filesize`、`fileaddr` 均不存在。
-- 固定 U-Boot 2013.07 的 `setenv(name, NULL)` 删除语义：删除成功返回 0；变量不存在或删除失败返回 1。因此先用 `getenv()` 区分“不存在”和“删除失败”，不可将对不存在变量的删除返回值误判为失败。
-- 两项必须分别尝试；第一项失败仍须尝试第二项。任一存在变量删除失败则拒绝启动 GET。
-- 仅更新 RAM 环境，不调用 `saveenv`。成功接收后由正常 `NETLOOP_SUCCESS` 发布新元数据。
-- Host Harness 直接测试生产 helper，覆盖两项成功、各自失败、首项失败仍尝试第二项、禁止 GET、成功发布、PUT 不变和不调用 saveenv。
+### 下一工作单元：P6-1B
+
+先完成完整文件 reservation、最大总长度、checked block/offset arithmetic 与超时/中断失败状态管理的生产实现及 Host/目标验证。P6-1A 只清除了旧结果元数据，不代表完整文件接收生命周期已经安全，也不授权真实 TFTP GET。
 
 ### 实机测试安排更新
 
@@ -132,11 +135,11 @@ P6-A 只读设备预检通过并不单独授权接收。首个真实 GET 还必�
 
 ### 安全边界采用风险驱动方式
 
-不机械沿用旧提示词中的 blanket 禁止项；按当前阶段选择最小必要权限和风险最低的验证方式。若旧限制妨碍低风险只读/RAM-only 验证，应以本节和 `doc/pa220/EXECUTION-CONTEXT.md` 的最新项目决策为准。破坏性操作仍需单独审批。
+不机械沿用旧交接提示中的 blanket 禁止项；按当前阶段选择最小必要权限和风险最低的验证方式。若旧限制妨碍低风险只读/RAM-only 验证，应以本节和 `doc/pa220/EXECUTION-CONTEXT.md` 的最新项目决策为准。破坏性操作仍需单独审批。
 
 ### 当前后续交付
 
-完成 P6 软件接收生命周期和校验安全门后，按需要安排设备只读预检及 RAM-only 接收测试。最终 Web 页面另按 `doc/pa220/WEB-UI-DESIGN.md` 实施，视觉参考 uBootKit Argon 风格；Web UI 不因视觉参考而开放未经验证的写功能。
+完成 P6-1B 及后续 P6 软件接收生命周期和校验安全门后，按需要安排设备只读预检及 RAM-only 接收测试。最终 Web 页面另按 `doc/pa220/WEB-UI-DESIGN.md` 实施，视觉参考 uBootKit Argon 风格；Web UI 不因视觉参考而开放未经验证的写功能。
 
 
 ## 10. P6-1A 实施记录（2026-11-25）

@@ -16,7 +16,7 @@
 
 P6 RAM-only 文件接收。首条接收路径为 TFTP GET/RRQ。
 
-P6-0 已完成源码审查。当前发现但尚未实现的首个缺口：TFTP GET 失败后，旧的 `filesize` / `fileaddr` 可能残留，导致部分新数据被误认为有效文件。下一步直接实施 P6-1A，不重新开展已完成的源码盘点。\n\nP6-1A 已进入实现与自动验证：生产 helper 与 GET 专属 gate 由 `scripts/generate-pa220-tftp-validity-patch.py` 从固定源码生成；Host 测试位于 `tests/pa220/tftp-validity/`；独立 Actions 工作流为 `.github/workflows/pa220-p6-1a-tftp-validity.yml`。实际 PASS 状态以本轮 Actions 及 `reports/pa220/P6-1A/` 证据为准。
+P6-0 源码审查已完成。P6-1A（TFTP GET 开始前失效旧 `filesize` / `fileaddr`）已完成生产实现、Host/ASan/UBSan、OCTEON object、N32 relocatable link、完整 U-Boot final link 和补丁生成器重复运行验证。\n\n- 实现提交：`dafb893a7f3a0637159b87b59def1618184efdad`\n- 最终验收 Actions：[#45588666611](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45588666611)，结论 SUCCESS。\n- 正式验收报告：`reports/pa220/P6-1A/ACCEPTANCE.md`。\n- 本轮未执行真实 TFTP GET、未传输文件、未调用 `saveenv`。P6 整体仍未开放实际接收。\n\n下一唯一工作单元：P6-1B，完成完整文件 reservation、最大总长度和接收失败状态管理的生产设计/Host/目标验证；不要跳到真实传输。
 
 ### P6-1A 设计要点
 
@@ -32,7 +32,7 @@ P6-0 已完成源码审查。当前发现但尚未实现的首个缺口：TFTP G
 - 只影响 TFTP GET/RRQ；不得改变 PUT 或 Server/WRQ 行为。
 - 成功接收后仍由正常 `NETLOOP_SUCCESS` 路径发布新元数据。
 
-Host 测试必须直接编译/调用生产 helper，使用 mock 环境接口和失败注入；至少覆盖两项删除成功、各自失败、首项失败仍执行第二项、禁止启动 GET、成功路径发布、PUT 不变、不调用 saveenv。
+Host 测试直接编译生产 helper，并从同一生成器注入生产 GET gate 代码；使用 mock 环境接口和失败注入，覆盖两项删除成功、各自失败、首项失败仍执行第二项、禁止启动 GET、成功失效后允许 GET、不调用 saveenv。正常 NETLOOP_SUCCESS 元数据发布路径未修改；PUT 与 Server/WRQ 分支未被补丁触及。
 
 ### 后续 P6 软件门
 

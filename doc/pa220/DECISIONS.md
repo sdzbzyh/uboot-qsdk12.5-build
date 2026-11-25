@@ -145,4 +145,4 @@
 - 理由：后续 DATA/超时/越界失败可能留下部分新数据；旧元数据若残留，会将部分新数据误认为上一轮完整有效文件。
 - 实现：固定源码 `setenv(name, NULL)` 对不存在变量也返回非零，故必须先 `getenv()` 判断存在；不调用 `saveenv`。
 - 影响：只作用于 `TftpStart()` 的 GET 分支；PUT 与 `TftpStartServer()` 的 WRQ 行为不变。成功接收仍由正常成功路径发布新元数据。
-- 状态：实现和验证状态以 P6-1A Actions 报告为准；不授权真实文件接收。
+- 状态：P6-1A 软件验收通过，证据见 `reports/pa220/P6-1A/ACCEPTANCE.md` 与 Actions #45588666611；不授权真实文件接收。
