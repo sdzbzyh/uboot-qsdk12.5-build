@@ -266,7 +266,7 @@ def main():
  TftpGetState=TFTP_GET_COMPLETE; return 0;
 }
 '''
-        new_finish = '''static int tftp_get_finish(void)
+        new_finish = '''static int tftp_get_finish_verified(const uchar *data, uint64_t size);\nstatic int tftp_get_finish(void)
 {
  return tftp_get_finish_verified((const uchar *)(uintptr_t)load_addr,
                                 (uint64_t)TftpGetReceivedSize);
