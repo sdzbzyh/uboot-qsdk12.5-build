@@ -7,7 +7,7 @@
 - 集成仓库：`sdzbzyh/uboot-qsdk12.5-build`
 - 分支：`feature/pa220-ubootkit-web`
 - 本文件建立时 HEAD：`8105ff0cf1da7e3aaf5c2b9c6b628947eb260be6`（历史记录）
-- 当前远端 HEAD：`e379008afd250293dbaec2b8716de2dcf7d0504c`
+- 当前远端 HEAD：`89bccb83c8e2dad2ed76bbafcd2e132be1a20045`
 - PA-220 固定源码：`sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
 - uBootKit 评估基线：`chenxin527/uboot-qsdk12.5-build@9ce315735ac88fd0a7c7697bc527a8616ed0a972`
 - 目标：OCTEON III CN7130、MIPS64 BE、N32、Cavium SDK 5.1.0、U-Boot 2013.07、原厂 Stage 2 加载自定义 Stage 3。
@@ -15,16 +15,15 @@
 
 ## 当前唯一主线
 
-P6 RAM-only 文件接收。首条接收路径为 TFTP GET/RRQ。
+P6 RAM-only 文件接收。P6-1A、P6-1B、P6-1C 软件门均已完成；真实接收仍未开放。
 
-P6-0 源码审查已完成。P6-1A（TFTP GET 开始前失效旧 `filesize` / `fileaddr`）已完成生产实现、Host/ASan/UBSan、OCTEON object、N32 relocatable link、完整 U-Boot final link 和补丁生成器重复运行验证。
+- P6-1A：GET 开始前失效旧 filesize/fileaddr，已验收。
+- P6-1B：完整 reservation、32 MiB 默认上限、checked arithmetic、接收失败状态和 Ctrl-C 清理，已验收。
+- P6-1C：接收后 SHA-256/CRC32、legacy uImage/FIT-FDT/ELF32/ELF64 只读格式识别、边界检查和失败元数据失效，已验收。
+- P6-1C Actions：[ #45600860179 ](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45600860179) SUCCESS；报告：reports/pa220/P6-1C/ACCEPTANCE.md。
+- 本阶段没有执行真实 TFTP GET、没有传输文件、没有调用 saveenv、没有写持久化介质。
 
-- 实现提交：`dafb893a7f3a0637159b87b59def1618184efdad`
-- 最终验收 Actions：[#45588666611](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45588666611)，结论 SUCCESS。
-- 正式验收报告：`reports/pa220/P6-1A/ACCEPTANCE.md`。
-- 本轮未执行真实 TFTP GET、未传输文件、未调用 `saveenv`。P6 整体仍未开放实际接收。
-
-下一唯一工作单元：P6-1C，完成接收后 SHA-256/CRC32 与只读格式识别的生产实现和 Host/OCTEON 验证；P6-1B 已完成软件验收，但仍不授权真实 TFTP GET。
+下一唯一工作单元：P6-A，只读检查 live __tmp_load descriptor、DRAM 范围和完整 reservation 可行性。P6-A 完成后再单独评估并确认 RAM-only TFTP GET。
 
 ### P6-1A 设计要点
 
@@ -44,7 +43,7 @@ Host 测试直接编译生产 helper，并从同一生成器注入生产 GET gat
 
 ### 后续 P6 软件门
 
-继续按 `doc/pa220/P6-PLAN.md` 推进：P6-1B 已完成完整文件 reservation、最大长度、checked block/offset arithmetic 和超时/中断失败状态；下一步 P6-1C 只做接收后 CRC32/SHA-256、只读格式识别和校验失败无效化。随后进行 P6-A live descriptor 只读预检；真实 TFTP GET 仍属于 P6-B，不能提前执行。
+继续按 `doc/pa220/P6-PLAN.md` 推进：P6-1A/B/C 软件门均已完成。下一步只做 P6-A live descriptor、DRAM 范围和完整 reservation 的只读预检；本轮不执行 TFTP GET。
 
 ## 验证与补丁规则
 
@@ -95,4 +94,4 @@ Host 测试直接编译生产 helper，并从同一生成器注入生产 GET gat
 - 独立补丁由 `git diff --binary` 生成：TFTP 接收状态补丁 SHA-256 `e3dba0c7fdfce6364a93998d94ea823a8d0307e92656b51a4619e7ffeca509b5`；GET abort hook 补丁 SHA-256 `71a1e403dd0988add42c8b229332dc6379e65c437de3c1e057158977398c8ccc`。
 - 未执行真实 TFTP GET、未传输文件、未调用 `saveenv`、未写入任何持久化介质。
 
-下一步 P6-1C：实现并验证接收后 SHA-256/CRC32 与只读格式识别。其后再执行 P6-A live `__tmp_load` descriptor 只读预检；P6-B 真实 RAM-only GET 仍需独立软件门和明确开始确认。
+P6-1C 已由 Actions #45600860179 验收通过，报告见 reports/pa220/P6-1C/ACCEPTANCE.md。下一步 P6-A：只读检查 live __tmp_load descriptor、DRAM 范围和完整 reservation。未完成 P6-A 前不执行真实 TFTP GET。
