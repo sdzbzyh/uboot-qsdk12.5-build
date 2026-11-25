@@ -13,9 +13,10 @@ spec = importlib.util.spec_from_file_location(
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 template = (root / "tests/pa220/tftp-validity/host_test.c.in").read_text()
-if template.count("/*__HELPER__*/") != 1:
-    raise SystemExit("expected exactly one production helper insertion marker")
+if template.count("/*__HELPER__*/") != 1 or template.count("/*__GET_GATE__*/") != 1:
+    raise SystemExit("expected one production helper and GET gate insertion marker")
 source = template.replace("/*__HELPER__*/", module.HELPER)
+source = source.replace("/*__GET_GATE__*/", module.GET_GATE)
 pathlib.Path(sys.argv[2]).write_text(source)
 PY
 cc -std=c99 -Wall -Wextra -Werror -O2 "$OUT.c" -o "$OUT"

@@ -75,10 +75,7 @@ static void reset_fixture(int have_size, int have_addr)
 
 static void start_get(void)
 {
-	if (tftp_invalidate_get_metadata()) {
-		mock_net_set_state(NETLOOP_FAIL);
-		return;
-	}
+	/*__GET_GATE__*/
 	rrq_count++;
 }
 

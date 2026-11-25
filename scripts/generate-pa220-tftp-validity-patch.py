@@ -57,7 +57,17 @@ def main():
     path = root / TFTP
     source = path.read_text()
     if "tftp_invalidate_get_metadata" in source:
-        raise RuntimeError("P6-1A helper already exists; generate from a clean pinned checkout")
+        out = pathlib.Path(args.output)
+        if not out.is_file():
+            raise RuntimeError("P6-1A source is already modified but its generated patch is missing")
+        existing = out.read_text()
+        if HELPER not in existing or GET_GATE.strip() not in existing:
+            raise RuntimeError("existing P6-1A patch does not match the applied source")
+        print("P6-1A_ALREADY_GENERATED=verified")
+        print("PATCH=" + str(out))
+        print("PATCH_SHA256=" + hashlib.sha256(out.read_bytes()).hexdigest())
+        print("DIFF_GENERATED_BY=git diff --binary")
+        return 0
     if source.count("void TftpStart(enum proto_t protocol)") != 1:
         raise RuntimeError("TftpStart anchor is missing or ambiguous")
     if source.count('\t\tprintf("Load address: 0x%lx\\n", load_addr);') != 1:
