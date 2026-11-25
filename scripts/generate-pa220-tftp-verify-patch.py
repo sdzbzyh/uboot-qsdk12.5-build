@@ -156,8 +156,7 @@ static int tftp_get_classify(const uchar *p, uint64_t len, int *format)
 			return -1;
 		}
 		if (shnum) {
-			uint64_t min_shentsize = (elf_class == 1) ? 40 : 64;
-			if (shentsize < min_shentsize || shoff > len ||
+			if (shentsize < ((elf_class == 1) ? 40 : 64) || shoff > len ||
 			    (uint64_t)shnum > (len - shoff) / shentsize)
 				return -1;
 		} else if (shoff > len) {
