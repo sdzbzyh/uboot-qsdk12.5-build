@@ -90,7 +90,7 @@ Host 测试直接编译生产 helper，并从同一生成器注入生产 GET gat
 - PUT 与 Server/WRQ 不调用 GET helper；PUT 的旧 tsize 解析和行为保留；不调用 `saveenv`。
 - Host 14 cases / 26 assertions / 0 failures；GCC 与 ASan/UBSan 均 PASS。
 - Cavium SDK 5.1.0 / GCC 4.7.0；OCTEON `tftp.o`、`cmd_net.o`、N32 relocatable link、完整 U-Boot final link 均 PASS。
-- Actions [#45595798808](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45595467013) SUCCESS；完整证据见 `reports/pa220/P6-1B/ACCEPTANCE.md`。
+- Actions [#45595798808](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45595798808) SUCCESS；完整证据见 `reports/pa220/P6-1B/ACCEPTANCE.md`。
 - 独立补丁由 `git diff --binary` 生成：TFTP 接收状态补丁 SHA-256 `e3dba0c7fdfce6364a93998d94ea823a8d0307e92656b51a4619e7ffeca509b5`；GET abort hook 补丁 SHA-256 `71a1e403dd0988add42c8b229332dc6379e65c437de3c1e057158977398c8ccc`。
 - 未执行真实 TFTP GET、未传输文件、未调用 `saveenv`、未写入任何持久化介质。
 
