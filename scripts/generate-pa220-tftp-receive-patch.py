@@ -22,6 +22,7 @@ static int tftp_get_check_block(uint64_t off,unsigned len)
  return 0;
 }
 static void tftp_get_commit_block(unsigned len) { TftpGetReceivedSize+=(ulong)len; }
+#ifdef CONFIG_TFTP_TSIZE
 static int tftp_get_parse_tsize(const char *p, ulong *size)
 {
  uint64_t value=0, limit=(uint64_t)CONFIG_PA220_TFTP_MAX_FILE_SIZE;
@@ -35,6 +36,7 @@ static int tftp_get_parse_tsize(const char *p, ulong *size)
  }
  *size=(ulong)value; return 0;
 }
+#endif
 static int tftp_get_finish(void)
 {
  if (TftpGetState!=TFTP_GET_ACTIVE || TftpGetReceivedSize>TftpGetReservedSize || NetBootFileXferSize!=TftpGetReceivedSize
