@@ -1,0 +1,27 @@
+#include <stdio.h>
+#include <stdint.h>
+typedef unsigned long ulong;
+#define NETLOOP_FAIL 1
+#define CONFIG_PA220_TFTP_MAX_FILE_SIZE (32UL*1024UL*1024UL)
+static ulong load_addr,NetBootFileXferSize,TftpTsize;
+static unsigned validator_calls,invalidate_calls,assertions,cases,failures;
+static int validator_result,net_state,size_marker,addr_marker;
+static void net_set_state(int s){net_state=s;}
+static int octeon_load_range_check(uint64_t a,uint64_t n){validator_calls++;return validator_result||a!=(uint64_t)load_addr||n!=CONFIG_PA220_TFTP_MAX_FILE_SIZE;}
+static int tftp_invalidate_get_metadata(void){invalidate_calls++;size_marker=addr_marker=0;return 0;}
+static void check(int ok,const char *s){assertions++;if(!ok){failures++;printf("FAIL: %s\n",s);}}
+/*__HELPERS__*/
+static void reset(void){load_addr=0x20000000UL;NetBootFileXferSize=TftpTsize=0;validator_calls=invalidate_calls=0;validator_result=net_state=0;size_marker=addr_marker=1;}
+int main(void){
+ reset();cases++;check(tftp_get_reserve()==0,"full reservation accepted");check(TftpGetState==TFTP_GET_ACTIVE&&TftpGetReservedSize==CONFIG_PA220_TFTP_MAX_FILE_SIZE,"reservation recorded");check(validator_calls==1,"whole-range validator called");
+ reset();validator_result=1;cases++;check(tftp_get_reserve()!=0&&TftpGetState==TFTP_GET_FAILED,"reservation failure recorded");
+ reset();tftp_get_reserve();cases++;check(tftp_get_check_block(0,512)==0,"first block");tftp_get_commit_block(512);check(tftp_get_check_block(512,512)==0,"sequential block");tftp_get_commit_block(512);check(TftpGetReceivedSize==1024,"received count");
+ reset();tftp_get_reserve();cases++;check(tftp_get_check_block(512,512)!=0,"out of order rejected");
+ reset();tftp_get_reserve();TftpGetReceivedSize=TftpGetReservedSize;cases++;check(tftp_get_check_block(TftpGetReceivedSize,1)!=0,"maximum plus one rejected");
+ reset();tftp_get_reserve();TftpGetReceivedSize=TftpGetReservedSize-1;cases++;check(tftp_get_check_block(TftpGetReceivedSize,2)!=0,"cross-end block rejected");
+ reset();tftp_get_reserve();TftpGetReceivedSize=4096;NetBootFileXferSize=4096;cases++;check(tftp_get_finish()==0&&TftpGetState==TFTP_GET_COMPLETE,"complete file accepted");
+ reset();tftp_get_reserve();TftpGetReceivedSize=512;NetBootFileXferSize=512;TftpTsize=513;cases++;check(tftp_get_finish()!=0&&TftpGetState==TFTP_GET_FAILED&&net_state==NETLOOP_FAIL,"tsize mismatch fails");
+ reset();tftp_get_reserve();TftpGetReceivedSize=512;NetBootFileXferSize=511;cases++;check(tftp_get_finish()!=0&&NetBootFileXferSize==0,"partial size not published");
+ reset();tftp_get_reserve();cases++;tftp_get_fail("timeout");check(TftpGetState==TFTP_GET_FAILED&&net_state==NETLOOP_FAIL,"failure state set");check(NetBootFileXferSize==0&&!size_marker&&!addr_marker&&invalidate_calls==1,"partial metadata invalidated");
+ printf("HOST TFTP GET LIFECYCLE: cases=%u assertions=%u failures=%u\n",cases,assertions,failures);return failures?1:0;
+}
