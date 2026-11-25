@@ -1,0 +1,110 @@
+#include <stdio.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <limits.h>
+typedef unsigned char uchar;
+typedef unsigned long ulong;
+typedef unsigned int uint;
+#define NETLOOP_FAIL 1
+#define CONFIG_TFTP_TSIZE 1
+#define CONFIG_PA220_TFTP_MAX_FILE_SIZE (32UL*1024UL*1024UL)
+#define CHUNKSZ_SHA256 (64U*1024U)
+#define SHA256_SUM_LEN 32
+static ulong load_addr, NetBootFileXferSize, TftpTsize;
+static unsigned validator_calls, invalidate_calls, assertions, cases, failures;
+static unsigned flush_calls, sha_calls;
+static int validator_result, net_state, size_marker, addr_marker;
+static void net_set_state(int s) { net_state=s; }
+static int octeon_load_range_check(uint64_t a, uint64_t n) { validator_calls++; return validator_result || a!=(uint64_t)load_addr || n!=CONFIG_PA220_TFTP_MAX_FILE_SIZE; }
+static int tftp_invalidate_get_metadata(void) { invalidate_calls++; size_marker=addr_marker=0; return 0; }
+static void flush_dcache_range(ulong start, ulong stop) { flush_calls++; (void)start; (void)stop; }
+static uint32_t crc32_wd(uint32_t crc, const unsigned char *p, uint len, uint chunk)
+{
+	uint i, bit; (void)chunk; crc ^= 0xffffffffU;
+	for (i=0;i<len;i++) { crc ^= p[i]; for (bit=0;bit<8;bit++) crc=(crc>>1) ^ (0xedb88320U & (0U-(crc&1U))); }
+	return crc ^ 0xffffffffU;
+}
+static void sha256_csum_wd(const unsigned char *p, unsigned int len, unsigned char *out, unsigned int chunk)
+{
+	unsigned int i; (void)p; (void)len; (void)chunk; sha_calls++;
+	for (i=0;i<SHA256_SUM_LEN;i++) out[i]=(uchar)i;
+}
+static void check(int ok,const char *s) { assertions++; if(!ok){failures++;printf("FAIL: %s\n",s);} }
+/*__P6B_HELPERS__*/
+/*__P6C_HELPERS__*/
+
+static void put_be32(uchar *p, uint32_t v) { p[0]=v>>24;p[1]=v>>16;p[2]=v>>8;p[3]=v; }
+static void put_le16(uchar *p, uint16_t v) { p[0]=v;p[1]=v>>8; }
+static void put_le32(uchar *p, uint32_t v) { p[0]=v;p[1]=v>>8;p[2]=v>>16;p[3]=v>>24; }
+static void put_le64(uchar *p, uint64_t v) { put_le32(p,(uint32_t)v);put_le32(p+4,(uint32_t)(v>>32)); }
+static void make_uimage(uchar *p, unsigned len, unsigned payload)
+{
+	unsigned i; for(i=0;i<len;i++)p[i]=0; put_be32(p,0x27051956U);put_be32(p+12,payload);
+}
+static void make_fdt(uchar *p, unsigned len)
+{
+	unsigned i;for(i=0;i<len;i++)p[i]=0;
+	put_be32(p,0xd00dfeedU);put_be32(p+4,len);put_be32(p+8,56);
+	put_be32(p+12,56);put_be32(p+16,40);put_be32(p+20,17);
+	put_be32(p+24,16);put_be32(p+32,8);put_be32(p+36,8);
+}
+static void make_elf32(uchar *p, unsigned len, unsigned phoff)
+{
+	unsigned i;for(i=0;i<len;i++)p[i]=0;
+	p[0]=0x7f;p[1]='E';p[2]='L';p[3]='F';p[4]=1;p[5]=2;p[6]=1;
+	put_be32(p+28,phoff);put_le16(p+40,52);put_le16(p+42,32);put_le16(p+44,1);
+	/* ELF fields are target-endian; the tested ELF is big-endian. */
+	p[40]=0;p[41]=52;p[42]=0;p[43]=32;p[44]=0;p[45]=1;
+}
+static void make_elf64le(uchar *p, unsigned len)
+{
+	unsigned i;for(i=0;i<len;i++)p[i]=0;
+	p[0]=0x7f;p[1]='E';p[2]='L';p[3]='F';p[4]=2;p[5]=1;p[6]=1;
+	put_le64(p+32,64);put_le16(p+52,64);put_le16(p+54,56);put_le16(p+56,1);
+}
+static void reset(void)
+{
+	load_addr=0x20000000UL;NetBootFileXferSize=TftpTsize=0;
+	validator_calls=invalidate_calls=flush_calls=sha_calls=0;
+	validator_result=net_state=0;size_marker=addr_marker=1;
+	TftpGetState=TFTP_GET_IDLE;TftpGetReservedSize=TftpGetReceivedSize=0;
+}
+static void classify_case(uchar *data,uint64_t len,int expected,const char *name)
+{
+	int format=-1;cases++;check(tftp_get_classify(data,len,&format)==0,name);
+	check(format==expected,"classified expected format");
+}
+int main(void)
+{
+	uchar data[256];int format;
+	reset();make_uimage(data,64,0);classify_case(data,64,TFTP_GET_FORMAT_UIMAGE,"legacy uImage accepted");
+	cases++;check(tftp_get_classify(data,63,&format)!=0,"truncated uImage header rejected");
+	make_uimage(data,64,1);cases++;check(tftp_get_classify(data,64,&format)!=0,"uImage payload length mismatch rejected");
+	make_fdt(data,64);classify_case(data,64,TFTP_GET_FORMAT_FDT,"FDT/FIT header accepted");
+	put_be32(data+4,257);cases++;check(tftp_get_classify(data,64,&format)!=0,"FDT totalsize beyond file rejected");
+	make_fdt(data,64);put_be32(data+36,32);cases++;check(tftp_get_classify(data,64,&format)!=0,"FDT structure range overflow rejected");
+	make_elf32(data,84,52);classify_case(data,84,TFTP_GET_FORMAT_ELF32,"ELF32 program table accepted");
+	make_elf32(data,84,80);cases++;check(tftp_get_classify(data,84,&format)!=0,"ELF32 program table beyond file rejected");
+	cases++;check(tftp_get_classify(data,15,&format)!=0,"truncated ELF identification rejected");
+	make_elf64le(data,120);classify_case(data,120,TFTP_GET_FORMAT_ELF64,"ELF64 little-endian accepted");
+	data[4]=3;cases++;check(tftp_get_classify(data,120,&format)!=0,"unsupported ELF class rejected");
+	data[0]='X';cases++;check(tftp_get_classify(data,120,&format)!=0,"unknown magic rejected");
+	cases++;check(crc32_wd(0,(const uchar *)"123456789",9,64)==0xcbf43926U,"CRC32 IEEE known vector");
+
+	reset();make_uimage(data,64,0);TftpGetState=TFTP_GET_ACTIVE;
+	TftpGetReservedSize=64;TftpGetReceivedSize=64;NetBootFileXferSize=64;
+	cases++;check(tftp_get_finish_verified(data,64)==0,"verified completion accepted");
+	check(TftpGetState==TFTP_GET_COMPLETE&&NetBootFileXferSize==64,"valid file marked complete");
+	check(flush_calls==1&&sha_calls==1,"cache sync and SHA-256 called once");
+	reset();data[0]='?';TftpGetState=TFTP_GET_ACTIVE;
+	TftpGetReservedSize=64;TftpGetReceivedSize=64;NetBootFileXferSize=64;
+	cases++;check(tftp_get_finish_verified(data,64)!=0,"unsupported format rejected at completion");
+	check(TftpGetState==TFTP_GET_FAILED&&net_state==NETLOOP_FAIL,"unsupported format enters FAILED");
+	check(NetBootFileXferSize==0&&!size_marker&&!addr_marker&&invalidate_calls==1,"failed file metadata invalidated");
+	reset();make_uimage(data,64,0);TftpGetState=TFTP_GET_ACTIVE;
+	TftpGetReservedSize=63;TftpGetReceivedSize=64;NetBootFileXferSize=64;
+	cases++;check(tftp_get_finish_verified(data,64)!=0,"reservation overflow rejected");
+	check(TftpGetState==TFTP_GET_FAILED&&NetBootFileXferSize==0,"reservation failure cannot publish valid file");
+	printf("HOST TFTP GET VERIFY: cases=%u assertions=%u failures=%u\n",cases,assertions,failures);
+	return failures?1:0;
+}
