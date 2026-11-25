@@ -26,6 +26,8 @@ Coverage includes:
 - Clearing partial transfer length and invalidating both volatile result
   metadata markers on failure.
 
+Failure diagnostics use ordinary newline-delimited output and do not alter the transfer state machine.
+
 The Host Harness does not emulate the complete UDP/TFTP packet engine. The
 OCTEON build separately compiles the integrated production `tftp.c` and
 `cmd_net.c` call sites and links the complete PA-220 U-Boot image.
