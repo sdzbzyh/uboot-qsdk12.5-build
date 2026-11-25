@@ -16,7 +16,7 @@
 00000000 t CDPTimeout
 00000000 r CDP_SNAP_hdr
 00000000 t CDP_compute_csum
-00000000 r CSWTCH.145
+00000000 r CSWTCH.146
 00000000 t DhcpExtended
 00000000 t DhcpHandler
 00000000 t DhcpOptionsProcess
@@ -330,6 +330,7 @@
 00000000 t tftp_get_fail
 00000000 t tftp_get_rd16
 00000000 t tftp_get_rd32
+00000000 t tftp_get_rd64
 00000000 t tftp_invalidate_get_metadata
 00000000 b timeDelta
 00000000 b timeHandler
