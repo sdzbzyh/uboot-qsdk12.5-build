@@ -52,8 +52,10 @@ jobs:
           grep -q P6_1C_SHA256_CRC32=integrated "$R/22-generator-idempotence.log"
           grep -q P6_1C_READ_ONLY_FORMATS=legacy-uImage,FIT-FDT,ELF32,ELF64 "$R/22-generator-idempotence.log"
           U="$PA220_REPO_DIR/u-boot"; O="$U/net/tftp.o"
-          test -s "$O" && test -s "$U/common/cmd_net.o" && test -s "$U/u-boot-octeon_pa220" && test -s "$U/u-boot-octeon_pa220.map" && test -s "$U/System-octeon_pa220.map" && test -s "$U/u-boot-octeon_pa220.bin"
-          strings "$O" | grep -F 'TFTP GET verified:'
+          for F in "$O" "$U/common/cmd_net.o" "$U/u-boot-octeon_pa220" "$U/u-boot-octeon_pa220.map" "$U/System-octeon_pa220.map" "$U/u-boot-octeon_pa220.bin"; do
+            if [ ! -s "$F" ]; then echo "MISSING_BUILD_OUTPUT=$F"; ls -la "$(dirname "$F")"; exit 1; fi
+          done
+          grep -Fq 'TFTP GET verified:' "$R/0006-pa220-tftp-get-verification.patch"
           cp "$O" "$R/tftp.o"; cp "$U/common/cmd_net.o" "$R/cmd_net.o"; cp "$U/u-boot-octeon_pa220" "$R/"; cp "$U/u-boot-octeon_pa220.map" "$R/"; cp "$U/System-octeon_pa220.map" "$R/"; cp "$U/u-boot-octeon_pa220.bin" "$R/"
           RDL="$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-readelf"; "$RDL" -h "$O" | tee "$R/30-tftp-object-elf-header.txt"
           "$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-gcc" -mabi=n32 -EB -march=octeon2 -mabicalls -msoft-float -G 0 -nostdlib -Wl,-r "$O" -o "$R/tftp-n32-relocatable.o"
