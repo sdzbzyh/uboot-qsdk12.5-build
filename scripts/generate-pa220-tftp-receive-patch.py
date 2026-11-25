@@ -21,7 +21,11 @@ static int tftp_get_check_block(uint64_t off,unsigned len)
  if (TftpGetState!=TFTP_GET_ACTIVE || off!=(uint64_t)TftpGetReceivedSize || TftpGetReceivedSize>TftpGetReservedSize || (uint64_t)len>(uint64_t)TftpGetReservedSize-(uint64_t)TftpGetReceivedSize) return -1;
  return 0;
 }
-static void tftp_get_commit_block(unsigned len) { TftpGetReceivedSize+=(ulong)len; }
+static int tftp_get_commit_block(unsigned len)
+{
+ if (tftp_get_check_block((uint64_t)TftpGetReceivedSize,len)) return -1;
+ TftpGetReceivedSize+=(ulong)len; return 0;
+}
 #ifdef CONFIG_TFTP_TSIZE
 static int tftp_get_parse_tsize(const char *p, ulong *size)
 {
@@ -79,7 +83,7 @@ def main():
   s=rep(s,'\t\tif (tftp_invalidate_get_metadata()) {\n\t\t\tputs("\\nTFTP GET: unable to invalidate previous file metadata; refusing request\\n");\n\t\t\tnet_set_state(NETLOOP_FAIL);\n\t\t\treturn;\n\t\t}', '\t\tif (tftp_invalidate_get_metadata()) {\n\t\t\ttftp_get_fail("unable to invalidate previous file metadata");\n\t\t\treturn;\n\t\t}', "P6-1A GET failure state")
   s=rep(s,"\tTftpState = STATE_RECV_WRQ;","\tTftpGetState = TFTP_GET_IDLE;\n\tTftpState = STATE_RECV_WRQ;","WRQ reset")
   s=rep(s,"\tif (len && octeon_load_range_check(dest64, (uint64_t)len))\n\t\tgoto range_error;","\tif (len && octeon_load_range_check(dest64, (uint64_t)len))\n\t\tgoto range_error;\n\tif (TftpGetState == TFTP_GET_ACTIVE && tftp_get_check_block(offset64, len))\n\t\tgoto range_error;","block check")
-  s=rep(s,"\tif (NetBootFileXferSize < newsize)\n\t\tNetBootFileXferSize = newsize;\n\treturn 0;","\tif (TftpGetState == TFTP_GET_ACTIVE)\n\t\ttftp_get_commit_block(len);\n\tif (NetBootFileXferSize < newsize)\n\t\tNetBootFileXferSize = newsize;\n\treturn 0;","block commit")
+  s=rep(s,"\tif (NetBootFileXferSize < newsize)\n\t\tNetBootFileXferSize = newsize;\n\treturn 0;","\tif (TftpGetState == TFTP_GET_ACTIVE && tftp_get_commit_block(len)) {\n\t\ttftp_get_fail(\"received byte count overflow\");\n\t\treturn -1;\n\t}\n\tif (NetBootFileXferSize < newsize)\n\t\tNetBootFileXferSize = newsize;\n\treturn 0;","block commit")
   s=rep(s,"\t\t\tflash_perror(rc);\n\t\t\tnet_set_state(NETLOOP_FAIL);\n\t\t\treturn -1;","\t\t\tflash_perror(rc);\n\t\t\tif (TftpGetState == TFTP_GET_ACTIVE) tftp_get_fail(\"destination write failed\");\n\t\t\telse net_set_state(NETLOOP_FAIL);\n\t\t\treturn -1;","write failure")
   s=rep(s,'range_error:\n\tprintf("TFTP: rejecting DATA block (offset overflow or outside __tmp_load)\\n");\n\tnet_set_state(NETLOOP_FAIL);\n\treturn -1;','range_error:\n\tif (TftpGetState == TFTP_GET_ACTIVE)\n\t\ttftp_get_fail("DATA block exceeds reservation or is non-sequential");\n\telse {\n\t\tprintf("TFTP: rejecting DATA block (offset overflow or outside __tmp_load)\\n");\n\t\tnet_set_state(NETLOOP_FAIL);\n\t}\n\treturn -1;',"range failure")
   s=rep(s,'\tprintf("\\n%s; starting again\\n", msg);','\tif (TftpGetState == TFTP_GET_ACTIVE) { tftp_get_fail(msg); return; }\n\tprintf("\\n%s; starting again\\n", msg);',"restart")
