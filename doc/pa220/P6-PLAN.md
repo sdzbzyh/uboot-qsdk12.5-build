@@ -1,6 +1,6 @@
 # PA-220 P6 计划：RAM-only 文件接收与校验
 
-- 状态：**P6-1A/P6-1B 软件门 ACCEPTED；P6 整体未开放实际接收；未执行任何文件传输**
+- 状态：**P6-1A/P6-1B/P6-1C 软件门 ACCEPTED；P6 整体未开放实际接收；未执行任何文件传输**
 - 日期：2026-11-24
 - 集成分支：`feature/pa220-ubootkit-web`
 - 固定 PA-220 源码：`sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
@@ -201,4 +201,4 @@ P6-1A、P6-1B、P6-1C 软件门均已完成；下一步先安排 P6-A live descr
 ### 未执行事项与下一步
 
 - 未执行真实 TFTP GET、未传输文件、未调用 saveenv，未写入 SPI/eMMC/NAND/EEPROM/CPLD/flash。
-- 下一软件工作单元为 P6-1C：接收后 SHA-256/CRC32 与只读格式识别；随后执行 P6-A live __tmp_load descriptor 只读预检。P6-B 真实 RAM-only GET 需等待全部软件门和用户明确开始确认。
+- 下一工作单元为 P6-A：只读检查 live __tmp_load descriptor、DRAM 范围和完整 reservation。P6-A 通过并经审查、取得明确确认后，才考虑 P6-B RAM-only TFTP GET。
