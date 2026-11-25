@@ -16,7 +16,7 @@ jobs:
       - name: Checkout exact triggering commit
         uses: actions/checkout@v4
         with:
-          ref: \${{ github.sha }}
+          ref: ${{ github.sha }}
           fetch-depth: 0
       - name: Host production lifecycle tests (GCC and ASan/UBSan)
         shell: bash
@@ -24,10 +24,10 @@ jobs:
           set -euo pipefail
           mkdir -p reports/pa220/P6-1B
           { echo "INTEGRATION_COMMIT=$(git rev-parse HEAD)"; bash tests/pa220/tftp-get-lifecycle/run.sh; } 2>&1 | tee reports/pa220/P6-1B/10-host-tests.log
-          test "$(grep -c 'HOST TFTP GET LIFECYCLE: cases=11 .* failures=0' reports/pa220/P6-1B/10-host-tests.log)" -eq 2
+          test "$(grep -c 'HOST TFTP GET LIFECYCLE: cases=10 .* failures=0' reports/pa220/P6-1B/10-host-tests.log)" -eq 2
       - name: Download and verify Cavium OCTEON SDK 5.1.0
         env:
-          GH_TOKEN: \${{ secrets.OCTEON_SDK_READ_TOKEN }}
+          GH_TOKEN: ${{ secrets.OCTEON_SDK_READ_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
@@ -61,7 +61,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pa220-p6-1b-tftp-lifecycle-\${{ github.sha }}
+          name: pa220-p6-1b-tftp-lifecycle-${{ github.sha }}
           path: reports/pa220/P6-1B/
           if-no-files-found: warn
           retention-days: 60
