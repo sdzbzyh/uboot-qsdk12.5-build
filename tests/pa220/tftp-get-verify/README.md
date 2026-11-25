@@ -25,3 +25,5 @@ The valid-format completion cases use bounded synthetic headers; the 4 KiB plain
 The CI target gate verifies the generated P6-1C patch, compiles the modified OCTEON TFTP object, performs an N32 relocatable link, and links the complete PA-220 image. It does not execute TFTP or write target storage.
 
 The Actions job reports separate build-output, artifact-copy, object-ELF and N32-link gates so a failure is localized to the exact validation stage.
+
+The patch file is checked by the generator's own idempotence branch; the workflow does not duplicate that check with a second path-sensitive shell test.
