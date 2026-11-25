@@ -177,13 +177,13 @@ P6-1A 仅完成 GET 开始前旧元数据失效，不构成真实 TFTP GET 授�
 
 ### 验收证据
 
-- Actions [#45595467013](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45595467013)：SUCCESS；验证提交 79b2c943bb852a3b125c59d1f8e4a556c3de1c52。
+- Actions [#45595798808](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45595467013)：SUCCESS；验证提交 fc6f60ca28418f74a418456cd1144a5c4f0f017a。
 - Host Harness 直接注入生产 GET_STATE_HELPERS：14 cases / 26 assertions / 0 failures；GCC 和 ASan/UBSan 均通过。
 - Cavium SDK 5.1.0，GCC 4.7.0；SDK archive SHA-256：cd8cd3232078094c89accf32a82a13e7847e3466c94e9b5e12dd11b741102d99。
 - OCTEON tftp.o 与 N32 relocatable object 均为 ELF32 big-endian、ABI2；完整 U-Boot final link 成功。
-- P6-1B patch SHA-256：12c3fd97347cef03b6fd8dc66e9a43fd63d314193e598c00dcbe9857072a3621；GET abort patch SHA-256：71a1e403dd0988add42c8b229332dc6379e65c437de3c1e057158977398c8ccc。两者均由 git diff --binary 生成。
-- tftp.o SHA-256：6a73d4637bbf9ebc6fb83e014f5f70bb10e232b2bb6f25536ecd82dfc7816a48；cmd_net.o：4412f25a65989c4007655eb446ca91df53801a905596ef78d1ecea108b12820a；N32 relocatable：f9ffc7b4c5c61c6eade7e902762d3da07b9d70cc40f10d80714d122b88930e52。
-- 完整 U-Boot：ba41216fa5749d1ed9ffc5b4730a348aee099ee440e9085a8afa91818af0db3c；map：cec340e456ac8e29afcc29c73c1d639afdc575e1139593d11c67cee99f94495c；System map：e7f19bcee44b0859b0588e058480662be62b5fe3b3a2cb865fa27abfbcc40a76；BIN：d1b75257bb64faba3f8643e9655ff405ca71e57bde291e7767473c1841415354。
+- P6-1B patch SHA-256：e3dba0c7fdfce6364a93998d94ea823a8d0307e92656b51a4619e7ffeca509b5；GET abort patch SHA-256：71a1e403dd0988add42c8b229332dc6379e65c437de3c1e057158977398c8ccc。两者均由 git diff --binary 生成。
+- tftp.o SHA-256：538c0bebdb0133d9e6e67228295c8558a672ea90d8a2a7bd3dc2d0d834ccbc29；cmd_net.o：4412f25a65989c4007655eb446ca91df53801a905596ef78d1ecea108b12820a；N32 relocatable：d33743c508344d97bc9d0050cb08cc79095b771f5d2d7e83ef1583d1b6610aa7。
+- 完整 U-Boot：e383384dc26606ccf1a18c6d07b6217dc7f3cabd6699e132f92c6691e19286b9；map：cec340e456ac8e29afcc29c73c1d639afdc575e1139593d11c67cee99f94495c；System map：e7f19bcee44b0859b0588e058480662be62b5fe3b3a2cb865fa27abfbcc40a76；BIN：d4779c0a55a47891af2865cd315b3a827a990cece7e0c10201ab14e5e1a97aec。
 - 构建日志存在 PA-220 基线配置中既有宏重定义 warnings；无新增 P6-1B 编译错误，目标与最终链接均成功。
 
 ### 未执行事项与下一步
