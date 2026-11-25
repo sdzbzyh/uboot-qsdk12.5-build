@@ -21,7 +21,6 @@ on:
       - 'tests/host/http_request/**'
       - 'tests/host/http_handler/**'
       - 'tests/host/tcp_ipv4_tx/**'
-      - 'build-pa220.sh'
   workflow_dispatch:
 
 permissions:
