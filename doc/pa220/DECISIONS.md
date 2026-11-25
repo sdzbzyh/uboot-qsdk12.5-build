@@ -146,3 +146,12 @@
 - 实现：固定源码 `setenv(name, NULL)` 对不存在变量也返回非零，故必须先 `getenv()` 判断存在；不调用 `saveenv`。
 - 影响：只作用于 `TftpStart()` 的 GET 分支；PUT 与 `TftpStartServer()` 的 WRQ 行为不变。成功接收仍由正常成功路径发布新元数据。
 - 状态：P6-1A 软件验收通过（Host GCC、ASan/UBSan、补丁生成器重复运行、OCTEON TFTP object、N32 relocatable link、完整 U-Boot final link）；证据见 `reports/pa220/P6-1A/ACCEPTANCE.md` 与 Actions #45588666611。不授权真实文件接收。
+
+## D-020：P6-1B 完整文件 reservation 与 GET 失败状态（2026-11-25）
+
+- 决策：TFTP GET/RRQ 在发送前对最大文件完整区间做一次 reservation；默认上限 32 MiB，由 CONFIG_PA220_TFTP_MAX_FILE_SIZE 配置。reservation 使用 P4-2 validator，不能只逐 DATA block 临时验证。
+- 决策：每个 DATA block 必须按连续 offset 接收，长度不得超过 reservation 剩余空间；写入后累计总长度再次 checked，完成时核对 NetBootFileXferSize、累计字节数和服务器 tsize。
+- 决策：接收失败状态显式区分 IDLE/ACTIVE/COMPLETE/FAILED。超时、TFTP ERROR、ICMP、越界/乱序、超长、目标写入失败、首块错误、tsize/总长度不匹配以及 do_tftpb 返回时的中断均使部分结果失效并清零长度。
+- 决策：通过 do_tftpb() 的 GET-only abort hook 处理 Ctrl-C/NetLoop 非成功返回；不改 TFTP PUT/WRQ 行为，不调用 saveenv。
+- 证据：Host 14 cases / 26 assertions / 0 failures（GCC、ASan/UBSan）；Cavium SDK 5.1.0 OCTEON object、N32 relocatable link、完整 U-Boot final link PASS；Actions #45595467013。
+- 状态：P6-1B SOFTWARE ACCEPTED；不授权真实 TFTP GET。下一步 P6-1C 校验和/格式识别，之后 P6-A live descriptor 只读预检。
