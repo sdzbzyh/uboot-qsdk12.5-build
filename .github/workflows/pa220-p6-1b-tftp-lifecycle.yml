@@ -9,6 +9,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  statuses: write
 jobs:
   p6-1b-host-and-octeon:
     runs-on: ubuntu-latest
@@ -67,3 +68,20 @@ jobs:
           path: reports/pa220/P6-1B/
           if-no-files-found: warn
           retention-days: 60
+      - name: Publish P6-1B validation status
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          JOB_STATUS: ${{ job.status }}
+        with:
+          script: |
+            const state = process.env.JOB_STATUS === "success" ? "success" : "failure";
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state,
+              context: "pa220/p6-1b-host-and-octeon",
+              description: "P6-1B Actions " + process.env.JOB_STATUS,
+              target_url: "https://github.com/" + context.repo.owner + "/" + context.repo.repo + "/actions/runs/" + context.runId
+            });
