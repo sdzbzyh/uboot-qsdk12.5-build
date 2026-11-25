@@ -68,6 +68,11 @@ jobs:
           export PA220_REPO_DIR="$RUNNER_TEMP/pa220-openwrt"
           export PA220_OUTPUT_DIR="$RUNNER_TEMP/pa220-output"
           ./build-pa220.sh "$OCTEON_TOOLCHAIN" 2>&1 | tee "$R/29-octeon-full-build.log"
+          python3 scripts/generate-pa220-tftp-validity-patch.py \
+            --source-root "$PA220_REPO_DIR" \
+            --output "$R/0003-pa220-tftp-get-metadata-validity.patch" \
+            | tee "$R/22-generator-idempotence.log"
+          grep -q 'P6-1A_ALREADY_GENERATED=verified' "$R/22-generator-idempotence.log"
           U="$PA220_REPO_DIR/u-boot"
           O="$U/net/tftp.o"
           test -s "$O"
