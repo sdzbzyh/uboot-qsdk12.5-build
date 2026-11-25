@@ -6,7 +6,8 @@
 
 - 集成仓库：`sdzbzyh/uboot-qsdk12.5-build`
 - 分支：`feature/pa220-ubootkit-web`
-- 本文件建立时 HEAD：`8105ff0cf1da7e3aaf5c2b9c6b628947eb260be6`（历史记录；当前执行 HEAD 见最新提交）
+- 本文件建立时 HEAD：`8105ff0cf1da7e3aaf5c2b9c6b628947eb260be6`（历史记录）
+- 当前远端 HEAD：`e919dbddfc1a8457d86c479fb64e13f9ee0cbbbd`
 - PA-220 固定源码：`sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
 - uBootKit 评估基线：`chenxin527/uboot-qsdk12.5-build@9ce315735ac88fd0a7c7697bc527a8616ed0a972`
 - 目标：OCTEON III CN7130、MIPS64 BE、N32、Cavium SDK 5.1.0、U-Boot 2013.07、原厂 Stage 2 加载自定义 Stage 3。
@@ -43,7 +44,7 @@ Host 测试直接编译生产 helper，并从同一生成器注入生产 GET gat
 
 ### 后续 P6 软件门
 
-继续按 `doc/pa220/P6-PLAN.md` 推进：完整文件 reservation、最大长度、checked block/offset arithmetic、超时/中断失败状态、CRC32、SHA-256、只读格式识别、数据同步和失败数据无效化。不要把单 DATA block validator 当作完整文件生命周期保证。
+继续按 `doc/pa220/P6-PLAN.md` 推进：P6-1B 已完成完整文件 reservation、最大长度、checked block/offset arithmetic 和超时/中断失败状态；下一步 P6-1C 只做接收后 CRC32/SHA-256、只读格式识别和校验失败无效化。随后进行 P6-A live descriptor 只读预检；真实 TFTP GET 仍属于 P6-B，不能提前执行。
 
 ## 验证与补丁规则
 
