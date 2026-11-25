@@ -9,7 +9,6 @@ on:
       - 'patches/pa220/0003-pa220-native-ipv4-tcp-dispatch.patch'
       - 'u-boot/net/tcp.c'
       - 'u-boot/include/net/tcp.h'
-      - 'build-pa220.sh'
   workflow_dispatch:
 
 permissions:
