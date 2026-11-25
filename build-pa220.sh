@@ -131,6 +131,11 @@ python3 "$ROOT_DIR/scripts/generate-pa220-tftp-validity-patch.py" \
     --source-root "$PA220_SOURCE_ROOT" \
     --output "$ROOT_DIR/reports/pa220/P6-1A/0003-pa220-tftp-get-metadata-validity.patch"
 
+mkdir -p "$ROOT_DIR/reports/pa220/P6-1B"
+python3 "$ROOT_DIR/scripts/generate-pa220-tftp-receive-patch.py" \
+    --source-root "$PA220_SOURCE_ROOT" \
+    --output "$ROOT_DIR/reports/pa220/P6-1B/0004-pa220-tftp-get-full-reservation.patch"
+
 if [ -n "$TOOLCHAIN_DIR" ]; then
     "$UBOOT_DIR/build.sh" "$TOOLCHAIN_DIR"
 else
