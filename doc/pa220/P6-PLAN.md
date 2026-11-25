@@ -163,7 +163,7 @@ P6-1B 已完成生产实现、Host GCC/ASan/UBSan、OCTEON object、N32 relocata
 - P6-1A patch SHA-256：`040c24b8fff0ab76dc83a8479d9760852b5ba685d38622141466c7fc95c54330`。
 - 完整测试、SDK、对象、链接产物哈希见 `reports/pa220/P6-1A/ACCEPTANCE.md`。
 
-P6-1A 仅完成 GET 开始前旧元数据失效，不构成真实 TFTP GET 授权；完整文件 reservation、最大长度、失败状态、校验/格式识别及 live descriptor 预检仍未完成。
+在 P6-1A 验收时，完整文件 reservation、最大长度和失败状态仍未完成；这些软件门现已由 P6-1B 完成。校验/格式识别由 P6-1C 继续，live descriptor 预检由 P6-A 完成；在这些步骤结束前仍不授权真实 TFTP GET。
 
 ## 11. P6-1B 实施与验收记录（2026-11-25）
 
