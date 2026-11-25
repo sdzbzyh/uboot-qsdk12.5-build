@@ -52,7 +52,7 @@ static int tftp_get_finish(void)
 }
 static void tftp_get_fail(const char *why)
 {
- printf("\\nTFTP GET failed: %s\\n",why); TftpGetState=TFTP_GET_FAILED; TftpGetReceivedSize=0; TftpGetReservedSize=0; NetBootFileXferSize=0; (void)tftp_invalidate_get_metadata(); net_set_state(NETLOOP_FAIL);
+ printf("\nTFTP GET failed: %s\n",why); TftpGetState=TFTP_GET_FAILED; TftpGetReceivedSize=0; TftpGetReservedSize=0; NetBootFileXferSize=0; (void)tftp_invalidate_get_metadata(); net_set_state(NETLOOP_FAIL);
 }
 void TftpGetAbort(void)
 {
