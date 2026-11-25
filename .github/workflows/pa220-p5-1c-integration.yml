@@ -7,7 +7,6 @@ on:
     paths:
       - '.github/workflows/pa220-p5-1c-integration.yml'
       - 'patches/pa220/0004-pa220-foreground-web-lifecycle.patch'
-      - 'build-pa220.sh'
   workflow_dispatch:
 
 permissions:
