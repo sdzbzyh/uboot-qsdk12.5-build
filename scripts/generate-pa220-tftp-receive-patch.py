@@ -35,6 +35,10 @@ static void tftp_get_fail(const char *why)
 {
  printf("\\nTFTP GET failed: %s\\n",why); TftpGetState=TFTP_GET_FAILED; TftpGetReceivedSize=0; TftpGetReservedSize=0; NetBootFileXferSize=0; (void)tftp_invalidate_get_metadata(); net_set_state(NETLOOP_FAIL);
 }
+void TftpGetAbort(void)
+{
+ if (TftpGetState == TFTP_GET_ACTIVE) tftp_get_fail("interrupted or aborted");
+}
 '''
 def git(root,*args,env=None):
  return subprocess.run(["git","-C",str(root),*args],check=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env).stdout
@@ -69,9 +73,16 @@ def main():
   s=rep(s,"\tcase TFTP_ERROR:\n\t\tprintf(","\tcase TFTP_ERROR:\n\t\tif (TftpGetState == TFTP_GET_ACTIVE) { tftp_get_fail(\"server TFTP ERROR\"); break; }\n\t\tprintf(","TFTP ERROR")
   ic="\tif (type == ICMP_NOT_REACH && code == ICMP_NOT_REACH_PORT) {"
   s=rep(s,ic,ic+"\n\t\tif (TftpGetState == TFTP_GET_ACTIVE) { tftp_get_fail(\"network interruption\"); return; }","ICMP")
-  path.write_text(s); patch=git(root,"diff","--no-ext-diff","--no-renames","--binary","--",str(TFTP),env=env)
-  if not patch or "tftp_get_reserve" not in patch or "saveenv" in patch or "TftpWriting" in patch: raise RuntimeError("incomplete patch or PUT/WRQ touched")
+  cmd_path=root/"u-boot/common/cmd_net.c"
+  cmd=cmd_path.read_text()
+  cmd=rep(cmd,"int do_tftpb(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])","extern void TftpGetAbort(void);\n\nint do_tftpb(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])","GET command declaration")
+  cmd=rep(cmd,"ret = netboot_common(TFTPGET, cmdtp, argc, argv);","ret = netboot_common(TFTPGET, cmdtp, argc, argv);\n\tTftpGetAbort();","GET command abort hook")
+  path.write_text(s); cmd_path.write_text(cmd)
+  patch=git(root,"diff","--no-ext-diff","--no-renames","--binary","--",str(TFTP),env=env)
+  cmd_patch=git(root,"diff","--no-ext-diff","--no-renames","--binary","--",str(cmd_path),env=env)
+  if not patch or "tftp_get_reserve" not in patch or "saveenv" in patch or "TftpWriting" in patch or "TftpGetAbort" not in cmd_patch: raise RuntimeError("incomplete patch or PUT/WRQ touched")
   out.parent.mkdir(parents=True,exist_ok=True); out.write_text(patch)
+  out.with_name("0005-pa220-tftp-get-abort-hook.patch").write_text(cmd_patch)
  print("PA220_SOURCE_PIN="+PIN); print("PATCH="+str(out)); print("PATCH_SHA256="+hashlib.sha256(out.read_bytes()).hexdigest()); print("MAX_FILE_SIZE=32MiB"); print("FULL_RANGE_RESERVED_BEFORE_RRQ=verified"); print("SEQUENTIAL_BLOCK_AND_TOTAL_LENGTH_CHECKS=verified"); print("FAILURE_INVALIDATES_METADATA=verified"); print("PUT_WRQ_UNCHANGED=verified"); print("DIFF_GENERATED_BY=git diff --binary")
 if __name__=="__main__":
  try: sys.exit(main())
