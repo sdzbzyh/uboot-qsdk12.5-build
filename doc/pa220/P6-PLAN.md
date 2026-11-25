@@ -86,7 +86,7 @@ P6-1A、P6-1B、P6-1C 的软件门均已完成。P6-1C 的实现范围与边界�
 ### 固定测试文件（设计，不代表已传输）
 
 - 文件长度：4,096 bytes。
-- 内容：64-byte legacy uImage header + 4,032-byte inert ASCII payload；ih_os=0（invalid）、ih_type=0（invalid），不具备可执行镜像类型；文件只用于 RAM-only 接收与指纹比对，不作为启动镜像。
+- 内容：64-byte legacy uImage header + 4,032-byte inert ASCII payload；payload 为重复字节串 PA220-P6-TFTP-GET-TEST 后跟 LF（0x0a），截断到恰好 4,032 bytes。ih_os=0（invalid）、ih_type=0（invalid），不具备可执行镜像类型；文件只用于 RAM-only 接收与指纹比对，不作为启动镜像。
 - uImage ih_size=`4032`，ih_hcrc=`1b1e2ee7`，ih_dcrc=`705c16e0`。
 - CRC32（IEEE，完整 4,096-byte 文件）：`cde0b20d`。
 - SHA-256（完整文件）：`0649bd6d56764ed2d09f3fdf84f9b84cf33e51d75001f0fe95a0cb254d6a2d24`。
