@@ -136,6 +136,11 @@ python3 "$ROOT_DIR/scripts/generate-pa220-tftp-receive-patch.py" \
     --source-root "$PA220_SOURCE_ROOT" \
     --output "$ROOT_DIR/reports/pa220/P6-1B/0004-pa220-tftp-get-full-reservation.patch"
 
+mkdir -p "$ROOT_DIR/reports/pa220/P6-1C"
+python3 "$ROOT_DIR/scripts/generate-pa220-tftp-verify-patch.py" \
+    --source-root "$PA220_SOURCE_ROOT" \
+    --output "$ROOT_DIR/reports/pa220/P6-1C/0006-pa220-tftp-get-verification.patch"
+
 if [ -n "$TOOLCHAIN_DIR" ]; then
     "$UBOOT_DIR/build.sh" "$TOOLCHAIN_DIR"
 else
