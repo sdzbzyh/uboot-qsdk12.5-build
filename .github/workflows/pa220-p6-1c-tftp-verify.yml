@@ -1,0 +1,87 @@
+name: PA-220 P6-1C TFTP GET checksum and format verification
+on:
+  push:
+    branches: [feature/pa220-ubootkit-web]
+    paths:
+      - 'scripts/generate-pa220-tftp-verify-patch.py'
+      - 'tests/pa220/tftp-get-verify/**'
+      - 'build-pa220.sh'
+  workflow_dispatch:
+permissions:
+  contents: read
+  statuses: write
+jobs:
+  p6-1c-host-and-octeon:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact triggering commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${ github.sha }
+          fetch-depth: 0
+      - name: Host production checksum and format tests (GCC and ASan/UBSan)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p reports/pa220/P6-1C
+          { echo "INTEGRATION_COMMIT=$(git rev-parse HEAD)"; bash tests/pa220/tftp-get-verify/run.sh; } 2>&1 | tee reports/pa220/P6-1C/10-host-tests.log
+          test "$(grep -c 'HOST TFTP GET VERIFY: cases=16 .* failures=0' reports/pa220/P6-1C/10-host-tests.log)" -eq 2
+      - name: Download and verify Cavium OCTEON SDK 5.1.0
+        env:
+          GH_TOKEN: ${ secrets.OCTEON_SDK_READ_TOKEN }
+        shell: bash
+        run: |
+          set -euo pipefail
+          D="$RUNNER_TEMP/octeon-download"; S="$RUNNER_TEMP/octeon-sdk"; mkdir -p "$D" "$S" reports/pa220/P6-1C
+          test -n "$GH_TOKEN"
+          gh release download octeon-sdk-5.1.0 --repo sdzbzyh/pa220-toolchains --pattern '*.tar.gz' --pattern '*.sha256' --dir "$D"
+          (cd "$D" && sha256sum -c ./*.sha256)
+          A=$(find "$D" -maxdepth 1 -name '*.tar.gz' -print -quit); tar -xzf "$A" -C "$S"
+          GCC=$(find "$S" -path '*/bin/mips64-octeon-linux-gnu-gcc' -print -quit); TC=$(dirname "$(dirname "$GCC")")
+          echo "OCTEON_TOOLCHAIN=$TC" >> "$GITHUB_ENV"; echo "$TC/bin" >> "$GITHUB_PATH"
+          "$GCC" --version | head -n 2 | tee reports/pa220/P6-1C/20-octeon-toolchain.txt
+          sha256sum "$A" | tee reports/pa220/P6-1C/21-sdk-sha256.txt
+      - name: Build full PA-220 image with P6-1C and verify patch repeatability
+        shell: bash
+        run: |
+          set -euo pipefail
+          R=reports/pa220/P6-1C; export OCTEON_MODEL=OCTEON_CN70XX PA220_REPO_DIR="$RUNNER_TEMP/pa220-openwrt" PA220_OUTPUT_DIR="$RUNNER_TEMP/pa220-output"
+          ./build-pa220.sh "$OCTEON_TOOLCHAIN" 2>&1 | tee "$R/29-octeon-full-build.log"
+          python3 scripts/generate-pa220-tftp-verify-patch.py --source-root "$PA220_REPO_DIR" --output "$R/0006-pa220-tftp-get-verification.patch" | tee "$R/22-generator-idempotence.log"
+          grep -q P6-1C_ALREADY_GENERATED=verified "$R/22-generator-idempotence.log"
+          grep -q P6_1C_SHA256_CRC32=integrated "$R/22-generator-idempotence.log"
+          grep -q P6_1C_READ_ONLY_FORMATS=legacy-uImage,FIT-FDT,ELF32,ELF64 "$R/22-generator-idempotence.log"
+          U="$PA220_REPO_DIR/u-boot"; O="$U/net/tftp.o"
+          test -s "$O" && test -s "$U/common/cmd_net.o" && test -s "$U/u-boot-octeon_pa220" && test -s "$U/u-boot-octeon_pa220.map" && test -s "$U/System-octeon_pa220.map" && test -s "$U/u-boot-octeon_pa220.bin"
+          strings "$O" | grep -F 'TFTP GET verified:'
+          cp "$O" "$R/tftp.o"; cp "$U/common/cmd_net.o" "$R/cmd_net.o"; cp "$U/u-boot-octeon_pa220" "$R/"; cp "$U/u-boot-octeon_pa220.map" "$R/"; cp "$U/System-octeon_pa220.map" "$R/"; cp "$U/u-boot-octeon_pa220.bin" "$R/"
+          RDL="$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-readelf"; "$RDL" -h "$O" | tee "$R/30-tftp-object-elf-header.txt"
+          "$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-gcc" -mabi=n32 -EB -march=octeon2 -mabicalls -msoft-float -G 0 -nostdlib -Wl,-r "$O" -o "$R/tftp-n32-relocatable.o"
+          "$RDL" -h "$R/tftp-n32-relocatable.o" | tee "$R/31-tftp-n32-relocatable-link.txt"
+          sha256sum "$R/tftp.o" "$R/cmd_net.o" "$R/tftp-n32-relocatable.o" "$R/u-boot-octeon_pa220" "$R/u-boot-octeon_pa220.map" "$R/System-octeon_pa220.map" "$R/u-boot-octeon_pa220.bin" "$R/0006-pa220-tftp-get-verification.patch" | tee "$R/50-artifact-sha256.txt"
+          echo P6_1C_TFTP_OBJECT=PASS; echo P6_1C_N32_RELOCATABLE_LINK=PASS; echo P6_1C_FULL_UBOOT_FINAL_LINK=PASS
+      - name: Upload P6-1C evidence and build artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pa220-p6-1c-tftp-verify-${ github.sha }
+          path: reports/pa220/P6-1C/
+          if-no-files-found: warn
+          retention-days: 60
+      - name: Publish P6-1C validation status
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          JOB_STATUS: ${ job.status }
+        with:
+          script: |
+            const state = process.env.JOB_STATUS === "success" ? "success" : "failure";
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state,
+              context: "pa220/p6-1c-host-and-octeon",
+              description: "P6-1C Actions " + process.env.JOB_STATUS,
+              target_url: "https://github.com/" + context.repo.owner + "/" + context.repo.repo + "/actions/runs/" + context.runId
+            });
