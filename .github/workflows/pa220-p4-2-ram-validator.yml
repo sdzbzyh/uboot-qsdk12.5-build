@@ -9,7 +9,6 @@ on:
       - 'tests/pa220/ram-range/**'
       - 'tests/pa220/tftp-guard/**'
       - 'scripts/generate-pa220-load-range-makefile-patch.py'
-      - 'build-pa220.sh'
   workflow_dispatch:
 
 permissions:
