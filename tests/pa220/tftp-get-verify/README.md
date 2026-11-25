@@ -18,3 +18,6 @@ contract; the OCTEON build links the pinned U-Boot SHA-256 implementation enable
 by CONFIG_SHA256. CRC32's Host boundary uses the standard IEEE polynomial and
 checks the 123456789 reference vector. This harness validates format and lifecycle
 logic, not cryptographic implementation internals.
+
+
+The valid-format completion cases use bounded synthetic headers; the 4 KiB plain-text fixture from the earlier P6-0 proposal is intentionally not a success case because P6-1C rejects unsupported formats. The P6-B first-transfer fixture must be changed to a supported, inert test image before any real receive is considered.
