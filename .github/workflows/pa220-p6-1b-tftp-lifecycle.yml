@@ -25,7 +25,7 @@ jobs:
           set -euo pipefail
           mkdir -p reports/pa220/P6-1B
           { echo "INTEGRATION_COMMIT=$(git rev-parse HEAD)"; bash tests/pa220/tftp-get-lifecycle/run.sh; } 2>&1 | tee reports/pa220/P6-1B/10-host-tests.log
-          test "$(grep -c 'HOST TFTP GET LIFECYCLE: cases=12 .* failures=0' reports/pa220/P6-1B/10-host-tests.log)" -eq 2
+          test "$(grep -c 'HOST TFTP GET LIFECYCLE: cases=13 .* failures=0' reports/pa220/P6-1B/10-host-tests.log)" -eq 2
       - name: Download and verify Cavium OCTEON SDK 5.1.0
         env:
           GH_TOKEN: ${{ secrets.OCTEON_SDK_READ_TOKEN }}
