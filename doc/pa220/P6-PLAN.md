@@ -1,6 +1,6 @@
 # PA-220 P6 计划：RAM-only 文件接收与校验
 
-- 状态：**P6-1A 软件门 ACCEPTED；P6 整体未开放实际接收；未执行任何文件传输**
+- 状态：**P6-1A/P6-1B 软件门 ACCEPTED；P6 整体未开放实际接收；未执行任何文件传输**
 - 日期：2026-11-24
 - 集成分支：`feature/pa220-ubootkit-web`
 - 固定 PA-220 源码：`sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
@@ -55,14 +55,14 @@ P6 只负责将一个文件接收到经验证的 RAM 区间，并对接收结果
 
 P6-B 只验证 TFTP GET，不代表 TFTP Server/WRQ、PUT、HTTP upload 或 ELF loader 写入安全。
 
-## 5. P6-C：长度、校验与格式识别
+## 5. P6-C：校验与格式识别（P6-1C 后续软件门）
 
-首次真实接收前完成相应软件实现与测试：
-- 明确最大文件长度；上限不得超过 live `__tmp_load` 可用区间，并在接收开始前验证完整 reservation。
-- 每个 DATA block 继续在 memcpy 前验证；block index、wrap offset、目标地址、文件总长度使用 checked arithmetic。
+P6-1B 已完成最大文件长度、完整 reservation、DATA block/offset/总长度 checked arithmetic，以及超时/中断/越界/失败状态管理。首次真实接收前仍须完成：
+
 - 接收结束后计算 SHA-256（首选）和/或 CRC32，输出长度、校验值、格式类型。
 - 格式识别仅做只读 magic/header 检查（例如 legacy uImage、FIT/FDT、ELF）；不解析后即执行、不写介质。
-- 失败状态明确区分超长、越界、超时、校验不匹配和不支持的格式；不将部分文件标记为有效。
+- 校验不匹配或格式不支持时明确标记 FAILED，清除/作废部分接收结果，不得发布有效文件元数据。
+- 完成 P6-1C Host 与 OCTEON 验证后，才进入 P6-A live descriptor 只读预检；之后 P6-B 才考虑真实 RAM-only TFTP GET。
 
 ## 6. 明确不在 P6 首轮范围内
 
