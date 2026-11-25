@@ -24,5 +24,6 @@ int main(void){
  reset();tftp_get_reserve();TftpGetReceivedSize=512;NetBootFileXferSize=512;TftpTsize=513;cases++;check(tftp_get_finish()!=0&&TftpGetState==TFTP_GET_FAILED&&net_state==NETLOOP_FAIL,"tsize mismatch fails");
  reset();tftp_get_reserve();TftpGetReceivedSize=512;NetBootFileXferSize=511;cases++;check(tftp_get_finish()!=0&&NetBootFileXferSize==0,"partial size not published");
  reset();tftp_get_reserve();cases++;tftp_get_fail("timeout");check(TftpGetState==TFTP_GET_FAILED&&net_state==NETLOOP_FAIL,"failure state set");check(NetBootFileXferSize==0&&!size_marker&&!addr_marker&&invalidate_calls==1,"partial metadata invalidated");
+ reset();tftp_get_reserve();TftpGetReceivedSize=512;NetBootFileXferSize=512;cases++;TftpGetAbort();check(TftpGetState==TFTP_GET_FAILED&&net_state==NETLOOP_FAIL,"Ctrl-C command abort marks GET failed");check(NetBootFileXferSize==0&&!size_marker&&!addr_marker,"aborted partial file metadata invalidated");
  printf("HOST TFTP GET LIFECYCLE: cases=%u assertions=%u failures=%u\n",cases,assertions,failures);return failures?1:0;
 }
