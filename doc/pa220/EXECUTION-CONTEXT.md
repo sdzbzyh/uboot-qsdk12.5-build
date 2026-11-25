@@ -29,7 +29,7 @@ P6-0 源码审查已完成。P6-1A（TFTP GET 开始前失效旧 `filesize` / `f
 
 固定源码 `u-boot/common/cmd_nvedit.c` 中：
 
-- `setenv(name, NULL)` 或空值表示删除。
+- 只有 `setenv(name, NULL)` 表示删除；空字符串不是删除请求，不得用它代替 `NULL`。
 - 删除成功返回 0；删除失败（包括变量不存在）返回 1。
 - `hdelete_r()` 对不存在的变量返回 0，因此必须先用 `getenv()` 判断变量是否存在。
 - 对存在的变量删除时，必须检查 `setenv()` 返回值。
