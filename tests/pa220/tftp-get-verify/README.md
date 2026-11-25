@@ -23,3 +23,5 @@ logic, not cryptographic implementation internals.
 The valid-format completion cases use bounded synthetic headers; the 4 KiB plain-text fixture from the earlier P6-0 proposal is intentionally not a success case because P6-1C rejects unsupported formats. The P6-B first-transfer fixture must be changed to a supported, inert test image before any real receive is considered.
 
 The CI target gate verifies the generated P6-1C patch, compiles the modified OCTEON TFTP object, performs an N32 relocatable link, and links the complete PA-220 image. It does not execute TFTP or write target storage.
+
+The Actions job reports separate build-output, artifact-copy, object-ELF and N32-link gates so a failure is localized to the exact validation stage.
