@@ -9,7 +9,6 @@ on:
       - 'u-boot/include/net/**'
       - 'patches/pa220/**'
       - 'scripts/generate-pa220-p5-2c-makefile-patch.py'
-      - 'build-pa220.sh'
   workflow_dispatch:
 permissions:
   contents: read
