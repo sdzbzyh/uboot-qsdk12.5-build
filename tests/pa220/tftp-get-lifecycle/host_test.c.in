@@ -2,6 +2,7 @@
 #include <stdint.h>
 typedef unsigned long ulong;
 #define NETLOOP_FAIL 1
+#define CONFIG_TFTP_TSIZE 1
 #define CONFIG_PA220_TFTP_MAX_FILE_SIZE (32UL*1024UL*1024UL)
 static ulong load_addr,NetBootFileXferSize,TftpTsize;
 static unsigned validator_calls,invalidate_calls,assertions,cases,failures;
