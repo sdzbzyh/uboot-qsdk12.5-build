@@ -5,7 +5,6 @@ on:
     paths:
       - 'scripts/generate-pa220-tftp-receive-patch.py'
       - 'tests/pa220/tftp-get-lifecycle/**'
-      - 'build-pa220.sh'
   workflow_dispatch:
 permissions:
   contents: read
