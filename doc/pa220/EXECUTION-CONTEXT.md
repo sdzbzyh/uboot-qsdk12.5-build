@@ -16,7 +16,14 @@
 
 P6 RAM-only 文件接收。首条接收路径为 TFTP GET/RRQ。
 
-P6-0 源码审查已完成。P6-1A（TFTP GET 开始前失效旧 `filesize` / `fileaddr`）已完成生产实现、Host/ASan/UBSan、OCTEON object、N32 relocatable link、完整 U-Boot final link 和补丁生成器重复运行验证。\n\n- 实现提交：`dafb893a7f3a0637159b87b59def1618184efdad`\n- 最终验收 Actions：[#45588666611](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45588666611)，结论 SUCCESS。\n- 正式验收报告：`reports/pa220/P6-1A/ACCEPTANCE.md`。\n- 本轮未执行真实 TFTP GET、未传输文件、未调用 `saveenv`。P6 整体仍未开放实际接收。\n\n下一唯一工作单元：P6-1B，完成完整文件 reservation、最大总长度和接收失败状态管理的生产设计/Host/目标验证；不要跳到真实传输。
+P6-0 源码审查已完成。P6-1A（TFTP GET 开始前失效旧 `filesize` / `fileaddr`）已完成生产实现、Host/ASan/UBSan、OCTEON object、N32 relocatable link、完整 U-Boot final link 和补丁生成器重复运行验证。
+
+- 实现提交：`dafb893a7f3a0637159b87b59def1618184efdad`
+- 最终验收 Actions：[#45588666611](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45588666611)，结论 SUCCESS。
+- 正式验收报告：`reports/pa220/P6-1A/ACCEPTANCE.md`。
+- 本轮未执行真实 TFTP GET、未传输文件、未调用 `saveenv`。P6 整体仍未开放实际接收。
+
+下一唯一工作单元：P6-1B，完成完整文件 reservation、最大总长度和接收失败状态管理的生产设计/Host/目标验证；不要跳到真实传输。
 
 ### P6-1A 设计要点
 

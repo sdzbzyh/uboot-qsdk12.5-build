@@ -154,5 +154,13 @@ P6-A 只读设备预检通过并不单独授权接收。首个真实 GET 还必�
 - 不调用 `saveenv`；正常成功接收后的元数据发布路径不变。
 - 生成器在固定源码工作树中生成 P6-1A 独立 unified diff，所有 diff 由 `git diff --binary` 产生。
 
-### 验收状态
-本节描述实现设计；Host、ASan/UBSan、TFTP object、N32 relocatable link 和完整 U-Boot final link 的 PASS/FAIL 只依据 `reports/pa220/P6-1A/` 的实际 Actions 证据填写。无日志/产物不得标记 PASS。P6-1A 不构成真实 TFTP GET 授权，后续仍须完成 P6 软件门及 live descriptor 预检。
+### 验收结果
+
+- Actions [#45588666611](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45588666611)：SUCCESS；验证提交 `2ef6771739c2020a7bb3446c71f3a070c0b42901`。
+- Host GCC：6 cases / 19 assertions / 0 failures；ASan/UBSan：6 / 19 / 0。
+- 补丁生成器在已修改源码树重复运行成功，`P6-1A_ALREADY_GENERATED=verified`，补丁 SHA-256 一致。
+- Cavium SDK 5.1.0 / GCC 4.7.0 已校验；TFTP OCTEON object、N32 relocatable link、完整 U-Boot final link 均 PASS。
+- P6-1A patch SHA-256：`040c24b8fff0ab76dc83a8479d9760852b5ba685d38622141466c7fc95c54330`。
+- 完整测试、SDK、对象、链接产物哈希见 `reports/pa220/P6-1A/ACCEPTANCE.md`。
+
+P6-1A 仅完成 GET 开始前旧元数据失效，不构成真实 TFTP GET 授权；完整文件 reservation、最大长度、失败状态、校验/格式识别及 live descriptor 预检仍未完成。
