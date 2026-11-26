@@ -15,15 +15,16 @@
 
 ## 当前唯一主线
 
-P6 RAM-only 文件接收。P6-1A、P6-1B、P6-1C 软件门均已完成；真实接收仍未开放。
+P6-A live DRAM descriptor / reservation read-only preflight 已 PASS；下一工作单元为 P6-B 首个 RAM-only TFTP GET 的测试准备与用户确认。
 
-- P6-1A：GET 开始前失效旧 filesize/fileaddr，已验收。
-- P6-1B：完整 reservation、32 MiB 默认上限、checked arithmetic、接收失败状态和 Ctrl-C 清理，已验收。
-- P6-1C：接收后 SHA-256/CRC32、legacy uImage/FIT-FDT/ELF32/ELF64 只读格式识别、边界检查和失败元数据失效，已验收。
-- P6-1C Actions：[ #45600860179 ](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45600860179) SUCCESS；报告：reports/pa220/P6-1C/ACCEPTANCE.md。
-- 本阶段没有执行真实 TFTP GET、没有传输文件、没有调用 saveenv、没有写持久化介质。
+- P6-1A / P6-1B / P6-1C 软件门均已验收，历史证据保留在各自 ACCEPTANCE 报告，不在此重复。
+- P6-A 实机预检报告：`reports/pa220/P6-A/READONLY-PREFLIGHT.md`。
+- 设备实际报告 8 GiB DRAM；`__tmp_load=[0x20000000,0x30000000)`，256 MiB；`loadaddr=0x20000000`；`autoload=n`。
+- MIPS/CN70XX 地址域已与源码 DDR map 对齐；Linux reserved、low/FDT/exception、free block 和高端 U-Boot reservation 均不与 load block 重叠。
+- P6-1B 的 32 MiB 完整接收 reservation 可容纳于 live 256 MiB descriptor；生产 validator 在 RRQ 前仍会再次核对 live descriptor 与 reservation globals，任何不一致均 fail closed。
+- 尚未执行真实 TFTP GET、未传输文件、未修改网络环境变量、未调用 saveenv、未写持久化介质。
 
-下一唯一工作单元：P6-A，只读检查 live __tmp_load descriptor、DRAM 范围和完整 reservation 可行性。P6-A 完成后再单独评估并确认 RAM-only TFTP GET。
+P6-B 仍需单独明确确认后才开始。当前 `ipaddr` / `serverip` 未定义不影响 P6-A；它们是设备作为 TFTP client 时的网络参数，与最终由 PA-220 DHCP Server 给维护电脑分配地址是不同需求。
 
 ### P6-1A 设计要点
 
@@ -65,6 +66,10 @@ Host 测试直接编译生产 helper，并从同一生成器注入生产 GET gat
 - 每轮给出明确命令、预期结果、停止条件和串口/网络证据要求；完成该轮后指导设备断电。
 - 持久化介质写入、环境持久化、EEPROM/CPLD 修改、刷写、擦除等破坏性操作不包含在上述常规实机测试授权中；确实需要时再说明具体对象、风险和回滚方案，取得针对该操作的明确同意。
 - 不把 RAM-only 接收自动扩展为 PUT、WRQ、HTTP upload 或 ELF segment 写入。
+
+## 最终维护网络交付要求
+
+最终版本必须由 PA-220 在隔离的 MGT 维护接口上提供 DHCP Server，为直连维护电脑自动分配地址；不能只实现 U-Boot 自己作为 DHCP Client 获取地址。还需审查并实现对上游 DHCP OFFER/ACK 的隔离/过滤，避免上游 DHCP 报文干扰维护电脑。PA-220 管理地址、地址池、接口绑定及过滤策略应在网络阶段单独设计、Host/目标验证和实机验收；不得把此功能混入 P6-A/P6-B，也不得为了启动维护服务自动调用 saveenv。
 
 ## Web UI 目标
 
