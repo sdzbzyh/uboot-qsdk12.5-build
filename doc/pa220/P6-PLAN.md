@@ -1,6 +1,6 @@
 # PA-220 P6 计划：RAM-only 文件接收与校验
 
-- 状态：**P6-1A/P6-1B/P6-1C 软件门 ACCEPTED；P6 整体未开放实际接收；未执行任何文件传输**
+- 状态：**P6-1A/P6-1B/P6-1C 软件门 ACCEPTED；P6-A live descriptor/DRAM/reservation 只读预检 PASS；P6-B 实际 TFTP GET 尚未执行，等待单独确认**
 - 日期：2026-11-24
 - 集成分支：`feature/pa220-ubootkit-web`
 - 固定 PA-220 源码：`sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
@@ -23,25 +23,23 @@ P6 只负责将一个文件接收到经验证的 RAM 区间，并对接收结果
 
 这些结果只证明 Host 逻辑测试和目标编译/链接，不证明设备运行时 descriptor 正确，也不证明网络接收成功。
 
-## 3. P6-A：设备只读 RAM 布局预检（实际传输前硬门）
+## 3. P6-A：设备只读 RAM 布局预检 — PASS（2026-11-26）
 
-设备目前保持断电。重新上电后先只执行只读命令并记录原始串口输出：
+实机原始输出和逐项地址核对见 [P6-A READONLY PREFLIGHT](../../reports/pa220/P6-A/READONLY-PREFLIGHT.md)。
 
-- `version`
-- `bdinfo`
-- `pa220 memory`
-- `namedprint`
-- `freeprint`
-- `printenv loadaddr autoload ipaddr serverip ethact ethprime`
+确认结果：
 
-核对：
-1. 当前运行镜像版本/构建标识与待测 RAM 启动镜像一致。
-2. `__tmp_load` descriptor 存在，名称、base、size 与 validator 使用的 globals 一致。
-3. descriptor 位于实际 DRAM，不跨 boot-bus hole，不覆盖 U-Boot code/data、relocation、stack、GD、malloc、exception、FDT、environment、Linux reserved 等区域。
-4. 当前 `loadaddr` 规范化后落在 `__tmp_load` 内；测试文件的完整 reservation 不越界。
-5. `autoload=n` 已由只读 `printenv` 确认。若不是 n，不执行 DHCP/TFTP，也不在本阶段自行改变或保存环境。
+- 当前设备运行 U-Boot build time `Nov 25 2026 - 11:04:13`，与 P6-1C Actions #45600860179 完整目标构建窗口相符。
+- `bdinfo`：`memstart=0x80000000`，`memsize=0x200000000`（8 GiB）。
+- `pa220 memory` / `namedprint`：`loadaddr=0x20000000`，`__tmp_load` base=`0x20000000`，size=`0x10000000`（256 MiB）。
+- `autoload=n`；`ipaddr/serverip` 未定义，和本阶段只读预检无关。
+- 按 CN70XX DDR0 / boot-bus hole / DDR1+ 映射解释，`0x20000000` 是物理 DDR1 起点的 identity-mapped 地址；`memstart=0x80000000` 是 cached alias，不构成地址冲突。
+- Linux reserved、低 1 MiB/FDT/exception/idle/MAC、free block 和高端 `__uboot_code_data` 均与 `__tmp_load` 分离。
+- P6-1B 默认 32 MiB 完整 reservation 从 `0x20000000` 起可容纳于 256 MiB descriptor。
 
-在以上核对完成前，禁止执行 `tftpboot`、`tftpsrv`、`tftpput` 或任何文件接收命令。不能仅凭历史 `0x20000000` 或 Stage3 地址 `0x81000000` 推定当前缓冲区安全。
+结论：P6-A 只读 RAM 布局和完整 reservation 可行性通过。生产 validator 在 P6-B 的 RRQ 前仍会重新读取 descriptor，并核对 `load_reserved_addr/load_reserved_size`；若运行时不一致会在接收开始前 fail closed。P6-A 不等于授权实际传输。
+
+本轮只执行只读命令；没有执行 TFTP、`setenv`、`saveenv`、flash/storage 写入、reset 或 reboot。
 
 ## 4. P6-B：首个 RAM-only TFTP GET 验收
 
