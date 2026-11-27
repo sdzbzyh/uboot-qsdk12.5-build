@@ -9,6 +9,7 @@ on:
       - 'scripts/generate-pa220-p7-image-patch.py'
       - 'tests/pa220/image-preview/**'
       - 'tools/pa220/make-p7-uimage-fixture.py'
+      - 'tools/pa220/make-p7-stage3-uimage-wrapper.py'
       - '.github/workflows/pa220-p7-image-preview.yml'
   workflow_dispatch:
 permissions:
@@ -79,7 +80,11 @@ jobs:
           grep -q 'pa220_image_preview' reports/pa220/P7-1/31-final-symbols.txt
           grep -q 'pa220_image_parse' reports/pa220/P7-1/31-final-symbols.txt
           cp "$BIN" reports/pa220/P7-1/u-boot-octeon_pa220.bin
-          sha256sum "$ELF" "$BIN" reports/pa220/P7-1/0001-pa220-image-preview.patch | tee reports/pa220/P7-1/50-artifact-sha256.txt
+          python3 tools/pa220/make-p7-stage3-uimage-wrapper.py \
+            --input "$BIN" \
+            --output reports/pa220/P7-1/u-boot-octeon_pa220-stage3-wrapper.uImage \
+            | tee reports/pa220/P7-1/12-stage3-wrapper.txt
+          sha256sum "$ELF" "$BIN" reports/pa220/P7-1/0001-pa220-image-preview.patch reports/pa220/P7-1/u-boot-octeon_pa220-stage3-wrapper.uImage | tee reports/pa220/P7-1/50-artifact-sha256.txt
           echo P7_1_OCTEON_OBJECT_AND_FINAL_LINK=PASS
           echo P7_1_READ_ONLY_PREVIEW_SYMBOLS=PASS
       - name: Upload P7-1 evidence and target artifacts
