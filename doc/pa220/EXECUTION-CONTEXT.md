@@ -27,7 +27,7 @@ P6-1A/B/C 软件门与 P6-A live descriptor 只读预检均已通过。P6-B 的 
 - 传输中出现一次 `rgmii rx` transient/drop warning；接收最终成功。无 pcap，不声称已确认 block size/块数。
 - 本轮测试结束后设备可断电；未调用 `saveenv`，未执行 loader/启动命令，未写持久化介质。
 
-32 MiB 精确上限实机已接收成功：size=33554432，CRC32=97257c28，SHA-256=fe773a13c9bfa1759c32826302e0b9a0e2ba6c88de9841219a2337d17861f526；Windows 主机复核长度与 SHA-256 完全一致，filesize=0x2000000、fileaddr=0x20000000，descriptor 不变。证据见 `reports/pa220/P6-B/32M-EXACT-BOUNDARY-ACCEPTANCE.md`。32 MiB+1 已在 OACK tsize 校验阶段拒绝，抓包仅有 RRQ/OACK、没有 DATA；失败后 filesize/fileaddr 均不存在，descriptor 不变。完整证据见 `reports/pa220/P6-B/32M-PLUS-1-OVERLIMIT-ACCEPTANCE.md`。下一步只做受控中断/超时失败清理。
+32 MiB 精确上限实机已接收成功：size=33554432，CRC32=97257c28，SHA-256=fe773a13c9bfa1759c32826302e0b9a0e2ba6c88de9841219a2337d17861f526；Windows 主机复核长度与 SHA-256 完全一致，filesize=0x2000000、fileaddr=0x20000000，descriptor 不变。证据见 `reports/pa220/P6-B/32M-EXACT-BOUNDARY-ACCEPTANCE.md`。32 MiB+1 已在 OACK tsize 校验阶段拒绝，抓包仅有 RRQ/OACK、没有 DATA；失败后 filesize/fileaddr 均不存在，descriptor 不变。完整证据见 `reports/pa220/P6-B/32M-PLUS-1-OVERLIMIT-ACCEPTANCE.md`。受控中断/超时失败清理已于 2026-11-27 通过；当前 P6-B 测试矩阵全部完成。
 
 ### P6-1A 设计要点
 
@@ -47,7 +47,7 @@ Host 测试直接编译生产 helper，并从同一生成器注入生产 GET gat
 
 ### 后续 P6 软件门
 
-继续按 `doc/pa220/P6-PLAN.md` 推进：P6-1A/B/C 软件门均已完成。P6-A live descriptor/DRAM/reservation 只读预检已通过；当前状态以本文件顶部“当前唯一主线”为准。
+继续按 `doc/pa220/P6-PLAN.md` 推进：P6-1A/B/C 软件门均已完成。P6-A live descriptor/DRAM/reservation 只读预检已通过；当前状态以本文件顶部“当前唯一主线”和 P6-PLAN.md 第 12 节为准。
 
 ## 验证与补丁规则
 
