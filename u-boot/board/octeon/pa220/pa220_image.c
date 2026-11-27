@@ -14,7 +14,7 @@
 #define OCTEON_HEADER_MAX 0x200U
 #define OCTEON_IMAGE_MAX 0x200000U
 #define UIMAGE_MAGIC 0x27051956U
-#define FDT_MAGIC 0xd00dfeedU
+#define PA220_FDT_MAGIC 0xd00dfeedU
 #define ELF_PT_LOAD 1U
 #define ELF_EM_MIPS 8U
 
@@ -129,7 +129,7 @@ static int parse_uimage(const uint8_t *p, uint64_t n, struct pa220_image_info *o
 static int parse_fdt(const uint8_t *p, uint64_t n, struct pa220_image_info *o)
 {
     uint32_t total, so, sto, ro, ss, sz, ver, last;
-    if (n < 40 || rd32(p, 0) != FDT_MAGIC) return -1;
+    if (n < 40 || rd32(p, 0) != PA220_FDT_MAGIC) return -1;
     total = rd32(p + 4, 0); so = rd32(p + 8, 0); sto = rd32(p + 12, 0);
     ro = rd32(p + 16, 0); ver = rd32(p + 20, 0); last = rd32(p + 24, 0);
     ss = rd32(p + 32, 0); sz = rd32(p + 36, 0);
@@ -196,7 +196,7 @@ int pa220_image_parse(const uint8_t *data, uint64_t size, struct pa220_image_inf
     memset(info, 0, sizeof(*info));
     if (size >= 12 && rd32(data + 8, 0) == OCTEON_BOOT_MAGIC) return parse_octeon(data, size, info);
     if (size >= 4 && rd32(data, 0) == UIMAGE_MAGIC) return parse_uimage(data, size, info);
-    if (size >= 4 && rd32(data, 0) == FDT_MAGIC) return parse_fdt(data, size, info);
+    if (size >= 4 && rd32(data, 0) == PA220_FDT_MAGIC) return parse_fdt(data, size, info);
     if (size >= 4 && data[0] == 0x7f && data[1]=='E' && data[2]=='L' && data[3]=='F') return parse_elf(data, size, info);
     return -1;
 }
