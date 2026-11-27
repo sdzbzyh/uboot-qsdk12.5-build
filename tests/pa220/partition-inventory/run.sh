@@ -6,7 +6,7 @@ SRC="$ROOT/u-boot/board/octeon/pa220/pa220_partition.c"
 TEST="$ROOT/tests/pa220/partition-inventory/host-test.c"
 gcc -DPA220_PARTITION_HOST_TEST -std=c99 -Wall -Wextra -Werror -I"$ROOT/u-boot/include" "$SRC" "$TEST" -o "$TMP/test"
 "$TMP/test"
-gcc -std=c99 -Wall -Wextra -Werror -fsanitize=address,undefined -fno-omit-frame-pointer -I"$ROOT/u-boot/include" "$SRC" "$TEST" -o "$TMP/test-san"
+gcc -DPA220_PARTITION_HOST_TEST -std=c99 -Wall -Wextra -Werror -fsanitize=address,undefined -fno-omit-frame-pointer -I"$ROOT/u-boot/include" "$SRC" "$TEST" -o "$TMP/test-san"
 "$TMP/test-san"
 echo PA220_PARTITION_GCC=PASS
 echo PA220_PARTITION_ASAN_UBSAN=PASS
