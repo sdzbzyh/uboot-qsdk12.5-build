@@ -53,7 +53,17 @@ static int test_pa220_live_layout(void){
  sparse[2].lba=40004160ULL; sig(sparse[2].data); mbr_entry(sparse[2].data+446,0x83,16,8000048); mbr_entry(sparse[2].data+462,0x0f,32000128,9798528);
  sparse[3].lba=48004224ULL; sig(sparse[3].data); mbr_entry(sparse[3].data+446,0x83,16,3952); mbr_entry(sparse[3].data+462,0x0f,32004096,9794560);
  sparse[4].lba=48008192ULL; sig(sparse[4].data); mbr_entry(sparse[4].data+446,0x82,16,9794544);
- if(pa220_partition_scan(sparse_rd,0,cap,&t)||t.count!=7||t.parts[0].start_lba!=16||t.parts[6].start_lba!=48008208ULL||t.parts[6].sectors!=9794544ULL) return 1;
+ {
+  static const uint64_t starts[7]={16ULL,3968ULL,8004032ULL,16004112ULL,40004176ULL,48004240ULL,48008208ULL};
+  static const uint64_t sizes[7]={3952ULL,8000064ULL,8000064ULL,24000048ULL,8000048ULL,3952ULL,9794544ULL};
+  static const unsigned char types[7]={0x83,0x83,0x83,0x83,0x83,0x83,0x82};
+  unsigned i;
+  if(pa220_partition_scan(sparse_rd,0,cap,&t)||t.format!=PA220_PT_DOS_MBR||t.count!=7) return 1;
+  for(i=0;i<7;i++){
+   if(t.parts[i].start_lba!=starts[i]||t.parts[i].sectors!=sizes[i]||t.parts[i].type!=types[i]) return 1;
+   if(t.parts[i].kind!=(i<3?PA220_PART_PRIMARY:PA220_PART_LOGICAL)) return 1;
+  }
+ }
  return 0;
 }
 
