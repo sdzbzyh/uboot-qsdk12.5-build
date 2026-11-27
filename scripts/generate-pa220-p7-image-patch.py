@@ -30,9 +30,11 @@ def main():
     fn_body = replace_once(fn_body,dispatch,dispatch_new,"pa220 image preview dispatch")
     bs = bs[:fn_start] + fn_body + bs[cmd_start:]
     bs=replace_once(bs,"U_BOOT_CMD(pa220, 2, 1, do_pa220,","U_BOOT_CMD(pa220, 3, 1, do_pa220,","pa220 maxargs")
-    old_usage = '"pa220 clock   - show initialized CORE, SCLK and DDR clock values");'
-    new_usage = '"pa220 clock   - show initialized CORE, SCLK and DDR clock values\\n"\n\t   "pa220 image preview - parse current RAM image and print a read-only plan");'
-    bs=replace_once(bs,old_usage,new_usage,"pa220 usage")
+    cmd_start = bs.index("U_BOOT_CMD(pa220,")
+    cmd_end = bs.index(");", cmd_start) + 2
+    cmd_text = bs[cmd_start:cmd_end]
+    cmd_text = replace_once(cmd_text, '");', '\\n"\n\t   "pa220 image preview - parse current RAM image and print a read-only plan");', "pa220 usage")
+    bs = bs[:cmd_start] + cmd_text + bs[cmd_end:]
     ms=replace_once(ms,"COBJS\t= $(BOARD)_board.o","COBJS\t= $(BOARD)_board.o pa220_image.o","board object integration")
     with tempfile.TemporaryDirectory() as td:
         env=os.environ.copy(); env["GIT_INDEX_FILE"]=str(pathlib.Path(td)/"index")
