@@ -40,10 +40,29 @@
 
 ## P7-2：容器语义与固件布局取证
 
-- 对 FIT 解析 /images、/configurations、默认 configuration、子镜像 data 与 hash/signature 节点；明确区分“结构可读”“hash 通过”“签名可信”。
-- 审查 OCTEON bootloader Stage1/2/3、eMMC 和 SPI 更新代码的真实目标选择及写入路径；不得调用 updater。
-- 如需分析 `pa220-spi-normal.img`，只把它作为原机 SPI NOR 备份取证；不得把 SPI 镜像误当作 eMMC GPT 证据。
-- 对 eMMC 目标映射，必须取得可信 GPT/分区布局证据；缺少设备只读数据时保持 UNMAPPED。
+### P7-2A：SPI NOR 原机备份静态取证 — PASS
+
+- 报告：`reports/pa220/P7-2/SPI-IMAGE-ANALYSIS.md`。
+- 原始镜像只从仓库 `main@da755efd49df32f3e85d231745212674737feba5` 读取；16 MiB，SHA-256 `4899a1c5ed06e5eafbb8c92625a4afae14cad399806df13979fd2c70ee1ed922`。
+- 4 个 OCTEON header 的 header/data CRC 均通过：Pre-U-Boot 两份（offset 0、0x1d80）、Stage 2（0x10000）、NOR bootloader（0x100000）。
+- 发现两个嵌入 FDT：Stage2 generic SPI tree、PA-220 Stage3 tree；后者描述 W25Q128-compatible SPI、OCTEON MMC host 与 Kingfisher CPLD。
+- `0x70000-0x100000` 与 `0x250000-0x1000000` 为全 `0xff` 区域；配置环境 sector `0xe00000` / `0xe10000` 在该备份中也全擦除。
+- 这只是 SPI NOR 证据，不提供 eMMC GPT/分区布局，也不授权写入。
+
+### P7-2B：FIT 语义只读解析 — PENDING
+
+- 解析 `/images`、`/configurations`、默认 configuration、kernel/ramdisk/fdt 引用、inline `data`、hash 子节点及算法/值。
+- 严格区分结构合法、数据 hash PASS/FAIL/IGNORED/UNSUPPORTED 和签名可信状态。
+- 固定源码仅支持 inline `data` 的 `fit_image_get_data()`；外置数据 `data-offset/data-position` 必须显式标记 unsupported。
+- 当前 PA-220 配置未启用 `CONFIG_FIT_SIGNATURE`；不能把 FIT signature 节点存在误报为已验证签名。
+- 不调用 `fit_image_load()`、bootm 或任何会把子镜像复制到 load 地址的路径。
+
+### P7-2C：eMMC GPT 实机只读取证 — WAITING FOR DEVICE OUTPUT
+
+- 源码具备 GPT header/entry CRC 读取校验；`mmc part` 是本轮首选只读现场证据。
+- 需要记录 eMMC 设备号、容量、分区名/GUID/start LBA/size，并确认主/备 GPT 一致性。
+- SPI NOR 镜像与 FDT 不能替代 eMMC GPT 证据；没有现场读数时继续保持 eMMC target mapping 为 UNMAPPED。
+- 只运行 `mmc list`、`mmc dev`、`mmc rescan`、`mmc info`、`mmc part`；禁止 `gpt write`、`mmc write/erase`、`saveenv` 和 updater。
 
 ## P7-3：dry-run 安装计划
 
@@ -56,4 +75,4 @@
 
 - P7-1 parser、Host Harness、ASan/UBSan、Actions OCTEON 完整构建及真实 PA-220 实机 preview 均已通过；云端证据见 `reports/pa220/P7-1/ACCEPTANCE.md`，实机串口证据见 `reports/pa220/P7-1/DEVICE-ACCEPTANCE.md`。
 - 实机已验证 wrapper TFTP 接收、uImage 校验、payload RAM-copy/compare、RAM Stage3 启动、外层 legacy uImage preview、内层 OCTEON bootloader preview 和 reservation descriptor 不变。
-- P7-1 验收完成。P7 整体仍未完成；P7-2/P7-3 尚未开始。
+- P7-1 验收完成。P7-2A SPI NOR 静态取证已通过；P7-2B FIT 语义解析与 P7-2C eMMC GPT 现场只读取证尚未完成。P7 整体仍未完成。
