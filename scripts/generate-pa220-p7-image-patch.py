@@ -28,9 +28,6 @@ def main():
     bs=replace_once(bs,"U_BOOT_CMD(pa220, 2, 1, do_pa220,","U_BOOT_CMD(pa220, 3, 1, do_pa220,","pa220 maxargs")
     old_usage = '"pa220 clock   - show initialized CORE, SCLK and DDR clock values");'
     new_usage = '"pa220 clock   - show initialized CORE, SCLK and DDR clock values\\n"\n\t   "pa220 image preview - parse current RAM image and print a read-only plan");'
-    bs=replace_once(bs,"U_BOOT_CMD(pa220, 2, 1, do_pa220,","U_BOOT_CMD(pa220, 3, 1, do_pa220,","pa220 maxargs")
-    old_usage = '"pa220 clock   - show initialized CORE, SCLK and DDR clock values");'
-    new_usage = '"pa220 clock   - show initialized CORE, SCLK and DDR clock values\\\\n"\\n\\t   "pa220 image preview - parse current RAM image and print a read-only plan");'
     bs=replace_once(bs,old_usage,new_usage,"pa220 usage")
     ms=replace_once(ms,"COBJS\t= $(BOARD)_board.o","COBJS\t= $(BOARD)_board.o pa220_image.o","board object integration")
     with tempfile.TemporaryDirectory() as td:
