@@ -307,3 +307,17 @@ P4 网络维护基础仍保留历史计划中的未完成项：DHCP Client/Ping 
 - P8 eMMC 安装事务及 P10 SPI 维护继续作为独立高风险工作流，需单独审查和明确授权。
 
 本次 P6-B 测试轮已结束；设备可断电。未执行 loader/boot、`saveenv` 或任何持久化写入。
+
+## 当前阶段状态覆盖（2026-11-27，P7-1 解析器实现中）
+
+本节覆盖前述 P6-0 之前的历史状态。P6-B 已在 2026-11-27 完成实机验收，详见 `doc/pa220/P6-PLAN.md` 第 12 节。
+
+- **P6 RAM-only GET：ACCEPTED（已测试范围）**。4 KiB 成功、32 MiB 精确上限成功、32 MiB+1 OACK tsize 拒绝、受控服务端中断/ACK 重试/失败清理均有实机或抓包证据。
+- **P7：IN PROGRESS。** 新增 `pa220 image preview` 只读解析入口；Host GCC 与 ASan/UBSan 格式测试通过。OCTEON target build 正在 Actions 验证，尚未将 P7-1 标记为 ACCEPTED。
+- P7-1 当前解析 OCTEON bootloader header、legacy uImage、FIT/FDT header bounds、ELF32/ELF64 PT_LOAD bounds；所有目标映射明确为 UNMAPPED。FIT configuration/subimage/hash/signature 语义尚未解析。
+- P7-1 尚未实机运行；云端 OCTEON 完整构建通过后，用有效 legacy uImage fixture 做 RAM-only preview，不执行 load/boot、不写介质。
+- P7-2 将进一步分析 FIT 语义、原机 SPI 备份与 OCTEON boot chain；SPI 备份不得作为 eMMC GPT 证据。eMMC 目标映射须有可信分区表依据。
+- **P4 尚未整体 COMPLETE**：DHCP Client/Ping 实机验证仍为独立遗留项，不能由 P6 TFTP GET 通过替代。
+- P8 eMMC 安装事务、P10 SPI 维护仍是独立高风险阶段，需单独审查和明确授权。
+
+P7 计划：`doc/pa220/P7-PLAN.md`；P7-1 源码审查：`reports/pa220/P7-1/SOURCE-REVIEW.md`。
