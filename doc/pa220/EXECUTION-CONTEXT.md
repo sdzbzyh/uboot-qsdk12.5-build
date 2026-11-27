@@ -22,10 +22,10 @@ P6-B 已完成实机测试矩阵验收，设备本轮可断电。当前转入 P7
 - 新增生产代码：`u-boot/board/octeon/pa220/pa220_image.c`、`u-boot/include/pa220_image.h`；命令入口 `pa220 image preview`。
 - 当前解析范围：OCTEON bootloader header（含 bounded CRC）、legacy uImage（header/data CRC）、FIT/FDT header bounds、ELF32/ELF64 PT_LOAD bounds。
 - Host GCC 与 ASan/UBSan 测试已通过。Actions #45958126118（Host + OCTEON full build + final ELF symbols）与 #45958503668（Stage3 wrapper/fixture artifact）均 PASS。P7-1 云端验收通过，真实设备 preview 尚未执行。
-- P7 preview 只读取有效 `fileaddr/filesize`，重新检查 `__tmp_load` reservation；不执行 load/boot，不写 eMMC/SPI/NAND，不调用 `saveenv`。
-- 所有镜像 target mapping 目前 UNMAPPED。FIT configuration/subimage/hash/signature 语义和 eMMC GPT 映射尚未完成。
-- OCTEON bootloader header parser 已实现，但 P6-1C TFTP recognizer 尚不接受此格式；当前 TFTP 物理 preview 先使用有效 legacy uImage fixture。
-- 下一步：按 `reports/pa220/P7-1/ACCEPTANCE.md` 用 Actions artifact 做 RAM-only Stage3 boot，然后在新 U-Boot 中验证 legacy uImage 与内层 OCTEON header 两种 preview。
+- P7-1 parser、Host Harness、ASan/UBSan、OCTEON 完整 U-Boot build 和真实 PA-220 实机验收均已通过；报告：`reports/pa220/P7-1/ACCEPTANCE.md`、`reports/pa220/P7-1/DEVICE-ACCEPTANCE.md`。
+- 实机验证包括 wrapper TFTP 接收与 SHA-256 核对、legacy uImage CRC preview、内层 OCTEON bootloader preview（board_type 20021、header/data CRC PASS）、reservation descriptor 不变性和 RAM-only Stage3 启动。
+- 所有镜像 target mapping 仍为 UNMAPPED；preview 动作为 NONE。未执行安装、updater、saveenv 或 eMMC/SPI/NAND 写入。
+- P7-1 验收完成。下一步进入 P7-2：FIT configuration/subimage/hash/signature 语义与原机 SPI boot chain / eMMC GPT 映射取证；`pa220-spi-normal.img` 仅作为 SPI NOR 证据，不可替代 eMMC GPT 证据。
 - P4 DHCP Client/Ping 实机验证仍是独立遗留项，P4 overall 不得标记 COMPLETE。
 
 ## 历史检查点（P6-B 完成前，保留审计记录）
@@ -142,4 +142,14 @@ P6-1C 已由 Actions #45600860179 验收通过，报告见 reports/pa220/P6-1C/A
 - Artifact ID：`15179692876`；下载地址见验收报告。
 - BIN SHA-256：`f981ad195a0418d142b6a1cf34cfd70327668273612e4506b40d75fa11893c7c`。
 - Stage3 wrapper：`0x153928` bytes；payload `0x1538e8` bytes；SHA-256 `4f5f3d8561f427cbcfae44f63c5d880e9229afc4fa8130f1556e08b321781ba8`。
-- 实机 preview 尚待执行；设备本轮 P6 后断电，需按报告执行 RAM-only test。P7 整体仍未完成。
+- P7-1 实机 preview 已于 2026-11-27 通过；完整记录见 `reports/pa220/P7-1/DEVICE-ACCEPTANCE.md`。P7-1 完成，P7-2/P7-3 尚未开始。
+
+
+## P7-1 实机验收闭环（2026-11-27）
+
+- 实机报告：`reports/pa220/P7-1/DEVICE-ACCEPTANCE.md`；P7-1 总验收报告已更新。
+- Stage3 wrapper TFTP GET 1,390,888 bytes，SHA-256 `4f5f3d8561f427cbcfae44f63c5d880e9229afc4fa8130f1556e08b321781ba8`；与 Actions artifact 一致。
+- 旧 U-Boot 验证 wrapper uImage checksum OK；payload 1,390,824 bytes 复制/比较一致，并从 RAM `0x81000000` 成功启动 Nov 27 Stage3。
+- 新 U-Boot 外层 legacy uImage preview：header/data CRC PASS；内层 OCTEON preview：board_type 20021 compatible、image_type 3、header/data CRC PASS。
+- 两种 preview 均为 target mapping `UNMAPPED`、actions `NONE`；live `__tmp_load=[0x20000000,0x30000000)` 未变化。
+- 全程未执行 `saveenv`、updater 或持久化介质写入。P7-1 实机验收 PASS；下一工作单元 P7-2。
