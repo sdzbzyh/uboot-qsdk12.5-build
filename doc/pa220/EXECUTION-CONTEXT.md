@@ -6,6 +6,7 @@
 
 - 集成仓库：`sdzbzyh/uboot-qsdk12.5-build`
 - 分支：`feature/pa220-ubootkit-web`
+- 当前归档 HEAD（2026-11-27）：`70e879e1877a7bf42e0c664e391c3868069b9e2a`
 - 本文件建立时 HEAD：`8105ff0cf1da7e3aaf5c2b9c6b628947eb260be6`（历史记录）
 - P6-1C 验收与计划文档更新基线 HEAD（本文件本次更新前）：`7503f421e82dc16f0343b4092eb86458a181647f`
 - PA-220 固定源码：`sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
@@ -111,3 +112,10 @@ P6-1C 已由 Actions #45600860179 验收通过，报告见 reports/pa220/P6-1C/A
 - Frames 13415/13416 payload 均为 `00 04 1a 32`（ACK block 6706），相隔约 4.999 秒。
 - U-Boot 报告 network interruption；失败后 filesize/fileaddr 不存在，live descriptor 未变化。
 - P6-B 实机测试矩阵已验收完成。未执行 loader/boot、saveenv 或持久化写入。
+
+
+## 后续工作入口（2026-11-27）
+
+- P6-B 实机测试矩阵已全部验收，设备本轮可断电。
+- 按 `doc/pa220/ROADMAP.md`，下一开发入口为 P7 固件解析与安装预览（dry-run only）。P4 DHCP Client/Ping 实机验证仍是独立遗留项，不因 P6-B 通过而标记完成。
+- P7 开始前先恢复远端最新 HEAD，阅读 ROADMAP、PROJECT、FEATURE-MATRIX 及固定源码相关解析路径；先实现只读解析与目标映射报告，不写 eMMC/SPI/NAND，不执行镜像。
