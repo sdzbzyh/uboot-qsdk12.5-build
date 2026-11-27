@@ -19,6 +19,7 @@ P6-1A/B/C 软件门与 P6-A live descriptor 只读预检均已通过。P6-B 首�
 
 - 实机报告：`reports/pa220/P6-B/INITIAL-GET-ACCEPTANCE.md`。
 - 测试文件生成器：`tools/pa220/make-p6-get-fixture.py`。
+- 边界测试 fixture Actions [#45938976540](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45938976540) SUCCESS；Artifact [15171887471](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45938976540/artifacts/15171887471) 含 4 KiB、32 MiB、32 MiB+1 三个向量及 SHA256SUMS。
 - 设备 build time：`Nov 25 2026 - 11:04:13`；IP `192.168.2.2` / TFTP host `192.168.2.10`；接口 `octrgmii0`。
 - live DRAM：8 GiB；`loadaddr=0x20000000`；`__tmp_load=[0x20000000,0x30000000)`（256 MiB）。
 - 成功路径：4096 bytes，`filesize=0x1000`，`fileaddr=0x20000000`，格式 `legacy-uImage`，CRC32 `9e4df6c8`，SHA-256 `83b1bb6b9c006c9d38c6915a985895bfeffd41f24d969aae1b74365041028082`；主机与设备摘要一致。
