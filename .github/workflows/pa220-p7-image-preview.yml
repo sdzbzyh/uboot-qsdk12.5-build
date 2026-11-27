@@ -8,6 +8,7 @@ on:
       - 'u-boot/include/pa220_image.h'
       - 'scripts/generate-pa220-p7-image-patch.py'
       - 'tests/pa220/image-preview/**'
+      - 'tools/pa220/make-p7-uimage-fixture.py'
       - '.github/workflows/pa220-p7-image-preview.yml'
   workflow_dispatch:
 permissions:
@@ -30,6 +31,12 @@ jobs:
           bash tests/pa220/image-preview/run.sh 2>&1 | tee reports/pa220/P7-1/10-host-tests.log
           grep -q 'PA220_P7_HOST_GCC=PASS' reports/pa220/P7-1/10-host-tests.log
           grep -q 'PA220_P7_HOST_ASAN_UBSAN=PASS' reports/pa220/P7-1/10-host-tests.log
+      - name: Generate physical legacy-uImage preview fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/pa220/make-p7-uimage-fixture.py --output reports/pa220/P7-1/pa220-p7-uimage-preview.bin | tee reports/pa220/P7-1/11-uimage-fixture.txt
+          sha256sum reports/pa220/P7-1/pa220-p7-uimage-preview.bin | tee -a reports/pa220/P7-1/11-uimage-fixture.txt
       - name: Download and verify pinned Cavium OCTEON SDK
         env:
           GH_TOKEN: ${{ secrets.OCTEON_SDK_READ_TOKEN }}
