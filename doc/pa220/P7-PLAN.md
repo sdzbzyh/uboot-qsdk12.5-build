@@ -57,12 +57,14 @@
 - 当前 PA-220 配置未启用 `CONFIG_FIT_SIGNATURE`；不能把 FIT signature 节点存在误报为已验证签名。
 - 不调用 `fit_image_load()`、bootm 或任何会把子镜像复制到 load 地址的路径。
 
-### P7-2C：eMMC GPT 实机只读取证 — WAITING FOR DEVICE OUTPUT
+### P7-2C：eMMC DOS/MBR 实机只读取证 — PASS（范围已纠正）
 
-- 源码具备 GPT header/entry CRC 读取校验；`mmc part` 是本轮首选只读现场证据。
-- 需要记录 eMMC 设备号、容量、分区名/GUID/start LBA/size，并确认主/备 GPT 一致性。
-- SPI NOR 镜像与 FDT 不能替代 eMMC GPT 证据；没有现场读数时继续保持 eMMC target mapping 为 UNMAPPED。
-- 只运行 `mmc list`、`mmc dev`、`mmc rescan`、`mmc info`、`mmc part`；禁止 `gpt write`、`mmc write/erase`、`saveenv` 和 updater。
+- 实机报告：`reports/pa220/P7-2/EMMC-DEVICE-ACCEPTANCE.md`。
+- 设备为 Octeon MMC/SD0（device 0），eMMC R1J58L，MMC v5.0/v5.01，8-bit DDR，容量 29,595,009,024 bytes / 57,802,752 blocks，Pre EOL Normal，lifetime A/B 0–10。
+- `mmc part` 实机识别 DOS/MBR，不是 GPT；8 个条目包括 3 个 primary Linux、1 个 extended container、3 个 logical Linux 和 1 个 logical swap。Start LBA/sector count 与同一 User Area 完整镜像离线 fdisk/parted/sfdisk 记录一致。
+- Live ext2ls 根目录读取已覆盖 0:1、0:2（2026-11-27）及 0:3、0:5、0:6、0:8（2026-11-18）；0:4 是扩展容器，0:7 是 swap，不按文件系统目录探测。
+- 原计划的 GPT primary/backup header/entry consistency 不适用；未读取并归档原始 MBR/EBR sector dump，因此不声称逐扇区 EBR 链审计完成。
+- 所有 eMMC 固件安装目标继续为 `UNMAPPED`。不执行 `gpt write`、`mmc write/erase`、filesystem write、`saveenv` 或 updater。
 
 ## P7-3：dry-run 安装计划
 
@@ -75,4 +77,4 @@
 
 - P7-1 parser、Host Harness、ASan/UBSan、Actions OCTEON 完整构建及真实 PA-220 实机 preview 均已通过；云端证据见 `reports/pa220/P7-1/ACCEPTANCE.md`，实机串口证据见 `reports/pa220/P7-1/DEVICE-ACCEPTANCE.md`。
 - 实机已验证 wrapper TFTP 接收、uImage 校验、payload RAM-copy/compare、RAM Stage3 启动、外层 legacy uImage preview、内层 OCTEON bootloader preview 和 reservation descriptor 不变。
-- P7-1 验收完成。P7-2A SPI NOR 静态取证已通过；P7-2B FIT 语义解析与 P7-2C eMMC GPT 现场只读取证尚未完成。P7 整体仍未完成。
+- P7-1 验收完成。P7-2A SPI NOR 静态取证已通过；P7-2A SPI 静态取证与 P7-2C eMMC DOS/MBR 实机只读取证已完成；P7-2B FIT 语义解析仍待实施。P7 整体仍未完成。
