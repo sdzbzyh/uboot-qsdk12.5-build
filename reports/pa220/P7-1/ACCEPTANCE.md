@@ -4,7 +4,7 @@
 - 仓库：`sdzbzyh/uboot-qsdk12.5-build`
 - 分支：`feature/pa220-ubootkit-web`
 - 固定 PA-220 源码：`sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
-- 状态：**CLOUD BUILD / HOST PASS；实机 preview 待执行**
+- 状态：**CLOUD BUILD / HOST PASS；DEVICE PREVIEW PASS**
 
 ## 1. Host 验证
 
@@ -47,17 +47,17 @@ Stage3 wrapper 的 uImage payload 长度为 `0x1538e8`，外层文件长度为 `
 
 ## 4. 实机验证状态
 
-**NOT RUN。** 设备此前已按 P6 完成测试后断电。本报告不把 Host/Actions PASS 等同于真实设备 preview PASS。
+**PASS。** 真实 PA-220 已完成 RAM-only Stage3 启动、外层 legacy uImage preview、内层 OCTEON bootloader preview 和 descriptor 不变性检查。完整串口证据、摘要和解析输出见 [P7-1 实机验收报告](DEVICE-ACCEPTANCE.md)。
 
-计划的只读实机步骤：
+关键结果：
 
-1. 在旧 U-Boot 中 TFTP GET wrapper 到 `0x20000000`（P6 验证过的 `__tmp_load` reservation）。
-2. 将 wrapper payload（从 offset `0x40` 开始，长度 `0x1538e8`）RAM-copy 到已用于 P5 RAM boot 的 `0x81000000`，用 `cmp.b` 验证后 `go 0x81000000`。
-3. 新 P7 U-Boot 再次接收 wrapper，运行 `pa220 image preview` 验证 legacy uImage header/data CRC。
-4. 将内层 OCTEON payload 复制到 `__tmp_load` 内的 `0x20200000`，临时设置 `fileaddr=0x20200000`、`filesize=0x1538e8`，再次运行 `pa220 image preview` 验证 OCTEON header、board type 和 CRC。
-5. 检查 `pa220 memory` descriptor 未改变。
+- Stage3 wrapper TFTP GET：1,390,888 bytes，SHA-256 `4f5f3d8561f427cbcfae44f63c5d880e9229afc4fa8130f1556e08b321781ba8`，与 Actions artifact 一致。
+- 旧 U-Boot `iminfo` header/data checksum OK；payload 复制到 `0x81000000` 后 `cmp.b` 全部 1,390,824 bytes 相同，RAM `go` 成功启动 Nov 27 Stage3。
+- 新 U-Boot 外层预览识别 legacy uImage，64-byte header、payload `0x1538e8`，header/data CRC PASS，MIPS candidate。
+- 内层预览识别 OCTEON bootloader，header `0xc0`、payload `0x153828`、board type 20021 compatible、image type 3、link address `0xffffffffc0000000`，header/data CRC PASS。
+- 两次 preview 均报告 target mapping `UNMAPPED`、actions `NONE`；`__tmp_load=[0x20000000,0x30000000)` descriptor 未改变。
 
-所有操作均限于 RAM；不执行 `saveenv`、`bootloaderupdate`、MMC/SPI/NAND 写入或任何持久化操作。
+测试只使用 RAM 与临时环境变量；未执行安装、updater、`saveenv` 或任何 eMMC/SPI/NAND 写入。
 
 ## 5. 当前限制
 
