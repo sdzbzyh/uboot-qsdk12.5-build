@@ -49,6 +49,8 @@ jobs:
           test -s "$ELF"
           "$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-readelf" -s "$ELF" | tee reports/pa220/P7-3/30-final-symbols.txt
           grep -q 'pa220_partition_scan' reports/pa220/P7-3/30-final-symbols.txt
+          cp "$PA220_OUTPUT_DIR/u-boot-octeon_pa220.bin" reports/pa220/P7-3/u-boot-octeon_pa220.bin
+          sha256sum "$ELF" reports/pa220/P7-3/u-boot-octeon_pa220.bin | tee reports/pa220/P7-3/31-build-sha256.txt
           echo P7_3A_OCTEON_FULL_UBOOT_LINK=PASS
       - name: Upload evidence
         if: always()

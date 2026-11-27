@@ -63,25 +63,25 @@ static int pa220_partition_scan_cmd(int dev)
 
 	mmc = find_mmc_device(dev);
 	if (!mmc) {
-		printf("pa220 partition: no MMC device %d\\n", dev);
+		printf("pa220 partition: no MMC device %d\n", dev);
 		return CMD_RET_FAILURE;
 	}
 	if (mmc_init(mmc)) {
-		printf("pa220 partition: MMC init failed for device %d\\n", dev);
+		printf("pa220 partition: MMC init failed for device %d\n", dev);
 		return CMD_RET_FAILURE;
 	}
 	desc = mmc_get_dev(dev);
 	if (!desc || desc->type == DEV_TYPE_UNKNOWN || desc->blksz != 512) {
-		puts("pa220 partition: unavailable 512-byte block device\\n");
+		puts("pa220 partition: unavailable 512-byte block device\n");
 		return CMD_RET_FAILURE;
 	}
 	reader.desc = desc;
 	if (pa220_partition_scan(pa220_mmc_read_sector, &reader,
 				 (uint64_t)desc->lba, &table)) {
-		printf("partition table: %s\\n", pa220_pt_status_name(table.status));
+		printf("partition table: %s\n", pa220_pt_status_name(table.status));
 		return CMD_RET_FAILURE;
 	}
-	printf("partition table: %s, capacity=%llu sectors, count=%u\\n",
+	printf("partition table: %s, capacity=%llu sectors, count=%u\n",
 	       table.format == PA220_PT_DOS_MBR ? "DOS/MBR" : "GPT",
 	       (unsigned long long)table.capacity, table.count);
 	for (i = 0; i < table.count; i++) {
@@ -93,12 +93,12 @@ static int pa220_partition_scan_cmd(int dev)
 		       (unsigned long long)p->start_lba,
 		       (unsigned long long)p->sectors);
 		if (p->kind != PA220_PART_GPT)
-			printf(" type=0x%02x\\n", p->type);
+			printf(" type=0x%02x\n", p->type);
 		else
-			printf(" attributes=0x%llx\\n",
+			printf(" attributes=0x%llx\n",
 			       (unsigned long long)p->attributes);
 	}
-	puts("partition inventory: READ_ONLY; target mapping: UNMAPPED\\n");
+	puts("partition inventory: READ_ONLY; target mapping: UNMAPPED\n");
 	return CMD_RET_SUCCESS;
 }
 '''
