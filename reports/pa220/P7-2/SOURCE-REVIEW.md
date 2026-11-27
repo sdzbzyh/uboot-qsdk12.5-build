@@ -4,7 +4,7 @@
 - Fixed PA-220 source: `sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
 - Integration branch: `feature/pa220-ubootkit-web`
 - Scope: `image-fit.c`, `libfdt`, PA-220 configuration, `cmd_octeon_bootloader.c`, `part_efi.c`, `cmd_gpt.c`, `env_sf.c`.
-- Status: **SOURCE REVIEW COMPLETE; P7-2C LIVE DOS/MBR INVENTORY ACCEPTED; P7-2B FIT PREVIEW IMPLEMENTED, VALIDATION PENDING**.
+- Status: **SOURCE REVIEW COMPLETE; P7-2C LIVE DOS/MBR INVENTORY ACCEPTED; P7-2B FIT PREVIEW TARGET BUILD PASS, DEVICE SEMANTIC VALIDATION PENDING**.
 
 ## 1. FIT is enabled, but FIT signature verification is not enabled in the reviewed board configuration
 
@@ -58,7 +58,7 @@ The P7-2A backup scan found both configured environment sectors entirely erased.
 | Work unit | Scope | Status |
 |---|---|---|
 | P7-2A | Static SPI NOR backup inventory, OCTEON headers, embedded FDTs, erased regions and environment-sector bytes | PASS; see [SPI-IMAGE-ANALYSIS.md](SPI-IMAGE-ANALYSIS.md) |
-| P7-2B | FIT configurations/subimages, inline data bounds, hash states and signature capability classification | Implementation staged; Actions target build and dedicated FIT vectors pending; see [FIT-IMPLEMENTATION.md](FIT-IMPLEMENTATION.md) |
+| P7-2B | FIT configurations/subimages, inline data bounds, hash states and signature capability classification | Target build PASS (Actions #45970127218, #45970607698); FIT fixture generation PASS; PA-220 runtime output pending; see [FIT-IMPLEMENTATION.md](FIT-IMPLEMENTATION.md) |
 | P7-2C | Live eMMC DOS/MBR inventory and read-only filesystem root probes | PASS; see [EMMC-DEVICE-ACCEPTANCE.md](EMMC-DEVICE-ACCEPTANCE.md) |
 
 No install manifest is approved by this review. P7-2 remains in progress and all install mappings remain `UNMAPPED`.
@@ -69,4 +69,4 @@ P7-2C live evidence is already available in [EMMC-DEVICE-ACCEPTANCE.md](EMMC-DEV
 
 The physical device and eMMC have remained unchanged. Do not repeat the directory probes or request another offline image upload merely to recreate evidence already captured. Further raw MBR/EBR sector capture is not required for the current inventory acceptance; it would be a separate deeper forensic task only if a later requirement needs byte-level EBR validation.
 
-No install manifest is approved by this review. P7-2 remains in progress: P7-2B FIT semantic preview code is staged but not yet accepted pending target build and dedicated FIT vectors. All eMMC/SPI install mappings remain `UNMAPPED`.
+No install manifest is approved by this review. P7-2 remains in progress: P7-2B target build and fixture generation passed, but PA-220 runtime semantic output is not yet accepted. All eMMC/SPI install mappings remain `UNMAPPED`.
