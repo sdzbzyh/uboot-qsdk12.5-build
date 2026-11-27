@@ -32,7 +32,7 @@
 | SPI NOR | 探测、读、擦写 | SPI NOR/sf 已配置 | 需研究（高风险） | 只读 JEDEC/容量/芯片选择；写入功能默认关闭 |
 | 环境变量 | 查看、设置、持久化 | SPI 环境主区 0xe00000、冗余区 0xe10000 | 已配置（写入危险） | 只读显示；禁止 RAM 测试期间 saveenv |
 | 分区表 | GPT/EFI/DOS 识别 | 相关配置已存在 | 已配置 | 验证实际 eMMC 分区表 |
-| 固件管理 | 识别、解析、安装预览、进度、读回校验 | P7-1 新增只读 parser/`pa220 image preview`；OCTEON/uImage CRC、FIT/FDT bounds、ELF PT_LOAD bounds；目标映射 UNMAPPED；OCTEON 完整目标构建与实机 preview 待验证 | **实现中（dry-run only）** | 完成 OCTEON build 和 uImage 实机 preview；再取证 FIT 语义、SPI boot chain 与 eMMC GPT 映射；禁止写入 |
+| 固件管理 | 识别、解析、安装预览、进度、读回校验 | P7-1 新增只读 parser/`pa220 image preview`；OCTEON/uImage CRC、FIT/FDT bounds、ELF PT_LOAD bounds；目标映射 UNMAPPED；OCTEON 完整目标构建/最终 ELF 符号 PASS；实机 preview 待验证 | **实现中（dry-run only）** | 完成 OCTEON build 和 uImage 实机 preview；再取证 FIT 语义、SPI boot chain 与 eMMC GPT 映射；禁止写入 |
 | 启动管理 | 正常/备用/恢复/RAM 启动 | 有 linux_ram 等现有启动脚本 | 需研究 | 查清内核选择、回退机制和环境依赖 |
 | EEPROM | 读取 MAC/板卡数据 | 板载 TLV EEPROM，MAC 读取逻辑存在 | 已配置 | 只读核对内容与 MAC 地址映射 |
 | I2C/RTC/GPIO | 外设状态与控制 | 配置中存在相应支持 | 需研究 | 分别验证总线、地址、寄存器和安全副作用 |
@@ -367,5 +367,5 @@ Actions #45346000355、#45374041373、#45375848020 均成功；最新 artifact I
 
 - 生产入口：`pa220 image preview`，只解析有效 `fileaddr/filesize` RAM reservation，不调用加载、启动或存储写入路径。
 - 当前格式范围：OCTEON bootloader header、legacy uImage、FIT/FDT header bounds、ELF32/ELF64 PT_LOAD bounds。
-- Host GCC 与 ASan/UBSan 测试通过；OCTEON 完整目标构建和实机 preview 尚待验收。
+- Host GCC、ASan/UBSan、Cavium GCC 4.7.0 OCTEON 完整目标构建和最终 ELF 符号检查 PASS（Actions #45958126118/#45958503668）；真实设备 preview 尚待验收。
 - 所有安装目标当前为 UNMAPPED；不得借用 IPQ/QCA 分区名称。P7 整体未完成。
