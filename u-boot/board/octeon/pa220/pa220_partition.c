@@ -25,13 +25,13 @@ static int read1(pa220_sector_read_fn fn,void *ctx,uint64_t lba,uint64_t cap,uin
  if(lba>=cap) return -1;
  return fn(ctx,lba,b)?-1:0;
 }
-static int append(struct pa220_partition_table *o,uint64_t s,uint64_t n,uint8_t type,uint8_t kind){
+static int append(struct pa220_partition_table *o,uint64_t s,uint64_t n,uint8_t type,uint8_t kind,uint32_t index){
  uint64_t e,pe; uint32_t i;
  if(!n || !add64(s,n,&e) || e>o->capacity || o->count>=PA220_PART_MAX) return 0;
  for(i=0;i<o->count;i++){ if(!add64(o->parts[i].start_lba,o->parts[i].sectors,&pe)) return 0;
   if(s<pe && o->parts[i].start_lba<e) return 0;
  }
- o->parts[o->count].index=o->count+1; o->parts[o->count].start_lba=s; o->parts[o->count].sectors=n;
+ o->parts[o->count].index=index; o->parts[o->count].start_lba=s; o->parts[o->count].sectors=n;
  o->parts[o->count].type=type; o->parts[o->count].kind=kind; o->count++; return 1;
 }
 static int empty_entry(const uint8_t *e){ unsigned int i; for(i=0;i<16;i++) if(e[i]) return 0; return 1; }
@@ -43,7 +43,7 @@ static int scan_mbr(pa220_sector_read_fn fn,void *ctx,struct pa220_partition_tab
   if(!valid_boot(e) || !t || !s || !n || !add64(s,n,&x) || x>o->capacity) return PA220_PT_CORRUPT;
   if(t==0xee) return PA220_PT_AMBIGUOUS;
   if(t==0x05 || t==0x0f || t==0x85){ if(ext) return PA220_PT_AMBIGUOUS; ext=s; extn=n; if(!add64(ext,extn,&end)||end>o->capacity) return PA220_PT_CORRUPT; }
-  else if(!append(o,s,n,t,PA220_PART_PRIMARY)) return PA220_PT_CORRUPT;
+  else if(!append(o,s,n,t,PA220_PART_PRIMARY,i+1)) return PA220_PT_CORRUPT;
  }
  if(!ext) return PA220_PT_OK;
  for(i=0;i<o->count;i++){ uint64_t pe; if(!add64(o->parts[i].start_lba,o->parts[i].sectors,&pe) || (o->parts[i].start_lba<end && ext<pe)) return PA220_PT_CORRUPT; }
@@ -64,7 +64,7 @@ static int scan_mbr(pa220_sector_read_fn fn,void *ctx,struct pa220_partition_tab
     uint8_t t=a[4]; ls=rd32(a+8); ln=rd32(a+12);
     if(!valid_boot(a)||!t||!ls||!ln||t==0x05||t==0x0f||t==0x85) return PA220_PT_CORRUPT;
     if(!add64(cur,ls,&base)||!add64(base,ln,&le)||base<ext||le>end) return PA220_PT_CORRUPT;
-    if(!append(o,base,ln,t,PA220_PART_LOGICAL)) return PA220_PT_CORRUPT;
+    if(!append(o,base,ln,t,PA220_PART_LOGICAL,4+used)) return PA220_PT_CORRUPT;
    }
    if(empty_entry(l)) return PA220_PT_OK;
    if(!valid_boot(l)|| (l[4]!=0x05 && l[4]!=0x0f && l[4]!=0x85)) return PA220_PT_CORRUPT;
@@ -123,8 +123,7 @@ static int scan_gpt(pa220_sector_read_fn fn,void *ctx,struct pa220_partition_tab
   if(!memcmp(e,(uint8_t[16]){0},16)) continue;
   s=rd64(e+32); en=rd64(e+40);
   if(s<first||en>last||en<s||!add64(en-s,1,&n)) return PA220_PT_CORRUPT;
-  if(!append(o,s,n,0,PA220_PART_GPT)) return PA220_PT_CORRUPT;
-  o->parts[o->count-1].index=i+1;
+  if(!append(o,s,n,0,PA220_PART_GPT,i+1)) return PA220_PT_CORRUPT;
   memcpy(o->parts[o->count-1].type_guid,e,16); memcpy(o->parts[o->count-1].unique_guid,e+16,16);
   memcpy(o->parts[o->count-1].name_utf16le,e+56,72);
   if(!memcmp(e+16,(uint8_t[16]){0},16)) return PA220_PT_CORRUPT;

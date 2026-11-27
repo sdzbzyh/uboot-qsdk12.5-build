@@ -12,10 +12,10 @@ static unsigned crc(const unsigned char*p,unsigned n){unsigned c=~0U,i,j;for(i=0
 static void sig(unsigned char*p){p[510]=0x55;p[511]=0xaa;}
 static void clear_disk(void){memset(disk,0,sizeof(disk));}
 static void mbr_entry(unsigned char*e,unsigned type,unsigned start,unsigned count){e[4]=type;w32(e+8,start);w32(e+12,count);}
-static int test_mbr(void){struct pa220_partition_table t;clear_disk();sig(disk[0]);mbr_entry(disk[0]+446,0x83,10,20);if(pa220_partition_scan(rd,0,DISK_SECTORS,&t)||t.format!=PA220_PT_DOS_MBR||t.count!=1||t.parts[0].start_lba!=10)return 1;return 0;}
+static int test_mbr(void){struct pa220_partition_table t;clear_disk();sig(disk[0]);mbr_entry(disk[0]+446,0x83,10,20);if(pa220_partition_scan(rd,0,DISK_SECTORS,&t)||t.format!=PA220_PT_DOS_MBR||t.count!=1||t.parts[0].index!=1||t.parts[0].start_lba!=10)return 1;return 0;}
 static int test_mbr_overlap(void){struct pa220_partition_table t;clear_disk();sig(disk[0]);mbr_entry(disk[0]+446,0x83,10,20);mbr_entry(disk[0]+462,0x83,20,20);if(!pa220_partition_scan(rd,0,DISK_SECTORS,&t)||t.status!=PA220_PT_CORRUPT)return 1;return 0;}
 static int test_mbr_bad_boot(void){struct pa220_partition_table t;clear_disk();sig(disk[0]);mbr_entry(disk[0]+446,0x83,10,20);disk[0][446]=0x7f;if(!pa220_partition_scan(rd,0,DISK_SECTORS,&t)||t.status!=PA220_PT_CORRUPT)return 1;return 0;}
-static int test_ebr(void){struct pa220_partition_table t;clear_disk();sig(disk[0]);mbr_entry(disk[0]+446,0x0f,10,100);sig(disk[10]);mbr_entry(disk[10]+446,0x83,1,10);if(pa220_partition_scan(rd,0,DISK_SECTORS,&t)||t.count!=1||t.parts[0].kind!=PA220_PART_LOGICAL||t.parts[0].start_lba!=11)return 1;return 0;}
+static int test_ebr(void){struct pa220_partition_table t;clear_disk();sig(disk[0]);mbr_entry(disk[0]+446,0x0f,10,100);sig(disk[10]);mbr_entry(disk[10]+446,0x83,1,10);if(pa220_partition_scan(rd,0,DISK_SECTORS,&t)||t.count!=1||t.parts[0].kind!=PA220_PART_LOGICAL||t.parts[0].index!=5||t.parts[0].start_lba!=11)return 1;return 0;}
 static int test_cycle(void){struct pa220_partition_table t;clear_disk();sig(disk[0]);mbr_entry(disk[0]+446,0x0f,10,100);sig(disk[10]);mbr_entry(disk[10]+462,0x0f,0,100);if(pa220_partition_scan(rd,0,DISK_SECTORS,&t)==0||t.status!=PA220_PT_CORRUPT)return 1;return 0;}
 static int test_ebr_outside(void){struct pa220_partition_table t;clear_disk();sig(disk[0]);mbr_entry(disk[0]+446,0x0f,10,100);sig(disk[10]);mbr_entry(disk[10]+446,0x83,99,10);if(!pa220_partition_scan(rd,0,DISK_SECTORS,&t)||t.status!=PA220_PT_CORRUPT)return 1;return 0;}
 static void gpt_header(unsigned char*h,unsigned cur,unsigned alt,unsigned ent,unsigned ec,unsigned es,unsigned ecrc){memcpy(h,"EFI PART",8);w32(h+8,0x10000);w32(h+12,92);w64(h+24,cur);w64(h+32,alt);w64(h+40,34);w64(h+48,220);memset(h+56,0x11,16);w64(h+72,ent);w32(h+80,ec);w32(h+84,es);w32(h+88,ecrc);w32(h+16,0);w32(h+16,crc(h,92));}
@@ -57,10 +57,11 @@ static int test_pa220_live_layout(void){
   static const uint64_t starts[7]={16ULL,3968ULL,8004032ULL,16004112ULL,40004176ULL,48004240ULL,48008208ULL};
   static const uint64_t sizes[7]={3952ULL,8000064ULL,8000064ULL,24000048ULL,8000048ULL,3952ULL,9794544ULL};
   static const unsigned char types[7]={0x83,0x83,0x83,0x83,0x83,0x83,0x82};
+  static const unsigned indices[7]={1,2,3,5,6,7,8};
   unsigned i;
   if(pa220_partition_scan(sparse_rd,0,cap,&t)||t.format!=PA220_PT_DOS_MBR||t.count!=7) return 1;
   for(i=0;i<7;i++){
-   if(t.parts[i].start_lba!=starts[i]||t.parts[i].sectors!=sizes[i]||t.parts[i].type!=types[i]) return 1;
+   if(t.parts[i].index!=indices[i]||t.parts[i].start_lba!=starts[i]||t.parts[i].sectors!=sizes[i]||t.parts[i].type!=types[i]) return 1;
    if(t.parts[i].kind!=(i<3?PA220_PART_PRIMARY:PA220_PART_LOGICAL)) return 1;
   }
  }
