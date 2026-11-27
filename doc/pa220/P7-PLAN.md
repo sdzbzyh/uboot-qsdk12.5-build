@@ -60,7 +60,7 @@
 - `0x70000-0x100000` 与 `0x250000-0x1000000` 为全 `0xff` 区域；配置环境 sector `0xe00000` / `0xe10000` 在该备份中也全擦除。
 - 这只是 SPI NOR 证据，不提供 eMMC GPT/分区布局，也不授权写入。
 
-### P7-2B：FIT 语义只读解析 — TARGET BUILD PASS；实机语义验收待执行
+### P7-2B：FIT 语义只读解析 — PASS（目标构建 + 正常/损坏双向量实机验收）
 
 - 生产代码已在 `u-boot/board/octeon/pa220/pa220_image.c` 加入 `/images`、`/configurations`、default configuration、kernel/ramdisk/fdt 引用、inline `data` 和 hash 子节点预览。
 - 严格区分结构合法、数据 hash PASS/FAIL/IGNORED/UNSUPPORTED 和签名可信状态。
@@ -88,4 +88,4 @@
 
 - P7-1 parser、Host Harness、ASan/UBSan、Actions OCTEON 完整构建及真实 PA-220 实机 preview 均已通过；云端证据见 `reports/pa220/P7-1/ACCEPTANCE.md`，实机串口证据见 `reports/pa220/P7-1/DEVICE-ACCEPTANCE.md`。
 - 实机已验证 wrapper TFTP 接收、uImage 校验、payload RAM-copy/compare、RAM Stage3 启动、外层 legacy uImage preview、内层 OCTEON bootloader preview 和 reservation descriptor 不变。
-- P7-1 验收完成。P7-2A SPI NOR 静态取证与 P7-2C eMMC DOS/MBR 实机只读取证已完成。P7-2B FIT preview 已通过 Actions #45970127218 / #45970607698 的 Host/ASan/UBSan、Cavium OCTEON object、N32 relocatable link 和完整 U-Boot final link；FIT fixtures 已打包在 [Artifact 15184393205](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45970607698/artifacts/15184393205)。尚未做 PA-220 实机 FIT 语义输出验收，不能标记 P7-2B PASS。P7 整体仍未完成。
+- P7-1 验收完成。P7-2A SPI NOR 静态取证与 P7-2C eMMC DOS/MBR 实机只读取证已完成。P7-2B FIT preview 已通过 Actions #45970127218 / #45970607698 的 Host/ASan/UBSan、Cavium OCTEON object、N32 relocatable link 和完整 U-Boot final link；FIT fixtures 已打包在 [Artifact 15184393205](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45970607698/artifacts/15184393205)。PA-220 已完成正常与损坏两个 FIT fixture 的 RAM-only 实机语义验收，P7-2B PASS。正常 fixture 的 kernel/ramdisk CRC32、SHA1、MD5 均 PASS，ignored/unsupported/signature/external-data 状态正确，default configuration 三项引用全部 RESOLVED，hash_failures=0；损坏 fixture 的 kernel 三种 hash 均 FAIL、ramdisk 三种 hash 均 PASS，hash_failures=1。两次均 target mapping UNMAPPED、actions NONE，未执行加载/启动或持久化写入。完整实机证据见 `reports/pa220/P7-2/FIT-IMPLEMENTATION.md`。P7-2A、P7-2B、P7-2C 均已完成；下一工作单元为 P7-3 dry-run 安装计划，P7 整体仍未完成。
