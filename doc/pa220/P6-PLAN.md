@@ -1,6 +1,6 @@
 # PA-220 P6 计划：RAM-only 文件接收与校验
 
-- 状态：**P6-1A/P6-1B/P6-1C 软件门 ACCEPTED；P6-A live descriptor/DRAM/reservation 只读预检 PASS；P6-B 4 KiB、32 MiB 精确上限成功路径 PASS；32 MiB+1 在 OACK tsize 阶段拒绝及失败清理 PASS；仅受控中断/超时失败清理待验收**
+- 状态：**P6-1A/P6-1B/P6-1C 软件门 ACCEPTED；P6-A PASS；P6-B 实机测试矩阵 ACCEPTED（4 KiB 成功、32 MiB 精确上限成功、32 MiB+1 OACK tsize 拒绝、受控服务端中断/超时与失败清理）**
 - 日期：2026-11-24
 - 集成分支：`feature/pa220-ubootkit-web`
 - 固定 PA-220 源码：`sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
@@ -228,3 +228,16 @@ P6-1A、P6-1B、P6-1C 软件门均已完成；下一步先安排 P6-A live descr
 
 - **截至 P6-1B 软件验收时**未执行真实 TFTP GET；随后 P6-B 首个成功路径已由本计划第 4 节记录。该阶段未调用 saveenv，未写入 SPI/eMMC/NAND/EEPROM/CPLD/flash。
 - P6-A 与 P6-B 的前述实机检查点均已完成；当前下一工作单元仅为受控中断/超时失败清理实机验收。
+
+## 12. P6-B 受控中断/超时实机验收 — PASS（2026-11-27）
+
+完整证据见 [CONTROLLED INTERRUPTION ACCEPTANCE](../../reports/pa220/P6-B/CONTROLLED-INTERRUPTION-ACCEPTANCE.md)。
+
+- 32 MiB TFTP GET 已进入 DATA 阶段，随后通过停止 Tftpd64 服务进程制造受控服务端中断。
+- 设备报告 `TFTP GET failed: network interruption`。
+- pcap `C:\\pa220-p6-b\\pa220-p6-b-interrupt.pcapng`，10,998,760 bytes，SHA-256 `83B96A88C0AEC9983A7B429369396B715B9613CAA2312D0A42984508AB6840CA`。
+- Frame 13415 与 13416 的 UDP payload 均为 `00 04 1a 32`，即 ACK block 6706；两帧相隔约 4.999 秒，确认相同 ACK 的 timeout retry。
+- 失败后 `filesize`、`fileaddr` 均未定义；`loadaddr=0x20000000`、`__tmp_load=[0x20000000,0x30000000)` 保持不变。
+- 本项仅验收本次受控服务端中断场景，不泛化为所有网络故障场景。
+
+**P6-B 实机测试矩阵至此全部通过并验收。** 未执行 loader/boot、`saveenv` 或持久化介质写入。
