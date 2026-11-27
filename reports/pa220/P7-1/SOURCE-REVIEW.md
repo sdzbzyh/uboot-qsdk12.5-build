@@ -17,7 +17,7 @@
 
 现有 `validate_header()` 对 `hlen` 有最大值检查，但未以接收文件的实际 `filesize` 建立完整的最小长度/剩余长度边界；header CRC 长度又依赖 `hlen`。因此不能把旧 `bootloadervalidate` 当成任意 RAM 文件的通用安全 parser。P7 使用独立 bounded parser：先验证 header 最小/最大长度、文件总长度、payload 长度，再读取 CRC 覆盖区间。
 
-P7 当前按 PA-220 board type 20021 判断兼容性；generic board type 0 仅标记为通用候选，不据此推断安装目标。
+P7 当前按 PA-220 board type 20021 判断兼容性；generic board type 28 仅标记为通用候选，不据此推断安装目标。
 
 ## 2. 其他格式
 
