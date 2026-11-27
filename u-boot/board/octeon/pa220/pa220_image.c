@@ -9,6 +9,7 @@
 #include "pa220_image.h"
 
 #define PA220_BOARD_TYPE 20021U
+#define PA220_BOARD_TYPE_GENERIC 28U
 #define OCTEON_BOOT_MAGIC 0x424f4f54U
 #define OCTEON_HEADER_MIN 192U
 #define OCTEON_HEADER_MAX 0x200U
@@ -102,7 +103,7 @@ static int parse_octeon(const uint8_t *p, uint64_t n, struct pa220_image_info *o
     o->format = PA220_IMAGE_OCTEON_BOOTLOADER;
     o->total_size = n; o->header_size = hlen; o->payload_size = dlen;
     o->header_crc = hcrc; o->data_crc = dcrc; o->crc_valid = 1;
-    o->board_type = board; o->board_compatible = (board == 0 || board == PA220_BOARD_TYPE);
+    o->board_type = board; o->board_compatible = (board == PA220_BOARD_TYPE_GENERIC || board == PA220_BOARD_TYPE);
     o->image_type = type; o->image_flags = rd32(p + 40, 0);
     o->load_address = rd64(p + 32, 0);
     return 0;
