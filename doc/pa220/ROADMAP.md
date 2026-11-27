@@ -313,7 +313,7 @@ P4 网络维护基础仍保留历史计划中的未完成项：DHCP Client/Ping 
 本节覆盖前述 P6-0 之前的历史状态。P6-B 已在 2026-11-27 完成实机验收，详见 `doc/pa220/P6-PLAN.md` 第 12 节。
 
 - **P6 RAM-only GET：ACCEPTED（已测试范围）**。4 KiB 成功、32 MiB 精确上限成功、32 MiB+1 OACK tsize 拒绝、受控服务端中断/ACK 重试/失败清理均有实机或抓包证据。
-- **P7：IN PROGRESS。** 新增 `pa220 image preview` 只读解析入口；Host GCC 与 ASan/UBSan 格式测试通过。OCTEON target build 正在 Actions 验证，尚未将 P7-1 标记为 ACCEPTED。
+- **P7：IN PROGRESS。** P7-1 的 Host GCC/ASan/UBSan、Cavium GCC 4.7.0 OCTEON 完整构建、最终 ELF 符号检查均 PASS（Actions #45958126118/#45958503668）；云端门已通过，真实设备 preview 尚待执行。
 - P7-1 当前解析 OCTEON bootloader header、legacy uImage、FIT/FDT header bounds、ELF32/ELF64 PT_LOAD bounds；所有目标映射明确为 UNMAPPED。FIT configuration/subimage/hash/signature 语义尚未解析。完整验收报告：`reports/pa220/P7-1/ACCEPTANCE.md`。
 - P7-1 尚未实机运行；Actions artifact 已提供 Stage3 uImage wrapper 和 uImage preview fixture。按 `reports/pa220/P7-1/ACCEPTANCE.md` 做 RAM-only Stage3 boot 与两种格式 preview，不写介质。
 - P7-2 将进一步分析 FIT 语义、原机 SPI 备份与 OCTEON boot chain；SPI 备份不得作为 eMMC GPT 证据。eMMC 目标映射须有可信分区表依据。
