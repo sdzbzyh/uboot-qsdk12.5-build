@@ -14,18 +14,19 @@
 - 目标：OCTEON III CN7130、MIPS64 BE、N32、Cavium SDK 5.1.0、U-Boot 2013.07、原厂 Stage 2 加载自定义 Stage 3。
 - PA-220 独立构建入口：`./build-pa220.sh`；不得混入 Qualcomm `build.sh`。
 
-## 当前唯一主线（2026-11-27，P7-1）
+## 当前唯一主线（2026-11-27，P7-2）
 
-P6-B 已完成实机测试矩阵验收，设备本轮可断电。当前转入 P7-1：只读镜像解析与预览。
+P7-1 parser、Host/ASan/UBSan、OCTEON 完整构建和 PA-220 实机 preview 均已通过。当前推进 P7-2：FIT 容器语义与原机 SPI/eMMC 存储布局取证。
 
-- P7 计划：`doc/pa220/P7-PLAN.md`；源码审查：`reports/pa220/P7-1/SOURCE-REVIEW.md`。
-- 新增生产代码：`u-boot/board/octeon/pa220/pa220_image.c`、`u-boot/include/pa220_image.h`；命令入口 `pa220 image preview`。
-- 当前解析范围：OCTEON bootloader header（含 bounded CRC）、legacy uImage（header/data CRC）、FIT/FDT header bounds、ELF32/ELF64 PT_LOAD bounds。
-- Host GCC 与 ASan/UBSan 测试已通过。Actions #45958126118（Host + OCTEON full build + final ELF symbols）与 #45958503668（Stage3 wrapper/fixture artifact）均 PASS。P7-1 云端验收通过，真实设备 preview 尚未执行。
-- P7-1 parser、Host Harness、ASan/UBSan、OCTEON 完整 U-Boot build 和真实 PA-220 实机验收均已通过；报告：`reports/pa220/P7-1/ACCEPTANCE.md`、`reports/pa220/P7-1/DEVICE-ACCEPTANCE.md`。
-- 实机验证包括 wrapper TFTP 接收与 SHA-256 核对、legacy uImage CRC preview、内层 OCTEON bootloader preview（board_type 20021、header/data CRC PASS）、reservation descriptor 不变性和 RAM-only Stage3 启动。
-- 所有镜像 target mapping 仍为 UNMAPPED；preview 动作为 NONE。未执行安装、updater、saveenv 或 eMMC/SPI/NAND 写入。
-- P7-1 验收完成。下一步进入 P7-2：FIT configuration/subimage/hash/signature 语义与原机 SPI boot chain / eMMC GPT 映射取证；`pa220-spi-normal.img` 仅作为 SPI NOR 证据，不可替代 eMMC GPT 证据。
+- P7 计划：`doc/pa220/P7-PLAN.md`。
+- P7-1 验收：`reports/pa220/P7-1/ACCEPTANCE.md`、`DEVICE-ACCEPTANCE.md`。
+- P7-2A SPI NOR 静态分析 PASS：`reports/pa220/P7-2/SPI-IMAGE-ANALYSIS.md`。
+- P7-2 源码审查：`reports/pa220/P7-2/SOURCE-REVIEW.md`。
+- 原机 SPI 备份仅从 `main@da755efd49df32f3e85d231745212674737feba5` 读取；16 MiB，SHA-256 `4899a1c5ed06e5eafbb8c92625a4afae14cad399806df13979fd2c70ee1ed922`。4 个 OCTEON header 均通过 header/data CRC；识别 Pre-U-Boot、Stage 2 和 NOR bootloader；两个 FDT 分别描述 generic SPI Stage2 与 PA-220 Stage3。
+- SPI 备份的 `0x250000-0x1000000` 全为 `0xff`；配置环境区 `0xe00000` / `0xe10000` 在备份中也全擦除。该镜像不提供 eMMC GPT 证据。
+- 重要配置：PA-220 实际启用 SPI redundant environment（`0xe00000` / `0xe10000`），`saveenv` 会擦写 SPI NOR 64 KiB sector；板级文件顶部“RAM-only”注释与宏配置矛盾。P7-2 禁止调用 `saveenv`。
+- 当前工作单元：P7-2B FIT 只读语义解析；P7-2C eMMC GPT 现场只读取证待设备输出。eMMC install target 继续 UNMAPPED。
+- 需要现场时，设备上电并中断 autoboot 后，只运行 `version`、`mmc list`、`mmc dev 0`、`mmc rescan`、`mmc info`、`mmc part`，提供完整串口输出；不执行任何 write/erase/GPT write/updater/saveenv。
 - P4 DHCP Client/Ping 实机验证仍是独立遗留项，P4 overall 不得标记 COMPLETE。
 
 ## 历史检查点（P6-B 完成前，保留审计记录）
@@ -153,3 +154,13 @@ P6-1C 已由 Actions #45600860179 验收通过，报告见 reports/pa220/P6-1C/A
 - 新 U-Boot 外层 legacy uImage preview：header/data CRC PASS；内层 OCTEON preview：board_type 20021 compatible、image_type 3、header/data CRC PASS。
 - 两种 preview 均为 target mapping `UNMAPPED`、actions `NONE`；live `__tmp_load=[0x20000000,0x30000000)` 未变化。
 - 全程未执行 `saveenv`、updater 或持久化介质写入。P7-1 实机验收 PASS；下一工作单元 P7-2。
+
+
+## P7-2A SPI NOR 静态取证检查点（2026-11-27）
+
+- Actions [#45962029417](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45962029417) SUCCESS；Artifact [15181630025](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45962029417/artifacts/15181630025)。
+- 只读分析脚本：`tools/pa220/analyze-p7-spi.py`；工作流：`.github/workflows/pa220-p7-2-spi-forensics.yml`。从 main sparse checkout 读取原镜像，未把二进制复制到集成分支。
+- 原机 SPI 镜像 SHA-256 `4899a1c5ed06e5eafbb8c92625a4afae14cad399806df13979fd2c70ee1ed922`；offset 0、0x1d80、0x10000、0x100000 的四个 OCTEON header 均通过 header/data CRC。
+- 两个 FDT：0x58030 generic_spi_stage2；0x1c9460 pan,pa-220 / cavium,tb7100。后者描述 W25Q128-compatible SPI、OCTEON MMC host、Kingfisher CPLD。
+- `0x70000-0x100000` 和 `0x250000-0x1000000` 为 all-FF 区域；配置 env 主/冗余 sector 与注释中的 0xef0000 区域均 all-FF。
+- 此报告只证明备份内容，不推断 eMMC GPT、不建立安装映射、不授权 SPI 写入。
