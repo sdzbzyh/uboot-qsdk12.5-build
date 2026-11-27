@@ -21,11 +21,11 @@ P6-B 已完成实机测试矩阵验收，设备本轮可断电。当前转入 P7
 - P7 计划：`doc/pa220/P7-PLAN.md`；源码审查：`reports/pa220/P7-1/SOURCE-REVIEW.md`。
 - 新增生产代码：`u-boot/board/octeon/pa220/pa220_image.c`、`u-boot/include/pa220_image.h`；命令入口 `pa220 image preview`。
 - 当前解析范围：OCTEON bootloader header（含 bounded CRC）、legacy uImage（header/data CRC）、FIT/FDT header bounds、ELF32/ELF64 PT_LOAD bounds。
-- Host GCC 与 ASan/UBSan 测试已通过。Actions run #45957393714 对应最新 P7-1 测试向量；OCTEON target build 仍待最终成功状态，不得提前标记 P7-1 ACCEPTED。
+- Host GCC 与 ASan/UBSan 测试已通过。Actions #45958126118（Host + OCTEON full build + final ELF symbols）与 #45958503668（Stage3 wrapper/fixture artifact）均 PASS。P7-1 云端验收通过，真实设备 preview 尚未执行。
 - P7 preview 只读取有效 `fileaddr/filesize`，重新检查 `__tmp_load` reservation；不执行 load/boot，不写 eMMC/SPI/NAND，不调用 `saveenv`。
 - 所有镜像 target mapping 目前 UNMAPPED。FIT configuration/subimage/hash/signature 语义和 eMMC GPT 映射尚未完成。
 - OCTEON bootloader header parser 已实现，但 P6-1C TFTP recognizer 尚不接受此格式；当前 TFTP 物理 preview 先使用有效 legacy uImage fixture。
-- 下一步：先闭环 OCTEON 完整构建和最终 ELF 符号检查，再做一次 RAM-only legacy uImage 实机 preview。
+- 下一步：按 `reports/pa220/P7-1/ACCEPTANCE.md` 用 Actions artifact 做 RAM-only Stage3 boot，然后在新 U-Boot 中验证 legacy uImage 与内层 OCTEON header 两种 preview。
 - P4 DHCP Client/Ping 实机验证仍是独立遗留项，P4 overall 不得标记 COMPLETE。
 
 ## 历史检查点（P6-B 完成前，保留审计记录）
@@ -133,3 +133,13 @@ P6-1C 已由 Actions #45600860179 验收通过，报告见 reports/pa220/P6-1C/A
 - P6-B 实机测试矩阵已全部验收，设备本轮可断电。
 - 按 `doc/pa220/ROADMAP.md`，下一开发入口为 P7 固件解析与安装预览（dry-run only）。P4 DHCP Client/Ping 实机验证仍是独立遗留项，不因 P6-B 通过而标记完成。
 - P7 开始前先恢复远端最新 HEAD，阅读 ROADMAP、PROJECT、FEATURE-MATRIX 及固定源码相关解析路径；先实现只读解析与目标映射报告，不写 eMMC/SPI/NAND，不执行镜像。
+
+
+## P7-1 云端验收检查点（2026-11-27）
+
+- 验收报告：`reports/pa220/P7-1/ACCEPTANCE.md`。
+- Actions #45958126118 和 #45958503668：Host GCC、ASan/UBSan、Cavium OCTEON 完整构建、最终 ELF 符号和 RAM-boot wrapper 生成均 PASS。
+- Artifact ID：`15179692876`；下载地址见验收报告。
+- BIN SHA-256：`f981ad195a0418d142b6a1cf34cfd70327668273612e4506b40d75fa11893c7c`。
+- Stage3 wrapper：`0x153928` bytes；payload `0x1538e8` bytes；SHA-256 `4f5f3d8561f427cbcfae44f63c5d880e9229afc4fa8130f1556e08b321781ba8`。
+- 实机 preview 尚待执行；设备本轮 P6 后断电，需按报告执行 RAM-only test。P7 整体仍未完成。
