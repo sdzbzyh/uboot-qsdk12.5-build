@@ -69,6 +69,97 @@ def octeon_headers(buf):
         out.append(rec)
     return out
 
+def decode_fdt_value(raw):
+    if raw.endswith(b'\0') and all((b == 0 or 32 <= b < 127) for b in raw):
+        return ' | '.join(x.decode('ascii', 'replace') for x in raw.rstrip(b'\0').split(b'\0'))
+    if len(raw) and len(raw) % 4 == 0 and len(raw) <= 32:
+        return 'cells:' + ' '.join('0x%08x' % x for x in struct.unpack('>' + 'I'*(len(raw)//4), raw))
+    return 'hex:' + raw[:48].hex() + ('...' if len(raw) > 48 else '')
+
+def parse_fdt_detail(buf, off):
+    if off + 40 > len(buf) or buf[off:off+4] != FDT_MAGIC:
+        return None
+    total, so, sto, ro, ver, last = struct.unpack_from('>6I', buf, off+4)
+    strings_size, struct_size = struct.unpack_from('>2I', buf, off+32)
+    if (total < 40 or total > len(buf)-off or ver < 16 or ver > 17 or
+            last < 16 or last > ver or ro < 40 or (ro & 7) or
+            so < 40 or sto < 40 or so + struct_size > total or
+            sto + strings_size > total):
+        return None
+    ranges = [(0, 40, 'header'), (so, so+struct_size, 'structure'),
+              (sto, sto+strings_size, 'strings')]
+    for i, (a, b, _) in enumerate(ranges):
+        for d, c, _ in ranges[i+1:]:
+            if a < c and d < b:
+                return None
+    reservations = []
+    rp = ro
+    while rp + 16 <= total:
+        address, size = struct.unpack_from('>QQ', buf, off+rp)
+        rp += 16
+        if address == 0 and size == 0:
+            break
+        reservations.append({'address': '0x%016x' % address, 'size': '0x%016x' % size})
+    else:
+        return None
+    if rp > so and rp < so + struct_size:
+        return None
+    p = off + so
+    end = p + struct_size
+    stack = []
+    nodes = []
+    selected = {'compatible','model','device_type','status','reg','label',
+                'spi-max-frequency','spi-cpol','spi-cpha','num-cs','bus-width',
+                'clock-frequency','#address-cells','#size-cells','cavium,board-type'}
+    terminated = False
+    while p + 4 <= end:
+        tag, = struct.unpack_from('>I', buf, p)
+        p += 4
+        if tag == 1:
+            q = buf.find(b'\0', p, end)
+            if q < 0:
+                return None
+            name = buf[p:q].decode('ascii', 'replace')
+            p = (q + 4) & ~3
+            parent = stack[-1] if stack else ''
+            path = (parent.rstrip('/') + '/' + name) if parent else ('/' + name if name else '/')
+            stack.append(path)
+            nodes.append({'path': path, 'properties': {}})
+        elif tag == 2:
+            if not stack:
+                return None
+            stack.pop()
+        elif tag == 3:
+            if not stack or p + 8 > end:
+                return None
+            length, nameoff = struct.unpack_from('>II', buf, p)
+            p += 8
+            if length > end - p or nameoff >= strings_size:
+                return None
+            nq = buf.find(b'\0', off+sto+nameoff, off+sto+strings_size)
+            if nq < 0:
+                return None
+            pname = buf[off+sto+nameoff:nq].decode('ascii', 'replace')
+            raw = buf[p:p+length]
+            p = (p + length + 3) & ~3
+            if p > end:
+                return None
+            if pname in selected:
+                nodes[-1]['properties'][pname] = decode_fdt_value(raw)
+        elif tag == 4:
+            continue
+        elif tag == 9:
+            terminated = True
+            break
+        else:
+            return None
+    if not terminated or stack:
+        return None
+    return {'offset': off, 'totalsize': total, 'version': ver,
+            'struct_offset': so, 'struct_size': struct_size,
+            'strings_offset': sto, 'strings_size': strings_size,
+            'reserve_map_offset': ro, 'reservations': reservations, 'nodes': nodes}
+
 def embedded_uimages(buf):
     out = []
     pos = 0
@@ -153,6 +244,13 @@ def main():
     valid = [x for x in headers if x["fully_valid"]]
     uimgs = embedded_uimages(data)
     fdts = embedded_fdts(data)
+    fdt_details = [x for x in (parse_fdt_detail(data, f['offset']) for f in fdts) if x]
+    env_regions = []
+    for label, offset in [('configured_primary_env', 0xe00000), ('configured_redundant_env', 0xe10000), ('legacy_oem_env_comment_offset', 0xef0000)]:
+        region = data[offset:offset+0x10000]
+        env_regions.append({'label': label, 'offset': '0x%06x' % offset, 'length': len(region),
+                            'sha256': hashlib.sha256(region).hexdigest(),
+                            'entire_64k_sector_all_ff': len(region) == 0x10000 and all(b == 0xff for b in region)})
     report = {
         "input": path.name, "size_bytes":len(data),
         "sha256":hashlib.sha256(data).hexdigest(),
@@ -164,6 +262,8 @@ def main():
         "fully_valid_octeon_headers":valid,
         "validated_embedded_uimages":uimgs,
         "bounded_embedded_fdts":fdts,
+        "decoded_fdt_details":fdt_details,
+        "environment_region_checks":env_regions,
         "all_ff_4k_runs":erased_runs(data,SECTOR,0xff),
         "all_zero_4k_runs":erased_runs(data,SECTOR,0x00),
         "all_ff_64k_runs":erased_runs(data,ERASE_BLOCK,0xff),
@@ -192,8 +292,21 @@ def main():
         "| SPI offset | Type | Board | Header | Data | Link address | Header CRC | Data CRC |",
         "|---:|---:|---:|---:|---:|---:|---|---|"
     ]
-    for h in headers:
-        lines.append(f"| 0x{h['offset']:06x} | {h['image_type']} | {h['board_type']} | 0x{h['header_length']:x} | 0x{h['data_length']:x} | {h['link_address']} | {h.get('header_crc_pass',False)} | {h.get('data_crc_pass',False)} |")
+    type_names = {1:'Stage 2',2:'Stage 3',3:'NOR bootloader',4:'PCI bootloader',5:'U-Boot env',6:'Pre-U-Boot',7:'Stage 1'}
+    for h in valid:
+        lines.append("| 0x%06x | %s (%d) | %d | 0x%x | 0x%x | %s | PASS | PASS |" % (h['offset'], type_names.get(h['image_type'], 'unknown'), h['image_type'], h['board_type'], h['header_length'], h['data_length'], h['link_address']))
+    lines += ["","## Embedded FDTs (bounded structure parse)","","| SPI offset | Size | Root compatible/model | Node count |","|---:|---:|---|---:|"]
+    for fdt in fdt_details:
+        root = next((n for n in fdt['nodes'] if n['path'] == '/'), {'properties':{}})
+        rootval = root['properties'].get('compatible', root['properties'].get('model', 'not present'))
+        lines.append("| 0x%06x | 0x%x | %s | %d |" % (fdt['offset'], fdt['totalsize'], rootval, len(fdt['nodes'])))
+        for node in fdt['nodes']:
+            if node['properties']:
+                props = '; '.join('%s=%s' % (k,v) for k,v in node['properties'].items())
+                lines.append("- %s: %s" % (node['path'], props))
+    lines += ["","## SPI environment sectors (backup contents only)","","| Region | Offset | 64 KiB all 0xff? | SHA-256 |","|---|---:|---|---|"]
+    for region in env_regions:
+        lines.append("| %s | %s | %s | %s |" % (region['label'], region['offset'], region['entire_64k_sector_all_ff'], region['sha256']))
     lines += ["","## CRC-valid embedded legacy uImages","","| SPI offset | Total size | Payload | Load | Entry |","|---:|---:|---:|---:|---:|"]
     for x in uimgs:
         lines.append(f"| 0x{x['offset']:06x} | 0x{x['size']:x} | 0x{x['payload_size']:x} | {x['load']} | {x['entry']} |")
