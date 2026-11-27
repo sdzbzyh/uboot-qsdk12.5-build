@@ -40,7 +40,8 @@ P6-1C 当前 TFTP GET 格式 recognizer 不包含 OCTEON bootloader header；所
 
 ## 5. 当前验证状态
 
-- Host parser vectors：5 suites，GCC 与 ASan/UBSan 均 PASS（Actions 证据待最终 OCTEON build run 闭环）。
-- OCTEON target object / final U-Boot link：以最新 `pa220/p7-1-image-preview` Actions 状态为准。
+- Host parser vectors：5 suites，GCC 与 ASan/UBSan 均 PASS。
+- OCTEON target object / final U-Boot link：PASS，Actions run #45958126118；打包 wrapper 和实机 fixture 的 run #45958503668 也 PASS。最终 ELF 保留 `pa220_image_preview` 与 `pa220_image_parse`。
+- 实机 preview 尚未运行，不能将云端构建通过视为设备验收。完整数据见 `reports/pa220/P7-1/ACCEPTANCE.md`。
 - 真实设备 `pa220 image preview`：NOT RUN。
 - 安装目标映射：UNMAPPED。
