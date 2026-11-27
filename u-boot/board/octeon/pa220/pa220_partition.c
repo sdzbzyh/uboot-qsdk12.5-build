@@ -37,7 +37,7 @@ static int append(struct pa220_partition_table *o,uint64_t s,uint64_t n,uint8_t 
 static int empty_entry(const uint8_t *e){ unsigned int i; for(i=0;i<16;i++) if(e[i]) return 0; return 1; }
 static int valid_boot(const uint8_t *e){ return e[0]==0 || e[0]==0x80; }
 static int scan_mbr(pa220_sector_read_fn fn,void *ctx,struct pa220_partition_table *o,const uint8_t *m){
- uint64_t ext=0,extn=0,cur,base,end,next,ls,ln,le,linkn; uint8_t sec[512]; uint32_t i,hops;
+ uint64_t ext=0,extn=0,cur,base,end=0,next,ls,ln,le,linkn; uint8_t sec[512]; uint32_t i,hops;
  for(i=0;i<4;i++){ const uint8_t *e=m+446+i*16; uint8_t t=e[4]; uint64_t s=rd32(e+8),n=rd32(e+12),x;
   if(empty_entry(e)) continue;
   if(!valid_boot(e) || !t || !s || !n || !add64(s,n,&x) || x>o->capacity) return PA220_PT_CORRUPT;
