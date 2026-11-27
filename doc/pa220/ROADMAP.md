@@ -294,3 +294,16 @@ P4 网络维护基础仍保留历史计划中的未完成项：DHCP Client/Ping 
 - 本轮没有重跑 P4-2 测试，没有进行实际文件传输，也没有任何持久化写入。
 
 详细源码审查、测试向量和只读命令见 `reports/pa220/P6-0-SOURCE-REVIEW.md`。
+
+## 当前阶段状态覆盖（2026-11-27，P6-B 实机验收完成）
+
+本节覆盖上文截至 P6-0 的历史状态；早期记录保留为审计轨迹。
+
+- **P6 RAM-only 文件接收与校验：ACCEPTED（已测试范围）**。P6-1A/B/C 软件门、P6-A live descriptor 只读预检，以及 P6-B 实机测试矩阵全部通过。
+- P6-B 实机矩阵：4 KiB 成功；32 MiB 精确上限成功；32 MiB+1 在 OACK tsize 阶段拒绝且清理元数据；受控服务端中断后 ACK 6706 在约 5 秒后重发，最终报告 network interruption，失败元数据清理且 descriptor 不变。
+- 受控中断报告：`reports/pa220/P6-B/CONTROLLED-INTERRUPTION-ACCEPTANCE.md`；P6 汇总计划：`doc/pa220/P6-PLAN.md` 第 12 节。
+- **P4 尚未整体 COMPLETE**：DHCP Client/Ping 实机验证仍是独立遗留项；P6 的 TFTP GET 实机验收不自动替代 DHCP/Ping 测试。DHCP Server/维护电脑自动地址分配及上游 DHCP 隔离仍属于后续网络功能工作。
+- **下一开发入口：P7 固件解析与安装预览（dry-run only）**。依照路线图依赖，先从 RAM 中已接收文件的只读解析、目标映射和安装计划报告开始；不执行写入，不触碰 eMMC/SPI/NAND，不把解析结果自动升级为安装动作。
+- P8 eMMC 安装事务及 P10 SPI 维护继续作为独立高风险工作流，需单独审查和明确授权。
+
+本次 P6-B 测试轮已结束；设备可断电。未执行 loader/boot、`saveenv` 或任何持久化写入。
