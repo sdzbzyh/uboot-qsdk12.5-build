@@ -3,7 +3,7 @@
 - 日期：2026-11-27
 - 固定 PA-220 源码：`sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
 - 集成分支：`feature/pa220-ubootkit-web`
-- 当前状态：**TARGET BUILD PASS — FIT RUNTIME VALIDATION PENDING**
+- 当前状态：**PASS — TARGET BUILD, FIXTURE GENERATION AND PA-220 RAM-ONLY FIT RUNTIME VALIDATION**
 - 生产入口：`pa220 image preview`
 - 实现位置：`u-boot/board/octeon/pa220/pa220_image.c`
 
@@ -37,7 +37,7 @@
 - 新 U-Boot BIN：1,394,728 bytes，SHA-256 `9bf05f6915745d315023b3184cdf2668428fd5f10234d2e777e3f9372024e586`；Stage3 wrapper：1,394,792 bytes，SHA-256 `6d2b4d738934789b500bbe956e6cf828152c9ffcba8c8a66adb8528ff52ba9fe`。
 - Actions 的 5 suites 是 P7-1 通用镜像解析器既有 Host/ASan/UBSan 测试，不等于新增 target-only FIT 语义路径已通过运行测试。FIT fixtures 已生成，尚待 PA-220 RAM-only 实机执行。
 - 下一门：在 PA-220 RAM 启动该新 U-Boot，分别预览两个 FIT fixture，验证 default configuration、kernel/ramdisk/fdt refs、CRC32/SHA1/MD5 PASS/FAIL、ignored hash、unsupported SHA-256、signature NOT_VERIFIED、external data unsupported。此测试只读取 TFTP 接收的 RAM 文件，不触碰 eMMC/SPI/NAND。
-- FIT 语义测试通过前，P7-2B 不验收；不安排设备线下操作。
+- P7-2B FIT 语义实机验收已通过；无需重复设备操作。
 
 ## 4. 安全与证据边界
 
@@ -46,3 +46,27 @@
 - 不验证 FIT signature 的真实性，不建立固件安装映射，不根据 load/entry 属性执行或复制数据。
 - Hash PASS 仅证明对应 inline payload 与 FIT 中声明的摘要匹配，不等于签名可信、来源可信或 PA-220 可安全启动。
 - 所有分区枚举与未来目标映射继续按 D-022 同时兼容 DOS/MBR 与 GPT；当前设备已验证的 eMMC 格式仍是 DOS/MBR。
+
+## 5. PA-220 实机 FIT 语义验收 — PASS（2026-11-27）
+
+设备使用 Nov 27 09:04:34 Stage3 build；TFTP host 192.168.2.10，设备地址 192.168.2.2，接口 octrgmii0。两个 fixture 均接收到 RAM 0x20000000，仅执行 `pa220 image preview`。
+
+### 正常 fixture
+
+- TFTP：2,518 bytes；格式 FIT/FDT；CRC32 `f128aa47`；SHA-256 `db96358852a1c47fe7788c5ecf89093daf6d26142b3e946a3f8ca7a1d29ff565`，与预期 fixture 一致。
+- Kernel、ramdisk、FDT 均识别；inline data 分别为 256、28、24 bytes。
+- Kernel 与 ramdisk 的 CRC32、SHA1、MD5 均 PASS；ignored hash 为 IGNORED；SHA-256 为 UNSUPPORTED；signature 为 NOT_VERIFIED。
+- External-data image 明确为 EXTERNAL_DATA_UNSUPPORTED。
+- default configuration conf-1 的 kernel/ramdisk/fdt 引用全部 RESOLVED。
+- `FIT images=4 configurations=1 hash_failures=0`；signature capability NOT ENABLED；target mapping UNMAPPED；actions NONE。
+
+### 损坏 hash fixture
+
+- TFTP：2,518 bytes；格式 FIT/FDT；CRC32 `1b55a6a2`；SHA-256 `a2cc42cf33f94a5ef306068fb9e88a8b84e746fc672379227494aac1ea504f02`，与预期 fixture 一致。
+- Kernel 的 CRC32、SHA1、MD5 均 FAIL；ramdisk 对应三种 hash 均 PASS。
+- ignored/unsupported/signature/external-data/configuration 状态与预期一致。
+- `FIT images=4 configurations=1 hash_failures=1`；target mapping UNMAPPED；actions NONE。
+
+### 验收结论与边界
+
+正常与损坏两个向量均由目标设备实际解析，状态分类与预期完全一致。Hash PASS 仅代表 inline payload 与声明摘要匹配，不代表签名可信或启动安全。整个测试没有调用 image load/boot 路径，没有读写 eMMC/SPI/NAND，没有执行 `saveenv`，没有持久化写入。该验收不批准任何安装映射。
