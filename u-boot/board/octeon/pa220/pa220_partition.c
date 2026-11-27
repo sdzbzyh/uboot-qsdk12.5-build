@@ -18,7 +18,8 @@ static uint32_t crc32_bytes(const uint8_t *p,uint32_t n){
  return c^0xffffffffU;
 }
 static int read1(pa220_sector_read_fn fn,void *ctx,uint64_t lba,uint64_t cap,uint8_t *b){
- if(lba>=cap) return -1; return fn(ctx,lba,b)?-1:0;
+ if(lba>=cap) return -1;
+ return fn(ctx,lba,b)?-1:0;
 }
 static int append(struct pa220_partition_table *o,uint64_t s,uint64_t n,uint8_t type,uint8_t kind){
  uint64_t e,pe; uint32_t i;
@@ -76,7 +77,8 @@ static int gpt_header(pa220_sector_read_fn fn,void *ctx,uint64_t cap,uint64_t lb
  if(rd64(h+40)>rd64(h+48) || rd64(h+48)>=cap) return 0;
  *entries_lba=rd64(h+72); *count=rd32(h+80); *esz=rd32(h+84); *array_crc=rd32(h+88);
  if(!*count||*count>GPT_MAX_ENTRIES||*esz<128||*esz>GPT_MAX_ENTRY_SIZE||(*esz&7)) return 0;
- if(*count > UINT32_MAX / *esz) return 0; bytes=(*count)*(*esz);
+ if(*count > UINT32_MAX / *esz) return 0;
+ bytes=(*count)*(*esz);
  if(*entries_lba>=cap || (uint64_t)((bytes+511U)/512U)>cap-*entries_lba) return 0;
  return 1;
 }
@@ -96,8 +98,10 @@ static int scan_gpt(pa220_sector_read_fn fn,void *ctx,struct pa220_partition_tab
     pc!=bc||pe!=be||pcrc!=bcrc||pl==bl) return PA220_PT_CORRUPT;
  bytes=pc*pe; memset(pa,0,sizeof(pa)); memset(ba,0,sizeof(ba));
  for(i=0;i<(bytes+511U)/512U;i++){
-  if(read1(fn,ctx,pl+i,o->capacity,sec)<0) return PA220_PT_IO; memcpy(pa+i*512,sec,512);
-  if(read1(fn,ctx,bl+i,o->capacity,sec)<0) return PA220_PT_IO; memcpy(ba+i*512,sec,512);
+  if(read1(fn,ctx,pl+i,o->capacity,sec)<0) return PA220_PT_IO;
+  memcpy(pa+i*512,sec,512);
+  if(read1(fn,ctx,bl+i,o->capacity,sec)<0) return PA220_PT_IO;
+  memcpy(ba+i*512,sec,512);
  }
  if(crc32_bytes(pa,bytes)!=pcrc||crc32_bytes(ba,bytes)!=bcrc||memcmp(pa,ba,bytes)) return PA220_PT_CORRUPT;
  first=rd64(ph+40); last=rd64(ph+48);
@@ -116,7 +120,8 @@ static int scan_gpt(pa220_sector_read_fn fn,void *ctx,struct pa220_partition_tab
 }
 int pa220_partition_scan(pa220_sector_read_fn fn,void *ctx,uint64_t capacity,struct pa220_partition_table *out){
  uint8_t m[512]; enum pa220_pt_status st;
- if(!out) return -1; memset(out,0,sizeof(*out)); out->capacity=capacity;
+ if(!out) return -1;
+ memset(out,0,sizeof(*out)); out->capacity=capacity;
  if(!fn||capacity<2||read1(fn,ctx,0,capacity,m)<0){out->status=PA220_PT_IO;return -1;}
  if(rd16(m+510)!=MBR_SIG){out->status=PA220_PT_UNKNOWN;return -1;}
  if(m[450]==0xee) { out->format=PA220_PT_GPT; st=scan_gpt(fn,ctx,out); }
