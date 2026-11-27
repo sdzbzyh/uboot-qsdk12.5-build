@@ -57,6 +57,11 @@ static int add_ok(uint64_t a, uint64_t b)
 {
     return b <= UINT64_MAX - a;
 }
+static int ranges_disjoint(uint64_t a, uint64_t alen,
+                           uint64_t b, uint64_t blen)
+{
+    return !alen || !blen || a + alen <= b || b + blen <= a;
+}
 const char *pa220_image_format_name(enum pa220_image_format f)
 {
     switch (f) {
@@ -130,16 +135,37 @@ static int parse_uimage(const uint8_t *p, uint64_t n, struct pa220_image_info *o
 static int parse_fdt(const uint8_t *p, uint64_t n, struct pa220_image_info *o)
 {
     uint32_t total, so, sto, ro, ss, sz, ver, last;
+    uint64_t rsv_end;
+    int terminated = 0;
     if (n < 40 || rd32(p, 0) != PA220_FDT_MAGIC) return -1;
     total = rd32(p + 4, 0); so = rd32(p + 8, 0); sto = rd32(p + 12, 0);
     ro = rd32(p + 16, 0); ver = rd32(p + 20, 0); last = rd32(p + 24, 0);
     ss = rd32(p + 32, 0); sz = rd32(p + 36, 0);
     if (total < 40 || total > n || ver < 16 || ver > 17 ||
         last < 16 || last > ver || (ro & 7) || ro < 40 ||
-        !range_ok(ro, 16, total) || so < 40 || sto < 40 ||
-        !range_ok(so, sz, total) || !range_ok(sto, ss, total)) return -1;
+        so < 40 || sto < 40 || !range_ok(so, sz, total) ||
+        !range_ok(sto, ss, total) ||
+        !ranges_disjoint(so, sz, sto, ss) ||
+        !range_ok(ro, 16, total))
+        return -1;
+    rsv_end = ro;
+    while (range_ok(rsv_end, 16, total)) {
+        uint64_t address = rd64(p + rsv_end, 0);
+        uint64_t length = rd64(p + rsv_end + 8, 0);
+        rsv_end += 16;
+        if (!address && !length) {
+            terminated = 1;
+            break;
+        }
+        if (!add_ok(address, length))
+            return -1;
+    }
+    if (!terminated ||
+        !ranges_disjoint(ro, rsv_end - ro, so, sz) ||
+        !ranges_disjoint(ro, rsv_end - ro, sto, ss))
+        return -1;
     memset(o, 0, sizeof(*o)); o->format = PA220_IMAGE_FIT_FDT;
-    o->total_size = n; o->header_size = 40; o->payload_size = total - 40;
+    o->total_size = total; o->header_size = 40; o->payload_size = total - 40;
     return 0;
 }
 static int parse_elf(const uint8_t *p, uint64_t n, struct pa220_image_info *o)
@@ -236,6 +262,8 @@ static int pa220_fit_verify_hashes(const void *fit, int image_node)
             external = 1;
         printf("  data: %s\n", external ?
                "EXTERNAL_DATA_UNSUPPORTED" : "INLINE_DATA_MISSING");
+        if (!external)
+            failures++;
     } else {
         printf("  inline_data_size: 0x%llx (%llu bytes)\n",
                (unsigned long long)data_size,
@@ -306,7 +334,7 @@ static int pa220_fit_verify_hashes(const void *fit, int image_node)
 
 static int pa220_fit_preview(const void *fit, uint64_t received_size)
 {
-    int images_node, confs_node, node, ret;
+    int images_node, confs_node, node;
     int image_count = 0, config_count = 0, hash_failures = 0;
     int bad = 0, depth = 0, walk;
     const char *description;
