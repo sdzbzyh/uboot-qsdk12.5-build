@@ -25,7 +25,7 @@ P6-1A/B/C 软件门与 P6-A live descriptor 只读预检均已通过。P6-B 首�
 - 传输中出现一次 `rgmii rx` transient/drop warning；接收最终成功。无 pcap，不声称已确认 block size/块数。
 - 本轮测试结束后设备可断电；未调用 `saveenv`，未执行 loader/启动命令，未写持久化介质。
 
-下一步先审查生产 reservation 上限与 abort/timeout 状态清理，再设计最小风险的边界/失败用例。不得直接用 32 MiB 文件或随意制造网络中断；先从代码与 Host Harness 确认测试向量能精确触发目标分支。
+下一步使用生成器创建 32 MiB 精确上限与 32 MiB+1 超限向量，按 P6-PLAN 第 4 节逐项验证成功边界与失败元数据清理；超限拒绝阶段需用 pcap 区分 OACK tsize 拒绝和 DATA reservation 拒绝。中断/超时测试另行采用可控延迟方式。
 
 ### P6-1A 设计要点
 
