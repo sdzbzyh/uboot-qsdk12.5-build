@@ -52,6 +52,20 @@ P6 只负责将一个文件接收到经验证的 RAM 区间，并对接收结果
 - 传输中出现一次 `Receive error (code 11: rgmii rx), dropping`，随后传输成功。保留为 transient RX warning，不代表链路稳定性已验收。
 - 无 pcap，不推断协商 block size、DATA block 数量或终止块形态。
 
+### 下一轮 reservation 边界测试向量（已由生成器支持）
+
+生产默认上限为 32 MiB，live `__tmp_load` 为 256 MiB。无需改动生产配置即可验证实际最大 reservation：
+
+- 精确上限：`python3 tools/pa220/make-p6-get-fixture.py --size 33554432`，生成 32 MiB 合法 legacy-uImage；预期完整接收成功，设备 `filesize=2000000`（hex），格式识别成功。
+  - 预期 CRC32：`97257c28`
+  - 预期 SHA-256：`fe773a13c9bfa1759c32826302e0b9a0e2ba6c88de9841219a2337d17861f526`
+- 超上限 1 byte：`python3 tools/pa220/make-p6-get-fixture.py --size 33554433`，生成 32 MiB + 1 byte 文件；预期 TFTP GET 失败且 `filesize`/`fileaddr` 均不发布。
+  - 预期 CRC32：`d9aa897f`
+  - 预期 SHA-256：`b92c884a7f921c6065d1e8a7bf696aa26d6ef0ef61d17effa71b7a2656e828d2`
+- 超限拒绝可能发生在服务器 OACK 的 `tsize` 检查，也可能在 DATA block 超出 reservation 时发生；必须用 pcap/服务端日志确认实际拒绝阶段，不得把前者描述成 DATA 写入越界测试。
+- 每次 GET 后只读检查 `printenv filesize fileaddr` 和 `pa220 memory`。超限失败后两项应不存在，descriptor 不变。不得执行任何 loader/启动命令。
+- 中断/超时测试另行安排受控延迟/停止服务器的方式；不得依赖随机拔网线或不可控时机按 Ctrl-C。
+
 **P6-B 目前仅成功路径通过，整体仍未验收。** 精确 reservation 边界/越界拒绝，以及中断/超时失败后的状态清理和元数据失效仍待实机验证。未执行 loader、启动命令、`saveenv` 或持久化写入。
 
 P6-B 只验证 TFTP GET，不代表 TFTP Server/WRQ、PUT、HTTP upload 或 ELF loader 写入安全。
