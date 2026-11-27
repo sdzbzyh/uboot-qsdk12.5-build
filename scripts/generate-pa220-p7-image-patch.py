@@ -33,7 +33,9 @@ def main():
     cmd_start = bs.index("U_BOOT_CMD(pa220,")
     cmd_end = bs.index(");", cmd_start) + 2
     cmd_text = bs[cmd_start:cmd_end]
-    cmd_text = replace_once(cmd_text, '");', '\\n"\n\t   "pa220 image preview - parse current RAM image and print a read-only plan");', "pa220 usage")
+    close_quote = cmd_text.rfind('"')
+    if close_quote < 0: raise RuntimeError("pa220 command help string terminator missing")
+    cmd_text = cmd_text[:close_quote] + '\\n"\n\t   "pa220 image preview - parse current RAM image and print a read-only plan"' + cmd_text[close_quote:]
     bs = bs[:cmd_start] + cmd_text + bs[cmd_end:]
     ms=replace_once(ms,"COBJS\t= $(BOARD)_board.o","COBJS\t= $(BOARD)_board.o pa220_image.o","board object integration")
     with tempfile.TemporaryDirectory() as td:
