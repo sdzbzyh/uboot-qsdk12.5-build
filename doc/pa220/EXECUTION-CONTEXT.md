@@ -27,8 +27,9 @@ P7-1 parser、Host/ASan/UBSan、OCTEON 完整构建和 PA-220 实机 preview 均
 - 重要配置：PA-220 实际启用 SPI redundant environment（`0xe00000` / `0xe10000`），`saveenv` 会擦写 SPI NOR 64 KiB sector；板级文件顶部“RAM-only”注释与宏配置矛盾。P7-2 禁止调用 `saveenv`。
 - P7-2C live eMMC 只读取证已完成并归档：`reports/pa220/P7-2/EMMC-DEVICE-ACCEPTANCE.md`。实机介质是 DOS/MBR + extended/EBR logical partitions，不是 GPT；live `mmc part` 的 8 个分区条目与完整 User Area 镜像的离线 fdisk/parted/sfdisk 记录一致。
 - 已有 live 根目录探测：0:1、0:2 于 2026-11-27；0:3、0:5、0:6、0:8 于 2026-11-18。0:4 是扩展容器，0:7 是 swap。不要重复安排这些目录探测。
-- 当前唯一工作单元：P7-2B FIT 只读语义解析。P7-2C 不再等待设备输出；GPT primary/backup consistency 对当前 MBR 介质不适用。所有 eMMC install target 继续 UNMAPPED。
+- 当前唯一工作单元：P7-2B FIT 只读语义解析。生产代码已加入 `pa220_image.c`：bounded FDT structure/reservation-map validation、`/images`/`/configurations` 解析、inline data、CRC32/SHA1/MD5 hash 状态、ignored/unsupported 分类和 signature NOT_VERIFIED；外置 FIT data 明确 unsupported。Actions #45970127218 当时仍 in_progress，target compile/link 与专用 FIT fixture 尚未验收。详见 `reports/pa220/P7-2/FIT-IMPLEMENTATION.md`。P7-2C 不再等待设备输出。
 - 本轮没有读取并归档原始 MBR/EBR sector dump；不声称已完成 EBR 原始字节级审计。若未来确需该深度证据，再单独评估；当前 P7-2C inventory acceptance 不需要增加线下操作。
+- 通用存储兼容要求已写入 `doc/pa220/DECISIONS.md` D-022 和 `doc/pa220/P7-PLAN.md`：后续所有分区识别/映射同时支持 DOS/MBR（含 EBR）与 GPT（含主备 Header/Entry CRC）；按实际介质自动识别，混合/损坏/不一致 fail closed。当前 PA-220 只确认 MBR，不把本机结果冒充 GPT 验证。
 - P4 DHCP Client/Ping 实机验证仍是独立遗留项，P4 overall 不得标记 COMPLETE。
 
 ## 历史检查点（P6-B 完成前，保留审计记录）
