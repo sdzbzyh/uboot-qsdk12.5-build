@@ -103,3 +103,11 @@ Host 测试直接编译生产 helper，并从同一生成器注入生产 GET gat
 - 未执行真实 TFTP GET、未传输文件、未调用 `saveenv`、未写入任何持久化介质。
 
 P6-1C 已由 Actions #45600860179 验收通过，报告见 reports/pa220/P6-1C/ACCEPTANCE.md。P6-A 已通过，P6-B 首个成功路径已实机通过；当前状态以本文件顶部“当前唯一主线”为准。
+
+## 最新 P6-B 验收闭环（2026-11-27）
+
+- 受控中断实机报告：`reports/pa220/P6-B/CONTROLLED-INTERRUPTION-ACCEPTANCE.md`。
+- pcap：`C:\\pa220-p6-b\\pa220-p6-b-interrupt.pcapng`，10,998,760 bytes，SHA-256 `83B96A88C0AEC9983A7B429369396B715B9613CAA2312D0A42984508AB6840CA`。
+- Frames 13415/13416 payload 均为 `00 04 1a 32`（ACK block 6706），相隔约 4.999 秒。
+- U-Boot 报告 network interruption；失败后 filesize/fileaddr 不存在，live descriptor 未变化。
+- P6-B 实机测试矩阵已验收完成。未执行 loader/boot、saveenv 或持久化写入。
