@@ -77,4 +77,4 @@
 
 - P7-1 parser、Host Harness、ASan/UBSan、Actions OCTEON 完整构建及真实 PA-220 实机 preview 均已通过；云端证据见 `reports/pa220/P7-1/ACCEPTANCE.md`，实机串口证据见 `reports/pa220/P7-1/DEVICE-ACCEPTANCE.md`。
 - 实机已验证 wrapper TFTP 接收、uImage 校验、payload RAM-copy/compare、RAM Stage3 启动、外层 legacy uImage preview、内层 OCTEON bootloader preview 和 reservation descriptor 不变。
-- P7-1 验收完成。P7-2A SPI NOR 静态取证已通过；P7-2A SPI 静态取证与 P7-2C eMMC DOS/MBR 实机只读取证已完成；P7-2B FIT 语义解析仍待实施。P7 整体仍未完成。
+- P7-1 验收完成。P7-2A SPI NOR 静态取证与 P7-2C eMMC DOS/MBR 实机只读取证已完成；P7-2B FIT 语义解析仍待实施。P7 整体仍未完成。
