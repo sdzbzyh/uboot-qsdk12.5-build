@@ -74,7 +74,7 @@ static int scan_mbr(pa220_sector_read_fn fn,void *ctx,struct pa220_partition_tab
  }
  return PA220_PT_CORRUPT;
 }
-static int gpt_header(pa220_sector_read_fn fn,void *ctx,uint64_t cap,uint64_t lba,
+static int pa220_gpt_read_header(pa220_sector_read_fn fn,void *ctx,uint64_t cap,uint64_t lba,
                       uint8_t *h,uint64_t *entries_lba,uint32_t *count,uint32_t *esz,uint32_t *array_crc){
  uint32_t hs,stored,calc,bytes; uint8_t tmp[512];
  if(read1(fn,ctx,lba,cap,h)<0 || memcmp(h,"EFI PART",8)) return 0;
@@ -99,8 +99,8 @@ static int scan_gpt(pa220_sector_read_fn fn,void *ctx,struct pa220_partition_tab
     rd32(p+458)!=(o->capacity-1>0xffffffffULL?0xffffffffU:(uint32_t)(o->capacity-1))) return PA220_PT_AMBIGUOUS;
  for(i=1;i<4;i++) if(!empty_entry(p+446+i*16)) return PA220_PT_AMBIGUOUS;
  bl=o->capacity-1;
- if(!gpt_header(fn,ctx,o->capacity,1,ph,&pl,&pc,&pe,&pcrc) ||
-    !gpt_header(fn,ctx,o->capacity,bl,bh,&bl,&bc,&be,&bcrc)) return PA220_PT_CORRUPT;
+ if(!pa220_gpt_read_header(fn,ctx,o->capacity,1,ph,&pl,&pc,&pe,&pcrc) ||
+    !pa220_gpt_read_header(fn,ctx,o->capacity,bl,bh,&bl,&bc,&be,&bcrc)) return PA220_PT_CORRUPT;
  if(rd64(ph+32)!=o->capacity-1 || rd64(bh+32)!=1 ||
     memcmp(ph+56,bh+56,16)||rd32(ph+8)!=rd32(bh+8)||rd32(ph+12)!=rd32(bh+12)||rd64(ph+40)!=rd64(bh+40)||rd64(ph+48)!=rd64(bh+48)||
     pc!=bc||pe!=be||pcrc!=bcrc||pl==bl ||
