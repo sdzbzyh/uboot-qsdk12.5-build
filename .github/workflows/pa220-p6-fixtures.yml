@@ -1,0 +1,42 @@
+name: PA-220 P6 deterministic TFTP fixture generation
+on:
+  push:
+    branches: [feature/pa220-ubootkit-web]
+    paths:
+      - 'tools/pa220/make-p6-get-fixture.py'
+      - '.github/workflows/pa220-p6-fixtures.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  generate-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact triggering commit
+        uses: actions/checkout@v4
+        with:
+          ref: \${{ github.sha }}
+      - name: Generate 4 KiB, exact-limit and one-byte-over-limit fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/pa220/P6-B/fixtures
+          python3 -m py_compile tools/pa220/make-p6-get-fixture.py
+          python3 tools/pa220/make-p6-get-fixture.py --size 4096 --output artifacts/pa220/P6-B/fixtures/pa220-p6-get-4096.bin
+          python3 tools/pa220/make-p6-get-fixture.py --size 33554432 --output artifacts/pa220/P6-B/fixtures/pa220-p6-get-33554432.bin
+          python3 tools/pa220/make-p6-get-fixture.py --size 33554433 --output artifacts/pa220/P6-B/fixtures/pa220-p6-get-33554433.bin
+          test "$(stat -c %s artifacts/pa220/P6-B/fixtures/pa220-p6-get-4096.bin)" -eq 4096
+          test "$(stat -c %s artifacts/pa220/P6-B/fixtures/pa220-p6-get-33554432.bin)" -eq 33554432
+          test "$(stat -c %s artifacts/pa220/P6-B/fixtures/pa220-p6-get-33554433.bin)" -eq 33554433
+          sha256sum artifacts/pa220/P6-B/fixtures/*.bin | tee artifacts/pa220/P6-B/fixtures/SHA256SUMS
+          echo P6_FIXTURE_PYTHON_SYNTAX=PASS
+          echo P6_FIXTURE_4K=PASS
+          echo P6_FIXTURE_EXACT_32M=PASS
+          echo P6_FIXTURE_OVER_32M_BY_1=PASS
+      - name: Upload generated fixture set
+        uses: actions/upload-artifact@v4
+        with:
+          name: pa220-p6-get-fixtures-\${{ github.sha }}
+          path: artifacts/pa220/P6-B/fixtures/
+          if-no-files-found: error
+          retention-days: 60
