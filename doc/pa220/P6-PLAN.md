@@ -78,7 +78,7 @@ P6 只负责将一个文件接收到经验证的 RAM 区间，并对接收结果
 - 每次 GET 后只读检查 `printenv filesize fileaddr` 和 `pa220 memory`。超限失败后两项应不存在，descriptor 不变。不得执行任何 loader/启动命令。
 - 中断/超时测试另行安排受控延迟/停止服务器的方式；不得依赖随机拔网线或不可控时机按 Ctrl-C。
 
-**P6-B 目前 4 KiB、32 MiB 精确上限成功路径、32 MiB+1 OACK tsize 超限拒绝及失败清理均已通过实机验收；整体仍未验收。** 32 MiB+1 抓包仅见 RRQ 与 OACK（服务器返回 `tsize=33554433`），未见 DATA；设备在 tsize 校验阶段拒绝。失败后 `filesize`/`fileaddr` 均不存在，live descriptor 不变。完整证据见 [P6-B 32 MiB+1 OVERLIMIT ACCEPTANCE](../../reports/pa220/P6-B/32M-PLUS-1-OVERLIMIT-ACCEPTANCE.md)。仅受控中断/超时失败清理仍待实机验证。未执行 loader、启动命令、`saveenv` 或持久化写入。
+**截至本计划第 12 节，P6-B 实机测试矩阵已全部验收。** 32 MiB+1 在 OACK tsize 阶段拒绝；受控服务端中断/超时与失败清理也已通过，见 [CONTROLLED INTERRUPTION ACCEPTANCE](../../reports/pa220/P6-B/CONTROLLED-INTERRUPTION-ACCEPTANCE.md)。历史测试细节和证据链接保留在各报告中。未执行 loader、启动命令、`saveenv` 或持久化写入。
 
 P6-B 只验证 TFTP GET，不代表 TFTP Server/WRQ、PUT、HTTP upload 或 ELF loader 写入安全。
 
@@ -175,9 +175,9 @@ P6-1B 已完成生产实现、Host GCC/ASan/UBSan、OCTEON object、N32 relocata
 
 不机械沿用旧交接提示中的 blanket 禁止项；按当前阶段选择最小必要权限和风险最低的验证方式。若旧限制妨碍低风险只读/RAM-only 验证，应以本节和 `doc/pa220/EXECUTION-CONTEXT.md` 的最新项目决策为准。破坏性操作仍需单独审批。
 
-### 当前后续交付
+### 当前后续交付（历史记录；当前状态以第 12 节及 EXECUTION-CONTEXT.md 顶部为准）
 
-P6-1A、P6-1B、P6-1C 软件门均已完成；下一步先安排 P6-A live descriptor/DRAM/reservation 只读预检。P6-A 通过并获得单独确认后，才考虑 RAM-only TFTP GET。最终 Web 页面另按 `doc/pa220/WEB-UI-DESIGN.md` 实施，视觉参考 uBootKit Argon 风格；Web UI 不因视觉参考而开放未经验证的写功能。
+P6-1A、P6-1B、P6-1C 软件门、P6-A 只读预检及 P6-B 实机测试矩阵均已完成。最终 Web 页面另按 `doc/pa220/WEB-UI-DESIGN.md` 实施，视觉参考 uBootKit Argon 风格；Web UI 不因视觉参考而开放未经验证的写功能。
 
 
 ## 10. P6-1A 实施记录（2026-11-25）
