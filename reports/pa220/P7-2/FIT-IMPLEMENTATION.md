@@ -3,7 +3,7 @@
 - 日期：2026-11-27
 - 固定 PA-220 源码：`sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
 - 集成分支：`feature/pa220-ubootkit-web`
-- 当前状态：**IMPLEMENTATION STAGED — TARGET BUILD/ACTIONS VALIDATION PENDING**
+- 当前状态：**TARGET BUILD PASS — FIT RUNTIME VALIDATION PENDING**
 - 生产入口：`pa220 image preview`
 - 实现位置：`u-boot/board/octeon/pa220/pa220_image.c`
 
@@ -30,8 +30,13 @@
 
 - P7-1 既有 Host GCC / ASan / UBSan 的 5 suites 仍是旧 image parser 覆盖，不代表本轮新增 FIT 语义分支已经通过 host FIT fixtures。
 - 新增 FIT 语义代码位于 target-only 分支，需先由 pinned Cavium OCTEON SDK 完整构建验证其 API/链接兼容。
-- 本轮代码 push 自动触发 Actions workflow `pa220-p7-image-preview`，run #45970127218；当前记录时状态为 `in_progress`，不能写 PASS。
-- 下一软件门：检查该 Actions 的 Host/ASan/UBSan 与完整 OCTEON build；若编译/链接通过，再增加独立 FIT fixture vectors，覆盖 inline data、default configuration、kernel/ramdisk/fdt refs、CRC32/SHA1/MD5 PASS/FAIL、ignored hash、unsupported algorithm、signature NOT_VERIFIED、external data unsupported、malformed tree/offset。
+- Actions #45970127218（代码编译检查点）SUCCESS：Host GCC、ASan/UBSan、Cavium GCC 4.7.0 OCTEON object、N32 relocatable link、完整 U-Boot final link 均通过。
+- Actions #45970607698 SUCCESS：新增 FIT fixtures 生成、Host GCC/ASan/UBSan、固定 SDK 校验、完整 OCTEON build、生成补丁幂等性均通过。Artifact [15184393205](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45970607698/artifacts/15184393205)。
+- 正常 FIT fixture：2,518 bytes，SHA-256 `db96358852a1c47fe7788c5ecf89093daf6d26142b3e946a3f8ca7a1d29ff565`。
+- Hash-fail FIT fixture：2,518 bytes，SHA-256 `a2cc42cf33f94a5ef306068fb9e88a8b84e746fc672379227494aac1ea504f02`。
+- 新 U-Boot BIN：1,394,728 bytes，SHA-256 `9bf05f6915745d315023b3184cdf2668428fd5f10234d2e777e3f9372024e586`；Stage3 wrapper：1,394,792 bytes，SHA-256 `6d2b4d738934789b500bbe956e6cf828152c9ffcba8c8a66adb8528ff52ba9fe`。
+- Actions 的 5 suites 是 P7-1 通用镜像解析器既有 Host/ASan/UBSan 测试，不等于新增 target-only FIT 语义路径已通过运行测试。FIT fixtures 已生成，尚待 PA-220 RAM-only 实机执行。
+- 下一门：在 PA-220 RAM 启动该新 U-Boot，分别预览两个 FIT fixture，验证 default configuration、kernel/ramdisk/fdt refs、CRC32/SHA1/MD5 PASS/FAIL、ignored hash、unsupported SHA-256、signature NOT_VERIFIED、external data unsupported。此测试只读取 TFTP 接收的 RAM 文件，不触碰 eMMC/SPI/NAND。
 - FIT 语义测试通过前，P7-2B 不验收；不安排设备线下操作。
 
 ## 4. 安全与证据边界
