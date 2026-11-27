@@ -63,6 +63,9 @@ P6 只负责将一个文件接收到经验证的 RAM 区间，并对接收结果
   - 预期 CRC32：`d9aa897f`
   - 预期 SHA-256：`b92c884a7f921c6065d1e8a7bf696aa26d6ef0ef61d17effa71b7a2656e828d2`
 - 超限拒绝可能发生在服务器 OACK 的 `tsize` 检查，也可能在 DATA block 超出 reservation 时发生；必须用 pcap/服务端日志确认实际拒绝阶段，不得把前者描述成 DATA 写入越界测试。
+
+- GitHub Actions [#45938976540](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45938976540) SUCCESS：生成器语法、4 KiB、32 MiB 精确上限、32 MiB+1 四项检查均 PASS。
+- Artifact [15171887471](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45938976540/artifacts/15171887471) 包含三个二进制文件及 `SHA256SUMS`；ZIP SHA-256：`026873dea7a154d0b455b671998d9ccf75ceebc797ebc38cff2a0d3a2a4cd205`。
 - 每次 GET 后只读检查 `printenv filesize fileaddr` 和 `pa220 memory`。超限失败后两项应不存在，descriptor 不变。不得执行任何 loader/启动命令。
 - 中断/超时测试另行安排受控延迟/停止服务器的方式；不得依赖随机拔网线或不可控时机按 Ctrl-C。
 
