@@ -10,6 +10,7 @@ on:
       - 'tests/pa220/image-preview/**'
       - 'tools/pa220/make-p7-uimage-fixture.py'
       - 'tools/pa220/make-p7-stage3-uimage-wrapper.py'
+      - 'tools/pa220/make-p7-fit-fixture.py'
       - '.github/workflows/pa220-p7-image-preview.yml'
   workflow_dispatch:
 permissions:
@@ -38,6 +39,14 @@ jobs:
           set -euo pipefail
           python3 tools/pa220/make-p7-uimage-fixture.py --output reports/pa220/P7-1/pa220-p7-uimage-preview.bin | tee reports/pa220/P7-1/11-uimage-fixture.txt
           sha256sum reports/pa220/P7-1/pa220-p7-uimage-preview.bin | tee -a reports/pa220/P7-1/11-uimage-fixture.txt
+      - name: Generate FIT semantic preview fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/pa220/make-p7-fit-fixture.py --output-dir reports/pa220/P7-1 | tee reports/pa220/P7-1/13-fit-fixtures.txt
+          sha256sum reports/pa220/P7-1/pa220-p7-fit-*.itb | tee -a reports/pa220/P7-1/13-fit-fixtures.txt
+          grep -q 'crc32/sha1/md5 PASS' reports/pa220/P7-1/13-fit-fixtures.txt
+          grep -q 'kernel sha1/crc32/md5 FAIL' reports/pa220/P7-1/13-fit-fixtures.txt
       - name: Download and verify pinned Cavium OCTEON SDK
         env:
           GH_TOKEN: ${{ secrets.OCTEON_SDK_READ_TOKEN }}
