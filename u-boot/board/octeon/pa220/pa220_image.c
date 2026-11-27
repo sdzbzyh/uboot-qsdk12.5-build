@@ -455,7 +455,7 @@ static int pa220_fit_preview(const void *fit, uint64_t received_size)
                     if (!sig_name)
                         return -1;
                     if (!strncmp(sig_name, "signature", 9))
-                        printf("  configuration signature %s: NOT_VERIFIED\\n",
+                        printf("  configuration signature %s: NOT_VERIFIED\n",
                                sig_name);
                 }
                 if (sig_node != -FDT_ERR_NOTFOUND)
