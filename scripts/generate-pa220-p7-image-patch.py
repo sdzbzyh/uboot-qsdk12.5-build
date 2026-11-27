@@ -24,7 +24,11 @@ def main():
 \t\treturn pa220_image_preview();
 
 \treturn CMD_RET_USAGE;'''
-    bs=replace_once(bs,dispatch,dispatch_new,"pa220 image preview dispatch")
+    fn_start = bs.index("static int do_pa220(")
+    cmd_start = bs.index("U_BOOT_CMD(pa220,", fn_start)
+    fn_body = bs[fn_start:cmd_start]
+    fn_body = replace_once(fn_body,dispatch,dispatch_new,"pa220 image preview dispatch")
+    bs = bs[:fn_start] + fn_body + bs[cmd_start:]
     bs=replace_once(bs,"U_BOOT_CMD(pa220, 2, 1, do_pa220,","U_BOOT_CMD(pa220, 3, 1, do_pa220,","pa220 maxargs")
     old_usage = '"pa220 clock   - show initialized CORE, SCLK and DDR clock values");'
     new_usage = '"pa220 clock   - show initialized CORE, SCLK and DDR clock values\\n"\n\t   "pa220 image preview - parse current RAM image and print a read-only plan");'
