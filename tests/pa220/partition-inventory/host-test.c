@@ -4,7 +4,8 @@
 #include <pa220_partition.h>
 #define DISK_SECTORS 256
 static unsigned char disk[DISK_SECTORS][512];
-static int rd(void *x,uint64_t l,unsigned char b[512]){(void)x;if(l>=DISK_SECTORS)return -1;memcpy(b,disk[l],512);return 0;}
+static int fail_read_lba=-1;
+static int rd(void *x,uint64_t l,unsigned char b[512]){(void)x;if(l>=DISK_SECTORS||(int)l==fail_read_lba)return -1;memcpy(b,disk[l],512);return 0;}
 static void w32(unsigned char*p,unsigned v){p[0]=v;p[1]=v>>8;p[2]=v>>16;p[3]=v>>24;}
 static void w64(unsigned char*p,unsigned long long v){w32(p,(unsigned)v);w32(p+4,(unsigned)(v>>32));}
 static unsigned crc(const unsigned char*p,unsigned n){unsigned c=~0U,i,j;for(i=0;i<n;i++){c^=p[i];for(j=0;j<8;j++)c=(c>>1)^((c&1)?0xedb88320U:0);}return ~c;}
@@ -35,6 +36,12 @@ static int test_gpt_hybrid(void){struct pa220_partition_table t;make_gpt();mbr_e
 struct sparse_sector { uint64_t lba; unsigned char data[512]; };
 static struct sparse_sector sparse[5];
 static int sparse_rd(void *x,uint64_t l,unsigned char b[512]){unsigned i;(void)x;for(i=0;i<5;i++)if(sparse[i].lba==l){memcpy(b,sparse[i].data,512);return 0;}return -1;}
+
+static int test_ebr_read_error(void){struct pa220_partition_table t;clear_disk();sig(disk[0]);mbr_entry(disk[0]+446,0x0f,10,100);fail_read_lba=10;if(!pa220_partition_scan(rd,0,DISK_SECTORS,&t)||t.status!=PA220_PT_IO)return 1;fail_read_lba=-1;return 0;}
+static int test_gpt_read_error(void){struct pa220_partition_table t;make_gpt();fail_read_lba=254;if(!pa220_partition_scan(rd,0,DISK_SECTORS,&t)||t.status!=PA220_PT_IO)return 1;fail_read_lba=-1;return 0;}
+static int test_gpt_backup_header_crc(void){struct pa220_partition_table t;make_gpt();disk[255][16]^=1;if(!pa220_partition_scan(rd,0,DISK_SECTORS,&t)||t.status!=PA220_PT_CORRUPT)return 1;return 0;}
+static int test_gpt_backup_lba_mismatch(void){struct pa220_partition_table t;make_gpt();gpt_header(disk[255],254,1,254,4,128,crc(disk[254],512));if(!pa220_partition_scan(rd,0,DISK_SECTORS,&t)||t.status!=PA220_PT_CORRUPT)return 1;return 0;}
+
 static int test_pa220_live_layout(void){
  struct pa220_partition_table t; const uint64_t cap=57802752ULL, ext=16004096ULL;
  memset(sparse,0,sizeof(sparse)); sparse[0].lba=0; sig(sparse[0].data);
@@ -50,4 +57,4 @@ static int test_pa220_live_layout(void){
  return 0;
 }
 
-int main(void){int e=0;e+=test_mbr();e+=test_mbr_overlap();e+=test_mbr_bad_boot();e+=test_ebr();e+=test_cycle();e+=test_ebr_outside();e+=test_ebr_two_node_cycle();e+=test_gpt();e+=test_gpt_overlap();e+=test_gpt_duplicate_guid();e+=test_gpt_outside_usable();e+=test_gpt_header_crc();e+=test_gpt_entry_crc();e+=test_gpt_backup_mismatch();e+=test_gpt_hybrid();e+=test_pa220_live_layout();if(e){printf("partition inventory failures=%d\n",e);return 1;}puts("PA220_PARTITION_INVENTORY_HOST=PASS");return 0;}
+int main(void){int e=0;e+=test_mbr();e+=test_mbr_overlap();e+=test_mbr_bad_boot();e+=test_ebr();e+=test_cycle();e+=test_ebr_outside();e+=test_ebr_two_node_cycle();e+=test_gpt();e+=test_gpt_overlap();e+=test_gpt_duplicate_guid();e+=test_gpt_outside_usable();e+=test_gpt_header_crc();e+=test_gpt_entry_crc();e+=test_gpt_backup_mismatch();e+=test_gpt_hybrid();e+=test_ebr_read_error();e+=test_gpt_read_error();e+=test_gpt_backup_header_crc();e+=test_gpt_backup_lba_mismatch();e+=test_pa220_live_layout();if(e){printf("partition inventory failures=%d\n",e);return 1;}puts("PA220_PARTITION_INVENTORY_HOST=PASS");return 0;}
