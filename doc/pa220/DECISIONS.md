@@ -165,3 +165,12 @@
 - 出现一次 `rgmii rx` transient/drop warning，随后传输完成。无 pcap，不推断 block size 或 DATA block 数量。
 - 状态：P6-B PARTIAL — initial success path accepted；边界拒绝及中断/超时失败清理仍待验收。未执行 loader、`saveenv` 或持久化写入。
 - 本决策取代 D-016 的无效测试向量；D-016 保留为历史设计记录，不再作为测试文件规范。
+
+## D-022：存储分区表同时兼容 DOS/MBR 与 GPT
+
+- 日期：2026-11-27
+- 决策：PA-220 U-BootKit 后续的介质识别、分区枚举、镜像布局分析和 dry-run 目标映射必须同时支持 DOS/MBR（含 extended/EBR logical partitions）与 GPT（含 Protective MBR、主/备 Header 和 Entry Array 校验）。
+- 理由：PA-220 当前实机 eMMC 已确认使用 DOS/MBR；源码同时启用 DOS 与 EFI/GPT 分区支持。未来设备或镜像可能使用 GPT，不能把当前设备布局当作全局假设。
+- 实施要求：按实际介质内容自动识别；统一输出 source format、分区索引、起始 LBA、扇区数、type/GUID、name、attributes 和可用 UUID。MBR 必须验证 EBR 链与 extended container 边界；GPT 必须验证 CRC、LBA 边界和主备结构一致性。Hybrid MBR、签名冲突、损坏或不一致必须 fail closed 并报告，不修复、不写入。
+- 验证要求：MBR 与 GPT 各自建立独立 host fixture；GPT 测试覆盖主备一致、CRC 错误、越界、重叠和不一致，MBR 测试覆盖 primary、extended/EBR、循环链和越界。真实 PA-220 MBR 证据不替代 GPT 测试。
+- 影响：当前 PA-220 eMMC 仍按已验证的 DOS/MBR 解释；所有后续通用分区代码与文档必须保留两种格式兼容。
