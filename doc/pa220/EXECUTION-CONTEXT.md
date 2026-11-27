@@ -6,7 +6,7 @@
 
 - 集成仓库：`sdzbzyh/uboot-qsdk12.5-build`
 - 分支：`feature/pa220-ubootkit-web`
-- 当前归档 HEAD（2026-11-27）：`70e879e1877a7bf42e0c664e391c3868069b9e2a`
+- 当前归档 HEAD（2026-11-27）：`624a38dda5970f8a22a4bddaff623a91b03cb4af`
 - 本文件建立时 HEAD：`8105ff0cf1da7e3aaf5c2b9c6b628947eb260be6`（历史记录）
 - P6-1C 验收与计划文档更新基线 HEAD（本文件本次更新前）：`7503f421e82dc16f0343b4092eb86458a181647f`
 - PA-220 固定源码：`sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
