@@ -20,6 +20,13 @@ static int test_ebr_outside(void){struct pa220_partition_table t;clear_disk();si
 static void gpt_header(unsigned char*h,unsigned cur,unsigned alt,unsigned ent,unsigned ec,unsigned es,unsigned ecrc){memcpy(h,"EFI PART",8);w32(h+8,0x10000);w32(h+12,92);w64(h+24,cur);w64(h+32,alt);w64(h+40,34);w64(h+48,220);memset(h+56,0x11,16);w64(h+72,ent);w32(h+80,ec);w32(h+84,es);w32(h+88,ecrc);w32(h+16,0);w32(h+16,crc(h,92));}
 static void make_gpt(void){unsigned char ent[512];clear_disk();sig(disk[0]);mbr_entry(disk[0]+446,0xee,1,255);memset(ent,0,sizeof(ent));memset(ent,0x22,16);memset(ent+16,0x33,16);w64(ent+32,40);w64(ent+40,50);memcpy(disk[2],ent,512);gpt_header(disk[1],1,255,2,4,128,crc(ent,512));memcpy(disk[254],ent,512);gpt_header(disk[255],255,1,254,4,128,crc(ent,512));}
 static int test_gpt(void){struct pa220_partition_table t;make_gpt();if(pa220_partition_scan(rd,0,DISK_SECTORS,&t)||t.format!=PA220_PT_GPT||t.count!=1||t.parts[0].start_lba!=40)return 1;return 0;}
+
+static void finalize_gpt(void){unsigned c=crc(disk[2],512);gpt_header(disk[1],1,255,2,4,128,c);gpt_header(disk[255],255,1,254,4,128,c);memcpy(disk[254],disk[2],512);}
+static int test_gpt_overlap(void){struct pa220_partition_table t;make_gpt();memset(disk[2]+128,0x44,16);memset(disk[2]+144,0x55,16);w64(disk[2]+160,45);w64(disk[2]+168,60);finalize_gpt();if(!pa220_partition_scan(rd,0,DISK_SECTORS,&t)||t.status!=PA220_PT_CORRUPT)return 1;return 0;}
+static int test_gpt_duplicate_guid(void){struct pa220_partition_table t;make_gpt();memset(disk[2]+128,0x44,16);memcpy(disk[2]+144,disk[2]+16,16);w64(disk[2]+160,60);w64(disk[2]+168,70);finalize_gpt();if(!pa220_partition_scan(rd,0,DISK_SECTORS,&t)||t.status!=PA220_PT_CORRUPT)return 1;return 0;}
+static int test_gpt_outside_usable(void){struct pa220_partition_table t;make_gpt();w64(disk[2]+40,221);finalize_gpt();if(!pa220_partition_scan(rd,0,DISK_SECTORS,&t)||t.status!=PA220_PT_CORRUPT)return 1;return 0;}
+static int test_ebr_two_node_cycle(void){struct pa220_partition_table t;clear_disk();sig(disk[0]);mbr_entry(disk[0]+446,0x0f,10,100);sig(disk[10]);mbr_entry(disk[10]+462,0x0f,10,90);sig(disk[20]);mbr_entry(disk[20]+462,0x0f,0,100);if(!pa220_partition_scan(rd,0,DISK_SECTORS,&t)||t.status!=PA220_PT_CORRUPT)return 1;return 0;}
+
 static int test_gpt_header_crc(void){struct pa220_partition_table t;make_gpt();disk[1][16]^=1;if(!pa220_partition_scan(rd,0,DISK_SECTORS,&t)||t.status!=PA220_PT_CORRUPT)return 1;return 0;}
 static int test_gpt_entry_crc(void){struct pa220_partition_table t;make_gpt();disk[2][80]^=1;disk[254][80]^=1;if(!pa220_partition_scan(rd,0,DISK_SECTORS,&t)||t.status!=PA220_PT_CORRUPT)return 1;return 0;}
 static int test_gpt_backup_mismatch(void){struct pa220_partition_table t;make_gpt();disk[254][80]^=1;gpt_header(disk[255],255,1,254,4,128,crc(disk[254],512));if(!pa220_partition_scan(rd,0,DISK_SECTORS,&t)||t.status!=PA220_PT_CORRUPT)return 1;return 0;}
@@ -35,7 +42,7 @@ static int test_pa220_live_layout(void){
  mbr_entry(sparse[0].data+462,0x83,3968,8000064);
  mbr_entry(sparse[0].data+478,0x83,8004032,8000064);
  mbr_entry(sparse[0].data+494,0x0f,16004096,41798656);
- sparse[1].lba=ext; sig(sparse[1].data); mbr_entry(sparse[1].data+446,0x83,16,24000048); mbr_entry(sparse[1].data+462,0x0f,24000064,17794560);
+ sparse[1].lba=ext; sig(sparse[1].data); mbr_entry(sparse[1].data+446,0x83,16,24000048); mbr_entry(sparse[1].data+462,0x0f,24000064,17798592);
  sparse[2].lba=40004160ULL; sig(sparse[2].data); mbr_entry(sparse[2].data+446,0x83,16,8000048); mbr_entry(sparse[2].data+462,0x0f,32000128,9798528);
  sparse[3].lba=48004224ULL; sig(sparse[3].data); mbr_entry(sparse[3].data+446,0x83,16,3952); mbr_entry(sparse[3].data+462,0x0f,32004096,9794560);
  sparse[4].lba=48008192ULL; sig(sparse[4].data); mbr_entry(sparse[4].data+446,0x82,16,9794544);
@@ -43,4 +50,4 @@ static int test_pa220_live_layout(void){
  return 0;
 }
 
-int main(void){int e=0;e+=test_mbr();e+=test_mbr_overlap();e+=test_mbr_bad_boot();e+=test_ebr();e+=test_cycle();e+=test_ebr_outside();e+=test_gpt();e+=test_gpt_header_crc();e+=test_gpt_entry_crc();e+=test_gpt_backup_mismatch();e+=test_gpt_hybrid();e+=test_pa220_live_layout();if(e){printf("partition inventory failures=%d\n",e);return 1;}puts("PA220_PARTITION_INVENTORY_HOST=PASS");return 0;}
+int main(void){int e=0;e+=test_mbr();e+=test_mbr_overlap();e+=test_mbr_bad_boot();e+=test_ebr();e+=test_cycle();e+=test_ebr_outside();e+=test_ebr_two_node_cycle();e+=test_gpt();e+=test_gpt_overlap();e+=test_gpt_duplicate_guid();e+=test_gpt_outside_usable();e+=test_gpt_header_crc();e+=test_gpt_entry_crc();e+=test_gpt_backup_mismatch();e+=test_gpt_hybrid();e+=test_pa220_live_layout();if(e){printf("partition inventory failures=%d\n",e);return 1;}puts("PA220_PARTITION_INVENTORY_HOST=PASS");return 0;}
