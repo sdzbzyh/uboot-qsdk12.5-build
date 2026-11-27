@@ -6,7 +6,7 @@
 
 - 集成仓库：`sdzbzyh/uboot-qsdk12.5-build`
 - 分支：`feature/pa220-ubootkit-web`
-- 当前归档 HEAD（2026-11-27）：`624a38dda5970f8a22a4bddaff623a91b03cb4af`
+- 当前归档 HEAD（2026-11-27）：`e07c78759ba2381913db28a14a6bd181fc0d2554`
 - 本文件建立时 HEAD：`8105ff0cf1da7e3aaf5c2b9c6b628947eb260be6`（历史记录）
 - P6-1C 验收与计划文档更新基线 HEAD（本文件本次更新前）：`7503f421e82dc16f0343b4092eb86458a181647f`
 - PA-220 固定源码：`sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
@@ -14,7 +14,21 @@
 - 目标：OCTEON III CN7130、MIPS64 BE、N32、Cavium SDK 5.1.0、U-Boot 2013.07、原厂 Stage 2 加载自定义 Stage 3。
 - PA-220 独立构建入口：`./build-pa220.sh`；不得混入 Qualcomm `build.sh`。
 
-## 当前唯一主线
+## 当前唯一主线（2026-11-27，P7-1）
+
+P6-B 已完成实机测试矩阵验收，设备本轮可断电。当前转入 P7-1：只读镜像解析与预览。
+
+- P7 计划：`doc/pa220/P7-PLAN.md`；源码审查：`reports/pa220/P7-1/SOURCE-REVIEW.md`。
+- 新增生产代码：`u-boot/board/octeon/pa220/pa220_image.c`、`u-boot/include/pa220_image.h`；命令入口 `pa220 image preview`。
+- 当前解析范围：OCTEON bootloader header（含 bounded CRC）、legacy uImage（header/data CRC）、FIT/FDT header bounds、ELF32/ELF64 PT_LOAD bounds。
+- Host GCC 与 ASan/UBSan 测试已通过。Actions run #45957393714 对应最新 P7-1 测试向量；OCTEON target build 仍待最终成功状态，不得提前标记 P7-1 ACCEPTED。
+- P7 preview 只读取有效 `fileaddr/filesize`，重新检查 `__tmp_load` reservation；不执行 load/boot，不写 eMMC/SPI/NAND，不调用 `saveenv`。
+- 所有镜像 target mapping 目前 UNMAPPED。FIT configuration/subimage/hash/signature 语义和 eMMC GPT 映射尚未完成。
+- OCTEON bootloader header parser 已实现，但 P6-1C TFTP recognizer 尚不接受此格式；当前 TFTP 物理 preview 先使用有效 legacy uImage fixture。
+- 下一步：先闭环 OCTEON 完整构建和最终 ELF 符号检查，再做一次 RAM-only legacy uImage 实机 preview。
+- P4 DHCP Client/Ping 实机验证仍是独立遗留项，P4 overall 不得标记 COMPLETE。
+
+## 历史检查点（P6-B 完成前，保留审计记录）
 
 P6-1A/B/C 软件门与 P6-A live descriptor 只读预检均已通过。P6-B 的 4 KiB、32 MiB 精确上限成功路径均已实机通过；32 MiB+1 超限文件已由实机及 pcap 确认在 OACK 的 tsize=33554433 校验阶段、DATA 前拒绝，失败后 filesize/fileaddr 均不存在且 live descriptor 不变。当前唯一未完成工作为受控中断/超时失败清理实机验收。
 
