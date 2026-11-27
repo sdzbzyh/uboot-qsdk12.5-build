@@ -54,6 +54,6 @@
 
 ## 当前状态
 
-- P7-1 parser、Host Harness、Actions OCTEON 构建已通过；最终证据以 `reports/pa220/P7-1/ACCEPTANCE.md` 和最新 Actions artifact 为准。
-- 实机 preview 尚未执行；RAM boot wrapper 由 `tools/pa220/make-p7-stage3-uimage-wrapper.py` 生成并随 Actions artifact 提供。
-- P7 整体未完成；P7-2/P7-3 尚未开始。
+- P7-1 parser、Host Harness、ASan/UBSan、Actions OCTEON 完整构建及真实 PA-220 实机 preview 均已通过；云端证据见 `reports/pa220/P7-1/ACCEPTANCE.md`，实机串口证据见 `reports/pa220/P7-1/DEVICE-ACCEPTANCE.md`。
+- 实机已验证 wrapper TFTP 接收、uImage 校验、payload RAM-copy/compare、RAM Stage3 启动、外层 legacy uImage preview、内层 OCTEON bootloader preview 和 reservation descriptor 不变。
+- P7-1 验收完成。P7 整体仍未完成；P7-2/P7-3 尚未开始。
