@@ -20,7 +20,7 @@ jobs:
       - name: Checkout triggering commit
         uses: actions/checkout@v4
         with:
-          ref: \${{ github.sha }}
+          ref: ${{ github.sha }}
           fetch-depth: 0
       - name: Host parser vectors and sanitizer tests
         shell: bash
@@ -32,7 +32,7 @@ jobs:
           grep -q 'PA220_P7_HOST_ASAN_UBSAN=PASS' reports/pa220/P7-1/10-host-tests.log
       - name: Download and verify pinned Cavium OCTEON SDK
         env:
-          GH_TOKEN: \${{ secrets.OCTEON_SDK_READ_TOKEN }}
+          GH_TOKEN: ${{ secrets.OCTEON_SDK_READ_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
@@ -79,7 +79,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pa220-p7-1-image-preview-\${{ github.sha }}
+          name: pa220-p7-1-image-preview-${{ github.sha }}
           path: reports/pa220/P7-1/
           if-no-files-found: warn
           retention-days: 60
@@ -87,7 +87,7 @@ jobs:
         if: always()
         uses: actions/github-script@v7
         env:
-          JOB_STATUS: \${{ job.status }}
+          JOB_STATUS: ${{ job.status }}
         with:
           script: |
             const state = process.env.JOB_STATUS === "success" ? "success" : "failure";
