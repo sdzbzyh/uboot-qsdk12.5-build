@@ -1,7 +1,11 @@
 /* SPDX-License-Identifier: GPL-2.0+ */
 #include <stdint.h>
 #include <stddef.h>
+#ifdef PA220_IMAGE_HOST_TEST
 #include <string.h>
+#else
+#include <common.h>
+#endif
 #include "pa220_image.h"
 
 #define PA220_BOARD_TYPE 20021U
@@ -71,7 +75,8 @@ const char *pa220_image_type_name(uint32_t t)
     case 3: return "NOR bootloader";
     case 4: return "PCI bootloader";
     case 5: return "U-Boot environment";
-    case 6: return "Pre-U-Boot/Stage 1";
+    case 6: return "Pre-U-Boot";
+    case 7: return "Stage 1";
     default: return "unknown";
     }
 }
@@ -89,7 +94,7 @@ static int parse_octeon(const uint8_t *p, uint64_t n, struct pa220_image_info *o
         hlen > OCTEON_HEADER_MAX || hlen > n || major != 1 || minor < 1 ||
         dlen > n - hlen || !add_ok(hlen, dlen)) return -1;
     total = (uint64_t)hlen + dlen;
-    if (total != n || total > OCTEON_IMAGE_MAX || type < 1 || type > 6) return -1;
+    if (total != n || total > OCTEON_IMAGE_MAX || type < 1 || type > 7) return -1;
     crc = crc32_ieee(0, p, 12);
     crc = crc32_ieee(crc, p + 16, hlen - 16);
     if (crc != hcrc || crc32_ieee(0, p + hlen, dlen) != dcrc) return -1;
@@ -196,7 +201,6 @@ int pa220_image_parse(const uint8_t *data, uint64_t size, struct pa220_image_inf
     return -1;
 }
 #ifndef PA220_IMAGE_HOST_TEST
-#include <common.h>
 #include <environment.h>
 #include <command.h>
 #include <asm/arch/octeon_load_range.h>
@@ -241,6 +245,12 @@ int pa220_image_preview(void)
     }
     puts("target mapping: UNMAPPED (no approved PA-220 install manifest)\n");
     puts("actions: NONE; no device/partition writes, image load or execution performed\n");
+    if (info.format == PA220_IMAGE_OCTEON_BOOTLOADER && !info.board_compatible)
+        return 1;
+    if ((info.format == PA220_IMAGE_LEGACY_UIMAGE ||
+         info.format == PA220_IMAGE_ELF32 || info.format == PA220_IMAGE_ELF64) &&
+        !info.architecture_compatible)
+        return 1;
     return 0;
 }
 #endif
