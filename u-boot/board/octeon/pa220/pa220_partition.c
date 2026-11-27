@@ -102,7 +102,8 @@ static int scan_gpt(pa220_sector_read_fn fn,void *ctx,struct pa220_partition_tab
  bytes=pc*pe; array_sectors=(bytes+511U)/512U;
  first=rd64(ph+40); last=rd64(ph+48);
  if(!add64(pl,array_sectors,&array_end)||pl<2||array_end>first ||
-    bl<=last || !add64(bl,array_sectors,&array_end)||array_end>o->capacity-1) return PA220_PT_CORRUPT; memset(pa,0,sizeof(pa)); memset(ba,0,sizeof(ba));
+    bl<=last || !add64(bl,array_sectors,&array_end)||array_end>o->capacity-1) return PA220_PT_CORRUPT;
+ memset(pa,0,sizeof(pa)); memset(ba,0,sizeof(ba));
  for(i=0;i<(bytes+511U)/512U;i++){
   if(read1(fn,ctx,pl+i,o->capacity,sec)<0) return PA220_PT_IO;
   memcpy(pa+i*512,sec,512);
