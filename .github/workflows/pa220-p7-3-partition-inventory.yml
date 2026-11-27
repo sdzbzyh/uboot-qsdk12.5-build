@@ -5,6 +5,8 @@ on:
     paths:
       - 'u-boot/board/octeon/pa220/pa220_partition.c'
       - 'u-boot/include/pa220_partition.h'
+      - 'build-pa220.sh'
+      - 'scripts/generate-pa220-p7-partition-patch.py'
       - 'tests/pa220/partition-inventory/**'
       - '.github/workflows/pa220-p7-3-partition-inventory.yml'
   workflow_dispatch:
@@ -38,6 +40,16 @@ jobs:
           "$GCC" -std=gnu99 -Wall -Wextra -Werror -Iu-boot/include -c u-boot/board/octeon/pa220/pa220_partition.c -o "$RUNNER_TEMP/pa220_partition.o"
           file "$RUNNER_TEMP/pa220_partition.o" | tee reports/pa220/P7-3/20-octeon-object.txt
           echo P7_3A_OCTEON_OBJECT=PASS
+          export OCTEON_TOOLCHAIN="$(dirname "$(dirname "$GCC")")"
+          export OCTEON_MODEL=OCTEON_CN70XX
+          export PA220_REPO_DIR="$RUNNER_TEMP/pa220-openwrt"
+          export PA220_OUTPUT_DIR="$RUNNER_TEMP/pa220-output"
+          ./build-pa220.sh "$OCTEON_TOOLCHAIN" 2>&1 | tee reports/pa220/P7-3/29-octeon-full-build.log
+          ELF="$PA220_REPO_DIR/u-boot/u-boot-octeon_pa220"
+          test -s "$ELF"
+          "$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-readelf" -s "$ELF" | tee reports/pa220/P7-3/30-final-symbols.txt
+          grep -q 'pa220_partition_scan' reports/pa220/P7-3/30-final-symbols.txt
+          echo P7_3A_OCTEON_FULL_UBOOT_LINK=PASS
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4

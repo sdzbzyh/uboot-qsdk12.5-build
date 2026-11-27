@@ -121,6 +121,8 @@ cp "$ROOT_DIR/u-boot/arch/mips/include/asm/arch-octeon/octeon_load_range.h" \
 # Stage P7 read-only image preview into the disposable pinned-source checkout.
 cp "$ROOT_DIR/u-boot/board/octeon/pa220/pa220_image.c" "$UBOOT_DIR/board/octeon/pa220/pa220_image.c"
 cp "$ROOT_DIR/u-boot/include/pa220_image.h" "$UBOOT_DIR/include/pa220_image.h"
+cp "$ROOT_DIR/u-boot/board/octeon/pa220/pa220_partition.c" "$UBOOT_DIR/board/octeon/pa220/pa220_partition.c"
+cp "$ROOT_DIR/u-boot/include/pa220_partition.h" "$UBOOT_DIR/include/pa220_partition.h"
 # Generate the Makefile patch with Git's diff engine (never hand-count hunks).
 mkdir -p "$ROOT_DIR/reports/pa220/P5-2C"
 python3 "$ROOT_DIR/scripts/generate-pa220-p5-2c-makefile-patch.py" \
@@ -148,6 +150,10 @@ mkdir -p "$ROOT_DIR/reports/pa220/P7-1"
 python3 "$ROOT_DIR/scripts/generate-pa220-p7-image-patch.py" \
     --source-root "$PA220_SOURCE_ROOT" \
     --output "$ROOT_DIR/reports/pa220/P7-1/0001-pa220-image-preview.patch"
+mkdir -p "$ROOT_DIR/reports/pa220/P7-3"
+python3 "$ROOT_DIR/scripts/generate-pa220-p7-partition-patch.py" \
+    --source-root "$PA220_SOURCE_ROOT" \
+    --output "$ROOT_DIR/reports/pa220/P7-3/0001-pa220-partition-scan.patch"
 if [ -n "$TOOLCHAIN_DIR" ]; then
     "$UBOOT_DIR/build.sh" "$TOOLCHAIN_DIR"
 else
