@@ -30,13 +30,6 @@ def main():
     fn_body = replace_once(fn_body,dispatch,dispatch_new,"pa220 image preview dispatch")
     bs = bs[:fn_start] + fn_body + bs[cmd_start:]
     bs=replace_once(bs,"U_BOOT_CMD(pa220, 2, 1, do_pa220,","U_BOOT_CMD(pa220, 3, 1, do_pa220,","pa220 maxargs")
-    cmd_start = bs.index("U_BOOT_CMD(pa220,")
-    cmd_end = bs.index(");", cmd_start) + 2
-    cmd_text = bs[cmd_start:cmd_end]
-    close_quote = cmd_text.rfind('"')
-    if close_quote < 0: raise RuntimeError("pa220 command help string terminator missing")
-    cmd_text = cmd_text[:close_quote] + '\\n"\n\t   "pa220 image preview - parse current RAM image and print a read-only plan"' + cmd_text[close_quote:]
-    bs = bs[:cmd_start] + cmd_text + bs[cmd_end:]
     ms=replace_once(ms,"COBJS\t= $(BOARD)_board.o","COBJS\t= $(BOARD)_board.o pa220_image.o","board object integration")
     with tempfile.TemporaryDirectory() as td:
         env=os.environ.copy(); env["GIT_INDEX_FILE"]=str(pathlib.Path(td)/"index")
