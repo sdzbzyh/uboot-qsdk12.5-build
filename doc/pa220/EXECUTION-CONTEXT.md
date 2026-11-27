@@ -28,8 +28,8 @@ P7-1 parser、Host/ASan/UBSan、OCTEON 完整构建和 PA-220 实机 preview 均
 - P7-2C live eMMC 只读取证已完成并归档：`reports/pa220/P7-2/EMMC-DEVICE-ACCEPTANCE.md`。实机介质是 DOS/MBR + extended/EBR logical partitions，不是 GPT；live `mmc part` 的 8 个分区条目与完整 User Area 镜像的离线 fdisk/parted/sfdisk 记录一致。
 - 已有 live 根目录探测：0:1、0:2 于 2026-11-27；0:3、0:5、0:6、0:8 于 2026-11-18。0:4 是扩展容器，0:7 是 swap。不要重复安排这些目录探测。
 - P7-2B FIT 语义实机验收于 2026-11-27 完成；正常与 hash-fail 双向量证据见 `reports/pa220/P7-2/FIT-IMPLEMENTATION.md`。P7-2A/B/C 均 PASS。
-- P7-3 当前状态：固定源码分区解析路径审计完成，审计报告 `reports/pa220/P7-3/SOURCE-AUDIT.md`。发现原生 DOS/EBR 递归遍历缺少 visited-set/hop bound 和完整 extended-container containment；原生 GPT 调用路径只验证主 Header/Entry Array，未比较备份副本。因此下一步实现独立 bounded read-only partition validator，不能将 `mmc part` 当作严格验证器。
-- P7-3A 目标：独立 MBR/EBR + GPT parser，sector-read callback、checked 64-bit arithmetic、EBR cycle detection、GPT 主备 CRC/一致性、重叠/越界 fail closed；Host synthetic fixtures + ASan/UBSan + pinned OCTEON build。
+- P7-3 源码审计：`reports/pa220/P7-3/SOURCE-AUDIT.md`。独立只读解析器 core 已提交：`u-boot/board/octeon/pa220/pa220_partition.c` / `u-boot/include/pa220_partition.h`。Actions #45985125302 首轮 Host GCC、ASan/UBSan、Cavium GCC 4.7.0 target-object 均 PASS，Artifact 15191546135；扩展测试 Actions #45985342164 待完成。当前仍未完成 production command/Makefile 集成、完整 U-Boot final link 和 P7-3A 验收，不能将该 parser object compile 等同于设备可用。详见 `reports/pa220/P7-3/IMPLEMENTATION-PROGRESS.md`。
+- P7-3A 当前唯一工作：继续扩大 MBR/EBR + GPT 解析器的损坏向量和几何一致性检查；随后将只读 `pa220 partition scan [mmcdev]` 命令及 sector-read callback 集成到 PA-220 board，执行 Cavium 完整 U-Boot final link。Host/sanitizer/target-object 首轮已过，但 P7-3A 未验收。
 - P7-3B 目标：manifest-gated dry-run。当前没有 approved PA-220 install manifest，任何组件必须保持 UNMAPPED 并拒绝映射（`NO_APPROVED_MANIFEST`）。不推断分区角色，不生成写入脚本，不调用写入 API。
 - 当前 PA-220 eMMC MBR 与目录读取证据均已归档，不重复执行 `mmc part` 或既有 ext2ls 探测。GPT 用独立 Host fixtures 验证，不将本机 MBR 结果当作 GPT 证据。
 - 本轮没有读取并归档原始 MBR/EBR sector dump；不声称已完成 EBR 原始字节级审计。若未来确需该深度证据，再单独评估；当前 P7-2C inventory acceptance 不需要增加线下操作。
