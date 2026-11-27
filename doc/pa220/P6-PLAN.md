@@ -1,6 +1,6 @@
 # PA-220 P6 计划：RAM-only 文件接收与校验
 
-- 状态：**P6-1A/P6-1B/P6-1C 软件门 ACCEPTED；P6-A live descriptor/DRAM/reservation 只读预检 PASS；P6-B 实际 TFTP GET 尚未执行，等待单独确认**
+- 状态：**P6-1A/P6-1B/P6-1C 软件门 ACCEPTED；P6-A live descriptor/DRAM/reservation 只读预检 PASS；P6-B 首个 4 KiB 合法 uImage GET 成功路径 PASS；边界拒绝与中断/超时失败路径待验收**
 - 日期：2026-11-24
 - 集成分支：`feature/pa220-ubootkit-web`
 - 固定 PA-220 源码：`sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
@@ -41,15 +41,18 @@ P6 只负责将一个文件接收到经验证的 RAM 区间，并对接收结果
 
 本轮只执行只读命令；没有执行 TFTP、`setenv`、`saveenv`、flash/storage 写入、reset 或 reboot。
 
-## 4. P6-B：首个 RAM-only TFTP GET 验收
+## 4. P6-B：首个 RAM-only TFTP GET — SUCCESS PATH PASS（2026-11-27）
 
-仅在 P6-A 通过并获得明确开始测试的确认后执行：
+首个 4 KiB 合法 legacy-uImage 已在实机完成 TFTP GET。完整证据见 [P6-B INITIAL GET ACCEPTANCE](../../reports/pa220/P6-B/INITIAL-GET-ACCEPTANCE.md)。
 
-- 使用维护主机提供的、非固件可执行内容的小型固定测试文件；首轮建议 4 KiB，之后再逐级增加。
-- 传输前记录主机端文件长度和 SHA-256；接收后在设备端核对文件长度与 CRC/SHA。若当前镜像没有可用 SHA-256 命令，先实现只读校验命令并做 Host/目标验证，不以 CRC 代替 SHA 的证据。
-- 传输前记录 `loadaddr`、`__tmp_load` base/size；传输后记录 `filesize`、`load_addr`、接收结束状态和校验值。
-- 覆盖一个合法小文件、精确边界、越界拒绝和中断/超时失败；拒绝/中断后不得执行或启动残缺数据。
-- 仅写 RAM；不运行 `bootm`、`bootelf`、`booti`、`bootcmd`，不执行安装命令。
+- 设备 U-Boot 2013.07，build time `Nov 25 2026 - 11:04:13`；`ipaddr=192.168.2.2`，`serverip=192.168.2.10`，`ethact=octrgmii0`。
+- live DRAM 8 GiB；`loadaddr=0x20000000`；`__tmp_load` base `0x20000000`，size `0x10000000`（256 MiB）。
+- 接收 4096 bytes；格式 `legacy-uImage`；CRC32 `9e4df6c8`；SHA-256 `83b1bb6b9c006c9d38c6915a985895bfeffd41f24d969aae1b74365041028082`。
+- 设备发布 `filesize=0x1000`、`fileaddr=0x20000000`；主机 SHA-256 与设备一致；descriptor 未变化。
+- 传输中出现一次 `Receive error (code 11: rgmii rx), dropping`，随后传输成功。保留为 transient RX warning，不代表链路稳定性已验收。
+- 无 pcap，不推断协商 block size、DATA block 数量或终止块形态。
+
+**P6-B 目前仅成功路径通过，整体仍未验收。** 精确 reservation 边界/越界拒绝，以及中断/超时失败后的状态清理和元数据失效仍待实机验证。未执行 loader、启动命令、`saveenv` 或持久化写入。
 
 P6-B 只验证 TFTP GET，不代表 TFTP Server/WRQ、PUT、HTTP upload 或 ELF loader 写入安全。
 
@@ -81,15 +84,14 @@ P6-1A、P6-1B、P6-1C 的软件门均已完成。P6-1C 的实现范围与边界�
 
 源码审查、验证证据和设备预检命令详见 [P6-0 SOURCE REVIEW](../../reports/pa220/P6-0-SOURCE-REVIEW.md)。本节补充首个 GET 的可复现数据向量，并明确实际接收前的完整软件门。
 
-### 固定测试文件（设计，不代表已传输）
+### 固定测试文件（P6-B 实机已使用；生成器可复现）
 
-- 文件长度：4,096 bytes。
-- 内容：64-byte legacy uImage header + 4,032-byte inert ASCII payload；payload 为重复字节串 PA220-P6-TFTP-GET-TEST 后跟 LF（0x0a），截断到恰好 4,032 bytes。ih_os=0（invalid）、ih_type=0（invalid），不具备可执行镜像类型；文件只用于 RAM-only 接收与指纹比对，不作为启动镜像。
-- uImage ih_size=`4032`，ih_hcrc=`1b1e2ee7`，ih_dcrc=`705c16e0`。
-- CRC32（IEEE，完整 4,096-byte 文件）：`cde0b20d`。
-- SHA-256（完整文件）：`0649bd6d56764ed2d09f3fdf84f9b84cf33e51d75001f0fe95a0cb254d6a2d24`。
-- 目标 block size：512 bytes，必须从实际协商结果/接收端日志确认；如果实际值不是 512，先停止并重新计算预期 block 数，不得套用旧预期。
-- 512-byte block 下预期：8 个完整 DATA block + 第 9 个零长度终止 DATA block；最终文件长度 4,096 bytes。
+- 文件 `pa220-p6-get-4096.bin`：4096 bytes，64-byte legacy uImage header + 4032-byte inert ASCII payload（重复 `PA220-P6-TFTP-GET-TEST\n` 截断）。
+- Header：magic `0x27051956`，timestamp 0，ih_size 4032，load/entry 0，ih_dcrc `705c16e0`，ih_os=5 Linux，ih_arch=5 MIPS，ih_type=3 RAMDisk，ih_comp=0 none，name `PA220-P6-GET-TEST`，ih_hcrc `b1aa12e3`。
+- 完整文件 CRC32 `9e4df6c8`；SHA-256 `83b1bb6b9c006c9d38c6915a985895bfeffd41f24d969aae1b74365041028082`。
+- 生成器：[`tools/pa220/make-p6-get-fixture.py`](../../tools/pa220/make-p6-get-fixture.py)，自动断言长度、header/data CRC32 和全文件指纹。
+- 该 header 可被 P6-1C 识别为 legacy uImage；payload 是惰性测试文本。格式识别不代表签名或可启动性验证，严禁启动。
+- 原 D-016 的 `ih_os=0/ih_type=0` invalid header 与 P6-1C 拒绝行为冲突，已由此向量取代。
 
 ### 目标地址和完整区间
 
