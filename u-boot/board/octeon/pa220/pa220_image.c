@@ -289,7 +289,7 @@ static int pa220_fit_verify_hashes(const void *fit, int image_node)
             if (bad || !algo ||
                 fit_image_hash_get_value(fit, child, &expected,
                                          &expected_len) ||
-                expected_len <= 0 || expected_len > FIT_MAX_HASH_LEN) {
+                expected_len <= 0 || expected_len > 64) {
                 printf("  hash %s: MALFORMED\n", name);
                 failures++;
                 continue;
@@ -445,6 +445,21 @@ static int pa220_fit_preview(const void *fit, uint64_t received_size)
                     if (target < 0)
                         hash_failures++;
                 }
+            }
+            {
+                int sig_node;
+                for (sig_node = fdt_first_subnode(fit, node);
+                     sig_node >= 0;
+                     sig_node = fdt_next_subnode(fit, sig_node)) {
+                    const char *sig_name = fit_get_name(fit, sig_node, NULL);
+                    if (!sig_name)
+                        return -1;
+                    if (!strncmp(sig_name, "signature", 9))
+                        printf("  configuration signature %s: NOT_VERIFIED\\n",
+                               sig_name);
+                }
+                if (sig_node != -FDT_ERR_NOTFOUND)
+                    return -1;
             }
         }
         if (node != -FDT_ERR_NOTFOUND)
