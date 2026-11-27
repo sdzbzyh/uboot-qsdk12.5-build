@@ -27,7 +27,7 @@ P7-1 parser、Host/ASan/UBSan、OCTEON 完整构建和 PA-220 实机 preview 均
 - 重要配置：PA-220 实际启用 SPI redundant environment（`0xe00000` / `0xe10000`），`saveenv` 会擦写 SPI NOR 64 KiB sector；板级文件顶部“RAM-only”注释与宏配置矛盾。P7-2 禁止调用 `saveenv`。
 - P7-2C live eMMC 只读取证已完成并归档：`reports/pa220/P7-2/EMMC-DEVICE-ACCEPTANCE.md`。实机介质是 DOS/MBR + extended/EBR logical partitions，不是 GPT；live `mmc part` 的 8 个分区条目与完整 User Area 镜像的离线 fdisk/parted/sfdisk 记录一致。
 - 已有 live 根目录探测：0:1、0:2 于 2026-11-27；0:3、0:5、0:6、0:8 于 2026-11-18。0:4 是扩展容器，0:7 是 swap。不要重复安排这些目录探测。
-- 当前唯一工作单元：P7-2B FIT 实机语义验收。生产代码已加入 `pa220_image.c`：bounded FDT structure/reservation-map validation、`/images`/`/configurations` 解析、inline data、CRC32/SHA1/MD5 hash 状态、ignored/unsupported 分类和 signature NOT_VERIFIED；外置 FIT data 明确 unsupported。Actions #45970127218 与 #45970607698 均 SUCCESS，Host/ASan/UBSan、Cavium OCTEON object、N32 relocatable link、完整 U-Boot final link 均通过；FIT fixtures Artifact [15184393205](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45970607698/artifacts/15184393205)。下一步只需将新 Stage3 wrapper 和 FIT fixture 放入 TFTP root，在 PA-220 RAM 启动后执行两次 `pa220 image preview`；不触碰持久化介质。详见 `reports/pa220/P7-2/FIT-IMPLEMENTATION.md`。P7-2C 不再等待设备输出。
+- P7-2B FIT 语义实机验收已于 2026-11-27 完成：正常 fixture 与 hash-fail fixture 均在 PA-220 RAM-only 预览成功。正常向量 `hash_failures=0`，kernel/ramdisk CRC32、SHA1、MD5 PASS；损坏向量 kernel 三种 hash FAIL、ramdisk 三种 PASS，`hash_failures=1`。ignored、unsupported SHA-256、signature NOT_VERIFIED、external-data unsupported、default configuration refs 均按预期报告。两次均 target mapping UNMAPPED、actions NONE；无 image load/boot、无 eMMC/SPI/NAND 写入、无 `saveenv`。完整证据见 `reports/pa220/P7-2/FIT-IMPLEMENTATION.md`。P7-2A/B/C 均 PASS；下一唯一工作单元为 P7-3 dry-run 安装计划。
 - 本轮没有读取并归档原始 MBR/EBR sector dump；不声称已完成 EBR 原始字节级审计。若未来确需该深度证据，再单独评估；当前 P7-2C inventory acceptance 不需要增加线下操作。
 - 通用存储兼容要求已写入 `doc/pa220/DECISIONS.md` D-022 和 `doc/pa220/P7-PLAN.md`：后续所有分区识别/映射同时支持 DOS/MBR（含 EBR）与 GPT（含主备 Header/Entry CRC）；按实际介质自动识别，混合/损坏/不一致 fail closed。当前 PA-220 只确认 MBR，不把本机结果冒充 GPT 验证。
 - P4 DHCP Client/Ping 实机验证仍是独立遗留项，P4 overall 不得标记 COMPLETE。
@@ -167,3 +167,12 @@ P6-1C 已由 Actions #45600860179 验收通过，报告见 reports/pa220/P6-1C/A
 - 两个 FDT：0x58030 generic_spi_stage2；0x1c9460 pan,pa-220 / cavium,tb7100。后者描述 W25Q128-compatible SPI、OCTEON MMC host、Kingfisher CPLD。
 - `0x70000-0x100000` 和 `0x250000-0x1000000` 为 all-FF 区域；配置 env 主/冗余 sector 与注释中的 0xef0000 区域均 all-FF。
 - 此报告只证明备份内容，不推断 eMMC GPT、不建立安装映射、不授权 SPI 写入。
+
+
+## P7-2B 实机验收闭环（2026-11-27）
+
+- 新 Stage3 U-Boot build time：Nov 27 2026 09:04:34；TFTP host 192.168.2.10，PA-220 192.168.2.2，接口 octrgmii0。
+- 正常 FIT：2,518 bytes，SHA-256 `db96358852a1c47fe7788c5ecf89093daf6d26142b3e946a3f8ca7a1d29ff565`；kernel/ramdisk CRC32、SHA1、MD5 PASS；ignored hash IGNORED；SHA-256 UNSUPPORTED；signature NOT_VERIFIED；external data unsupported；default config refs RESOLVED；`hash_failures=0`。
+- 损坏 FIT：2,518 bytes，SHA-256 `a2cc42cf33f94a5ef306068fb9e88a8b84e746fc672379227494aac1ea504f02`；kernel CRC32/SHA1/MD5 FAIL；ramdisk 三种 hash PASS；其他分类与预期一致；`hash_failures=1`。
+- 两个向量均显示 target mapping UNMAPPED、actions NONE。仅操作 RAM 中已接收的 FIT 文件；无加载、启动、存储读取/写入或 saveenv。
+- 报告：`reports/pa220/P7-2/FIT-IMPLEMENTATION.md`。P7-2B PASS；P7-2A/B/C 全部完成，下一工作单元 P7-3。
