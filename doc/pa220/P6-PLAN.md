@@ -132,7 +132,7 @@ P6-1B 已完成生产实现、Host GCC/ASan/UBSan、OCTEON object、N32 relocata
 - 不支持/损坏格式和长度状态失败进入 FAILED，清零接收长度并失效 filesize/fileaddr；有效状态只在 digest 计算及格式识别后发布。
 - Cavium SDK 5.1.0 / GCC 4.7.0；OCTEON tftp.o、N32 relocatable link、完整 U-Boot final link 均 PASS。
 - P6-1C patch SHA-256：34941096eef9983fe7f951bb29c88e88e31f7d29d330ea4118fd83fcf5a9b32b；tftp.o SHA-256：bec5e494f7e5efee894fa23e902ead5894c468fc40159e25569daeeec549d433。
-- 完整证据见 reports/pa220/P6-1C/ACCEPTANCE.md。未执行真实 TFTP GET、未传输文件、未调用 saveenv、未写持久化介质。
+- 完整证据见 reports/pa220/P6-1C/ACCEPTANCE.md。**截至 P6-1C 软件验收时**尚未执行真实 TFTP GET；随后 P6-B 首个成功路径已由本计划第 4 节记录。
 
 
 ### 实机测试安排更新
@@ -200,5 +200,5 @@ P6-1A、P6-1B、P6-1C 软件门均已完成；下一步先安排 P6-A live descr
 
 ### 未执行事项与下一步
 
-- 未执行真实 TFTP GET、未传输文件、未调用 saveenv，未写入 SPI/eMMC/NAND/EEPROM/CPLD/flash。
+- **截至 P6-1B 软件验收时**未执行真实 TFTP GET；随后 P6-B 首个成功路径已由本计划第 4 节记录。该阶段未调用 saveenv，未写入 SPI/eMMC/NAND/EEPROM/CPLD/flash。
 - 下一工作单元为 P6-A：只读检查 live __tmp_load descriptor、DRAM 范围和完整 reservation。P6-A 通过并经审查、取得明确确认后，才考虑 P6-B RAM-only TFTP GET。
