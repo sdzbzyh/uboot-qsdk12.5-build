@@ -37,7 +37,7 @@ jobs:
           mkdir "$RUNNER_TEMP/sdk-unpack"; tar -xzf "$D"/*.tar.gz -C "$RUNNER_TEMP/sdk-unpack"
           GCC=$(find "$RUNNER_TEMP/sdk-unpack" -path '*/bin/mips64-octeon-linux-gnu-gcc' -print -quit)
           test -n "$GCC"
-          "$GCC" -std=gnu99 -Wall -Wextra -Werror -Iu-boot/include -c u-boot/board/octeon/pa220/pa220_partition.c -o "$RUNNER_TEMP/pa220_partition.o"
+          "$GCC" -DPA220_PARTITION_HOST_TEST -std=gnu99 -Wall -Wextra -Werror -Iu-boot/include -c u-boot/board/octeon/pa220/pa220_partition.c -o "$RUNNER_TEMP/pa220_partition.o"
           file "$RUNNER_TEMP/pa220_partition.o" | tee reports/pa220/P7-3/20-octeon-object.txt
           echo P7_3A_OCTEON_OBJECT=PASS
           export OCTEON_TOOLCHAIN="$(dirname "$(dirname "$GCC")")"

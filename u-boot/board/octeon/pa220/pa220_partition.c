@@ -1,7 +1,11 @@
 /* SPDX-License-Identifier: GPL-2.0+ */
 /* Bounded, read-only DOS/EBR and GPT inventory. No block write interface. */
+#ifdef PA220_PARTITION_HOST_TEST
 #include <stdint.h>
 #include <string.h>
+#else
+#include <common.h>
+#endif
 #include <pa220_partition.h>
 #define MBR_SIG 0xaa55
 #define EXT_MAX 16
