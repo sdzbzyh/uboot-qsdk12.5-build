@@ -155,3 +155,13 @@
 - 决策：通过 do_tftpb() 的 GET-only abort hook 处理 Ctrl-C/NetLoop 非成功返回；不改 TFTP PUT/WRQ 行为，不调用 saveenv。
 - 证据：Host 14 cases / 26 assertions / 0 failures（GCC、ASan/UBSan）；Cavium SDK 5.1.0 OCTEON object、N32 relocatable link、完整 U-Boot final link PASS；Actions #45595798808。
 - 状态：P6-1B SOFTWARE ACCEPTED；不授权真实 TFTP GET。下一步 P6-1C 校验和/格式识别，之后 P6-A live descriptor 只读预检。
+
+## D-021：P6-B 首个真实 TFTP GET 成功路径与修正后的测试向量
+
+- 日期：2026-11-27
+- 首个真实 GET 使用 4096-byte 可识别 legacy uImage header + inert ASCII payload；字段采用 Linux/MIPS/RAMDisk/none，避免使用会被 P6-1C 正确拒绝的 invalid/unsupported header。
+- 固定向量：`ih_size=4032`，`ih_dcrc=705c16e0`，`ih_hcrc=b1aa12e3`；全文件 CRC32 `9e4df6c8`；SHA-256 `83b1bb6b9c006c9d38c6915a985895bfeffd41f24d969aae1b74365041028082`。生成器：`tools/pa220/make-p6-get-fixture.py`。
+- 实机接收 4096 bytes；设备 `filesize=0x1000`、`fileaddr=0x20000000`，识别 `legacy-uImage`；主机与设备 SHA-256 一致；live descriptor 未改变。
+- 出现一次 `rgmii rx` transient/drop warning，随后传输完成。无 pcap，不推断 block size 或 DATA block 数量。
+- 状态：P6-B PARTIAL — initial success path accepted；边界拒绝及中断/超时失败清理仍待验收。未执行 loader、`saveenv` 或持久化写入。
+- 本决策取代 D-016 的无效测试向量；D-016 保留为历史设计记录，不再作为测试文件规范。
