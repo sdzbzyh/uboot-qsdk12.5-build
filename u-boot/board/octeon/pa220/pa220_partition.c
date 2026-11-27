@@ -42,6 +42,7 @@ static int scan_mbr(pa220_sector_read_fn fn,void *ctx,struct pa220_partition_tab
   else if(!append(o,s,n,t,PA220_PART_PRIMARY)) return PA220_PT_CORRUPT;
  }
  if(!ext) return PA220_PT_OK;
+ for(i=0;i<o->count;i++){ uint64_t pe; if(!add64(o->parts[i].start_lba,o->parts[i].sectors,&pe) || (o->parts[i].start_lba<end && ext<pe)) return PA220_PT_CORRUPT; }
  cur=ext;
  {
   uint64_t visited[EXT_MAX]; uint32_t used=0;
@@ -85,18 +86,23 @@ static int gpt_header(pa220_sector_read_fn fn,void *ctx,uint64_t cap,uint64_t lb
 static int scan_gpt(pa220_sector_read_fn fn,void *ctx,struct pa220_partition_table *o){
  static uint8_t pa[GPT_MAX_ENTRIES*GPT_MAX_ENTRY_SIZE],ba[GPT_MAX_ENTRIES*GPT_MAX_ENTRY_SIZE];
  uint8_t p[512],ph[512],bh[512],sec[512];
- uint64_t pl,bl,first,last; uint32_t pc,bc,pe,be,pcrc,bcrc,bytes,i,j;
+ uint64_t pl,bl,first,last,array_sectors,array_end; uint32_t pc,bc,pe,be,pcrc,bcrc,bytes,i,j;
  if(read1(fn,ctx,0,o->capacity,p)<0) return PA220_PT_IO;
  if(rd16(p+510)!=MBR_SIG) return PA220_PT_UNKNOWN;
- if(p[450]!=0xee || rd32(p+454)!=1 || rd32(p+458)==0) return PA220_PT_AMBIGUOUS;
- for(i=0;i<4;i++) if(i!=0 && !empty_entry(p+446+i*16)) return PA220_PT_AMBIGUOUS;
+ if(!valid_boot(p+446) || p[450]!=0xee || rd32(p+454)!=1 ||
+    rd32(p+458)!=(o->capacity-1>0xffffffffULL?0xffffffffU:(uint32_t)(o->capacity-1))) return PA220_PT_AMBIGUOUS;
+ for(i=1;i<4;i++) if(!empty_entry(p+446+i*16)) return PA220_PT_AMBIGUOUS;
  bl=o->capacity-1;
  if(!gpt_header(fn,ctx,o->capacity,1,ph,&pl,&pc,&pe,&pcrc) ||
     !gpt_header(fn,ctx,o->capacity,bl,bh,&bl,&bc,&be,&bcrc)) return PA220_PT_CORRUPT;
  if(rd64(ph+32)!=o->capacity-1 || rd64(bh+32)!=1 ||
     memcmp(ph+56,bh+56,16)||rd64(ph+40)!=rd64(bh+40)||rd64(ph+48)!=rd64(bh+48)||
-    pc!=bc||pe!=be||pcrc!=bcrc||pl==bl) return PA220_PT_CORRUPT;
- bytes=pc*pe; memset(pa,0,sizeof(pa)); memset(ba,0,sizeof(ba));
+    pc!=bc||pe!=be||pcrc!=bcrc||pl==bl ||
+    !memcmp(ph+56,(uint8_t[16]){0},16)) return PA220_PT_CORRUPT;
+ bytes=pc*pe; array_sectors=(bytes+511U)/512U;
+ first=rd64(ph+40); last=rd64(ph+48);
+ if(!add64(pl,array_sectors,&array_end)||pl<2||array_end>first ||
+    bl<=last || !add64(bl,array_sectors,&array_end)||array_end>o->capacity-1) return PA220_PT_CORRUPT; memset(pa,0,sizeof(pa)); memset(ba,0,sizeof(ba));
  for(i=0;i<(bytes+511U)/512U;i++){
   if(read1(fn,ctx,pl+i,o->capacity,sec)<0) return PA220_PT_IO;
   memcpy(pa+i*512,sec,512);
@@ -104,7 +110,6 @@ static int scan_gpt(pa220_sector_read_fn fn,void *ctx,struct pa220_partition_tab
   memcpy(ba+i*512,sec,512);
  }
  if(crc32_bytes(pa,bytes)!=pcrc||crc32_bytes(ba,bytes)!=bcrc||memcmp(pa,ba,bytes)) return PA220_PT_CORRUPT;
- first=rd64(ph+40); last=rd64(ph+48);
  for(i=0;i<pc;i++){
   const uint8_t *e=pa+i*pe; uint64_t s,en,n;
   if(!memcmp(e,(uint8_t[16]){0},16)) continue;
