@@ -36,7 +36,7 @@
 - Hash-fail FIT fixture：2,518 bytes，SHA-256 `a2cc42cf33f94a5ef306068fb9e88a8b84e746fc672379227494aac1ea504f02`。
 - 新 U-Boot BIN：1,394,728 bytes，SHA-256 `9bf05f6915745d315023b3184cdf2668428fd5f10234d2e777e3f9372024e586`；Stage3 wrapper：1,394,792 bytes，SHA-256 `6d2b4d738934789b500bbe956e6cf828152c9ffcba8c8a66adb8528ff52ba9fe`。
 - Actions 的 5 suites 是 P7-1 通用镜像解析器既有 Host/ASan/UBSan 测试，不等于新增 target-only FIT 语义路径已通过运行测试。FIT fixtures 已生成，尚待 PA-220 RAM-only 实机执行。
-- 下一门：在 PA-220 RAM 启动该新 U-Boot，分别预览两个 FIT fixture，验证 default configuration、kernel/ramdisk/fdt refs、CRC32/SHA1/MD5 PASS/FAIL、ignored hash、unsupported SHA-256、signature NOT_VERIFIED、external data unsupported。此测试只读取 TFTP 接收的 RAM 文件，不触碰 eMMC/SPI/NAND。
+- 已完成的实机门：PA-220 RAM 启动该新 U-Boot，分别预览两个 FIT fixture；default configuration、kernel/ramdisk/fdt refs、CRC32/SHA1/MD5 PASS/FAIL、ignored hash、unsupported SHA-256、signature NOT_VERIFIED、external data unsupported 均已按预期验证。此测试只读取 TFTP 接收的 RAM 文件，不触碰 eMMC/SPI/NAND。
 - P7-2B FIT 语义实机验收已通过；无需重复设备操作。
 
 ## 4. 安全与证据边界
