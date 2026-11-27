@@ -81,8 +81,9 @@ static int gpt_header(pa220_sector_read_fn fn,void *ctx,uint64_t cap,uint64_t lb
  return 1;
 }
 static int scan_gpt(pa220_sector_read_fn fn,void *ctx,struct pa220_partition_table *o){
- uint8_t p[512],ph[512],bh[512],pa[GPT_MAX_ENTRIES*GPT_MAX_ENTRY_SIZE],ba[GPT_MAX_ENTRIES*GPT_MAX_ENTRY_SIZE],sec[512];
- uint64_t pl,bl,first,last; uint32_t pc,bc,pe,be,pcrc,bcrc,bytes,i,j; uint32_t pos;
+ static uint8_t pa[GPT_MAX_ENTRIES*GPT_MAX_ENTRY_SIZE],ba[GPT_MAX_ENTRIES*GPT_MAX_ENTRY_SIZE];
+ uint8_t p[512],ph[512],bh[512],sec[512];
+ uint64_t pl,bl,first,last; uint32_t pc,bc,pe,be,pcrc,bcrc,bytes,i,j;
  if(read1(fn,ctx,0,o->capacity,p)<0) return PA220_PT_IO;
  if(rd16(p+510)!=MBR_SIG) return PA220_PT_UNKNOWN;
  if(p[450]!=0xee || rd32(p+454)!=1 || rd32(p+458)==0) return PA220_PT_AMBIGUOUS;
