@@ -1,10 +1,10 @@
-# P7-2 source review: FIT semantics, SPI update path and eMMC GPT reader
+# P7-2 source review: FIT semantics, SPI update path and eMMC DOS/MBR reader
 
 - Date: 2026-11-27
 - Fixed PA-220 source: `sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
 - Integration branch: `feature/pa220-ubootkit-web`
 - Scope: `image-fit.c`, `libfdt`, PA-220 configuration, `cmd_octeon_bootloader.c`, `part_efi.c`, `cmd_gpt.c`, `env_sf.c`.
-- Status: **SOURCE REVIEW COMPLETE FOR THIS PASS; FIT IMPLEMENTATION AND LIVE eMMC GPT EVIDENCE PENDING**.
+- Status: **SOURCE REVIEW COMPLETE; P7-2C LIVE DOS/MBR INVENTORY ACCEPTED; FIT IMPLEMENTATION PENDING**.
 
 ## 1. FIT is enabled, but FIT signature verification is not enabled in the reviewed board configuration
 
@@ -34,13 +34,16 @@
 - The original SPI backup is analyzed separately in [SPI-IMAGE-ANALYSIS.md](SPI-IMAGE-ANALYSIS.md). Its valid header offsets and FDTs provide static SPI evidence only. Never treat its contents as eMMC GPT evidence.
 - Do not execute `bootloaderupdate`, `sf erase`, `sf write`, `sf update` or any SPI updater during P7-2.
 
-## 4. eMMC GPT read path and write hazards
+## 4. eMMC DOS/MBR live inventory and write hazards
 
-- PA-220 configuration enables `CONFIG_EFI_PARTITION`, `CONFIG_PARTITION_UUIDS`, `CONFIG_CMD_PART` and `CONFIG_CMD_GPT`; the OCTEON MMC driver exposes block read/write interfaces.
-- The `part_efi.c` reader checks the GPT signature, header CRC, `my_lba`, usable-LBA bounds and partition-entry-array CRC. The standard `mmc part` display path is the next read-only source of live partition names, GUIDs, start LBAs and sizes.
-- `gpt write` is not a verifier: `cmd_gpt.c` builds a partition description and calls `gpt_restore()`, which writes primary and backup GPT structures through `block_write()`. The prior storage audit also found that `gpt_mmc_default()` does not propagate the lower-level `gpt_restore()` return value reliably.
+- PA-220 configuration includes EFI/GPT support, but that is a compiled capability, not proof that the installed card uses GPT. The live `mmc part` output identifies this device's partition table as DOS/MBR.
+- The live table contains primary partitions 1–3, extended container 4, and logical partitions 5–8. `mmc part` successfully enumerates the logical entries inside the extended partition. Exact start LBA, sector count and MBR type are recorded in [EMMC-DEVICE-ACCEPTANCE.md](EMMC-DEVICE-ACCEPTANCE.md).
+- Live table values match the independent offline `fdisk`, `parted` and `sfdisk` reports for the full User Area image stored on `main`. The live card identity/capacity also matches the recorded 29,595,009,024-byte image.
+- Live `ext2ls` root-directory reads succeeded on partitions 1, 2, 3, 5, 6 and 8 (with the historical 3/5/6/8 results reused rather than repeated). Partition 4 is an extended container; partition 7 is Linux swap.
+- This is not a GPT device. GPT primary/backup header and entry-array consistency checks are therefore not applicable. Raw MBR/EBR sector dumps and byte-level EBR chain checksums were not captured, so do not claim that deeper audit.
+- `gpt write` is not a verifier: `cmd_gpt.c` builds a partition description and calls `gpt_restore()`, which writes primary and backup GPT structures through `block_write()`. It must not be used on this DOS/MBR device.
 - `mmc write`, `mmc erase`, `gpt write`, `ext4write` and `fatwrite` are persistent write paths. Do not use them for P7-2 evidence collection.
-- The SPI backup and embedded FDTs cannot establish the actual eMMC GPT. Live eMMC GPT evidence remains missing, so all eMMC install targets remain `UNMAPPED`.
+- No install manifest is approved. All eMMC firmware install targets remain `UNMAPPED`.
 
 ## 5. Environment persistence discrepancy
 
@@ -56,22 +59,14 @@ The P7-2A backup scan found both configured environment sectors entirely erased.
 |---|---|---|
 | P7-2A | Static SPI NOR backup inventory, OCTEON headers, embedded FDTs, erased regions and environment-sector bytes | PASS; see [SPI-IMAGE-ANALYSIS.md](SPI-IMAGE-ANALYSIS.md) |
 | P7-2B | FIT configurations/subimages, inline data bounds, hash states and signature capability classification | Not implemented |
-| P7-2C | Live eMMC GPT read-only inventory and primary/backup consistency evidence | Awaiting device read-only output |
+| P7-2C | Live eMMC DOS/MBR inventory and read-only filesystem root probes | PASS; see [EMMC-DEVICE-ACCEPTANCE.md](EMMC-DEVICE-ACCEPTANCE.md) |
 
 No install manifest is approved by this review. P7-2 remains in progress and all install mappings remain `UNMAPPED`.
 
-## 7. Next live read-only eMMC capture
+## 7. Evidence reuse and remaining scope
 
-After powering on and interrupting autoboot, use only:
+P7-2C live evidence is already available in [EMMC-DEVICE-ACCEPTANCE.md](EMMC-DEVICE-ACCEPTANCE.md), including the 2026-11-27 `version` / `mmc list` / `mmc info` / `mmc part` results, the 2026-11-18 filesystem directory probes, and cross-checks against the full User Area image metadata on `main`.
 
-```text
-version
-mmc list
-mmc dev 0
-mmc rescan
-mmc info
-mmc part
-```
+The physical device and eMMC have remained unchanged. Do not repeat the directory probes or request another offline image upload merely to recreate evidence already captured. Further raw MBR/EBR sector capture is not required for the current inventory acceptance; it would be a separate deeper forensic task only if a later requirement needs byte-level EBR validation.
 
-These commands select/initialize the MMC device and display card/partition information; they do not write eMMC blocks. Capture the complete serial output. Stop if the device reports an initialization error or an unexpected device number. Do not run `gpt write`, `mmc write`, `mmc erase`, filesystem write commands, `saveenv`, or any updater.
-
+No install manifest is approved by this review. P7-2 remains in progress because P7-2B FIT semantic parsing is still pending. All eMMC/SPI install mappings remain `UNMAPPED`.
