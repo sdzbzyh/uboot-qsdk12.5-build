@@ -204,7 +204,232 @@ int pa220_image_parse(const uint8_t *data, uint64_t size, struct pa220_image_inf
 #ifndef PA220_IMAGE_HOST_TEST
 #include <environment.h>
 #include <command.h>
+#include <image.h>
 #include <asm/arch/octeon_load_range.h>
+
+static const char *pa220_fit_string(const void *fit, int node,
+                                    const char *prop, int *bad)
+{
+    int len = 0;
+    const char *s = fdt_getprop(fit, node, prop, &len);
+    if (!s)
+        return NULL;
+    if (len < 1 || s[len - 1] != '\0' ||
+        (len > 1 && memchr(s, '\0', len - 1) != NULL)) {
+        *bad = 1;
+        return NULL;
+    }
+    return s;
+}
+
+static int pa220_fit_verify_hashes(const void *fit, int image_node)
+{
+    const void *data = NULL;
+    size_t data_size = 0;
+    int child, hashes = 0, signatures = 0, failures = 0;
+    int external = 0;
+
+    if (fit_image_get_data(fit, image_node, &data, &data_size)) {
+        int len;
+        if (fdt_getprop(fit, image_node, "data-offset", &len) ||
+            fdt_getprop(fit, image_node, "data-position", &len))
+            external = 1;
+        printf("  data: %s\n", external ?
+               "EXTERNAL_DATA_UNSUPPORTED" : "INLINE_DATA_MISSING");
+    } else {
+        printf("  inline_data_size: 0x%llx (%llu bytes)\n",
+               (unsigned long long)data_size,
+               (unsigned long long)data_size);
+    }
+
+    for (child = fdt_first_subnode(fit, image_node);
+         child >= 0; child = fdt_next_subnode(fit, child)) {
+        const char *name = fit_get_name(fit, child, NULL);
+
+        if (!name)
+            return -1;
+        if (!strncmp(name, "hash", 4)) {
+            uint8_t *expected = NULL;
+            uint8_t actual[FIT_MAX_HASH_LEN];
+            int expected_len = 0, actual_len = 0, bad = 0, ret;
+            const char *algo;
+            const fdt32_t *ignore_prop;
+            int ignore_len = 0;
+
+            hashes++;
+            algo = pa220_fit_string(fit, child, "algo", &bad);
+            if (bad || !algo ||
+                fit_image_hash_get_value(fit, child, &expected,
+                                         &expected_len) ||
+                expected_len <= 0 || expected_len > FIT_MAX_HASH_LEN) {
+                printf("  hash %s: MALFORMED\n", name);
+                failures++;
+                continue;
+            }
+            ignore_prop = fdt_getprop(fit, child, "uboot-ignore",
+                                      &ignore_len);
+            if (IMAGE_ENABLE_IGNORE && ignore_prop && ignore_len == 4 &&
+                fdt32_to_cpu(*ignore_prop) != 0) {
+                printf("  hash %s (%s): IGNORED\n", name, algo);
+                continue;
+            }
+            if (external || !data || data_size > 0x7fffffffU) {
+                printf("  hash %s (%s): UNSUPPORTED (no bounded inline data)\n",
+                       name, algo);
+                continue;
+            }
+            ret = calculate_hash(data, (int)data_size, algo,
+                                 actual, &actual_len);
+            if (ret || actual_len != expected_len) {
+                printf("  hash %s (%s): UNSUPPORTED\n", name, algo);
+                continue;
+            }
+            if (memcmp(actual, expected, actual_len)) {
+                printf("  hash %s (%s): FAIL\n", name, algo);
+                failures++;
+            } else {
+                printf("  hash %s (%s): PASS\n", name, algo);
+            }
+        } else if (!strncmp(name, "signature", 9)) {
+            signatures++;
+            printf("  signature %s: NOT_VERIFIED\n", name);
+        }
+    }
+    if (child != -FDT_ERR_NOTFOUND)
+        return -1;
+    if (!hashes)
+        puts("  hashes: NONE");
+    if (!signatures)
+        puts("  signatures: NONE");
+    return failures ? 1 : 0;
+}
+
+static int pa220_fit_preview(const void *fit, uint64_t received_size)
+{
+    int images_node, confs_node, node, ret;
+    int image_count = 0, config_count = 0, hash_failures = 0;
+    int bad = 0;
+    const char *description;
+
+    if (received_size > 0x7fffffffU || fdt_check_header(fit) ||
+        fdt_totalsize(fit) > received_size || !fit_check_format(fit)) {
+        puts("FIT: malformed header or mandatory root/images structure\n");
+        return -1;
+    }
+    description = pa220_fit_string(fit, 0, "description", &bad);
+    if (bad) {
+        puts("FIT: malformed root description string\n");
+        return -1;
+    }
+    printf("FIT description: %s\n", description ? description : "(none)");
+    printf("FIT totalsize: 0x%x; received: 0x%llx\n",
+           fdt_totalsize(fit), (unsigned long long)received_size);
+
+    images_node = fdt_path_offset(fit, "/images");
+    if (images_node < 0)
+        return -1;
+    for (node = fdt_first_subnode(fit, images_node);
+         node >= 0; node = fdt_next_subnode(fit, node)) {
+        const char *name = fit_get_name(fit, node, NULL);
+        const char *type, *arch, *os, *comp;
+        ulong load, entry;
+        int local_bad = 0, hash_status;
+
+        if (!name)
+            return -1;
+        image_count++;
+        printf("FIT image %s\n", name);
+        type = pa220_fit_string(fit, node, "type", &local_bad);
+        arch = pa220_fit_string(fit, node, "arch", &local_bad);
+        os = pa220_fit_string(fit, node, "os", &local_bad);
+        comp = pa220_fit_string(fit, node, "compression", &local_bad);
+        if (local_bad) {
+            printf("  properties: MALFORMED_STRING\n");
+            hash_failures++;
+        } else {
+            printf("  type=%s arch=%s os=%s compression=%s\n",
+                   type ? type : "(absent)", arch ? arch : "(absent)",
+                   os ? os : "(absent)", comp ? comp : "(absent)");
+        }
+        if (!fit_image_get_load(fit, node, &load))
+            printf("  load=0x%lx\n", load);
+        if (!fit_image_get_entry(fit, node, &entry))
+            printf("  entry=0x%lx\n", entry);
+        hash_status = pa220_fit_verify_hashes(fit, node);
+        if (hash_status < 0) {
+            puts("  hash tree: MALFORMED\n");
+            return -1;
+        }
+        if (hash_status > 0)
+            hash_failures++;
+    }
+    if (node != -FDT_ERR_NOTFOUND || image_count == 0)
+        return -1;
+
+    confs_node = fdt_path_offset(fit, "/configurations");
+    if (confs_node >= 0) {
+        const char *default_name;
+        int cfg_bad = 0;
+        default_name = pa220_fit_string(fit, confs_node, "default",
+                                        &cfg_bad);
+        if (cfg_bad) {
+            puts("FIT default configuration: MALFORMED\n");
+            return -1;
+        }
+        printf("FIT default configuration: %s\n",
+               default_name ? default_name : "(not set)");
+        for (node = fdt_first_subnode(fit, confs_node);
+             node >= 0; node = fdt_next_subnode(fit, node)) {
+            const char *cfg_name = fit_get_name(fit, node, NULL);
+            static const char * const refs[] = {
+                "kernel", "ramdisk", "fdt"
+            };
+            unsigned int i;
+            if (!cfg_name)
+                return -1;
+            config_count++;
+            printf("FIT configuration %s%s\n", cfg_name,
+                   default_name && !strcmp(default_name, cfg_name) ?
+                   " (default)" : "");
+            for (i = 0; i < sizeof(refs) / sizeof(refs[0]); i++) {
+                const char *ref_name;
+                int ref_bad = 0;
+                ref_name = pa220_fit_string(fit, node, refs[i], &ref_bad);
+                if (ref_bad) {
+                    printf("  %s: MALFORMED_REFERENCE\n", refs[i]);
+                    hash_failures++;
+                } else if (ref_name) {
+                    int target = fit_image_get_node(fit, ref_name);
+                    printf("  %s -> %s: %s\n", refs[i], ref_name,
+                           target >= 0 ? "RESOLVED" : "UNRESOLVED");
+                    if (target < 0)
+                        hash_failures++;
+                }
+            }
+        }
+        if (node != -FDT_ERR_NOTFOUND)
+            return -1;
+        if (default_name && fit_conf_get_node(fit, NULL) < 0) {
+            puts("FIT default configuration reference: UNRESOLVED\n");
+            hash_failures++;
+        }
+    } else if (confs_node != -FDT_ERR_NOTFOUND) {
+        return -1;
+    } else {
+        puts("FIT configurations: NONE\n");
+    }
+
+#if defined(CONFIG_FIT_SIGNATURE)
+    puts("FIT signature capability: compiled; preview did not authenticate signatures\n");
+#else
+    puts("FIT signature capability: NOT ENABLED; signatures are NOT_VERIFIED\n");
+#endif
+    printf("FIT images=%d configurations=%d hash_failures=%d\n",
+           image_count, config_count, hash_failures);
+    puts("FIT verification is integrity metadata only; no trust decision or load performed\n");
+    return hash_failures ? 1 : 0;
+}
+
 int pa220_image_preview(void)
 {
     ulong addr = getenv_hex("fileaddr", 0), size = getenv_hex("filesize", 0);
@@ -230,7 +455,9 @@ int pa220_image_preview(void)
                (unsigned long long)info.payload_size, (unsigned long long)info.load_address,
                (unsigned long long)info.entry_address, info.architecture_compatible ? "MIPS candidate" : "not PA-220 MIPS");
     } else if (info.format == PA220_IMAGE_FIT_FDT) {
-        puts("FDT bounds: PASS; FIT configuration/subimage semantics: NOT YET ANALYZED\n");
+        ret = pa220_fit_preview((const void *)(uintptr_t)addr, size);
+        if (ret)
+            return 1;
     } else {
         printf("ELF type: %u machine: %u entry: 0x%llx\narchitecture: %s\nPT_LOAD segments: %u\n",
                info.elf_type, info.elf_machine, (unsigned long long)info.entry_address,
