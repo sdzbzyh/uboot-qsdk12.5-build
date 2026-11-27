@@ -29,7 +29,12 @@
 **验收门：**
 - Host GCC + ASan/UBSan 格式向量通过。
 - Pinned Cavium GCC 4.7.0 OCTEON 对象/完整 U-Boot 链接通过，最终 ELF 保留 `pa220_image_preview` 和 `pa220_image_parse`。
-- 随后用 4 KiB 以内的有效 legacy uImage fixture 做一次 RAM-only 实机预览；不执行 boot/load，不写任何介质。
+- 随后执行 RAM-only 实机验证：
+1. 使用 Actions artifact 中的 `u-boot-octeon_pa220-stage3-wrapper.uImage`。它是合法 legacy uImage 外壳，payload 是本轮构建的原始 OCTEON Stage3 BIN。
+2. 旧 U-Boot 将 wrapper TFTP GET 到 `0x20000000`（有效 `__tmp_load` 范围）；从 wrapper offset `0x40` 将 payload 用 `cp.b` 复制到已验证的 RAM 启动地址 `0x81000000`，用 `cmp.b` 校验后执行 `go 0x81000000`。这是 RAM 启动，不是 flash 写入。
+3. 新 P7 U-Boot 再次 TFTP GET 同一 wrapper，运行 `pa220 image preview` 验证 uImage header/data CRC。
+4. 将 wrapper 内层 OCTEON Stage3 payload 复制到 `__tmp_load` 内的另一个 RAM 地址（例如 `0x20200000`），临时设置 `fileaddr/filesize`，再次运行 `pa220 image preview`，验证 OCTEON header、board type 和 CRC。
+5. 检查 `pa220 memory`，确认 descriptor 不变；不执行 `saveenv`、bootloader updater 或任何介质写入。
 
 注意：P6-1C 当前 TFTP GET recognizer 接受 legacy uImage、FIT/FDT、ELF32/ELF64；OCTEON bootloader header 虽已纳入 P7 parser，但尚未纳入 P6-1C 接收格式门。因此当前 TFTP GET 路径不能接收 OCTEON bootloader-header 文件。若后续需要经 TFTP 预览该格式，必须单独扩展并测试 P6 verifier，不能假定本次 P7 parser 已使其可接收。
 
@@ -49,6 +54,6 @@
 
 ## 当前状态
 
-- P7-1 parser、Host Harness、Actions OCTEON 构建状态以本文件对应报告和最新 Actions run 为准。
-- 实机 preview 尚未执行。
+- P7-1 parser、Host Harness、Actions OCTEON 构建已通过；最终证据以 `reports/pa220/P7-1/ACCEPTANCE.md` 和最新 Actions artifact 为准。
+- 实机 preview 尚未执行；RAM boot wrapper 由 `tools/pa220/make-p7-stage3-uimage-wrapper.py` 生成并随 Actions artifact 提供。
 - P7 整体未完成；P7-2/P7-3 尚未开始。
