@@ -8,7 +8,7 @@ import zlib
 def make_wrapper(payload):
     fields = (0x27051956, 0, 0, len(payload), 0x81000000, 0x81000000,
               zlib.crc32(payload) & 0xffffffff, 5, 6, 2, 0,
-              b"PA220 OCTEON STAGE3 RAM BOOT WRAPPER".ljust(32, b"\0"))
+              b"PA220 STAGE3 RAM WRAPPER".ljust(32, b"\0"))
     header = bytearray(struct.pack(">7I4B32s", *fields))
     hcrc = zlib.crc32(header) & 0xffffffff
     struct.pack_into(">I", header, 4, hcrc)
