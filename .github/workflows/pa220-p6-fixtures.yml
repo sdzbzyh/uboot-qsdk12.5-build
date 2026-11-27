@@ -15,7 +15,7 @@ jobs:
       - name: Checkout exact triggering commit
         uses: actions/checkout@v4
         with:
-          ref: \${{ github.sha }}
+          ref: ${{ github.sha }}
       - name: Generate 4 KiB, exact-limit and one-byte-over-limit fixtures
         shell: bash
         run: |
@@ -36,7 +36,7 @@ jobs:
       - name: Upload generated fixture set
         uses: actions/upload-artifact@v4
         with:
-          name: pa220-p6-get-fixtures-\${{ github.sha }}
+          name: pa220-p6-get-fixtures-${{ github.sha }}
           path: artifacts/pa220/P6-B/fixtures/
           if-no-files-found: error
           retention-days: 60
