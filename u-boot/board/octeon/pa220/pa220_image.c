@@ -308,7 +308,7 @@ static int pa220_fit_preview(const void *fit, uint64_t received_size)
 {
     int images_node, confs_node, node, ret;
     int image_count = 0, config_count = 0, hash_failures = 0;
-    int bad = 0;
+    int bad = 0, depth = 0, walk;
     const char *description;
 
     if (received_size > 0x7fffffffU || fdt_check_header(fit) ||
@@ -324,6 +324,18 @@ static int pa220_fit_preview(const void *fit, uint64_t received_size)
     printf("FIT description: %s\n", description ? description : "(none)");
     printf("FIT totalsize: 0x%x; received: 0x%llx\n",
            fdt_totalsize(fit), (unsigned long long)received_size);
+
+    walk = fdt_next_node(fit, -1, &depth);
+    if (walk < 0) {
+        puts("FIT: missing or malformed root node\n");
+        return -1;
+    }
+    while (walk >= 0)
+        walk = fdt_next_node(fit, walk, &depth);
+    if (walk != -FDT_ERR_NOTFOUND) {
+        puts("FIT: malformed structure block\n");
+        return -1;
+    }
 
     images_node = fdt_path_offset(fit, "/images");
     if (images_node < 0)
@@ -435,6 +447,7 @@ int pa220_image_preview(void)
     ulong addr = getenv_hex("fileaddr", 0), size = getenv_hex("filesize", 0);
     struct pa220_image_info info;
     uint32_t i;
+    int ret;
     if (!addr || !size) { puts("pa220 image: no completed fileaddr/filesize metadata\n"); return 1; }
     if (size > (~0UL - addr) || octeon_load_range_check((uint64_t)addr, (uint64_t)size)) {
         puts("pa220 image: file range is outside the validated __tmp_load reservation\n"); return 1;
