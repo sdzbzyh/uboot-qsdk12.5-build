@@ -18,13 +18,16 @@ def main():
         if not out.is_file() or "pa220_image_preview" not in out.read_text(): raise RuntimeError("P7 patch missing after source modification")
         print("P7_ALREADY_GENERATED=verified"); print("PATCH_SHA256="+hashlib.sha256(out.read_bytes()).hexdigest()); return 0
     bs=replace_once(bs,"#include <command.h>","#include <command.h>\n#include <pa220_image.h>","image preview include")
-    dispatch = '\\treturn CMD_RET_USAGE;'
+    dispatch = '\treturn CMD_RET_USAGE;'
     dispatch_new = '''\tif (argc == 3 && !strcmp(argv[1], "image") &&
 \t    !strcmp(argv[2], "preview"))
 \t\treturn pa220_image_preview();
 
 \treturn CMD_RET_USAGE;'''
     bs=replace_once(bs,dispatch,dispatch_new,"pa220 image preview dispatch")
+    bs=replace_once(bs,"U_BOOT_CMD(pa220, 2, 1, do_pa220,","U_BOOT_CMD(pa220, 3, 1, do_pa220,","pa220 maxargs")
+    old_usage = '"pa220 clock   - show initialized CORE, SCLK and DDR clock values");'
+    new_usage = '"pa220 clock   - show initialized CORE, SCLK and DDR clock values\\n"\n\t   "pa220 image preview - parse current RAM image and print a read-only plan");'
     bs=replace_once(bs,"U_BOOT_CMD(pa220, 2, 1, do_pa220,","U_BOOT_CMD(pa220, 3, 1, do_pa220,","pa220 maxargs")
     old_usage = '"pa220 clock   - show initialized CORE, SCLK and DDR clock values");'
     new_usage = '"pa220 clock   - show initialized CORE, SCLK and DDR clock values\\\\n"\\n\\t   "pa220 image preview - parse current RAM image and print a read-only plan");'
