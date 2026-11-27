@@ -25,8 +25,10 @@ P7-1 parser、Host/ASan/UBSan、OCTEON 完整构建和 PA-220 实机 preview 均
 - 原机 SPI 备份仅从 `main@da755efd49df32f3e85d231745212674737feba5` 读取；16 MiB，SHA-256 `4899a1c5ed06e5eafbb8c92625a4afae14cad399806df13979fd2c70ee1ed922`。4 个 OCTEON header 均通过 header/data CRC；识别 Pre-U-Boot、Stage 2 和 NOR bootloader；两个 FDT 分别描述 generic SPI Stage2 与 PA-220 Stage3。
 - SPI 备份的 `0x250000-0x1000000` 全为 `0xff`；配置环境区 `0xe00000` / `0xe10000` 在备份中也全擦除。该镜像不提供 eMMC GPT 证据。
 - 重要配置：PA-220 实际启用 SPI redundant environment（`0xe00000` / `0xe10000`），`saveenv` 会擦写 SPI NOR 64 KiB sector；板级文件顶部“RAM-only”注释与宏配置矛盾。P7-2 禁止调用 `saveenv`。
-- 当前工作单元：P7-2B FIT 只读语义解析；P7-2C eMMC GPT 现场只读取证待设备输出。eMMC install target 继续 UNMAPPED。
-- 需要现场时，设备上电并中断 autoboot 后，只运行 `version`、`mmc list`、`mmc dev 0`、`mmc rescan`、`mmc info`、`mmc part`，提供完整串口输出；不执行任何 write/erase/GPT write/updater/saveenv。
+- P7-2C live eMMC 只读取证已完成并归档：`reports/pa220/P7-2/EMMC-DEVICE-ACCEPTANCE.md`。实机介质是 DOS/MBR + extended/EBR logical partitions，不是 GPT；live `mmc part` 的 8 个分区条目与完整 User Area 镜像的离线 fdisk/parted/sfdisk 记录一致。
+- 已有 live 根目录探测：0:1、0:2 于 2026-11-27；0:3、0:5、0:6、0:8 于 2026-11-18。0:4 是扩展容器，0:7 是 swap。不要重复安排这些目录探测。
+- 当前唯一工作单元：P7-2B FIT 只读语义解析。P7-2C 不再等待设备输出；GPT primary/backup consistency 对当前 MBR 介质不适用。所有 eMMC install target 继续 UNMAPPED。
+- 本轮没有读取并归档原始 MBR/EBR sector dump；不声称已完成 EBR 原始字节级审计。若未来确需该深度证据，再单独评估；当前 P7-2C inventory acceptance 不需要增加线下操作。
 - P4 DHCP Client/Ping 实机验证仍是独立遗留项，P4 overall 不得标记 COMPLETE。
 
 ## 历史检查点（P6-B 完成前，保留审计记录）
