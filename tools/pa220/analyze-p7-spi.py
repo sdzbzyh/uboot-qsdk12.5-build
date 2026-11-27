@@ -103,7 +103,7 @@ def embedded_fdts(buf):
         if off + 40 > len(buf):
             continue
         total, struct_off, strings_off, rsv_off, version, last_comp = struct.unpack_from(">6I", buf, off+4)
-        struct_size, strings_size = struct.unpack_from(">2I", buf, off+32)
+        strings_size, struct_size = struct.unpack_from(">2I", buf, off+32)
         if (40 <= total <= len(buf)-off and 16 <= version <= 17
                 and 16 <= last_comp <= version and rsv_off % 8 == 0
                 and 40 <= rsv_off <= total-16 and 40 <= struct_off <= total
