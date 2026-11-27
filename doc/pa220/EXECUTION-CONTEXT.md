@@ -15,9 +15,10 @@
 
 ## 当前唯一主线
 
-P6-1A/B/C 软件门与 P6-A live descriptor 只读预检均已通过。P6-B 首个 4 KiB 合法 legacy-uImage 的 RAM-only TFTP GET 成功路径已在实机通过；当前唯一未完成工作为 P6-B reservation 边界/越界拒绝与中断/超时失败清理验收。
+P6-1A/B/C 软件门与 P6-A live descriptor 只读预检均已通过。P6-B 的 4 KiB 成功路径及 32 MiB 精确 reservation 上限均已在实机通过（32 MiB 主机 SHA-256/长度独立复核一致）；当前唯一未完成工作为 32 MiB+1 超限拒绝阶段确认与中断/超时失败清理验收。
 
 - 实机报告：`reports/pa220/P6-B/INITIAL-GET-ACCEPTANCE.md`。
+- 32 MiB 精确 reservation 边界实机验收 PASS，主机独立 SHA-256/长度复核一致；报告：`reports/pa220/P6-B/32M-EXACT-BOUNDARY-ACCEPTANCE.md`。
 - 测试文件生成器：`tools/pa220/make-p6-get-fixture.py`。
 - 边界测试 fixture Actions [#45938976540](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45938976540) SUCCESS；Artifact [15171887471](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45938976540/artifacts/15171887471) 含 4 KiB、32 MiB、32 MiB+1 三个向量及 SHA256SUMS。
 - 设备 build time：`Nov 25 2026 - 11:04:13`；IP `192.168.2.2` / TFTP host `192.168.2.10`；接口 `octrgmii0`。
@@ -26,7 +27,7 @@ P6-1A/B/C 软件门与 P6-A live descriptor 只读预检均已通过。P6-B 首�
 - 传输中出现一次 `rgmii rx` transient/drop warning；接收最终成功。无 pcap，不声称已确认 block size/块数。
 - 本轮测试结束后设备可断电；未调用 `saveenv`，未执行 loader/启动命令，未写持久化介质。
 
-下一步使用生成器创建 32 MiB 精确上限与 32 MiB+1 超限向量，按 P6-PLAN 第 4 节逐项验证成功边界与失败元数据清理；超限拒绝阶段需用 pcap 区分 OACK tsize 拒绝和 DATA reservation 拒绝。中断/超时测试另行采用可控延迟方式。
+32 MiB 精确上限实机已接收成功：size=33554432，CRC32=97257c28，SHA-256=fe773a13c9bfa1759c32826302e0b9a0e2ba6c88de9841219a2337d17861f526；Windows 主机复核长度与 SHA-256 完全一致，filesize=0x2000000、fileaddr=0x20000000，descriptor 不变。证据见 `reports/pa220/P6-B/32M-EXACT-BOUNDARY-ACCEPTANCE.md`。下一步只需测试 32 MiB+1 超限向量并用 pcap 区分 OACK tsize 拒绝和 DATA reservation 拒绝，再完成受控中断/超时失败清理。
 
 ### P6-1A 设计要点
 
