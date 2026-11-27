@@ -1,6 +1,6 @@
 # PA-220 P6 计划：RAM-only 文件接收与校验
 
-- 状态：**P6-1A/P6-1B/P6-1C 软件门 ACCEPTED；P6-A live descriptor/DRAM/reservation 只读预检 PASS；P6-B 4 KiB 成功路径与 32 MiB 精确 reservation 上限实机 PASS；32 MiB+1 超限拒绝阶段确认及中断/超时失败清理待验收**
+- 状态：**P6-1A/P6-1B/P6-1C 软件门 ACCEPTED；P6-A live descriptor/DRAM/reservation 只读预检 PASS；P6-B 4 KiB、32 MiB 精确上限成功路径 PASS；32 MiB+1 在 OACK tsize 阶段拒绝及失败清理 PASS；仅受控中断/超时失败清理待验收**
 - 日期：2026-11-24
 - 集成分支：`feature/pa220-ubootkit-web`
 - 固定 PA-220 源码：`sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
@@ -78,7 +78,7 @@ P6 只负责将一个文件接收到经验证的 RAM 区间，并对接收结果
 - 每次 GET 后只读检查 `printenv filesize fileaddr` 和 `pa220 memory`。超限失败后两项应不存在，descriptor 不变。不得执行任何 loader/启动命令。
 - 中断/超时测试另行安排受控延迟/停止服务器的方式；不得依赖随机拔网线或不可控时机按 Ctrl-C。
 
-**P6-B 目前 4 KiB 与 32 MiB 精确上限成功路径均通过，整体仍未验收。** 32 MiB+1 超限拒绝阶段（OACK tsize 或 DATA reservation）及中断/超时失败后的状态清理和元数据失效仍待实机验证。未执行 loader、启动命令、`saveenv` 或持久化写入。
+**P6-B 目前 4 KiB、32 MiB 精确上限成功路径、32 MiB+1 OACK tsize 超限拒绝及失败清理均已通过实机验收；整体仍未验收。** 32 MiB+1 抓包仅见 RRQ 与 OACK（服务器返回 `tsize=33554433`），未见 DATA；设备在 tsize 校验阶段拒绝。失败后 `filesize`/`fileaddr` 均不存在，live descriptor 不变。完整证据见 [P6-B 32 MiB+1 OVERLIMIT ACCEPTANCE](../../reports/pa220/P6-B/32M-PLUS-1-OVERLIMIT-ACCEPTANCE.md)。仅受控中断/超时失败清理仍待实机验证。未执行 loader、启动命令、`saveenv` 或持久化写入。
 
 P6-B 只验证 TFTP GET，不代表 TFTP Server/WRQ、PUT、HTTP upload 或 ELF loader 写入安全。
 
@@ -227,4 +227,4 @@ P6-1A、P6-1B、P6-1C 软件门均已完成；下一步先安排 P6-A live descr
 ### 未执行事项与下一步
 
 - **截至 P6-1B 软件验收时**未执行真实 TFTP GET；随后 P6-B 首个成功路径已由本计划第 4 节记录。该阶段未调用 saveenv，未写入 SPI/eMMC/NAND/EEPROM/CPLD/flash。
-- 下一工作单元为 P6-A：只读检查 live __tmp_load descriptor、DRAM 范围和完整 reservation。P6-A 通过并经审查、取得明确确认后，才考虑 P6-B RAM-only TFTP GET。
+- P6-A 与 P6-B 的前述实机检查点均已完成；当前下一工作单元仅为受控中断/超时失败清理实机验收。
