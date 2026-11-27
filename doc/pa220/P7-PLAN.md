@@ -77,15 +77,34 @@
 - 原计划的 GPT primary/backup header/entry consistency 不适用；未读取并归档原始 MBR/EBR sector dump，因此不声称逐扇区 EBR 链审计完成。
 - 所有 eMMC 固件安装目标继续为 `UNMAPPED`。不执行 `gpt write`、`mmc write/erase`、filesystem write、`saveenv` 或 updater。
 
-## P7-3：dry-run 安装计划
+## P7-3：dry-run 安装计划（进行中；尚未验收）
 
-- 将已验证的镜像组件映射到有证据支持的目标分区/区域。
-- 输出来源 offset/length、目标设备/分区、目标 offset/容量、覆盖范围、校验结果、未决项和明确拒绝原因。
-- 对未知、歧义、越界、容量不足、签名策略未满足的项目拒绝生成可执行计划。
-- 只生成报告；不调用任何写入函数。
+源码审查已发现不能直接复用固定 U-Boot 的普通分区枚举作为 P7 安全边界：DOS/EBR 路径使用有符号 int 做 sector arithmetic，递归遍历缺少 EBR visited-set/hop bound 与 extended-container 完整约束；EFI/GPT 路径只验证调用方指定的单份 Header/Entry Array，现有调用只传 primary GPT LBA，未交叉验证 backup Header/Entry Array。详细审查：`reports/pa220/P7-3/SOURCE-AUDIT.md`。
+
+### P7-3A：bounded read-only partition inventory core
+
+- 独立实现 sector-read callback 驱动的 MBR/EBR 与 GPT 只读解析器，不调用 block-write API。
+- MBR：checked 64-bit arithmetic、4 primary entries、0x05/0x0f/0x85 extended、EBR visited-set/hop bound、extended-container containment、循环/重叠/越界/多 extended 容器 fail closed。
+- GPT：Protective MBR、主/备 Header 与 Entry Array CRC、几何边界、disk GUID/关键字段一致性、完整 Entry Array 一致性、partition GUID 唯一性、范围与重叠检查。
+- 自动识别；hybrid、损坏、冲突、未知格式拒绝。
+- Host 合成 MBR/GPT fixture + GCC/ASan/UBSan；随后 pinned Cavium OCTEON object/N32/full link。
+
+### P7-3B：manifest policy and dry-run plan
+
+- 仅接受显式审核过的 PA-220 install manifest；不根据 MBR type 0x83、目录名、FIT image name 或 load/entry 地址猜测分区角色。
+- 当前没有 approved PA-220 install manifest，因此所有组件必须保持 `UNMAPPED`，报告硬拒绝原因 `NO_APPROVED_MANIFEST`。
+- 输出 source offset/length、组件校验状态、分区表来源、候选目标/容量（只有 manifest 可解析时）、范围/重叠检查、未决证据和最终拒绝原因。
+- 只生成 dry-run 报告，不生成可执行写入脚本，不调用任何写入函数。
+
+### P7-3 验收门
+
+- MBR/GPT 独立正向与损坏 fixture 覆盖报告中的边界矩阵；ASan/UBSan 无错误。
+- 固定 SDK 目标编译、N32 relocatable link、完整 U-Boot final link 通过。
+- 对当前 PA-220 仅在软件门通过后进行必要的只读分区 inventory；不要求重复已完成的 `mmc part`/ext2ls 目录探测。
+- 在有批准 manifest 之前，dry-run 结果必须为拒绝映射；P7 不写 eMMC/SPI/NAND、不调用 `saveenv`。
 
 ## 当前状态
 
 - P7-1 parser、Host Harness、ASan/UBSan、Actions OCTEON 完整构建及真实 PA-220 实机 preview 均已通过；云端证据见 `reports/pa220/P7-1/ACCEPTANCE.md`，实机串口证据见 `reports/pa220/P7-1/DEVICE-ACCEPTANCE.md`。
 - 实机已验证 wrapper TFTP 接收、uImage 校验、payload RAM-copy/compare、RAM Stage3 启动、外层 legacy uImage preview、内层 OCTEON bootloader preview 和 reservation descriptor 不变。
-- P7-1 验收完成。P7-2A SPI NOR 静态取证与 P7-2C eMMC DOS/MBR 实机只读取证已完成。P7-2B FIT preview 已通过 Actions #45970127218 / #45970607698 的 Host/ASan/UBSan、Cavium OCTEON object、N32 relocatable link 和完整 U-Boot final link；FIT fixtures 已打包在 [Artifact 15184393205](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45970607698/artifacts/15184393205)。PA-220 已完成正常与损坏两个 FIT fixture 的 RAM-only 实机语义验收，P7-2B PASS。正常 fixture 的 kernel/ramdisk CRC32、SHA1、MD5 均 PASS，ignored/unsupported/signature/external-data 状态正确，default configuration 三项引用全部 RESOLVED，hash_failures=0；损坏 fixture 的 kernel 三种 hash 均 FAIL、ramdisk 三种 hash 均 PASS，hash_failures=1。两次均 target mapping UNMAPPED、actions NONE，未执行加载/启动或持久化写入。完整实机证据见 `reports/pa220/P7-2/FIT-IMPLEMENTATION.md`。P7-2A、P7-2B、P7-2C 均已完成；下一工作单元为 P7-3 dry-run 安装计划，P7 整体仍未完成。
+- P7-1 验收完成。P7-2A SPI NOR 静态取证与 P7-2C eMMC DOS/MBR 实机只读取证已完成。P7-2B FIT preview 已通过 Actions #45970127218 / #45970607698 的 Host/ASan/UBSan、Cavium OCTEON object、N32 relocatable link 和完整 U-Boot final link；FIT fixtures 已打包在 [Artifact 15184393205](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45970607698/artifacts/15184393205)。PA-220 已完成正常与损坏两个 FIT fixture 的 RAM-only 实机语义验收，P7-2B PASS。正常 fixture 的 kernel/ramdisk CRC32、SHA1、MD5 均 PASS，ignored/unsupported/signature/external-data 状态正确，default configuration 三项引用全部 RESOLVED，hash_failures=0；损坏 fixture 的 kernel 三种 hash 均 FAIL、ramdisk 三种 hash 均 PASS，hash_failures=1。两次均 target mapping UNMAPPED、actions NONE，未执行加载/启动或持久化写入。完整实机证据见 `reports/pa220/P7-2/FIT-IMPLEMENTATION.md`。P7-2A、P7-2B、P7-2C 均已完成。P7-3 源码审计完成，严格 MBR/GPT validator 与 manifest dry-run 尚未实现/验收；P7 整体仍未完成。
