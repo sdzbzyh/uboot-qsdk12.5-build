@@ -15,16 +15,17 @@
 
 ## 当前唯一主线
 
-P6-A live DRAM descriptor / reservation read-only preflight 已 PASS；下一工作单元为 P6-B 首个 RAM-only TFTP GET 的测试准备与用户确认。
+P6-1A/B/C 软件门与 P6-A live descriptor 只读预检均已通过。P6-B 首个 4 KiB 合法 legacy-uImage 的 RAM-only TFTP GET 成功路径已在实机通过；当前唯一未完成工作为 P6-B reservation 边界/越界拒绝与中断/超时失败清理验收。
 
-- P6-1A / P6-1B / P6-1C 软件门均已验收，历史证据保留在各自 ACCEPTANCE 报告，不在此重复。
-- P6-A 实机预检报告：`reports/pa220/P6-A/READONLY-PREFLIGHT.md`。
-- 设备实际报告 8 GiB DRAM；`__tmp_load=[0x20000000,0x30000000)`，256 MiB；`loadaddr=0x20000000`；`autoload=n`。
-- MIPS/CN70XX 地址域已与源码 DDR map 对齐；Linux reserved、low/FDT/exception、free block 和高端 U-Boot reservation 均不与 load block 重叠。
-- P6-1B 的 32 MiB 完整接收 reservation 可容纳于 live 256 MiB descriptor；生产 validator 在 RRQ 前仍会再次核对 live descriptor 与 reservation globals，任何不一致均 fail closed。
-- 尚未执行真实 TFTP GET、未传输文件、未修改网络环境变量、未调用 saveenv、未写持久化介质。
+- 实机报告：`reports/pa220/P6-B/INITIAL-GET-ACCEPTANCE.md`。
+- 测试文件生成器：`tools/pa220/make-p6-get-fixture.py`。
+- 设备 build time：`Nov 25 2026 - 11:04:13`；IP `192.168.2.2` / TFTP host `192.168.2.10`；接口 `octrgmii0`。
+- live DRAM：8 GiB；`loadaddr=0x20000000`；`__tmp_load=[0x20000000,0x30000000)`（256 MiB）。
+- 成功路径：4096 bytes，`filesize=0x1000`，`fileaddr=0x20000000`，格式 `legacy-uImage`，CRC32 `9e4df6c8`，SHA-256 `83b1bb6b9c006c9d38c6915a985895bfeffd41f24d969aae1b74365041028082`；主机与设备摘要一致。
+- 传输中出现一次 `rgmii rx` transient/drop warning；接收最终成功。无 pcap，不声称已确认 block size/块数。
+- 本轮测试结束后设备可断电；未调用 `saveenv`，未执行 loader/启动命令，未写持久化介质。
 
-P6-B 仍需单独明确确认后才开始。当前 `ipaddr` / `serverip` 未定义不影响 P6-A；它们是设备作为 TFTP client 时的网络参数，与最终由 PA-220 DHCP Server 给维护电脑分配地址是不同需求。
+下一步先审查生产 reservation 上限与 abort/timeout 状态清理，再设计最小风险的边界/失败用例。不得直接用 32 MiB 文件或随意制造网络中断；先从代码与 Host Harness 确认测试向量能精确触发目标分支。
 
 ### P6-1A 设计要点
 
@@ -44,7 +45,7 @@ Host 测试直接编译生产 helper，并从同一生成器注入生产 GET gat
 
 ### 后续 P6 软件门
 
-继续按 `doc/pa220/P6-PLAN.md` 推进：P6-1A/B/C 软件门均已完成。下一步只做 P6-A live descriptor、DRAM 范围和完整 reservation 的只读预检；本轮不执行 TFTP GET。
+继续按 `doc/pa220/P6-PLAN.md` 推进：P6-1A/B/C 软件门均已完成。P6-A live descriptor/DRAM/reservation 只读预检已通过；当前状态以本文件顶部“当前唯一主线”为准。
 
 ## 验证与补丁规则
 
@@ -99,4 +100,4 @@ Host 测试直接编译生产 helper，并从同一生成器注入生产 GET gat
 - 独立补丁由 `git diff --binary` 生成：TFTP 接收状态补丁 SHA-256 `e3dba0c7fdfce6364a93998d94ea823a8d0307e92656b51a4619e7ffeca509b5`；GET abort hook 补丁 SHA-256 `71a1e403dd0988add42c8b229332dc6379e65c437de3c1e057158977398c8ccc`。
 - 未执行真实 TFTP GET、未传输文件、未调用 `saveenv`、未写入任何持久化介质。
 
-P6-1C 已由 Actions #45600860179 验收通过，报告见 reports/pa220/P6-1C/ACCEPTANCE.md。下一步 P6-A：只读检查 live __tmp_load descriptor、DRAM 范围和完整 reservation。未完成 P6-A 前不执行真实 TFTP GET。
+P6-1C 已由 Actions #45600860179 验收通过，报告见 reports/pa220/P6-1C/ACCEPTANCE.md。P6-A 已通过，P6-B 首个成功路径已实机通过；当前状态以本文件顶部“当前唯一主线”为准。
