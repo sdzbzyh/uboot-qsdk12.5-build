@@ -27,7 +27,7 @@ static int append(struct pa220_partition_table *o,uint64_t s,uint64_t n,uint8_t 
  for(i=0;i<o->count;i++){ if(!add64(o->parts[i].start_lba,o->parts[i].sectors,&pe)) return 0;
   if(s<pe && o->parts[i].start_lba<e) return 0;
  }
- o->parts[o->count].start_lba=s; o->parts[o->count].sectors=n;
+ o->parts[o->count].index=o->count+1; o->parts[o->count].start_lba=s; o->parts[o->count].sectors=n;
  o->parts[o->count].type=type; o->parts[o->count].kind=kind; o->count++; return 1;
 }
 static int empty_entry(const uint8_t *e){ unsigned int i; for(i=0;i<16;i++) if(e[i]) return 0; return 1; }
@@ -89,18 +89,19 @@ static int scan_gpt(pa220_sector_read_fn fn,void *ctx,struct pa220_partition_tab
  uint64_t pl,bl,first,last,array_sectors,array_end; uint32_t pc,bc,pe,be,pcrc,bcrc,bytes,i,j;
  if(read1(fn,ctx,0,o->capacity,p)<0) return PA220_PT_IO;
  if(rd16(p+510)!=MBR_SIG) return PA220_PT_UNKNOWN;
- if(!valid_boot(p+446) || p[450]!=0xee || rd32(p+454)!=1 ||
+ if(p[446]!=0 || p[450]!=0xee || rd32(p+454)!=1 ||
     rd32(p+458)!=(o->capacity-1>0xffffffffULL?0xffffffffU:(uint32_t)(o->capacity-1))) return PA220_PT_AMBIGUOUS;
  for(i=1;i<4;i++) if(!empty_entry(p+446+i*16)) return PA220_PT_AMBIGUOUS;
  bl=o->capacity-1;
  if(!gpt_header(fn,ctx,o->capacity,1,ph,&pl,&pc,&pe,&pcrc) ||
     !gpt_header(fn,ctx,o->capacity,bl,bh,&bl,&bc,&be,&bcrc)) return PA220_PT_CORRUPT;
  if(rd64(ph+32)!=o->capacity-1 || rd64(bh+32)!=1 ||
-    memcmp(ph+56,bh+56,16)||rd64(ph+40)!=rd64(bh+40)||rd64(ph+48)!=rd64(bh+48)||
+    memcmp(ph+56,bh+56,16)||rd32(ph+8)!=rd32(bh+8)||rd32(ph+12)!=rd32(bh+12)||rd64(ph+40)!=rd64(bh+40)||rd64(ph+48)!=rd64(bh+48)||
     pc!=bc||pe!=be||pcrc!=bcrc||pl==bl ||
     !memcmp(ph+56,(uint8_t[16]){0},16)) return PA220_PT_CORRUPT;
  bytes=pc*pe; array_sectors=(bytes+511U)/512U;
  first=rd64(ph+40); last=rd64(ph+48);
+ memcpy(o->disk_guid,ph+56,16);
  if(!add64(pl,array_sectors,&array_end)||pl<2||array_end>first ||
     bl<=last || !add64(bl,array_sectors,&array_end)||array_end>o->capacity-1) return PA220_PT_CORRUPT;
  memset(pa,0,sizeof(pa)); memset(ba,0,sizeof(ba));
@@ -117,7 +118,9 @@ static int scan_gpt(pa220_sector_read_fn fn,void *ctx,struct pa220_partition_tab
   s=rd64(e+32); en=rd64(e+40);
   if(s<first||en>last||en<s||!add64(en-s,1,&n)) return PA220_PT_CORRUPT;
   if(!append(o,s,n,0,PA220_PART_GPT)) return PA220_PT_CORRUPT;
+  o->parts[o->count-1].index=i+1;
   memcpy(o->parts[o->count-1].type_guid,e,16); memcpy(o->parts[o->count-1].unique_guid,e+16,16);
+  memcpy(o->parts[o->count-1].name_utf16le,e+56,72);
   if(!memcmp(e+16,(uint8_t[16]){0},16)) return PA220_PT_CORRUPT;
   o->parts[o->count-1].attributes=rd64(e+48);
   for(j=0;j<i;j++) if(!memcmp(pa+j*pe+16,e+16,16)) return PA220_PT_CORRUPT;
