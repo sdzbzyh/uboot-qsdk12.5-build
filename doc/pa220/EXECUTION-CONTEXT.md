@@ -14,7 +14,7 @@
 - 目标：OCTEON III CN7130、MIPS64 BE、N32、Cavium SDK 5.1.0、U-Boot 2013.07、原厂 Stage 2 加载自定义 Stage 3。
 - PA-220 独立构建入口：`./build-pa220.sh`；不得混入 Qualcomm `build.sh`。
 
-## 当前唯一主线（2026-11-27，P7-2）
+## 当前唯一主线（2026-11-27，P7-3）
 
 P7-1 parser、Host/ASan/UBSan、OCTEON 完整构建和 PA-220 实机 preview 均已通过。当前推进 P7-2：FIT 容器语义与原机 SPI/eMMC 存储布局取证。
 
