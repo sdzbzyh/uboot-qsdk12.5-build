@@ -1,0 +1,102 @@
+name: PA-220 P7-1 read-only image preview parser
+on:
+  push:
+    branches: [feature/pa220-ubootkit-web]
+    paths:
+      - 'build-pa220.sh'
+      - 'u-boot/board/octeon/pa220/pa220_image.c'
+      - 'u-boot/include/pa220_image.h'
+      - 'scripts/generate-pa220-p7-image-patch.py'
+      - 'tests/pa220/image-preview/**'
+      - '.github/workflows/pa220-p7-image-preview.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  statuses: write
+jobs:
+  p7-image-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout triggering commit
+        uses: actions/checkout@v4
+        with:
+          ref: \${{ github.sha }}
+          fetch-depth: 0
+      - name: Host parser vectors and sanitizer tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p reports/pa220/P7-1
+          bash tests/pa220/image-preview/run.sh 2>&1 | tee reports/pa220/P7-1/10-host-tests.log
+          grep -q 'PA220_P7_HOST_GCC=PASS' reports/pa220/P7-1/10-host-tests.log
+          grep -q 'PA220_P7_HOST_ASAN_UBSAN=PASS' reports/pa220/P7-1/10-host-tests.log
+      - name: Download and verify pinned Cavium OCTEON SDK
+        env:
+          GH_TOKEN: \${{ secrets.OCTEON_SDK_READ_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          D="$RUNNER_TEMP/octeon-download"; S="$RUNNER_TEMP/octeon-sdk"; mkdir -p "$D" "$S"
+          test -n "$GH_TOKEN"
+          gh release download octeon-sdk-5.1.0 --repo sdzbzyh/pa220-toolchains --pattern '*.tar.gz' --pattern '*.sha256' --dir "$D"
+          (cd "$D" && sha256sum -c ./*.sha256)
+          A=$(find "$D" -maxdepth 1 -name '*.tar.gz' -print -quit)
+          tar -xzf "$A" -C "$S"
+          GCC=$(find "$S" -path '*/bin/mips64-octeon-linux-gnu-gcc' -print -quit)
+          TC=$(dirname "$(dirname "$GCC")")
+          echo "OCTEON_TOOLCHAIN=$TC" >> "$GITHUB_ENV"
+          echo "$TC/bin" >> "$GITHUB_PATH"
+          "$GCC" --version | head -n 2 | tee reports/pa220/P7-1/20-octeon-toolchain.txt
+          sha256sum "$A" | tee reports/pa220/P7-1/21-sdk-sha256.txt
+      - name: Full PA-220 build and generated-patch idempotence
+        shell: bash
+        run: |
+          set -euo pipefail
+          export OCTEON_MODEL=OCTEON_CN70XX
+          export PA220_REPO_DIR="$RUNNER_TEMP/pa220-openwrt"
+          export PA220_OUTPUT_DIR="$RUNNER_TEMP/pa220-output"
+          ./build-pa220.sh "$OCTEON_TOOLCHAIN" 2>&1 | tee reports/pa220/P7-1/29-octeon-full-build.log
+          python3 scripts/generate-pa220-p7-image-patch.py \
+            --source-root "$PA220_REPO_DIR" \
+            --output reports/pa220/P7-1/0001-pa220-image-preview.patch \
+            | tee reports/pa220/P7-1/22-generator-idempotence.log
+          grep -q 'P7_ALREADY_GENERATED=verified' reports/pa220/P7-1/22-generator-idempotence.log
+          U="$PA220_REPO_DIR/u-boot"
+          ELF="$U/u-boot-octeon_pa220"
+          BIN="$U/u-boot-octeon_pa220.bin"
+          test -s "$U/board/octeon/pa220/libpa220.o"
+          test -s "$ELF"
+          test -s "$BIN"
+          "$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-readelf" -h "$ELF" | tee reports/pa220/P7-1/30-final-elf-header.txt
+          "$OCTEON_TOOLCHAIN/bin/mips64-octeon-linux-gnu-readelf" -s "$ELF" | tee reports/pa220/P7-1/31-final-symbols.txt
+          grep -q 'pa220_image_preview' reports/pa220/P7-1/31-final-symbols.txt
+          grep -q 'pa220_image_parse' reports/pa220/P7-1/31-final-symbols.txt
+          cp "$BIN" reports/pa220/P7-1/u-boot-octeon_pa220.bin
+          sha256sum "$ELF" "$BIN" reports/pa220/P7-1/0001-pa220-image-preview.patch | tee reports/pa220/P7-1/50-artifact-sha256.txt
+          echo P7_1_OCTEON_OBJECT_AND_FINAL_LINK=PASS
+          echo P7_1_READ_ONLY_PREVIEW_SYMBOLS=PASS
+      - name: Upload P7-1 evidence and target artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pa220-p7-1-image-preview-\${{ github.sha }}
+          path: reports/pa220/P7-1/
+          if-no-files-found: warn
+          retention-days: 60
+      - name: Publish P7-1 validation status
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          JOB_STATUS: \${{ job.status }}
+        with:
+          script: |
+            const state = process.env.JOB_STATUS === "success" ? "success" : "failure";
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state,
+              context: "pa220/p7-1-image-preview",
+              description: "P7-1 Actions " + process.env.JOB_STATUS,
+              target_url: "https://github.com/" + context.repo.owner + "/" + context.repo.repo + "/actions/runs/" + context.runId
+            });
