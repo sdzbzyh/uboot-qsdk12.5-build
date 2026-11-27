@@ -3,12 +3,15 @@
 Usage: python3 tools/pa220/make-p6-get-fixture.py [output-path]
 RAM-only transfer/integrity test data; never boot or execute this file.
 """
-import hashlib, struct, sys, zlib
+import hashlib
+import struct
+import sys
+import zlib
 from pathlib import Path
 
 OUTPUT = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("pa220-p6-get-4096.bin")
 SIZE = 4032
-LINE = b"PA220-P6-TFTP-GET-TEST\\n"
+LINE = b"PA220-P6-TFTP-GET-TEST\n"
 EXPECTED_HEADER_CRC = 0xB1AA12E3
 EXPECTED_PAYLOAD_CRC = 0x705C16E0
 EXPECTED_FILE_CRC = 0x9E4DF6C8
@@ -18,9 +21,11 @@ def crc32(data):
     return zlib.crc32(data) & 0xFFFFFFFF
 
 payload = (LINE * ((SIZE + len(LINE) - 1) // len(LINE)))[:SIZE]
-header0 = struct.pack(">7I4B32s", 0x27051956, 0, 0, SIZE, 0, 0,
-                      crc32(payload), 5, 5, 3, 0,
-                      b"PA220-P6-GET-TEST".ljust(32, b"\\0"))
+header0 = struct.pack(
+    ">7I4B32s",
+    0x27051956, 0, 0, SIZE, 0, 0, crc32(payload),
+    5, 5, 3, 0, b"PA220-P6-GET-TEST".ljust(32, b"\0"),
+)
 header_crc = crc32(header0)
 header = bytearray(header0)
 struct.pack_into(">I", header, 4, header_crc)
