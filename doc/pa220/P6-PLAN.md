@@ -1,6 +1,6 @@
 # PA-220 P6 计划：RAM-only 文件接收与校验
 
-- 状态：**P6-1A/P6-1B/P6-1C 软件门 ACCEPTED；P6-A live descriptor/DRAM/reservation 只读预检 PASS；P6-B 首个 4 KiB 合法 uImage GET 成功路径 PASS；边界拒绝与中断/超时失败路径待验收**
+- 状态：**P6-1A/P6-1B/P6-1C 软件门 ACCEPTED；P6-A live descriptor/DRAM/reservation 只读预检 PASS；P6-B 4 KiB 成功路径与 32 MiB 精确 reservation 上限实机 PASS；32 MiB+1 超限拒绝阶段确认及中断/超时失败清理待验收**
 - 日期：2026-11-24
 - 集成分支：`feature/pa220-ubootkit-web`
 - 固定 PA-220 源码：`sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
@@ -52,6 +52,15 @@ P6 只负责将一个文件接收到经验证的 RAM 区间，并对接收结果
 - 传输中出现一次 `Receive error (code 11: rgmii rx), dropping`，随后传输成功。保留为 transient RX warning，不代表链路稳定性已验收。
 - 无 pcap，不推断协商 block size、DATA block 数量或终止块形态。
 
+### 32 MiB 精确 reservation 上限实机结果 — PASS（2026-11-27）
+
+完整串口与主机复核证据见 [P6-B 32 MiB EXACT BOUNDARY ACCEPTANCE](../../reports/pa220/P6-B/32M-EXACT-BOUNDARY-ACCEPTANCE.md)。
+
+- 设备成功接收 33,554,432 bytes（32 MiB），输出 `format=legacy-uImage`、CRC32 `97257c28`、SHA-256 `fe773a13c9bfa1759c32826302e0b9a0e2ba6c88de9841219a2337d17861f526`。
+- 设备发布 `filesize=0x2000000`、`fileaddr=0x20000000`；`__tmp_load` 仍为 base `0x20000000`、size `0x10000000`。
+- Windows PowerShell 独立复核文件长度 `33554432`，SHA-256 与设备报告完全一致。
+- 因此 32 MiB 配置上限的精确边界接收 PASS；此结果不覆盖 32 MiB+1 拒绝和失败清理。
+
 ### 下一轮 reservation 边界测试向量（已由生成器支持）
 
 生产默认上限为 32 MiB，live `__tmp_load` 为 256 MiB。无需改动生产配置即可验证实际最大 reservation：
@@ -69,7 +78,7 @@ P6 只负责将一个文件接收到经验证的 RAM 区间，并对接收结果
 - 每次 GET 后只读检查 `printenv filesize fileaddr` 和 `pa220 memory`。超限失败后两项应不存在，descriptor 不变。不得执行任何 loader/启动命令。
 - 中断/超时测试另行安排受控延迟/停止服务器的方式；不得依赖随机拔网线或不可控时机按 Ctrl-C。
 
-**P6-B 目前仅成功路径通过，整体仍未验收。** 精确 reservation 边界/越界拒绝，以及中断/超时失败后的状态清理和元数据失效仍待实机验证。未执行 loader、启动命令、`saveenv` 或持久化写入。
+**P6-B 目前 4 KiB 与 32 MiB 精确上限成功路径均通过，整体仍未验收。** 32 MiB+1 超限拒绝阶段（OACK tsize 或 DATA reservation）及中断/超时失败后的状态清理和元数据失效仍待实机验证。未执行 loader、启动命令、`saveenv` 或持久化写入。
 
 P6-B 只验证 TFTP GET，不代表 TFTP Server/WRQ、PUT、HTTP upload 或 ELF loader 写入安全。
 
