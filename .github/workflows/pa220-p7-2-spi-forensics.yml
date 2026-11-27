@@ -1,0 +1,69 @@
+name: PA-220 P7-2 SPI NOR read-only forensics
+
+on:
+  push:
+    branches:
+      - feature/pa220-ubootkit-web
+    paths:
+      - "tools/pa220/analyze-p7-spi.py"
+      - ".github/workflows/pa220-p7-2-spi-forensics.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pa220-p7-2-spi-forensics
+  cancel-in-progress: false
+
+jobs:
+  analyze-spi-backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout integration branch (analysis tool)
+        uses: actions/checkout@v4
+        with:
+          ref: feature/pa220-ubootkit-web
+          path: integration
+
+      - name: Checkout original SPI backup from main
+        uses: actions/checkout@v4
+        with:
+          repository: sdzbzyh/uboot-qsdk12.5-build
+          ref: main
+          path: spi-source
+          sparse-checkout: |
+            pa220-spi-normal.img
+          sparse-checkout-cone-mode: false
+
+      - name: Verify input and run read-only inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f spi-source/pa220-spi-normal.img
+          python3 integration/tools/pa220/analyze-p7-spi.py \
+            --image spi-source/pa220-spi-normal.img \
+            --json spi-analysis.json \
+            --markdown spi-analysis.md
+          sha256sum spi-source/pa220-spi-normal.img spi-analysis.json spi-analysis.md
+
+      - name: Publish analysis summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -f spi-analysis.md ]; then
+            cat spi-analysis.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "SPI image analysis did not produce a report." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload forensic report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pa220-p7-2-spi-forensics-${{ github.sha }}
+          path: |
+            spi-analysis.json
+            spi-analysis.md
+          if-no-files-found: warn
+          retention-days: 30
