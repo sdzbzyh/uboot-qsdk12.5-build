@@ -3,7 +3,7 @@
 - Date: 2026-11-27
 - Branch: `feature/pa220-ubootkit-web`
 - Fixed PA-220 source: `801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
-- Status: **PARSER + READ-ONLY COMMAND INTEGRATED; HOST/SANITIZER/TARGET OBJECT + CLEAN FULL U-BOOT LINK PASS; LIVE INVENTORY PENDING**
+- Status: **PARSER + READ-ONLY COMMAND INTEGRATED; HOST/SANITIZER/TARGET OBJECT + CLEAN FULL U-BOOT LINK PASS; RAM-BOOT WRAPPER READY; LIVE INVENTORY PENDING**
 
 ## Implemented
 
@@ -40,6 +40,13 @@ Actions [#45987282068](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/r
 - Parser-specific compiler warnings after initializing the extended-container end bound: none.
 - Final `u-boot-octeon_pa220.bin`: 1,399,624 bytes; SHA-256 `ab2539d28dad2ce3c42784e10a526a19d36f398fd691ca355a7395fc47b6aa3d`.
 - Artifact [15192027629](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45987282068/artifacts/15192027629) contains the binary, final symbol table, generated integration patch, hashes and Host/sanitizer/build logs.
+
+The latest build is Actions [#45988344341](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45988344341), SUCCESS, Artifact [15192058990](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45988344341/artifacts/15192058990). The sparse real-layout test now asserts all seven data partitions, exact start/count/type, and actual MBR indices `1,2,3,5,6,7,8` (extended container #4 intentionally omitted). The artifact contains both raw BIN and the tested RAM Stage3 wrapper.
+
+- BIN/payload size: 1,399,624 bytes (`0x155b48`); SHA-256 `141c70d57e06fea459ede92664a9abbba92b3162833cdc95d2b6b8e88cebcc31`.
+- Wrapper size: 1,399,688 bytes (`0x155b88`); SHA-256 `7f6854b91e75b88203b42bfc09495423da0bb4900e674ef944e86c2f3a87bb30`.
+- Wrapper header CRC32 `b3a8f2d3`; payload CRC32 `a166d65f`.
+- The wrapper note explicitly requires copying payload from offset `0x40` to `0x81000000`; do not boot/execute the wrapper itself.
 
 P7-3A is now software-integrated and clean-build verified. It is **not yet accepted** until the new image runs on PA-220 and `pa220 partition scan 0` returns the expected read-only inventory. P7-3B remains unimplemented; without an approved manifest all target mappings remain `UNMAPPED` / `NO_APPROVED_MANIFEST`.
 
