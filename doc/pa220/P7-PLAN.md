@@ -13,6 +13,17 @@
 4. 目标映射必须来自 PA-220 固定源码、实测分区表或可核验的固件 manifest。证据不足时明确输出 `UNMAPPED`，不得借用 IPQ/QCA 的 HLOS/rootfs/ART/CDT 分区名称。
 5. P7 dry-run 的成功不等于安装授权。P8 eMMC 和 P10 SPI 仍是独立风险阶段。
 
+## 分区表兼容性要求（持续有效）
+
+后续所有介质识别、分区枚举、固件目标映射和 dry-run 计划必须同时兼容 DOS/MBR 与 GPT；不得将当前 PA-220 eMMC 的 MBR 事实硬编码成所有设备/镜像的唯一格式，也不得因固件编译了 GPT 支持就假定实际介质为 GPT。
+
+- **自动识别**：读取介质实际分区表签名和结构后选择解析路径；识别结果必须携带来源格式（`DOS/MBR` 或 `GPT`）。格式不明、混合/冲突或结构损坏时拒绝生成目标映射。
+- **DOS/MBR**：解析 4 个 primary entries；对 extended 类型沿 EBR 链枚举 logical partitions；检查 512-byte sector 范围、起始/长度溢出、容器边界、EBR 自环/循环和越界。Extended container 不作为 filesystem target。
+- **GPT**：检查 Protective MBR、主 Header 和 Entry Array CRC、revision/header size、current/backup LBA、usable LBA bounds、disk GUID、entry-array bounds/CRC；读取备份 Header/Entry Array 并比较关键字段与条目内容。不能只因 `CONFIG_EFI_PARTITION` 存在就声称 GPT 验证通过。
+- **混合/损坏情况**：Hybrid MBR、MBR/GPT 签名冲突、主备 GPT 不一致、CRC 错误、重复/重叠/越界条目必须显式分类为 ambiguous/corrupt；只报告，不自动修复或写入。
+- **统一表示**：将两种格式映射到同一只读分区描述（source format、index、start LBA、sector count、type/GUID、name、attributes、可用时的 UUID），上层 FIT/镜像预览和目标映射只消费该统一表示。
+- **读写隔离**：所有验证器只允许 block read；`gpt write` 是写入/恢复路径，不是验证命令。当前 PA-220 live eMMC 已确认 MBR；未来 GPT 设备必须另有 GPT fixture/介质验证，不能把本机 MBR 结果当作 GPT 验收证据。
+
 ## P7-1：只读镜像解析入口
 
 生产入口：`pa220 image preview`
@@ -49,7 +60,7 @@
 - `0x70000-0x100000` 与 `0x250000-0x1000000` 为全 `0xff` 区域；配置环境 sector `0xe00000` / `0xe10000` 在该备份中也全擦除。
 - 这只是 SPI NOR 证据，不提供 eMMC GPT/分区布局，也不授权写入。
 
-### P7-2B：FIT 语义只读解析 — PENDING
+### P7-2B：FIT 语义只读解析 — IMPLEMENTATION IN PROGRESS
 
 - 解析 `/images`、`/configurations`、默认 configuration、kernel/ramdisk/fdt 引用、inline `data`、hash 子节点及算法/值。
 - 严格区分结构合法、数据 hash PASS/FAIL/IGNORED/UNSUPPORTED 和签名可信状态。
