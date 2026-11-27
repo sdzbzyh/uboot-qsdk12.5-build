@@ -60,11 +60,11 @@
 - `0x70000-0x100000` 与 `0x250000-0x1000000` 为全 `0xff` 区域；配置环境 sector `0xe00000` / `0xe10000` 在该备份中也全擦除。
 - 这只是 SPI NOR 证据，不提供 eMMC GPT/分区布局，也不授权写入。
 
-### P7-2B：FIT 语义只读解析 — IMPLEMENTATION IN PROGRESS
+### P7-2B：FIT 语义只读解析 — TARGET BUILD PASS；实机语义验收待执行
 
-- 解析 `/images`、`/configurations`、默认 configuration、kernel/ramdisk/fdt 引用、inline `data`、hash 子节点及算法/值。
+- 生产代码已在 `u-boot/board/octeon/pa220/pa220_image.c` 加入 `/images`、`/configurations`、default configuration、kernel/ramdisk/fdt 引用、inline `data` 和 hash 子节点预览。
 - 严格区分结构合法、数据 hash PASS/FAIL/IGNORED/UNSUPPORTED 和签名可信状态。
-- 固定源码仅支持 inline `data` 的 `fit_image_get_data()`；外置数据 `data-offset/data-position` 必须显式标记 unsupported。
+- 固定源码仅支持 inline `data` 的 `fit_image_get_data()`；外置数据 `data-offset/data-position` 显式标记 `EXTERNAL_DATA_UNSUPPORTED`。
 - 当前 PA-220 配置未启用 `CONFIG_FIT_SIGNATURE`；不能把 FIT signature 节点存在误报为已验证签名。
 - 不调用 `fit_image_load()`、bootm 或任何会把子镜像复制到 load 地址的路径。
 
@@ -88,4 +88,4 @@
 
 - P7-1 parser、Host Harness、ASan/UBSan、Actions OCTEON 完整构建及真实 PA-220 实机 preview 均已通过；云端证据见 `reports/pa220/P7-1/ACCEPTANCE.md`，实机串口证据见 `reports/pa220/P7-1/DEVICE-ACCEPTANCE.md`。
 - 实机已验证 wrapper TFTP 接收、uImage 校验、payload RAM-copy/compare、RAM Stage3 启动、外层 legacy uImage preview、内层 OCTEON bootloader preview 和 reservation descriptor 不变。
-- P7-1 验收完成。P7-2A SPI NOR 静态取证与 P7-2C eMMC DOS/MBR 实机只读取证已完成；P7-2B FIT 语义解析仍待实施。P7 整体仍未完成。
+- P7-1 验收完成。P7-2A SPI NOR 静态取证与 P7-2C eMMC DOS/MBR 实机只读取证已完成。P7-2B FIT preview 已通过 Actions #45970127218 / #45970607698 的 Host/ASan/UBSan、Cavium OCTEON object、N32 relocatable link 和完整 U-Boot final link；FIT fixtures 已打包在 [Artifact 15184393205](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45970607698/artifacts/15184393205)。尚未做 PA-220 实机 FIT 语义输出验收，不能标记 P7-2B PASS。P7 整体仍未完成。
