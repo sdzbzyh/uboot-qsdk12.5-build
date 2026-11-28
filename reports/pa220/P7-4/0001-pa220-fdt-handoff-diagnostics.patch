@@ -1,0 +1,91 @@
+--- a/u-boot/arch/mips/cpu/octeon/octeon_boot.c
++++ b/u-boot/arch/mips/cpu/octeon/octeon_boot.c
+@@ -914,10 +914,47 @@
+ 			       (void *)&boot_desc[core],
+ 			       boot_desc[core].desc_size);
+ 			memcpy((void *)(uint32_t) boot_desc[core].cvmx_desc_vaddr,
+ 			       (void *)&cvmx_bootinfo_array[core],
+ 			       sizeof(cvmx_bootinfo_t));
++			if (core == 0) {
++				cvmx_bootinfo_t *pa220_bi_copy =
++					(cvmx_bootinfo_t *)cvmx_phys_to_ptr(
++						boot_desc[core].cvmx_desc_vaddr);
++				void *pa220_fdt_copy = pa220_bi_copy->fdt_addr ?
++					cvmx_phys_to_ptr(pa220_bi_copy->fdt_addr) : NULL;
++
++				printf("PA220-HANDOFF: build ABI=%u.%u offsets major=%u minor=%u fdt=%u size=%u\n",
++				       (unsigned)CVMX_BOOTINFO_MAJ_VER,
++				       (unsigned)CVMX_BOOTINFO_MIN_VER,
++				       (unsigned)offsetof(cvmx_bootinfo_t, major_version),
++				       (unsigned)offsetof(cvmx_bootinfo_t, minor_version),
++				       (unsigned)offsetof(cvmx_bootinfo_t, fdt_addr),
++				       (unsigned)sizeof(cvmx_bootinfo_t));
++				printf("PA220-HANDOFF: array=%u.%u fdt=0x%llx copy=%u.%u fdt=0x%llx desc_fdt=0x%llx\n",
++				       (unsigned)cvmx_bootinfo_array[core].major_version,
++				       (unsigned)cvmx_bootinfo_array[core].minor_version,
++				       (unsigned long long)cvmx_bootinfo_array[core].fdt_addr,
++				       (unsigned)pa220_bi_copy->major_version,
++				       (unsigned)pa220_bi_copy->minor_version,
++				       (unsigned long long)pa220_bi_copy->fdt_addr,
++				       (unsigned long long)boot_desc[core].cvmx_desc_vaddr);
++				printf("PA220-HANDOFF: src=%p new=%p new_phys=0x%llx size=%u copied=%p check=%d total=%u\n",
++				       gd->fdt_blob, new_fdt,
++				       (unsigned long long)new_fdt_addr, (unsigned)fdt_size,
++				       pa220_fdt_copy,
++				       pa220_fdt_copy ? fdt_check_header(pa220_fdt_copy) : -1,
++				       pa220_fdt_copy ? fdt_totalsize(pa220_fdt_copy) : 0);
++				printf("PA220-HANDOFF: desc=%p version=%u size=%u argc=%u flags=0x%x coremask=0x%x boot_desc_copy=0x%llx\n",
++				       &boot_desc[core],
++				       (unsigned)boot_desc[core].desc_version,
++				       (unsigned)boot_desc[core].desc_size,
++				       (unsigned)boot_desc[core].argc,
++				       (unsigned)boot_desc[core].flags,
++				       (unsigned)boot_desc[core].core_mask,
++				       (unsigned long long)boot_info_block_array[core].boot_desc_addr);
++			}
+ #else
+ 			memcpy((void *) boot_info_block_array[core].boot_desc_addr,
+ 			       (void *)&boot_desc[core],
+ 			       boot_desc[core].desc_size);
+ 			memcpy((void *) boot_desc[core].cvmx_desc_vaddr,
+--- a/u-boot/arch/mips/cpu/octeon/commands/cmd_octeon_linux.c
++++ b/u-boot/arch/mips/cpu/octeon/commands/cmd_octeon_linux.c
+@@ -611,10 +611,38 @@
+ 
+ 	arg0 = cur_boot_desc->argc;
+ 	arg1 = (int32_t) cur_boot_desc->argv;
+ 	arg2 = !!(cur_boot_desc->flags & BOOT_FLAG_INIT_CORE);
+ 	arg3 = boot_desc_addr;
++	if (core_num == 0) {
++		struct octeon_boot_descriptor *pa220_desc_copy =
++			(struct octeon_boot_descriptor *)cvmx_phys_to_ptr(
++				boot_info_ptr->boot_desc_addr);
++		cvmx_bootinfo_t *pa220_bi =
++			(cvmx_bootinfo_t *)cvmx_phys_to_ptr(
++				cur_boot_desc->cvmx_desc_vaddr);
++
++		printf("PA220-START: a3=0x%llx global=%p global_phys=0x%llx copy_phys=0x%llx\n",
++		       (unsigned long long)boot_desc_addr, cur_boot_desc,
++		       (unsigned long long)uboot_tlb_ptr_to_phys(cur_boot_desc),
++		       (unsigned long long)boot_info_ptr->boot_desc_addr);
++		printf("PA220-START: global_desc cvmx=0x%llx argc=%u flags=0x%x coremask=0x%x; copy_desc cvmx=0x%llx argc=%u flags=0x%x coremask=0x%x cmp=%d\n",
++		       (unsigned long long)cur_boot_desc->cvmx_desc_vaddr,
++		       (unsigned)cur_boot_desc->argc, (unsigned)cur_boot_desc->flags,
++		       (unsigned)cur_boot_desc->core_mask,
++		       (unsigned long long)pa220_desc_copy->cvmx_desc_vaddr,
++		       (unsigned)pa220_desc_copy->argc, (unsigned)pa220_desc_copy->flags,
++		       (unsigned)pa220_desc_copy->core_mask,
++		       memcmp(cur_boot_desc, pa220_desc_copy,
++		              cur_boot_desc->desc_size));
++		printf("PA220-START: bootinfo=%p version=%u.%u core_mask=0x%x fdt=0x%llx phy_mem=0x%llx\n",
++		       pa220_bi, (unsigned)pa220_bi->major_version,
++		       (unsigned)pa220_bi->minor_version,
++		       (unsigned)pa220_bi->core_mask,
++		       (unsigned long long)pa220_bi->fdt_addr,
++		       (unsigned long long)pa220_bi->phy_mem_desc_addr);
++	}
+ 	arg4 = boot_info_ptr->entry_point;
+ 	le_flag = (boot_info_ptr->flags & BOOT_INFO_FLAG_LITTLE_ENDIAN) ? 1 : 0;
+ 	addr =
+ 	    MAKE_XKPHYS(uboot_tlb_ptr_to_phys((void *)&asm_launch_linux_entry_point));
+ 

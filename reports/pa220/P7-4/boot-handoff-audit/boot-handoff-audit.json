@@ -1,6 +1,6 @@
 {
   "spi_size": 16777216,
-  "uboot_size": 1402408,
+  "uboot_size": 1403592,
   "oem_fdt": {
     "offset": 1872992,
     "size": 10850,
@@ -9,7 +9,7 @@
     "compatible": "cavium,tb7100"
   },
   "rebuilt_fdt": {
-    "offset": 1128192,
+    "offset": 1128720,
     "size": 10277,
     "nodes": 52,
     "model": "pan,pa-220",
