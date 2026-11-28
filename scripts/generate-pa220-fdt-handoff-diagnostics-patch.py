@@ -4,7 +4,7 @@ import argparse
 import difflib
 from pathlib import Path
 
-REL = "arch/mips/cpu/octeon/octeon_boot.c"
+REL = "u-boot/arch/mips/cpu/octeon/octeon_boot.c"
 ANCHOR = """\t\t\tmemcpy((void *)(uint32_t) boot_desc[core].cvmx_desc_vaddr,
 \t\t\t       (void *)&cvmx_bootinfo_array[core],
 \t\t\t       sizeof(cvmx_bootinfo_t));
