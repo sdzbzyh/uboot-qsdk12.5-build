@@ -205,3 +205,12 @@ P7-3B dry-run live acceptance 已通过，实际根分区/内核路径与旧板�
 - RAM-test image: `artifacts/pa220/builds/pa220-pan-kernel-abi-compat.bin`; size 1,402,792 bytes; SHA-256 `318c319b824603ee3080ab12687e940ec317c9216566b1986ea8a9bde9048d1d`.
 - The first compile-only image from Actions #46134530956 is invalid for testing: its normal non-hplug path still reserved only 288 bytes. The corrected #46134874478 build reserves all 312 bytes in both paths. Do not use the first artifact.
 - P7-3B is NOT yet accepted. The next step is one RAM-only physical test with the original eMMC kernel on p3, omitting `nousb`, and checking the PA220-PAN-ABI line, passed-FDT selection, four CPUs, USB, and eMMC root mount. No SPI/eMMC writes.
+
+
+## PAN-OS 用户空间启动停滞：暂缓遗留项（2026-11-28）
+
+- 实机已能从 eMMC p3 读取原机内核 `/boot/vmlinux-3.10.87-oct3-mp`（10,387,920 bytes），并进入 Linux/PAN-OS 启动流程；串口在 9600 baud 下最终停留于 `PA-HDF login:`，等待超过一小时未自行转为 `PA-220 login:`。
+- 启动日志曾出现 `/sbin/cgroups_setup` 的 Python `TypeError: 'NoneType' object is not subscriptable`；该异常与后续停滞存在时间相关性，但尚未证明为根因。其他服务启动失败信息也尚未逐项归因。
+- 结论：这是 PAN-OS 用户空间/服务初始化尚未完成的已知问题，不阻塞 U-BootKit 其他功能开发；但原机 PAN-OS 完整启动与端到端兼容性仍为 NOT ACCEPTED，不得将“内核已启动/进入 PA-HDF 提示符”表述为系统启动通过。
+- 处理策略：当前主线继续推进 P7 只读解析、安装 dry-run、启动兼容和 U-BootKit Web UI；该问题列入竣工后遗留项。竣工后再以 RAM-only、rootfs 只读方式诊断 PAN-OS init/cgroups/service 启动链。
+- 约束：本轮未写 SPI/eMMC，未执行 `saveenv`，未修改原机 rootfs。除非后续发现该停滞直接阻断某项当前验收，不主动回头处理。
