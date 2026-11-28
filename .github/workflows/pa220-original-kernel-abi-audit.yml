@@ -1,0 +1,54 @@
+name: PA-220 original kernel ABI audit
+
+on:
+  push:
+    branches:
+      - feature/pa220-ubootkit-web
+    paths:
+      - .github/workflows/pa220-original-kernel-abi-audit.yml
+      - scripts/pa220/audit-original-kernel-abi.sh
+      - artifacts/pa220/original-kernel/pa220-original-vmlinux
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    name: Disassemble exact PAN-OS 3.10.87 kernel handoff
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout integration branch
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: feature/pa220-ubootkit-web
+          fetch-depth: 0
+
+      - name: Install MIPS64 binutils
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y binutils-mips64-linux-gnuabi64
+
+      - name: Audit exact uploaded kernel ELF
+        shell: bash
+        run: |
+          set -euo pipefail
+          scripts/pa220/audit-original-kernel-abi.sh
+
+      - name: Upload disassembly evidence
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: pa220-original-kernel-abi-disassembly
+          path: reports/pa220/P7-4/ORIGINAL-KERNEL-ABI-DISASSEMBLY.md
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Commit audit report
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/pa220/P7-4/ORIGINAL-KERNEL-ABI-DISASSEMBLY.md
+          git commit -m "pa220: record original kernel ABI disassembly"
+          git push origin HEAD:refs/heads/feature/pa220-ubootkit-web
