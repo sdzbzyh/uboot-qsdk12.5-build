@@ -4,9 +4,10 @@ Read-only comparison of the original SPI Stage-3 FDT and the FDT embedded in the
 
 | Field | OEM SPI Stage 3 | Rebuilt U-Boot |
 |---|---:|---:|
-| FDT offset | 0x1c9460 | 0x1139f0 |
+| FDT offset | 0x1c9460 | 0x1137f0 |
 | FDT size | 10850 | 10277 |
 | Node count | 59 | 52 |
+| FDT SHA-256 | 1ac63657d9f1bb2d840a103ff534a5cf1f40e6319c80e50d56329b066803b1c0 | 34f94b826441ed7403d49f8c9197f64519b77326939a3d55be20422e09904c7a |
 | Model | pan,pa-220 | pan,pa-220 |
 | Compatible | cavium,tb7100 | pan,pa-220 | cavium,tb7100 |
 
@@ -30,9 +31,17 @@ Critical property differences: 4
 - /soc@0/uctl@1180068000000 power: OEM=cells:00000002 00000002 00000000; rebuilt=cells:0000000b 00000002 00000000
 - /soc@0/uctl@1180069000000 power: OEM=cells:00000002 00000003 00000000; rebuilt=cells:0000000b 00000003 00000000
 
+## GPIO phandle resolution
+
+OEM: [{"path": "/soc@0/mmc@1180000002000", "property": "power-gpios", "phandle": "0x00000002", "target": "/soc@0/gpio-controller@1070000000800", "gpio": 8, "flags": 0}, {"path": "/soc@0/uctl@1180068000000", "property": "power", "phandle": "0x00000002", "target": "/soc@0/gpio-controller@1070000000800", "gpio": 2, "flags": 0}, {"path": "/soc@0/uctl@1180069000000", "property": "power", "phandle": "0x00000002", "target": "/soc@0/gpio-controller@1070000000800", "gpio": 3, "flags": 0}]
+Rebuilt: [{"path": "/soc@0/mmc@1180000002000", "property": "power-gpios", "phandle": "0x0000000b", "target": "/soc@0/gpio-controller@1070000000800", "gpio": 8, "flags": 0}, {"path": "/soc@0/uctl@1180068000000", "property": "power", "phandle": "0x0000000b", "target": "/soc@0/gpio-controller@1070000000800", "gpio": 2, "flags": 0}, {"path": "/soc@0/uctl@1180069000000", "property": "power", "phandle": "0x0000000b", "target": "/soc@0/gpio-controller@1070000000800", "gpio": 3, "flags": 0}]
+
+Phandle integers are tree-local identifiers; compare resolved node paths,
+not the raw integer values, when determining whether a GPIO reference changed.
+
 ## Toolchain bootinfo ABI
 
-- external/pa220-openwrt/u-boot/arch/mips/include/asm/arch-octeon/cvmx-app-init.h: CVMX_BOOTINFO_MIN_VER=4
+- cvmx-bootinfo.h not found in extracted toolchain
 
 ## Limits
 

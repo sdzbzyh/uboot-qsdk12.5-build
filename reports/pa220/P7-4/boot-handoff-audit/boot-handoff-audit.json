@@ -1,6 +1,6 @@
 {
   "spi_size": 16777216,
-  "uboot_size": 1403944,
+  "uboot_size": 1402792,
   "oem_fdt": {
     "offset": 1872992,
     "size": 10850,
@@ -9,7 +9,7 @@
     "compatible": "cavium,tb7100"
   },
   "rebuilt_fdt": {
-    "offset": 1128944,
+    "offset": 1128432,
     "size": 10277,
     "nodes": 52,
     "model": "pan,pa-220",
@@ -160,10 +160,57 @@
       "status": "ABSENT"
     }
   ],
-  "toolchain_bootinfo_versions": [
+  "toolchain_bootinfo_versions": [],
+  "oem_gpio_references": [
     {
-      "file": "external/pa220-openwrt/u-boot/arch/mips/include/asm/arch-octeon/cvmx-app-init.h",
-      "minor_version": 4
+      "path": "/soc@0/mmc@1180000002000",
+      "property": "power-gpios",
+      "phandle": "0x00000002",
+      "target": "/soc@0/gpio-controller@1070000000800",
+      "gpio": 8,
+      "flags": 0
+    },
+    {
+      "path": "/soc@0/uctl@1180068000000",
+      "property": "power",
+      "phandle": "0x00000002",
+      "target": "/soc@0/gpio-controller@1070000000800",
+      "gpio": 2,
+      "flags": 0
+    },
+    {
+      "path": "/soc@0/uctl@1180069000000",
+      "property": "power",
+      "phandle": "0x00000002",
+      "target": "/soc@0/gpio-controller@1070000000800",
+      "gpio": 3,
+      "flags": 0
+    }
+  ],
+  "rebuilt_gpio_references": [
+    {
+      "path": "/soc@0/mmc@1180000002000",
+      "property": "power-gpios",
+      "phandle": "0x0000000b",
+      "target": "/soc@0/gpio-controller@1070000000800",
+      "gpio": 8,
+      "flags": 0
+    },
+    {
+      "path": "/soc@0/uctl@1180068000000",
+      "property": "power",
+      "phandle": "0x0000000b",
+      "target": "/soc@0/gpio-controller@1070000000800",
+      "gpio": 2,
+      "flags": 0
+    },
+    {
+      "path": "/soc@0/uctl@1180069000000",
+      "property": "power",
+      "phandle": "0x0000000b",
+      "target": "/soc@0/gpio-controller@1070000000800",
+      "gpio": 3,
+      "flags": 0
     }
   ]
 }
