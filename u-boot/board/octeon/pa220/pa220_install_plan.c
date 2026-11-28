@@ -193,7 +193,8 @@ enum pa220_plan_status pa220_install_plan_build(
             required_sectors++;
         }
         if (required_sectors > part->sectors ||
-            !add_u64(part->start_lba, part->sectors, &target_end)) {
+            !add_u64(part->start_lba, part->sectors, &target_end) ||
+            target_end > partitions->capacity) {
             out->status = PA220_PLAN_CAPACITY;
             return out->status;
         }
