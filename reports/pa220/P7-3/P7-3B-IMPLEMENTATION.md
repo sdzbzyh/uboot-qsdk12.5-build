@@ -3,7 +3,7 @@
 - Date: 2026-11-28
 - Branch: `feature/pa220-ubootkit-web`
 - Fixed PA-220 source: `sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
-- Result: **SOFTWARE IMPLEMENTATION + HOST/SANITIZER + CAVIUM FULL LINK PASS; LIVE DEVICE DRY-RUN PENDING**
+- Result: **SOFTWARE IMPLEMENTATION + HOST/SANITIZER + CAVIUM FULL LINK PASS; LIVE DRY-RUN PASS; LEGACY BOOT PATH MISMATCH UNDER INVESTIGATION**
 
 ## Implementation
 
@@ -46,3 +46,10 @@ Perform one RAM-only device round:
 5. Then run the unchanged `run bootcmd` to test whether the original eMMC OpenWrt system still boots from p1 with root on p2. This is read-only with respect to persistent storage; do not run `saveenv` or any write command.
 
 P7-3B remains pending live device acceptance. This report records cloud/software evidence only.
+
+
+## Live device acceptance update (2026-11-28)
+
+The live `pa220 install dry-run 0` test passed its intended fail-closed behavior: the device reported a read-only DOS/MBR inventory and `NO_APPROVED_MANIFEST`, `UNMAPPED`, `actions=NONE`. The subsequent unchanged legacy `run bootcmd` did not boot Linux because neither `/vmlinux.oct3-mp` nor its `.bak` fallback exists at the p1 filesystem root; `bootoctlinux` consequently found no ELF at `0x21000000`. The kernel was not launched.
+
+Live read-only investigation found the actual kernel ELF at `mmc 0:3 /boot/vmlinux-3.10.87-oct3-mp` (10,387,920 bytes, ELF64 big-endian MIPS). The p2 ext label is `sysroot0`; p3 is `sysroot1`, matching the previously inspected p3 `/etc/fstab` root label. Thus the current installation's root is p3, contrary to the old board-header comment that says p2. Kernel built-in command-line/root-selection behavior remains unverified; no Linux boot acceptance is claimed. Full evidence: `reports/pa220/P7-3/P7-3B-DEVICE-ACCEPTANCE.md`.
