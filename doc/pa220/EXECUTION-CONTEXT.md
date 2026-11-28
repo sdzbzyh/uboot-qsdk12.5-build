@@ -214,3 +214,11 @@ P7-3B dry-run live acceptance 已通过，实际根分区/内核路径与旧板�
 - 结论：这是 PAN-OS 用户空间/服务初始化尚未完成的已知问题，不阻塞 U-BootKit 其他功能开发；但原机 PAN-OS 完整启动与端到端兼容性仍为 NOT ACCEPTED，不得将“内核已启动/进入 PA-HDF 提示符”表述为系统启动通过。
 - 处理策略：当前主线继续推进 P7 只读解析、安装 dry-run、启动兼容和 U-BootKit Web UI；该问题列入竣工后遗留项。竣工后再以 RAM-only、rootfs 只读方式诊断 PAN-OS init/cgroups/service 启动链。
 - 约束：本轮未写 SPI/eMMC，未执行 `saveenv`，未修改原机 rootfs。除非后续发现该停滞直接阻断某项当前验收，不主动回头处理。
+
+
+## P7-4 当前进度补充（2026-11-28）
+
+- 最新用户实机观察：从 eMMC p3 加载原机 kernel 后进入 `PA-HDF login:` 中间提示符，超过一小时未继续；该结果说明启动比早期 root-device wait 阶段更深入，但没有完整早期日志和准确 Stage3 SHA，故仅记录为 partial kernel/userspace progress，不作为 ABI/FDT/CPU 验收。该命令含 `nousb`，USB 未测试。详情见 `reports/pa220/P7-3/P7-3B-IMPLEMENTATION.md`，停滞本身按 D-027 暂缓。
+- OEM FDT 与重建 FDT 均含 MMC 与 CN7130 USB 节点；先前 raw GPIO phandle 2/11 的差异不能直接解释为接线不同，因为 phandle 是 tree-local identifier。
+- 已扩展 `scripts/pa220/boot-handoff-audit.py`：解析 GPIO phandle 实际目标路径、记录 OEM/重建 FDT SHA-256，并导出两份 DTB。已把该只读审计接入 `.github/workflows/pa220-pan-kernel-abi-compat-build.yml`，构建时用原始 SPI 备份和新鲜 U-Boot BIN 复核。最新工作流提交为 `478597e5bf4c6af1a77cbae75db708b330331e70`；等待 Actions 结果后再决定是否需要 FDT 代码修改。
+- 当前不重复 PA-HDF 等待测试，不猜测修改 GPIO/FDT，不写 SPI/eMMC，不执行 `saveenv`。
