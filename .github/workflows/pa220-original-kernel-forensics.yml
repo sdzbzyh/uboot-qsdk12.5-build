@@ -1,0 +1,75 @@
+name: PA-220 original kernel ELF forensics
+
+on:
+  push:
+    branches:
+      - feature/pa220-ubootkit-web
+    paths:
+      - 'artifacts/pa220/original-kernel/pa220-original-vmlinux'
+      - '.github/workflows/pa220-original-kernel-forensics.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout uploaded original kernel
+        uses: actions/checkout@v4
+        with:
+          ref: feature/pa220-ubootkit-web
+
+      - name: Read-only ELF inspection
+        shell: bash
+        run: |
+          set -euo pipefail
+          BIN=artifacts/pa220/original-kernel/pa220-original-vmlinux
+          OUT=reports/pa220/P7-4
+          mkdir -p "$OUT"
+          {
+            echo '# PA-220 original kernel ELF inspection'
+            echo
+            echo '- Scope: offline, read-only inspection of the uploaded original kernel'
+            echo "- Commit: $(git rev-parse HEAD)"
+            echo "- File: $BIN"
+            echo "- Size: $(stat -c '%s' "$BIN") bytes"
+            echo "- SHA-256: $(sha256sum "$BIN" | awk '{print $1}')"
+            echo
+            echo '## File identification'
+            file "$BIN"
+            echo
+            echo '## ELF header'
+            readelf -hW "$BIN"
+            echo
+            echo '## Program headers'
+            readelf -lW "$BIN"
+            echo
+            echo '## Section headers'
+            readelf -SW "$BIN"
+            echo
+            echo '## Relevant symbols'
+            readelf -sW "$BIN" | grep -Ei '(_text|_stext|_end|startup|kernel_entry|init_task|command_line|saved_command_line)' | head -n 100 || true
+            echo
+            echo '## Boot/root-related printable strings'
+            strings -a -n 5 "$BIN" | grep -Ei '(^|[^[:alnum:]_])(root=|rootfstype=|rootwait|rootflags=|init=|console=|numcores=|endbootargs|mmcblk|sysroot|ext[234])' | sort -u | head -n 300 || true
+          } > "$OUT/ORIGINAL-KERNEL-ELF-INSPECTION.md"
+          cp "$OUT/ORIGINAL-KERNEL-ELF-INSPECTION.md" "$RUNNER_TEMP/ORIGINAL-KERNEL-ELF-INSPECTION.md"
+
+      - name: Upload inspection report
+        uses: actions/upload-artifact@v4
+        with:
+          name: pa220-original-kernel-elf-inspection
+          path: reports/pa220/P7-4/ORIGINAL-KERNEL-ELF-INSPECTION.md
+          retention-days: 30
+
+      - name: Commit report to project branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add reports/pa220/P7-4/ORIGINAL-KERNEL-ELF-INSPECTION.md
+          git commit -m 'docs(pa220): record original kernel ELF inspection'
+          git push origin HEAD:refs/heads/feature/pa220-ubootkit-web
