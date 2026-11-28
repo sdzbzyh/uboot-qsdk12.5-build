@@ -1,6 +1,6 @@
 --- a/u-boot/arch/mips/cpu/octeon/octeon_boot.c
 +++ b/u-boot/arch/mips/cpu/octeon/octeon_boot.c
-@@ -914,10 +914,47 @@
+@@ -995,10 +995,47 @@
  			       (void *)&boot_desc[core],
  			       boot_desc[core].desc_size);
  			memcpy((void *)(uint32_t) boot_desc[core].cvmx_desc_vaddr,
@@ -43,11 +43,11 @@
 +				       (unsigned)boot_desc[core].core_mask,
 +				       (unsigned long long)boot_info_block_array[core].boot_desc_addr);
 +			}
+ 			pa220_prepare_pan_kernel_bootinfo(
+ 				(void *)(uint32_t)boot_desc[core].cvmx_desc_vaddr,
+ 				&cvmx_bootinfo_array[core], core);
  #else
  			memcpy((void *) boot_info_block_array[core].boot_desc_addr,
- 			       (void *)&boot_desc[core],
- 			       boot_desc[core].desc_size);
- 			memcpy((void *) boot_desc[core].cvmx_desc_vaddr,
 --- a/u-boot/arch/mips/cpu/octeon/commands/cmd_octeon_linux.c
 +++ b/u-boot/arch/mips/cpu/octeon/commands/cmd_octeon_linux.c
 @@ -611,10 +611,38 @@

@@ -4,7 +4,7 @@ Read-only comparison of the original SPI Stage-3 FDT and the FDT embedded in the
 
 | Field | OEM SPI Stage 3 | Rebuilt U-Boot |
 |---|---:|---:|
-| FDT offset | 0x1c9460 | 0x113910 |
+| FDT offset | 0x1c9460 | 0x1139f0 |
 | FDT size | 10850 | 10277 |
 | Node count | 59 | 52 |
 | Model | pan,pa-220 | pan,pa-220 |
