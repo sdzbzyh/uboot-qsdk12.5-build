@@ -100,3 +100,8 @@ The binary contains all four `PA220-HANDOFF` diagnostic strings, confirming that
 The artifact upload succeeded. The workflow's final evidence-commit step was rejected because the integration branch advanced while the run was in progress; this did not affect the build or artifact. The report and generator remain in the integration branch, and the binary is available from the run artifact.
 
 **Physical test required:** RAM-load this diagnostic U-Boot, reload the original kernel if RAM was reset, and run the existing read-only boot test with `nousb`. Capture all `PA220-HANDOFF` lines and the subsequent kernel line selecting either the passed or internal Device Tree. Do not write SPI/eMMC or save the environment.
+
+
+## Additional bootinfo-v4 source defect
+
+The pinned U-Boot source contains `#if (CVMX_BOOTINFO_MIN_VERR >= 4)` (extra `R`) around initialization of `ext_core_mask`. Since that macro is undefined, the v4 extended core mask is not populated. The legacy `core_mask` field is still populated and is 32-bit, sufficient for PA-220's 16 cores; the original 3.10 kernel's v3-compatible FDT selection does not depend on this appended v4 field. This is recorded as a separate bootinfo-v4 correctness defect, not the current explanation for the missing MMC/USB nodes. It should be corrected before treating the v4 handoff implementation as fully clean.
