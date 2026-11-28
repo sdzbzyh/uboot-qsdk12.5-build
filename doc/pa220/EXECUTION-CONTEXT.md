@@ -14,7 +14,7 @@
 - 目标：OCTEON III CN7130、MIPS64 BE、N32、Cavium SDK 5.1.0、U-Boot 2013.07、原厂 Stage 2 加载自定义 Stage 3。
 - PA-220 独立构建入口：`./build-pa220.sh`；不得混入 Qualcomm `build.sh`。
 
-## 当前唯一主线（2026-11-27，P7-3A）
+## 当前唯一主线（2026-11-28，P7-3B）
 
 P7-1 parser、Host/ASan/UBSan、OCTEON 完整构建和 PA-220 实机 preview 均已通过；P7-2A/B/C 已完成。当前推进 P7-3：严格 MBR/EBR + GPT 只读分区 inventory 与 manifest-gated dry-run。
 
@@ -29,10 +29,12 @@ P7-1 parser、Host/ASan/UBSan、OCTEON 完整构建和 PA-220 实机 preview 均
 - 已有 live 根目录探测：0:1、0:2 于 2026-11-27；0:3、0:5、0:6、0:8 于 2026-11-18。0:4 是扩展容器，0:7 是 swap。不要重复安排这些目录探测。
 - P7-2B FIT 语义实机验收于 2026-11-27 完成；正常与 hash-fail 双向量证据见 `reports/pa220/P7-2/FIT-IMPLEMENTATION.md`。P7-2A/B/C 均 PASS。
 - P7-3 源码审计：`reports/pa220/P7-3/SOURCE-AUDIT.md`。独立 MBR/EBR + GPT parser 已集成只读命令 `pa220 partition scan [mmc-device]`，production Makefile patch 由生成器产生并纳入 `build-pa220.sh`。Host GCC、ASan/UBSan、Cavium GCC 4.7.0 object、完整 N32 U-Boot final link 已在 Actions #45987282068 全部 PASS；Artifact 15192027629，最终 BIN SHA-256 `ab2539d28dad2ce3c42784e10a526a19d36f398fd691ca355a7395fc47b6aa3d`。P7-3A 已于 2026-11-28 完成 PA-220 live read-only inventory 验收，输出为 DOS/MBR、57,802,752 sectors、7 个数据分区，索引 1、2、3、5、6、7、8 的 start/count/type 与已知布局一致；扩展容器 #4 未作为数据目标暴露。实机报告：`reports/pa220/P7-3/DEVICE-ACCEPTANCE.md`。本轮使用 Actions #45988344341 / Artifact 15192058990 的 wrapper，TFTP 到 0x20000000，复制 payload 到 0x81000000 并 cmp.b 全长一致。
-- P7-3A 已验收完成。下一唯一工作单元为 P7-3B：实现 manifest-gated dry-run，消费已验证的镜像组件与统一分区 inventory；在缺少 approved PA-220 install manifest 时，对所有组件硬拒绝映射并输出 `NO_APPROVED_MANIFEST`。
+- P7-3A 已验收完成。P7-3B planner core 与生产命令 `pa220 install dry-run [mmc-device]` 已集成：先验证 RAM image 与 `__tmp_load` reservation，再只读扫描 MBR/EBR 或 GPT，当前没有 approved manifest 时调用 planner 并硬拒绝 `NO_APPROVED_MANIFEST`，保持 `UNMAPPED` / `actions=NONE`。Host GCC/ASan/UBSan 与 Actions #46112768625 的完整 OCTEON U-Boot final link 曾通过（Artifact 15250561646）；容量越界强化后的最新 SDK 路径复验正在进行。P7-3B 尚未最终验收；下一步确认最新 Actions 成功、归档证据，再安排一次必要的 RAM-only 实机 dry-run。
 - P7-3B 目标：manifest-gated dry-run。当前没有 approved PA-220 install manifest，任何组件必须保持 UNMAPPED 并拒绝映射（`NO_APPROVED_MANIFEST`）。不推断分区角色，不生成写入脚本，不调用写入 API。
 - 当前 PA-220 eMMC MBR 与目录读取证据均已归档，不重复执行 `mmc part` 或既有 ext2ls 探测。GPT 用独立 Host fixtures 验证，不将本机 MBR 结果当作 GPT 证据。
 - 本轮没有读取并归档原始 MBR/EBR sector dump；不声称已完成 EBR 原始字节级审计。若未来确需该深度证据，再单独评估；当前 P7-2C inventory acceptance 不需要增加线下操作。
+- D-023/D-024 已记录长期架构约束：保留原机 SPI 前级启动链与现有 eMMC 启动路径；禁止自动重分区，目标分区由用户显式选择；GitHub Actions 默认在托管 runner 上执行，不具备本地 Debian shell。若未来完整 eMMC 镜像需要本地大规模处理，再部署隔离的 self-hosted runner，不上传整台主机、不开放块设备写权限。
+- 固定源码 `u-boot/include/configs/octeon_pa220.h` 已核实原机预期启动命令：从 `mmc 0:1` 加载 `/vmlinux.oct3-mp`，失败回退 `.bak`，然后 `bootoctlinux`；注释指明 root 位于 `mmc 0:2`。这证明预期启动路径仍在当前固定源码配置中，但原系统启动兼容性仍须 RAM-only 实机验收。
 - 通用存储兼容要求已写入 `doc/pa220/DECISIONS.md` D-022 和 `doc/pa220/P7-PLAN.md`：后续所有分区识别/映射同时支持 DOS/MBR（含 EBR）与 GPT（含主备 Header/Entry CRC）；按实际介质自动识别，混合/损坏/不一致 fail closed。当前 PA-220 只确认 MBR，不把本机结果冒充 GPT 验证。
 - P4 DHCP Client/Ping 实机验证仍是独立遗留项，P4 overall 不得标记 COMPLETE。
 
