@@ -174,3 +174,22 @@
 - 实施要求：按实际介质内容自动识别；统一输出 source format、分区索引、起始 LBA、扇区数、type/GUID、name、attributes 和可用 UUID。MBR 必须验证 EBR 链与 extended container 边界；GPT 必须验证 CRC、LBA 边界和主备结构一致性。Hybrid MBR、签名冲突、损坏或不一致必须 fail closed 并报告，不修复、不写入。
 - 验证要求：MBR 与 GPT 各自建立独立 host fixture；GPT 测试覆盖主备一致、CRC 错误、越界、重叠和不一致，MBR 测试覆盖 primary、extended/EBR、循环链和越界。真实 PA-220 MBR 证据不替代 GPT 测试。
 - 影响：当前 PA-220 eMMC 仍按已验证的 DOS/MBR 解释；所有后续通用分区代码与文档必须保留两种格式兼容。
+
+## D-023：保留原机 eMMC 启动路径，安装目标必须由用户显式选择
+
+- 日期：2026-11-28
+- 决策：PA-220 U-BootKit 不沿用原作者自动重分区并批量刷入 OpenWrt 的安装策略。默认保留现有 eMMC 分区表和分区内容；不自动创建、删除、移动、格式化或重建分区。
+- 已核实的原机启动设计：固定 PA-220 源码 u-boot/include/configs/octeon_pa220.h 的 CONFIG_BOOTCOMMAND 从 mmc 0:1 加载 /vmlinux.oct3-mp，失败时回退 /vmlinux.oct3-mp.bak，再执行 bootoctlinux 0x21000000 numcores=4 endbootargs；配置注释说明 root 位于 mmc 0:2，由 kernel command line 指定。该配置证明原作者预期的现有 eMMC 启动路径，但仍须通过 RAM-only 实机启动验证当前系统兼容性。
+- 已核实的 SPI 启动链：原机 16 MiB SPI 备份的 Pre-U-Boot、Stage 2、NOR bootloader 及 CRC 证据见 reports/pa220/P7-2/SPI-IMAGE-ANALYSIS.md。保留前级 SPI 启动链、由 Stage 3 从 eMMC 启动原系统，是目标架构；SPI 备份本身不证明 eMMC 内容或 Linux 启动兼容性。
+- 安装模型：经过审核的 manifest 只定义受支持的镜像组件、格式、板型、容量和允许的分区类型/角色；目标分区编号由用户显式选择。dry-run 必须逐项显示组件、来源范围、所选分区编号、LBA/容量和拒绝原因。不得按分区序号、MBR type 0x83、文件名或 FIT image name 自动猜测目标。
+- 如果某个组件需要新建分区、扩大分区或重排分区，当前安装流程直接拒绝；不得悄悄转换为自动分区。未来若确需改变分区表，必须作为独立设计与授权阶段，不属于当前 P7。
+- 原机启动与 OpenWrt 安装是独立工作流。保留原机默认启动命令和现有 eMMC 数据；任何 OpenWrt 安装都必须先确保存在可回退的原系统启动路径，并在用户明确选择的目标分区上执行。
+- 持续约束：eMMC 写入、SPI 擦写、环境持久化（saveenv 会写 SPI 的 0xe00000 / 0xe10000）仍需单独授权。P7 仅实现只读分析与 dry-run。
+
+## D-024：GitHub Actions 与本地 Debian 的执行边界
+
+- 日期：2026-11-28
+- 决策：当前 GitHub 集成可读取/修改仓库、提交文件并读取 Actions 结果；Actions 默认在 GitHub 托管 runner 执行。它不会自动取得用户本地 Debian 的 shell、文件系统或设备访问权限。
+- 若后续需要在本地 Debian 对完整 eMMC 镜像做大规模离线分析，可按需将 Debian 注册为 GitHub Actions self-hosted runner。部署的是受限 runner agent，不是把整台 Debian 主机上传到 GitHub，也不是开放 SSH/远程 shell。
+- 部署前必须先设计隔离：专用低权限账户、专用工作目录、限制 runner 标签和仓库范围、不挂载真实块设备、不提供 SPI/eMMC 写权限、不在 workflow 中暴露个人凭据；大镜像只读处理，报告/哈希/必要切片作为 Actions artifact 归档。
+- 当前 P7-3B 使用托管 runner 与仓库内 sparse fixtures 即可，不需要部署 Debian runner，也不要求上传 29.6 GB eMMC 镜像。只有当离线证据不足以回答具体问题时再启用该路径。
