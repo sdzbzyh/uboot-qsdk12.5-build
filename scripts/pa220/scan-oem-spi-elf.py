@@ -151,6 +151,8 @@ if stage3_off + stage3_size <= len(blob):
             ("32-bit", struct.pack(">I", cmd_name_va)),
             ("64-bit zero-extended", struct.pack(">Q", cmd_name_va)),
             ("64-bit sign-extended", struct.pack(">Q", 0xffffffff00000000 | cmd_name_va)),
+            ("64-bit XKPHYS cached", struct.pack(">Q", 0x8000000000000000 | cmd_name_va)),
+            ("64-bit XKPHYS uncached", struct.pack(">Q", 0x9000000000000000 | cmd_name_va)),
         ]
         pointer_hits = []
         for label, needle in ptr_patterns:
@@ -168,6 +170,10 @@ if stage3_off + stage3_size <= len(blob):
             for q in range(start - start % 4, end - 3, 4):
                 val = struct.unpack_from(">I", stage3, q)[0]
                 words.append(f"+0x{q:06x}=0x{val:08x}")
+                if q + 8 <= len(stage3) and q % 8 == 0:
+                    val64 = struct.unpack_from(">Q", stage3, q)[0]
+                    if val64 >> 32 in (0x80000000, 0x90000000, 0xffffffff):
+                        words.append(f"+0x{q:06x}=0x{val64:016x}")
             lines.append(f"reference at Stage-3 +0x{p:x} ({label}): " + " ".join(words))
         if not pointer_hits:
             lines.append("(No direct pointer reference found; command table may be relocated or encoded.)")
@@ -179,6 +185,12 @@ if stage3_off + stage3_size <= len(blob):
                 val = struct.unpack_from(">I", stage3, q)[0]
                 if 0xc0000000 <= val < 0xc0140000 and val % 4 == 0:
                     candidate_addrs.add(val)
+                if q + 8 <= len(stage3) and q % 8 == 0:
+                    val64 = struct.unpack_from(">Q", stage3, q)[0]
+                    if val64 >> 32 in (0x80000000, 0x90000000, 0xffffffff):
+                        low = val64 & 0xffffffff
+                        if 0xc0000000 <= low < 0xc0140000 and low % 4 == 0:
+                            candidate_addrs.add(low)
         lines += ["### Candidate command-handler code windows", ""]
         for addr in sorted(candidate_addrs)[:12]:
             result = subprocess.run(
