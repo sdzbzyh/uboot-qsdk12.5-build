@@ -89,6 +89,8 @@ else:
 stage3_off, stage3_size = 0x100000, 1310920
 if stage3_off + stage3_size <= len(blob):
     stage3 = blob[stage3_off:stage3_off + stage3_size]
+    header_entry = struct.unpack_from(">I", stage3, 36)[0]
+    code_base = header_entry - 0x40
     stage3_path = Path("/tmp/pa220-oem-stage3.bin")
     stage3_path.write_bytes(stage3)
     lines += [
@@ -98,13 +100,15 @@ if stage3_off + stage3_size <= len(blob):
         f"- SPI offset: 0x{stage3_off:x}",
         f"- Size: {stage3_size} bytes (0x{stage3_size:x})",
         f"- First 64 bytes: {stage3[:64].hex(' ')}",
+        f"- Header entry point: 0x{header_entry:x}",
+        f"- Raw-file VMA including 64-byte header: 0x{code_base:x}",
         f"- PA-220 FDT relative offset: 0x{0x1c9460 - stage3_off:x}",
         f"- FDT signature inside extracted image: {stage3.find(bytes.fromhex('d00dfeed')) >= 0}",
         "",
     ]
     dis = subprocess.run(
         ["objdump", "-D", "-b", "binary", "-m", "mips:isa64r2", "-EB",
-         "--adjust-vma=0xc0000000", str(stage3_path)],
+         f"--adjust-vma=0x{code_base:x}", str(stage3_path)],
         text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False
     )
     if dis.returncode == 0:
@@ -133,13 +137,13 @@ if stage3_off + stage3_size <= len(blob):
         # Locate the command table's reference to the bootoctlinux string, then
         # disassemble nearby code-pointer candidates to identify the OEM handler.
         cmd_name_off = 0x1ce998 - stage3_off
-        cmd_name_va = 0xc0000000 + cmd_name_off
+        cmd_name_va = header_entry + cmd_name_off - 0x40
         lines += [
             "### OEM bootoctlinux command-table references",
             "",
             f"- String SPI offset: 0x1ce998",
             f"- String offset in Stage-3: 0x{cmd_name_off:x}",
-            f"- Provisional virtual address: 0x{cmd_name_va:x}",
+            f"- Virtual address after 64-byte boot header: 0x{cmd_name_va:x}",
             "",
             "~~~text",
         ]
@@ -179,8 +183,8 @@ if stage3_off + stage3_size <= len(blob):
         for addr in sorted(candidate_addrs)[:12]:
             result = subprocess.run(
                 ["objdump", "-D", "-b", "binary", "-m", "mips:isa64r2", "-EB",
-                 "--adjust-vma=0xc0000000", f"--start-address=0x{max(0xc0000000, addr-0x40):x}",
-                 f"--stop-address=0x{min(0xc0140000, addr+0x180):x}", str(stage3_path)],
+                 f"--adjust-vma=0x{code_base:x}", f"--start-address=0x{max(header_entry, addr-0x40):x}",
+                 f"--stop-address=0x{min(header_entry + stage3_size - 0x40, addr+0x180):x}", str(stage3_path)],
                 text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False
             )
             lines += [f"#### Candidate address 0x{addr:x}", "", "~~~asm", result.stdout.rstrip(), "~~~", ""]
@@ -204,7 +208,7 @@ lines += [
     "## Interpretation limits",
     "",
     "- The OEM Stage-3 is a flat binary in this SPI image, not an ELF with symbols.",
-    "- Raw disassembly uses the known Stage-3 image range and a provisional U-Boot text base of 0xc0000000; instruction offsets remain useful even if the linked virtual base differs.",
+    "- Raw disassembly accounts for the 64-byte BOOT header and its entry point; the file VMA is derived from the header entry point.",
     "- Direct load/store matches and command-table pointers are candidates and require code-context validation before attributing them to bootinfo fields.",
     "- No device access or persistent writes are performed.",
     "",
