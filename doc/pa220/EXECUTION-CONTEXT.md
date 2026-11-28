@@ -42,6 +42,20 @@ P7-3A 只读 MBR/EBR inventory 已验收；P7-3B planner 与 `pa220 install dry-
 - 最新 RAM-test BIN：`artifacts/pa220/builds/pa220-pan-kernel-abi-compat.bin`，1,402,792 bytes，SHA-256 `2f0fa866999c6684e0f32261da11472927321e4c087eceb862ff6621f3edbc11`；Artifact [15262267936](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/46143662432/artifacts/15262267936)。此前 #46134874478 的镜像 SHA-256 为 `318c319b824603ee3080ab12687e940ec317c9216566b1986ea8a9bde9048d1d`，仅作历史记录，不用于下一轮测试。
 - 分支最新 HEAD：`d72ef65684ada1b6a9e7950b745d42efa3f91d6b`。Actions 构建输入提交为 `478597e5bf4c6af1a77cbae75db708b330331e70`，随后由 workflow 归档提交推进分支。
 - **下一步唯一必要实机工作：使用上述最新 BIN 做一次 RAM-only 原机 Linux handoff 验证**。不写 SPI/eMMC、不调用 `saveenv`，不重复分区/内核文件发现。
+
+- 已按仓库既有 `tools/pa220/make-p7-stage3-uimage-wrapper.py` 规则，为最新 raw BIN 生成 RAM TFTP wrapper：`pa220-pan-kernel-abi-compat-uimage.bin`，1,402,856 bytes；wrapper SHA-256 `c71fd0c71e94e0b53106a1c7fcedf5d9484c587d885843e801520932cca42972`；header CRC32 `4a700c2b`；payload CRC32 `8d3843fc`；payload 长度 `0x1567a8`。已从 Actions artifact 原始 BIN 重算并核对 SHA-256，wrapper header/data CRC 和 payload 字节比较均通过。
+- 已有实机成功验证的 Stage3 启动顺序可复用：
+  ```text
+  setenv ipaddr 192.168.2.2
+  setenv serverip 192.168.2.10
+  setenv ethact octrgmii0
+  tftpboot 0x20000000 pa220-pan-kernel-abi-compat-uimage.bin
+  iminfo 0x20000000
+  cp.b 0x20000040 0x81000000 0x1567a8
+  cmp.b 0x20000040 0x81000000 0x1567a8
+  go 0x81000000
+  ```
+
 - 从 eMMC p3 加载已确认的 `/boot/vmlinux-3.10.87-oct3-mp` 到 `0x22000000`，使用 ABI 报告中的命令行：
   `bootoctlinux 0x22000000 numcores=4 endbootargs console=ttyS0,115200 root=/dev/mmcblk0p3 rootfstype=ext3 rootdelay=10`
   **本轮不带 `nousb`**，以同时观察 FDT、四核、USB、MMC 初始化。
