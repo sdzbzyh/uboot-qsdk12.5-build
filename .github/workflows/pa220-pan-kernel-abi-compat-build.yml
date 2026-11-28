@@ -7,6 +7,7 @@ on:
     paths:
       - build-pa220.sh
       - scripts/generate-pa220-pan-kernel-bootinfo-compat-patch.py
+      - scripts/pa220/boot-handoff-audit.py
       - .github/workflows/pa220-pan-kernel-abi-compat-build.yml
 
 permissions:
@@ -23,6 +24,15 @@ jobs:
           ref: feature/pa220-ubootkit-web
           fetch-depth: 0
 
+      - name: Checkout original SPI backup from main
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: main
+          path: spi-source
+          sparse-checkout: |
+            pa220-spi-normal.img
+          sparse-checkout-cone-mode: false
+
       - name: Download SDK, build, and record evidence
         id: build
         env:
@@ -38,6 +48,7 @@ jobs:
           BUILD_RC=99
           IMAGE_SHA="not-built"
           IMAGE_SIZE=0
+          AUDIT_RC=99
 
           {
             echo "========== PA-220 PAN KERNEL ABI COMPAT BUILD =========="
@@ -114,6 +125,25 @@ jobs:
             echo "SDK_CHECKSUM_RC=$CHECKSUM_RC"
             echo "BUILD_RC=$BUILD_RC"
             echo "IMAGE_SHA256=$IMAGE_SHA"
+            if [ "$BUILD_RC" -eq 0 ] && [ -s "$IMAGE" ] && [ -s spi-source/pa220-spi-normal.img ]; then
+              echo
+              echo "========== OEM FDT HANDOFF AUDIT =========="
+              python3 scripts/pa220/boot-handoff-audit.py \
+                --spi spi-source/pa220-spi-normal.img \
+                --uboot "$IMAGE" \
+                --toolchain "$TOOLCHAIN_DIR" \
+                --out "$REPORT_DIR/boot-handoff-audit"
+              AUDIT_RC=$?
+              echo "FDT_AUDIT_RC=$AUDIT_RC"
+            fi
+
+            echo
+            echo "========== FINAL STATUS =========="
+            echo "SDK_DOWNLOAD_RC=$SDK_RC"
+            echo "SDK_CHECKSUM_RC=$CHECKSUM_RC"
+            echo "BUILD_RC=$BUILD_RC"
+            echo "FDT_AUDIT_RC=$AUDIT_RC"
+            echo "IMAGE_SHA256=$IMAGE_SHA"
             echo "IMAGE_SIZE=$IMAGE_SIZE"
             echo "========== END =========="
           } > "$LOG" 2>&1
@@ -142,7 +172,8 @@ jobs:
           echo "sdk_rc=$SDK_RC" >> "$GITHUB_OUTPUT"
           echo "checksum_rc=$CHECKSUM_RC" >> "$GITHUB_OUTPUT"
           echo "build_rc=$BUILD_RC" >> "$GITHUB_OUTPUT"
-          if [ "$SDK_RC" -ne 0 ] || [ "$CHECKSUM_RC" -ne 0 ] || [ "$BUILD_RC" -ne 0 ]; then
+          echo "audit_rc=$AUDIT_RC" >> "$GITHUB_OUTPUT"
+          if [ "$SDK_RC" -ne 0 ] || [ "$CHECKSUM_RC" -ne 0 ] || [ "$BUILD_RC" -ne 0 ] || [ "$AUDIT_RC" -ne 0 ]; then
             exit 1
           fi
 
@@ -155,6 +186,7 @@ jobs:
             reports/pa220/P7-4/PAN-KERNEL-ABI-COMPAT-BUILD.*
             patches/pa220/0006-pa220-pan-kernel-bootinfo-compat.patch
             artifacts/pa220/builds/pa220-pan-kernel-abi-compat.bin
+            reports/pa220/P7-4/boot-handoff-audit/*
           if-no-files-found: warn
           retention-days: 30
 
@@ -166,6 +198,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add reports/pa220/P7-4/PAN-KERNEL-ABI-COMPAT-BUILD.md reports/pa220/P7-4/PAN-KERNEL-ABI-COMPAT-BUILD.log
+          if [ -d reports/pa220/P7-4/boot-handoff-audit ]; then git add reports/pa220/P7-4/boot-handoff-audit; fi
           if [ -f patches/pa220/0006-pa220-pan-kernel-bootinfo-compat.patch ]; then
             git add -f patches/pa220/0006-pa220-pan-kernel-bootinfo-compat.patch
           fi
