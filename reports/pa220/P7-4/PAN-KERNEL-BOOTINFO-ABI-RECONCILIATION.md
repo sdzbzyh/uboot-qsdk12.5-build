@@ -96,3 +96,19 @@ The next round is RAM-only. No SPI flash writes are part of this phase.
 - The patch reserves 312 bytes for both hplug and non-hplug paths. The earlier build #46134530956 is not valid for testing because the non-hplug path retained a 288-byte reservation; do not use that artifact.
 - This is a kernel-ABI-derived compatibility layer, not yet a symbol-level reproduction of the OEM U-Boot writer. The original OEM Stage-3 is a flat binary without ELF symbols.
 - Physical RAM test remains pending. Use the corrected image only; do not write SPI.
+
+
+## Latest rebuild superseding the earlier RAM-test image (2026-11-28)
+
+- Actions #46143662432 completed SUCCESS. SDK download/checksum, U-Boot build, and OEM FDT audit all returned 0.
+- This run rebuilt the same PAN ABI compatibility patch from integration input commit `478597e5bf4c6af1a77cbae75db708b330331e70`; the workflow archive commit advanced branch HEAD to `d72ef65684ada1b6a9e7950b745d42efa3f91d6b`.
+- Use the latest image only: `artifacts/pa220/builds/pa220-pan-kernel-abi-compat.bin`, 1,402,792 bytes, SHA-256 `2f0fa866999c6684e0f32261da11472927321e4c087eceb862ff6621f3edbc11`; Actions artifact ID `15262267936`.
+- This supersedes the earlier build artifact/hash recorded above for the next physical test. The successful cloud build and static FDT audit are not physical Linux handoff acceptance.
+- Next test is RAM-only. Load the original kernel from eMMC p3 at `0x22000000`, then run:
+
+  ```text
+  bootoctlinux 0x22000000 numcores=4 endbootargs console=ttyS0,115200 root=/dev/mmcblk0p3 rootfstype=ext3 rootdelay=10
+  ```
+
+- Do not include `nousb` in this round: the passed PA-220 FDT and USB controller are part of the ABI handoff validation. Expected checks: `PA220-PAN-ABI: size=312`, FDT offset 176, ext coremask offset 184, both core masks `0xf`; Linux must stop selecting its internal FDT, enumerate four CPUs, probe USB and MMC, and attempt mounting p3.
+- No SPI/eMMC writes, environment persistence, or `saveenv` are part of this test. P7-3B remains NOT ACCEPTED until the physical RAM-only result is recorded.
