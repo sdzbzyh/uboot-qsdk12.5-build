@@ -14,29 +14,36 @@
 - 目标：OCTEON III CN7130、MIPS64 BE、N32、Cavium SDK 5.1.0、U-Boot 2013.07、原厂 Stage 2 加载自定义 Stage 3。
 - PA-220 独立构建入口：`./build-pa220.sh`；不得混入 Qualcomm `build.sh`。
 
-## 当前唯一主线（2026-11-28，P7-3B）
+## 当前唯一主线（2026-11-28，P7-3B 原机 Linux 启动路径验证）
 
-P7-1 parser、Host/ASan/UBSan、OCTEON 完整构建和 PA-220 实机 preview 均已通过；P7-2A/B/C 已完成。当前推进 P7-3：严格 MBR/EBR + GPT 只读分区 inventory 与 manifest-gated dry-run。
+P7-3A 只读 MBR/EBR inventory 已验收；P7-3B planner 与 `pa220 install dry-run` 已完成软件实现和云端构建，但整体验收仍需完成原机 eMMC Linux 启动路径验证。当前不要推进任何 eMMC/SPI 安装写入。
 
 - P7 计划：`doc/pa220/P7-PLAN.md`。
-- P7-1 验收：`reports/pa220/P7-1/ACCEPTANCE.md`、`DEVICE-ACCEPTANCE.md`。
-- P7-2A SPI NOR 静态分析 PASS：`reports/pa220/P7-2/SPI-IMAGE-ANALYSIS.md`。
-- P7-2 源码审查：`reports/pa220/P7-2/SOURCE-REVIEW.md`。
-- 原机 SPI 备份仅从 `main@da755efd49df32f3e85d231745212674737feba5` 读取；16 MiB，SHA-256 `4899a1c5ed06e5eafbb8c92625a4afae14cad399806df13979fd2c70ee1ed922`。4 个 OCTEON header 均通过 header/data CRC；识别 Pre-U-Boot、Stage 2 和 NOR bootloader；两个 FDT 分别描述 generic SPI Stage2 与 PA-220 Stage3。
-- SPI 备份的 `0x250000-0x1000000` 全为 `0xff`；配置环境区 `0xe00000` / `0xe10000` 在备份中也全擦除。该镜像不提供 eMMC GPT 证据。
-- 重要配置：PA-220 实际启用 SPI redundant environment（`0xe00000` / `0xe10000`），`saveenv` 会擦写 SPI NOR 64 KiB sector；板级文件顶部“RAM-only”注释与宏配置矛盾。P7-2 禁止调用 `saveenv`。
-- P7-2C live eMMC 只读取证已完成并归档：`reports/pa220/P7-2/EMMC-DEVICE-ACCEPTANCE.md`。实机介质是 DOS/MBR + extended/EBR logical partitions，不是 GPT；live `mmc part` 的 8 个分区条目与完整 User Area 镜像的离线 fdisk/parted/sfdisk 记录一致。
-- 已有 live 根目录探测：0:1、0:2 于 2026-11-27；0:3、0:5、0:6、0:8 于 2026-11-18。0:4 是扩展容器，0:7 是 swap。不要重复安排这些目录探测。
-- P7-2B FIT 语义实机验收于 2026-11-27 完成；正常与 hash-fail 双向量证据见 `reports/pa220/P7-2/FIT-IMPLEMENTATION.md`。P7-2A/B/C 均 PASS。
-- P7-3 源码审计：`reports/pa220/P7-3/SOURCE-AUDIT.md`。独立 MBR/EBR + GPT parser 已集成只读命令 `pa220 partition scan [mmc-device]`，production Makefile patch 由生成器产生并纳入 `build-pa220.sh`。Host GCC、ASan/UBSan、Cavium GCC 4.7.0 object、完整 N32 U-Boot final link 已在 Actions #45987282068 全部 PASS；Artifact 15192027629，最终 BIN SHA-256 `ab2539d28dad2ce3c42784e10a526a19d36f398fd691ca355a7395fc47b6aa3d`。P7-3A 已于 2026-11-28 完成 PA-220 live read-only inventory 验收，输出为 DOS/MBR、57,802,752 sectors、7 个数据分区，索引 1、2、3、5、6、7、8 的 start/count/type 与已知布局一致；扩展容器 #4 未作为数据目标暴露。实机报告：`reports/pa220/P7-3/DEVICE-ACCEPTANCE.md`。本轮使用 Actions #45988344341 / Artifact 15192058990 的 wrapper，TFTP 到 0x20000000，复制 payload 到 0x81000000 并 cmp.b 全长一致。
-- P7-3A 已验收完成。P7-3B planner core 与生产命令 `pa220 install dry-run [mmc-device]` 已集成：先验证 RAM image 与 `__tmp_load` reservation，再只读扫描 MBR/EBR 或 GPT，当前没有 approved manifest 时调用 planner 并硬拒绝 `NO_APPROVED_MANIFEST`，保持 `UNMAPPED` / `actions=NONE`。Host GCC 与 ASan/UBSan 各 15 assertions / 0 failures；Actions #46113003495 的 pinned Cavium 完整 U-Boot final link 通过，ELF 保留 `pa220_install_plan_build` 与 `pa220_install_dry_run_cmd`（Artifact 15249864977）。Stage3 wrapper 已由 Actions #46113156556 验证并归档，Artifact 15250271914；实现报告 `reports/pa220/P7-3/P7-3B-IMPLEMENTATION.md` 已记录哈希和设备步骤。P7-3B live dry-run 已通过：设备报告 DOS/MBR READ_ONLY、`NO_APPROVED_MANIFEST`、`UNMAPPED`、`actions=NONE`。原样 `run bootcmd` 未能启动内核，因为 p1 根目录不存在 `/vmlinux.oct3-mp` 或 `.bak`。后续只读检查确认真实 ELF 位于 `mmc 0:3 /boot/vmlinux-3.10.87-oct3-mp`，p2 标签为 `sysroot0`、p3 标签为 `sysroot1`；p3 `/etc/fstab` 指定 `LABEL=sysroot1` 为根。旧板级注释中 kernel-on-p1/root-on-p2 的说明不符合当前实机文件系统。内核 built-in command line/root selection 仍待核实，尚不宣称原系统启动通过。详细实机证据：`reports/pa220/P7-3/P7-3B-DEVICE-ACCEPTANCE.md`。
-- P7-3B 目标：manifest-gated dry-run。当前没有 approved PA-220 install manifest，任何组件必须保持 UNMAPPED 并拒绝映射（`NO_APPROVED_MANIFEST`）。不推断分区角色，不生成写入脚本，不调用写入 API。
-- 当前 PA-220 eMMC MBR 与目录读取证据均已归档，不重复执行 `mmc part` 或既有 ext2ls 探测。GPT 用独立 Host fixtures 验证，不将本机 MBR 结果当作 GPT 证据。
-- 本轮没有读取并归档原始 MBR/EBR sector dump；不声称已完成 EBR 原始字节级审计。若未来确需该深度证据，再单独评估；当前 P7-2C inventory acceptance 不需要增加线下操作。
-- D-023/D-024 已记录长期架构约束：保留原机 SPI 前级启动链与现有 eMMC 启动路径；禁止自动重分区，目标分区由用户显式选择；GitHub Actions 默认在托管 runner 上执行，不具备本地 Debian shell。若未来完整 eMMC 镜像需要本地大规模处理，再部署隔离的 self-hosted runner，不上传整台主机、不开放块设备写权限。
-- 固定源码 `u-boot/include/configs/octeon_pa220.h` 的旧 `CONFIG_BOOTCOMMAND` 仍从 `mmc 0:1` 根目录加载 `/vmlinux.oct3-mp`，回退 `.bak`，再执行 `bootoctlinux`；但 live 设备证实当前 PAN 10.2.11 kernel ELF 在 `mmc 0:3 /boot/vmlinux-3.10.87-oct3-mp`，根分区是标签 `sysroot1` 的 p3。不要再把源码注释中的 p2 root 当作当前实机事实。内核 built-in command line 尚待核实。
-- 通用存储兼容要求已写入 `doc/pa220/DECISIONS.md` D-022 和 `doc/pa220/P7-PLAN.md`：后续所有分区识别/映射同时支持 DOS/MBR（含 EBR）与 GPT（含主备 Header/Entry CRC）；按实际介质自动识别，混合/损坏/不一致 fail closed。当前 PA-220 只确认 MBR，不把本机结果冒充 GPT 验证。
-- P4 DHCP Client/Ping 实机验证仍是独立遗留项，P4 overall 不得标记 COMPLETE。
+- P7-3B 实施报告：`reports/pa220/P7-3/P7-3B-IMPLEMENTATION.md`。
+- P7-3B 实机报告：`reports/pa220/P7-3/P7-3B-DEVICE-ACCEPTANCE.md`。
+- 本轮新增原机 Linux handoff 诊断报告：`reports/pa220/P7-3B/ORIGINAL-KERNEL-HANDOFF-DIAGNOSTIC.md`。
+- 原机 SPI Stage-3 与当前重建 U-Boot FDT 审计：`reports/pa220/P7-4/boot-handoff-audit/boot-handoff-audit.json`；诊断 patch：`reports/pa220/P7-4/0001-pa220-fdt-handoff-diagnostics.patch`。
+
+### 原机 Linux 启动现状
+
+- 已从 eMMC p3 成功读取原机内核 `/boot/vmlinux-3.10.87-oct3-mp`（10,387,920 bytes），并通过 `bootoctlinux` 进入 Linux 3.10.87-oct3-mp。
+- U-Boot 报告 coremask `0xf`，Linux 实际只识别 1 个 CPU。
+- Linux 打印 `Using internal Device Tree.`，随后等待 `/dev/mmcblk0p3`；当前不能标记原机启动通过。
+- 本轮命令行包含 `nousb`，因此 `usbcore: USB support disabled` 与该参数一致；不能用这一行推断内核未编译 USB 支持。
+- Actions #46131655103 的只读 FDT 审计确认：当前重建 U-Boot FDT 与 OEM FDT 都包含 CN7130 eMMC host/slot 和 USB UCTL/xHCI 节点；因此当前首要问题是 Linux 没有采用传入的 PA-220 FDT，而不是重建 FDT 中完全缺少 MMC/USB 节点。
+- OEM FDT 59 nodes / 10,850 bytes；重建 FDT 52 nodes / 10,277 bytes。差异包括部分 LED、风扇、EEPROM、温度节点及 root compatible / GPIO phandle 数值；详细内容以 P7-4 审计报告为准。
+
+### 当前诊断构建与下一步
+
+- 诊断生成器提交：`d74ca2614483fddac1a64bc50aefbb2f78159e6e`；审计报告提交：`a504621079c70183d5e9238c23b3179da9e82af3`。
+- Actions [#46131655103](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/46131655103) SUCCESS；Artifact [15257646907](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/46131655103/artifacts/15257646907)。
+- 新 RAM 测试 U-Boot：1,403,592 bytes；SHA-256 `0195a96a511caa3ac2a170bc0b2c11175bbf9ea65bf5d78540be1e1c32cc9d0d`。
+- 新增 `PA220-START` 运行时输出：实际 a3、全局 descriptor TLB 物理地址、独立副本地址、两份 descriptor 比较结果，以及 Linux 将读取的 bootinfo 版本、core_mask、fdt_addr。
+- 之前看到的 `desc=0xc025ef18` 是 U-Boot 虚拟地址，不能直接把低 32 位当作物理地址；descriptor 与 kernel ELF 加载范围是否重叠仍未证实，不得据此直接修改传递指针。
+- 下一步仅做一轮 RAM-only 实机测试：加载新诊断 U-Boot；从 eMMC p3 加载同一原机内核；保留当前 `nousb` 参数；完整记录 `PA220-HANDOFF`、`PA220-START` 和 Linux 启动日志。核对 Linux 可见 bootinfo 是否为 1.4、`core_mask=0xf`、`fdt_addr` 非零，以及是否不再回退到 internal FDT、是否出现 MMC host/block 初始化。
+- FDT handoff 验证前不移除 `nousb`；待 eMMC/root 路径确认后，再单独移除 `nousb` 验证 USB。全程不调用 `saveenv`，不写 SPI/eMMC 或其他持久化介质。
+
+P4 DHCP Client/Ping 实机验证仍是独立遗留项，P4 overall 不得标记 COMPLETE。
 
 ## 历史检查点（P6-B 完成前，保留审计记录）
 
