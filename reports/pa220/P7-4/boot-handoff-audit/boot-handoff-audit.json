@@ -1,0 +1,164 @@
+{
+  "spi_size": 16777216,
+  "uboot_size": 1402408,
+  "oem_fdt": {
+    "offset": 1872992,
+    "size": 10850,
+    "nodes": 59,
+    "model": "pan,pa-220",
+    "compatible": "cavium,tb7100"
+  },
+  "rebuilt_fdt": {
+    "offset": 1128192,
+    "size": 10277,
+    "nodes": 52,
+    "model": "pan,pa-220",
+    "compatible": "pan,pa-220 | cavium,tb7100"
+  },
+  "nodes_only_in_rebuilt": [
+    "/memory",
+    "/soc@0/i2c@1180000001000/temp-sensor@4c"
+  ],
+  "nodes_only_in_oem": [
+    "/gpio-leds",
+    "/soc@0/i2c@1180000001000/fan-ctlr@2c",
+    "/soc@0/i2c@1180000001000/tlv-eeprom@56",
+    "/soc@0/i2c@1180000001000/tmp@48",
+    "/soc@0/i2c@1180000001000/tmp@49",
+    "/soc@0/i2c@1180000001000/tmp@4a",
+    "/soc@0/i2c@1180000001000/tmp@4b",
+    "/soc@0/i2c@1180000001000/tmp@4c",
+    "/soc@0/i2c@1180000001000/volt-monitor@35"
+  ],
+  "critical_property_differences": [
+    {
+      "path": "/",
+      "property": "compatible",
+      "oem": "cavium,tb7100",
+      "rebuilt": "pan,pa-220 | cavium,tb7100"
+    },
+    {
+      "path": "/soc@0/mmc@1180000002000",
+      "property": "power-gpios",
+      "oem": "\u0002 | \b",
+      "rebuilt": "\u000b | \b"
+    },
+    {
+      "path": "/soc@0/uctl@1180068000000",
+      "property": "power",
+      "oem": "\u0002 | \u0002",
+      "rebuilt": "\u000b | \u0002"
+    },
+    {
+      "path": "/soc@0/uctl@1180069000000",
+      "property": "power",
+      "oem": "\u0002 | \u0003",
+      "rebuilt": "\u000b | \u0003"
+    }
+  ],
+  "oem_mmc": [
+    {
+      "path": "/soc@0/mmc@1180000002000",
+      "compatible": "cavium,octeon-6130-mmc",
+      "reg": "\u0001\u0018 |   | \u0001 | \u0001\u0018 | \u0001h |  ",
+      "status": "ABSENT"
+    },
+    {
+      "path": "/soc@0/mmc@1180000002000/mmc-slot@0",
+      "compatible": "cavium,octeon-6130-mmc-slot | mmc-spi-slot",
+      "reg": "cells:00000000",
+      "status": "ABSENT"
+    }
+  ],
+  "rebuilt_mmc": [
+    {
+      "path": "/soc@0/mmc@1180000002000",
+      "compatible": "cavium,octeon-6130-mmc",
+      "reg": "\u0001\u0018 |   | \u0001 | \u0001\u0018 | \u0001h |  ",
+      "status": "ABSENT"
+    },
+    {
+      "path": "/soc@0/mmc@1180000002000/mmc-slot@0",
+      "compatible": "cavium,octeon-6130-mmc-slot | mmc-spi-slot",
+      "reg": "cells:00000000",
+      "status": "ABSENT"
+    }
+  ],
+  "oem_usb": [
+    {
+      "path": "/soc@0/interrupt-controller@107000000e800",
+      "compatible": "cavium,octeon-7130-cib",
+      "reg": "\u0001\u0007 | \ufffd | \b | \u0001\u0007 | \ufffd | \b",
+      "status": "ABSENT"
+    },
+    {
+      "path": "/soc@0/interrupt-controller@107000000e900",
+      "compatible": "cavium,octeon-7130-cib",
+      "reg": "\u0001\u0007 | \ufffd | \b | \u0001\u0007 | \ufffd | \b",
+      "status": "ABSENT"
+    },
+    {
+      "path": "/soc@0/uctl@1180068000000",
+      "compatible": "cavium,octeon-7130-usb-uctl",
+      "reg": "\u0001\u0018 | h | \u0001",
+      "status": "ABSENT"
+    },
+    {
+      "path": "/soc@0/uctl@1180068000000/xhci@1680000000000",
+      "compatible": "cavium,octeon-7130-xhci | synopsys,dwc3",
+      "reg": "\u0001h | \u0010",
+      "status": "ABSENT"
+    },
+    {
+      "path": "/soc@0/uctl@1180069000000",
+      "compatible": "cavium,octeon-7130-usb-uctl",
+      "reg": "\u0001\u0018 | i | \u0001",
+      "status": "ABSENT"
+    },
+    {
+      "path": "/soc@0/uctl@1180069000000/xhci@1690000000000",
+      "compatible": "cavium,octeon-7130-xhci | synopsys,dwc3",
+      "reg": "\u0001i | \u0010",
+      "status": "ABSENT"
+    }
+  ],
+  "rebuilt_usb": [
+    {
+      "path": "/soc@0/interrupt-controller@107000000e800",
+      "compatible": "cavium,octeon-7130-cib",
+      "reg": "\u0001\u0007 | \ufffd | \b | \u0001\u0007 | \ufffd | \b",
+      "status": "ABSENT"
+    },
+    {
+      "path": "/soc@0/interrupt-controller@107000000e900",
+      "compatible": "cavium,octeon-7130-cib",
+      "reg": "\u0001\u0007 | \ufffd | \b | \u0001\u0007 | \ufffd | \b",
+      "status": "ABSENT"
+    },
+    {
+      "path": "/soc@0/uctl@1180068000000",
+      "compatible": "cavium,octeon-7130-usb-uctl",
+      "reg": "\u0001\u0018 | h | \u0001",
+      "status": "ABSENT"
+    },
+    {
+      "path": "/soc@0/uctl@1180068000000/xhci@1680000000000",
+      "compatible": "cavium,octeon-7130-xhci | synopsys,dwc3",
+      "reg": "\u0001h | \u0010",
+      "status": "ABSENT"
+    },
+    {
+      "path": "/soc@0/uctl@1180069000000",
+      "compatible": "cavium,octeon-7130-usb-uctl",
+      "reg": "\u0001\u0018 | i | \u0001",
+      "status": "ABSENT"
+    },
+    {
+      "path": "/soc@0/uctl@1180069000000/xhci@1690000000000",
+      "compatible": "cavium,octeon-7130-xhci | synopsys,dwc3",
+      "reg": "\u0001i | \u0010",
+      "status": "ABSENT"
+    }
+  ],
+  "toolchain_bootinfo_versions": []
+}
