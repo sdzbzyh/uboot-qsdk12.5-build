@@ -178,7 +178,13 @@ jobs:
           fi
           git commit -m "pa220: record PAN kernel ABI compatibility build"
           if ! git push origin HEAD:refs/heads/feature/pa220-ubootkit-web; then
-            git fetch origin feature/pa220-ubootkit-web
-            git rebase origin/feature/pa220-ubootkit-web
-            git push origin HEAD:refs/heads/feature/pa220-ubootkit-web
+            git stash push -u -m "generated build outputs before rebase" || true
+            for attempt in 1 2 3; do
+              git fetch origin feature/pa220-ubootkit-web
+              git rebase origin/feature/pa220-ubootkit-web
+              if git push origin HEAD:refs/heads/feature/pa220-ubootkit-web; then
+                exit 0
+              fi
+            done
+            exit 1
           fi

@@ -112,9 +112,21 @@ def build_modified(source: str) -> str:
     )
     source = replace_once(
         source,
+        "void *new_fdt;\n#endif\n\tint hplug = 0;",
+        "void *new_fdt;\n\tuint32_t bootinfo_size = (image_flags & OCTEON_BOOT_DESC_IMAGE_LINUX) ?\n\t\tPA220_PAN_BOOTINFO_SIZE : sizeof(cvmx_bootinfo_t);\n#endif\n\tint hplug = 0;",
+        "Linux bootinfo size selection"
+    )
+    source = replace_once(
+        source,
         "addr = cvmx_bootmem_phy_alloc(sizeof(cvmx_bootinfo_t),\n",
-        "addr = cvmx_bootmem_phy_alloc(PA220_PAN_BOOTINFO_SIZE,\n",
+        "addr = cvmx_bootmem_phy_alloc(bootinfo_size,\n",
         "Linux bootinfo allocation"
+    )
+    source = replace_once(
+        source,
+        "boot_desc[core].cvmx_desc_vaddr =\n\t\t\t    (boot_info_block_array[core].boot_desc_addr -\n\t\t\t     sizeof(cvmx_bootinfo_t)) & (~0x7ull);",
+        "boot_desc[core].cvmx_desc_vaddr =\n\t\t\t    (boot_info_block_array[core].boot_desc_addr -\n\t\t\t     bootinfo_size) & (~0x7ull);",
+        "Linux bootinfo heap reservation"
     )
     copy = (
         "\t\t\tmemcpy((void *)(uint32_t) boot_desc[core].cvmx_desc_vaddr,\n"
