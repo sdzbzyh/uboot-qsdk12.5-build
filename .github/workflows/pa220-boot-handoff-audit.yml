@@ -1,0 +1,127 @@
+name: PA-220 OEM boot handoff audit
+
+on:
+  push:
+    branches:
+      - feature/pa220-ubootkit-web
+    paths:
+      - .github/workflows/pa220-boot-handoff-audit.yml
+      - scripts/pa220/boot-handoff-audit.py
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    name: Compare OEM SPI Stage-3 and rebuilt U-Boot
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout integration branch
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: feature/pa220-ubootkit-web
+          fetch-depth: 0
+
+      - name: Retrieve immutable OEM SPI backup from main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin main
+          git show origin/main:pa220-spi-normal.img > "$RUNNER_TEMP/pa220-spi-normal.img"
+          echo "SPI_SIZE=$(stat -c %s "$RUNNER_TEMP/pa220-spi-normal.img")"
+          sha256sum "$RUNNER_TEMP/pa220-spi-normal.img"
+
+      - name: Download pinned OCTEON SDK
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.OCTEON_SDK_READ_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/octeon-download" "$RUNNER_TEMP/octeon-sdk"
+          test -n "$GH_TOKEN"
+          gh release download octeon-sdk-5.1.0 \
+            --repo sdzbzyh/pa220-toolchains \
+            --pattern '*.tar.gz' --pattern '*.sha256' \
+            --dir "$RUNNER_TEMP/octeon-download"
+          cd "$RUNNER_TEMP/octeon-download"
+          sha256sum -c ./*.sha256
+          ARCHIVE=$(find . -maxdepth 1 -type f -name '*.tar.gz' -print -quit)
+          tar -xzf "$ARCHIVE" -C "$RUNNER_TEMP/octeon-sdk"
+          GCC_PATH=$(find "$RUNNER_TEMP/octeon-sdk" -path '*/bin/mips64-octeon-linux-gnu-gcc' -print -quit)
+          test -n "$GCC_PATH"
+          TOOLCHAIN_DIR=$(dirname "$(dirname "$GCC_PATH")")
+          echo "TOOLCHAIN_DIR=$TOOLCHAIN_DIR" >> "$GITHUB_ENV"
+          echo "GCC_PATH=$GCC_PATH" >> "$GITHUB_ENV"
+          "$GCC_PATH" --version | head -n 2
+
+      - name: Rebuild current PA-220 U-Boot and compare FDTs
+        shell: bash
+        run: |
+          set -euo pipefail
+          REPORT_DIR="reports/pa220/P7-4/boot-handoff-audit"
+          mkdir -p "$REPORT_DIR"
+          {
+            echo "UTC=$(date -u +%FT%TZ)"
+            echo "BRANCH=$(git branch --show-current)"
+            echo "INTEGRATION_HEAD=$(git rev-parse HEAD)"
+            echo "FIXED_SOURCE=sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8"
+            echo "SDK=octeon-sdk-5.1.0"
+            echo
+            ./build-pa220.sh "$TOOLCHAIN_DIR"
+            echo
+            echo "========== BOOTINFO HEADER VERSION =========="
+            find "$TOOLCHAIN_DIR" -iname cvmx-bootinfo.h -print
+            grep -R -n -E 'CVMX_BOOTINFO_(MAJ|MIN)_VER' "$TOOLCHAIN_DIR" \
+              --include='cvmx-bootinfo.h' || true
+            echo
+            echo "========== BOOT DESCRIPTOR SYMBOL =========="
+            ELF="external/pa220-openwrt/u-boot/u-boot-octeon_pa220"
+            test -s "$ELF"
+            readelf -sW "$ELF" | grep -E 'octeon_setup_boot_desc_block|octeon_setup_boot_desc_bl' || true
+            OBJDUMP=$(find "$TOOLCHAIN_DIR/bin" -name 'mips64-octeon-linux-gnu-objdump' -print -quit)
+            if [ -n "$OBJDUMP" ]; then
+              "$OBJDUMP" -d --disassemble=octeon_setup_boot_desc_block "$ELF" \
+                > "$REPORT_DIR/current-bootinfo-disassembly.txt" || true
+              grep -i -E 'fdt|0x15[0-9a-f]|0x16[0-9a-f]' \
+                "$REPORT_DIR/current-bootinfo-disassembly.txt" | head -80 || true
+            fi
+            echo
+            echo "========== OEM VS REBUILT FDT =========="
+            python3 scripts/pa220/boot-handoff-audit.py \
+              --spi "$RUNNER_TEMP/pa220-spi-normal.img" \
+              --uboot bin/pa220/u-boot-octeon_pa220.bin \
+              --toolchain "$TOOLCHAIN_DIR" \
+              --out "$REPORT_DIR"
+            echo
+            echo "========== HASHES =========="
+            sha256sum "$RUNNER_TEMP/pa220-spi-normal.img" \
+              bin/pa220/u-boot-octeon_pa220.bin \
+              "$REPORT_DIR/boot-handoff-audit.json"
+          } 2>&1 | tee "$REPORT_DIR/audit.log"
+
+      - name: Upload audit evidence
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: pa220-oem-boot-handoff-audit
+          path: |
+            reports/pa220/P7-4/boot-handoff-audit/
+            bin/pa220/u-boot-octeon_pa220.bin
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Commit audit evidence
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/pa220/P7-4/boot-handoff-audit/
+          if git diff --cached --quiet; then
+            echo "No audit output to commit."
+            exit 0
+          fi
+          git commit -m "pa220: record OEM boot handoff audit"
+          git push origin HEAD:refs/heads/feature/pa220-ubootkit-web
