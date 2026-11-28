@@ -61,6 +61,9 @@ PA220-HANDOFF: src=00080000 new=0fff2da0 new_phys=0xfff2da0 size=10240 copied=0f
 PA220-HANDOFF: desc=c025ef18 version=7 size=400 argc=8 flags=0x5 coremask=0xf boot_desc_copy=0x7ffffe60
 ```
 
+
+说明：旧日志中的 `desc_fdt=0x7ffffd40` 是诊断打印标签不准确；该值来自 `boot_desc.cvmx_desc_vaddr`，指向 `cvmx_bootinfo_t` 结构，不是 FDT 本体地址。实际 FDT 地址是同一行的 `fdt=0x0fff2da0`。新 `PA220-START` 输出会把 bootinfo 指针与 `fdt_addr` 分开打印。
+
 FDT header 检查成功，但 Linux 仍选择内部 FDT。此前曾提出 `0xc025ef18` 可能落入内核 ELF 加载范围的假设；该地址是 U-Boot 虚拟地址，不能直接将其低 32 位当作物理地址，因此**该重叠假设尚未证实，不得据此直接修改 descriptor 指针**。
 
 ## 4. 新诊断 U-Boot
