@@ -29,12 +29,12 @@ P7-1 parser、Host/ASan/UBSan、OCTEON 完整构建和 PA-220 实机 preview 均
 - 已有 live 根目录探测：0:1、0:2 于 2026-11-27；0:3、0:5、0:6、0:8 于 2026-11-18。0:4 是扩展容器，0:7 是 swap。不要重复安排这些目录探测。
 - P7-2B FIT 语义实机验收于 2026-11-27 完成；正常与 hash-fail 双向量证据见 `reports/pa220/P7-2/FIT-IMPLEMENTATION.md`。P7-2A/B/C 均 PASS。
 - P7-3 源码审计：`reports/pa220/P7-3/SOURCE-AUDIT.md`。独立 MBR/EBR + GPT parser 已集成只读命令 `pa220 partition scan [mmc-device]`，production Makefile patch 由生成器产生并纳入 `build-pa220.sh`。Host GCC、ASan/UBSan、Cavium GCC 4.7.0 object、完整 N32 U-Boot final link 已在 Actions #45987282068 全部 PASS；Artifact 15192027629，最终 BIN SHA-256 `ab2539d28dad2ce3c42784e10a526a19d36f398fd691ca355a7395fc47b6aa3d`。P7-3A 已于 2026-11-28 完成 PA-220 live read-only inventory 验收，输出为 DOS/MBR、57,802,752 sectors、7 个数据分区，索引 1、2、3、5、6、7、8 的 start/count/type 与已知布局一致；扩展容器 #4 未作为数据目标暴露。实机报告：`reports/pa220/P7-3/DEVICE-ACCEPTANCE.md`。本轮使用 Actions #45988344341 / Artifact 15192058990 的 wrapper，TFTP 到 0x20000000，复制 payload 到 0x81000000 并 cmp.b 全长一致。
-- P7-3A 已验收完成。P7-3B planner core 与生产命令 `pa220 install dry-run [mmc-device]` 已集成：先验证 RAM image 与 `__tmp_load` reservation，再只读扫描 MBR/EBR 或 GPT，当前没有 approved manifest 时调用 planner 并硬拒绝 `NO_APPROVED_MANIFEST`，保持 `UNMAPPED` / `actions=NONE`。Host GCC 与 ASan/UBSan 各 15 assertions / 0 failures；Actions #46113003495 的 pinned Cavium 完整 U-Boot final link 通过，ELF 保留 `pa220_install_plan_build` 与 `pa220_install_dry_run_cmd`（Artifact 15249864977）。Stage3 wrapper 已由 Actions #46113156556 验证并归档，Artifact 15250271914；实现报告 `reports/pa220/P7-3/P7-3B-IMPLEMENTATION.md` 已记录哈希和设备步骤。下一步安排一轮 RAM-only 实机：执行 `pa220 install dry-run 0` 验证 `NO_APPROVED_MANIFEST`，随后执行未修改的 `run bootcmd` 验证原机 eMMC 系统启动。两者均不写介质；完成后断电。
+- P7-3A 已验收完成。P7-3B planner core 与生产命令 `pa220 install dry-run [mmc-device]` 已集成：先验证 RAM image 与 `__tmp_load` reservation，再只读扫描 MBR/EBR 或 GPT，当前没有 approved manifest 时调用 planner 并硬拒绝 `NO_APPROVED_MANIFEST`，保持 `UNMAPPED` / `actions=NONE`。Host GCC 与 ASan/UBSan 各 15 assertions / 0 failures；Actions #46113003495 的 pinned Cavium 完整 U-Boot final link 通过，ELF 保留 `pa220_install_plan_build` 与 `pa220_install_dry_run_cmd`（Artifact 15249864977）。Stage3 wrapper 已由 Actions #46113156556 验证并归档，Artifact 15250271914；实现报告 `reports/pa220/P7-3/P7-3B-IMPLEMENTATION.md` 已记录哈希和设备步骤。P7-3B live dry-run 已通过：设备报告 DOS/MBR READ_ONLY、`NO_APPROVED_MANIFEST`、`UNMAPPED`、`actions=NONE`。原样 `run bootcmd` 未能启动内核，因为 p1 根目录不存在 `/vmlinux.oct3-mp` 或 `.bak`。后续只读检查确认真实 ELF 位于 `mmc 0:3 /boot/vmlinux-3.10.87-oct3-mp`，p2 标签为 `sysroot0`、p3 标签为 `sysroot1`；p3 `/etc/fstab` 指定 `LABEL=sysroot1` 为根。旧板级注释中 kernel-on-p1/root-on-p2 的说明不符合当前实机文件系统。内核 built-in command line/root selection 仍待核实，尚不宣称原系统启动通过。详细实机证据：`reports/pa220/P7-3/P7-3B-DEVICE-ACCEPTANCE.md`。
 - P7-3B 目标：manifest-gated dry-run。当前没有 approved PA-220 install manifest，任何组件必须保持 UNMAPPED 并拒绝映射（`NO_APPROVED_MANIFEST`）。不推断分区角色，不生成写入脚本，不调用写入 API。
 - 当前 PA-220 eMMC MBR 与目录读取证据均已归档，不重复执行 `mmc part` 或既有 ext2ls 探测。GPT 用独立 Host fixtures 验证，不将本机 MBR 结果当作 GPT 证据。
 - 本轮没有读取并归档原始 MBR/EBR sector dump；不声称已完成 EBR 原始字节级审计。若未来确需该深度证据，再单独评估；当前 P7-2C inventory acceptance 不需要增加线下操作。
 - D-023/D-024 已记录长期架构约束：保留原机 SPI 前级启动链与现有 eMMC 启动路径；禁止自动重分区，目标分区由用户显式选择；GitHub Actions 默认在托管 runner 上执行，不具备本地 Debian shell。若未来完整 eMMC 镜像需要本地大规模处理，再部署隔离的 self-hosted runner，不上传整台主机、不开放块设备写权限。
-- 固定源码 `u-boot/include/configs/octeon_pa220.h` 已核实原机预期启动命令：从 `mmc 0:1` 加载 `/vmlinux.oct3-mp`，失败回退 `.bak`，然后 `bootoctlinux`；注释指明 root 位于 `mmc 0:2`。这证明预期启动路径仍在当前固定源码配置中，但原系统启动兼容性仍须 RAM-only 实机验收。
+- 固定源码 `u-boot/include/configs/octeon_pa220.h` 的旧 `CONFIG_BOOTCOMMAND` 仍从 `mmc 0:1` 根目录加载 `/vmlinux.oct3-mp`，回退 `.bak`，再执行 `bootoctlinux`；但 live 设备证实当前 PAN 10.2.11 kernel ELF 在 `mmc 0:3 /boot/vmlinux-3.10.87-oct3-mp`，根分区是标签 `sysroot1` 的 p3。不要再把源码注释中的 p2 root 当作当前实机事实。内核 built-in command line 尚待核实。
 - 通用存储兼容要求已写入 `doc/pa220/DECISIONS.md` D-022 和 `doc/pa220/P7-PLAN.md`：后续所有分区识别/映射同时支持 DOS/MBR（含 EBR）与 GPT（含主备 Header/Entry CRC）；按实际介质自动识别，混合/损坏/不一致 fail closed。当前 PA-220 只确认 MBR，不把本机结果冒充 GPT 验证。
 - P4 DHCP Client/Ping 实机验证仍是独立遗留项，P4 overall 不得标记 COMPLETE。
 
@@ -182,3 +182,8 @@ P6-1C 已由 Actions #45600860179 验收通过，报告见 reports/pa220/P6-1C/A
 - 损坏 FIT：2,518 bytes，SHA-256 `a2cc42cf33f94a5ef306068fb9e88a8b84e746fc672379227494aac1ea504f02`；kernel CRC32/SHA1/MD5 FAIL；ramdisk 三种 hash PASS；其他分类与预期一致；`hash_failures=1`。
 - 两个向量均显示 target mapping UNMAPPED、actions NONE。仅操作 RAM 中已接收的 FIT 文件；无加载、启动、存储读取/写入或 saveenv。
 - 报告：`reports/pa220/P7-2/FIT-IMPLEMENTATION.md`。P7-2B PASS；P7-2A/B/C 全部完成，下一工作单元 P7-3。
+
+
+## 2026-11-28 live eMMC 启动路径补充
+
+P7-3B dry-run live acceptance 已通过，实际根分区/内核路径与旧板级注释不一致。p2=`sysroot0`，p3=`sysroot1`；p3 `/etc/fstab` 指向 `LABEL=sysroot1`；内核 ELF 位于 p3 `/boot/vmlinux-3.10.87-oct3-mp`。旧 `run bootcmd` 因 p1 两个候选文件均不存在而失败，未执行 Linux kernel。详细证据和待核实项见 `reports/pa220/P7-3/P7-3B-DEVICE-ACCEPTANCE.md`。
