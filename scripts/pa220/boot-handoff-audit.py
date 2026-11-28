@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Read-only OEM Stage-3 versus rebuilt PA-220 U-Boot FDT audit."""
 import argparse
+import hashlib
 import json
 import re
 import struct
@@ -58,7 +59,9 @@ def parse_fdt(blob, offset):
             raise ValueError("unknown FDT token")
     if not ended or "/" not in nodes:
         raise ValueError("incomplete FDT")
-    return {"offset": offset, "totalsize": total, "version": version, "nodes": nodes}
+    return {"offset": offset, "totalsize": total, "version": version, "nodes": nodes,
+            "blob": blob[offset:offset + total],
+            "sha256": hashlib.sha256(blob[offset:offset + total]).hexdigest()}
 
 
 def scan_fdts(blob):
@@ -100,6 +103,39 @@ def choose(fdts, marker):
         if any(marker in x for x in values):
             return fdt
     raise RuntimeError("could not find FDT marker " + marker)
+
+
+def phandle_index(tree):
+    index = {}
+    for path, props in tree["nodes"].items():
+        raw = props.get("phandle") or props.get("linux,phandle")
+        if raw is not None and len(raw) == 4:
+            value = struct.unpack(">I", raw)[0]
+            if value:
+                if value in index and index[value] != path:
+                    raise ValueError("duplicate phandle 0x%08x" % value)
+                index[value] = path
+    return index
+
+
+def gpio_references(tree):
+    index = phandle_index(tree)
+    refs = []
+    for path, props in tree["nodes"].items():
+        for prop in ("power-gpios", "power"):
+            raw = props.get(prop)
+            if raw is None:
+                continue
+            if len(raw) < 12 or len(raw) % 4:
+                refs.append({"path": path, "property": prop,
+                             "raw": display(raw), "target": "MALFORMED"})
+                continue
+            cells = struct.unpack(">" + "I" * (len(raw) // 4), raw)
+            refs.append({"path": path, "property": prop,
+                         "phandle": "0x%08x" % cells[0],
+                         "target": index.get(cells[0], "UNRESOLVED"),
+                         "gpio": cells[1], "flags": cells[2]})
+    return refs
 
 
 def matching_nodes(tree, marker):
@@ -172,7 +208,11 @@ def main():
         "toolchain_bootinfo_versions": versions
     }
     out = Path(a.out)
+    report["oem_gpio_references"] = gpio_references(oem)
+    report["rebuilt_gpio_references"] = gpio_references(current)
     out.mkdir(parents=True, exist_ok=True)
+    (out / "oem-stage3-pa220.dtb").write_bytes(oem["blob"])
+    (out / "rebuilt-stage3-pa220.dtb").write_bytes(current["blob"])
     (out / "boot-handoff-audit.json").write_text(json.dumps(report, indent=2) + "\n")
     lines = [
         "# PA-220 OEM Stage-3 and rebuilt U-Boot FDT comparison", "",
@@ -182,6 +222,7 @@ def main():
         "| FDT offset | 0x%x | 0x%x |" % (oem["offset"], current["offset"]),
         "| FDT size | %d | %d |" % (oem["totalsize"], current["totalsize"]),
         "| Node count | %d | %d |" % (len(old), len(new)),
+        "| FDT SHA-256 | %s | %s |" % (oem["sha256"], current["sha256"]),
         "| Model | %s | %s |" % (display(old["/"].get("model")), display(new["/"].get("model"))),
         "| Compatible | %s | %s |" % (display(old["/"].get("compatible")), display(new["/"].get("compatible"))),
         "", "## MMC controller", "",
@@ -198,7 +239,12 @@ def main():
     for item in diffs:
         lines.append("- %s %s: OEM=%s; rebuilt=%s" %
                      (item["path"], item["property"], item["oem"], item["rebuilt"]))
-    lines += ["", "## Toolchain bootinfo ABI", ""]
+    lines += ["", "## GPIO phandle resolution", "",
+              "OEM: " + json.dumps(report["oem_gpio_references"]),
+              "Rebuilt: " + json.dumps(report["rebuilt_gpio_references"]),
+              "", "Phandle integers are tree-local identifiers; compare resolved node paths,",
+              "not the raw integer values, when determining whether a GPIO reference changed.",
+              "", "## Toolchain bootinfo ABI", ""]
     if versions:
         for item in versions:
             lines.append("- %s: CVMX_BOOTINFO_MIN_VER=%d" %
