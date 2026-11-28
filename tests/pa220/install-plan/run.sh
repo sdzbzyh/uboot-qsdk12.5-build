@@ -1,6 +1,6 @@
 #!/bin/sh
 set -eu
-ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/../../../../" && pwd)
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/../../../" && pwd)
 OUT="$ROOT/reports/pa220/P7-3"
 mkdir -p "$OUT"
 CC=${CC:-gcc}
