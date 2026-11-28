@@ -86,8 +86,6 @@ else:
         symbols = [x for x in nm.stdout.splitlines() if re.search(r"(octeon_setup_boot_desc_block|start_linux|cvmx_bootinfo_array|cvmx_desc_vaddr|do_bootoctlinux)", x)]
         lines += ["", "Relevant symbols:", *(symbols or ["(none found; likely stripped)"]), "~~~", ""]
 
-# SPI layout audit previously identified the OEM Stage-3 payload at 0x100000,
-# length 1,310,920 bytes. Verify the embedded PA-220 FDT is inside that range.
 stage3_off, stage3_size = 0x100000, 1310920
 if stage3_off + stage3_size <= len(blob):
     stage3 = blob[stage3_off:stage3_off + stage3_size]
@@ -131,6 +129,63 @@ if stage3_off + stage3_size <= len(blob):
         if not hits:
             lines.append("(No direct load/store instructions matched these offsets.)")
         lines += ["~~~", ""]
+
+        # Locate the command table's reference to the bootoctlinux string, then
+        # disassemble nearby code-pointer candidates to identify the OEM handler.
+        cmd_name_off = 0x1ce998 - stage3_off
+        cmd_name_va = 0xc0000000 + cmd_name_off
+        lines += [
+            "### OEM bootoctlinux command-table references",
+            "",
+            f"- String SPI offset: 0x1ce998",
+            f"- String offset in Stage-3: 0x{cmd_name_off:x}",
+            f"- Provisional virtual address: 0x{cmd_name_va:x}",
+            "",
+            "~~~text",
+        ]
+        ptr_patterns = [
+            ("32-bit", struct.pack(">I", cmd_name_va)),
+            ("64-bit zero-extended", struct.pack(">Q", cmd_name_va)),
+            ("64-bit sign-extended", struct.pack(">Q", 0xffffffff00000000 | cmd_name_va)),
+        ]
+        pointer_hits = []
+        for label, needle in ptr_patterns:
+            p = 0
+            while True:
+                p = stage3.find(needle, p)
+                if p < 0:
+                    break
+                pointer_hits.append((p, label, len(needle)))
+                p += len(needle)
+        for p, label, width in pointer_hits[:40]:
+            words = []
+            start = max(0, p - 24)
+            end = min(len(stage3), p + width + 40)
+            for q in range(start - start % 4, end - 3, 4):
+                val = struct.unpack_from(">I", stage3, q)[0]
+                words.append(f"+0x{q:06x}=0x{val:08x}")
+            lines.append(f"reference at Stage-3 +0x{p:x} ({label}): " + " ".join(words))
+        if not pointer_hits:
+            lines.append("(No direct pointer reference found; command table may be relocated or encoded.)")
+        lines += ["~~~", ""]
+
+        candidate_addrs = set()
+        for p, label, width in pointer_hits:
+            for q in range(max(0, p - 24), min(len(stage3) - 3, p + width + 40), 4):
+                val = struct.unpack_from(">I", stage3, q)[0]
+                if 0xc0000000 <= val < 0xc0140000 and val % 4 == 0:
+                    candidate_addrs.add(val)
+        lines += ["### Candidate command-handler code windows", ""]
+        for addr in sorted(candidate_addrs)[:12]:
+            result = subprocess.run(
+                ["objdump", "-D", "-b", "binary", "-m", "mips:isa64r2", "-EB",
+                 "--adjust-vma=0xc0000000", f"--start-address=0x{max(0xc0000000, addr-0x40):x}",
+                 f"--stop-address=0x{min(0xc0140000, addr+0x180):x}", str(stage3_path)],
+                text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False
+            )
+            lines += [f"#### Candidate address 0x{addr:x}", "", "~~~asm", result.stdout.rstrip(), "~~~", ""]
+        if not candidate_addrs:
+            lines.append("(No nearby absolute code pointers found.)")
     else:
         lines += ["### Raw MIPS64 disassembly", "", "~~~text", dis.stdout.rstrip(), "~~~", ""]
 
@@ -150,7 +205,7 @@ lines += [
     "",
     "- The OEM Stage-3 is a flat binary in this SPI image, not an ELF with symbols.",
     "- Raw disassembly uses the known Stage-3 image range and a provisional U-Boot text base of 0xc0000000; instruction offsets remain useful even if the linked virtual base differs.",
-    "- Direct load/store matches are candidates and require code-context validation before attributing them to bootinfo fields.",
+    "- Direct load/store matches and command-table pointers are candidates and require code-context validation before attributing them to bootinfo fields.",
     "- No device access or persistent writes are performed.",
     "",
 ]
