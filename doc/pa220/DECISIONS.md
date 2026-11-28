@@ -212,3 +212,12 @@
 - ext_core_mask 从已验证的 legacy core_mask 重建，避免 SDK 高位残留；Linux image 的 hplug allocation 与 normal heap-adjacent reservation 均必须预留完整 312 bytes。
 - 该兼容层只用于 RAM handoff，不改变 SPI/eMMC，不执行 saveenv。实机通过前不得将 P7-3B 标记为完成。
 - 构建证据：Actions #46134874478，image SHA-256 `318c319b824603ee3080ab12687e940ec317c9216566b1986ea8a9bde9048d1d`；报告 `reports/pa220/P7-4/PAN-KERNEL-BOOTINFO-ABI-RECONCILIATION.md`。
+
+
+## D-027：PAN-OS 用户空间启动停滞列为竣工后遗留项
+
+- 日期：2026-11-28
+- 现象：从 eMMC p3 加载原机 Linux 3.10.87-oct3-mp 后，设备进入 PAN-OS 启动流程，但串口在 9600 baud 下停留于 `PA-HDF login:` 超过一小时，未转为型号登录提示符。启动日志还出现 `/sbin/cgroups_setup` Python `TypeError: 'NoneType' object is not subscriptable`。
+- 判断：当前证据只能确认 PAN-OS 用户空间初始化未完成，不能确认 cgroups 异常就是根因。该问题不影响 U-BootKit 其他独立功能继续开发，但原机 PAN-OS 完整启动/端到端兼容验收保持 NOT ACCEPTED。
+- 决策：不因此暂停 P7 其余工作；将该问题登记为竣工后专项诊断项。竣工后使用 RAM-only 启动和只读 rootfs 检查 init、cgroups 与服务依赖。
+- 边界：不写 SPI/eMMC、不调用 `saveenv`、不修改原机文件系统；只有当该问题被证明阻断当前某个具体验收项时，才提前切回处理。
