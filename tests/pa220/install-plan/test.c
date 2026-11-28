@@ -72,6 +72,9 @@ int main(void)
     t.parts[1].type=0x82;
     CHECK(pa220_install_plan_build(&m,&t,0x10000,c,2,s,2,&p)==PA220_PLAN_TARGET_MISMATCH);
     t.parts[1].type=0x83;
+    t.parts[1].start_lba=t.capacity-10; t.parts[1].sectors=100;
+    CHECK(pa220_install_plan_build(&m,&t,0x10000,c,2,s,2,&p)==PA220_PLAN_CAPACITY);
+    t.parts[1].start_lba=3968; t.parts[1].sectors=8000064;
     m.board_type=28;
     CHECK(pa220_install_plan_build(&m,&t,0x10000,c,2,s,2,&p)==PA220_PLAN_BAD_MANIFEST);
 
