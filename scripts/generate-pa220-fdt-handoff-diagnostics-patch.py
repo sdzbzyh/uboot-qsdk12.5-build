@@ -89,7 +89,7 @@ LINUX_DIAGNOSTIC = """\tif (core_num == 0) {
 \t\t       (unsigned)pa220_bi[154], (char *)(pa220_bi + 155),
 \t\t       (unsigned long long)pa220_fdt,
 \t\t       (unsigned long long)pa220_ext_low,
-\t\t       (unsigned long long)*(uint64_t *)(pa220_bi + 60));
+\t\t       (unsigned long long)pa220_phy_mem);
 \t}
 """
 
