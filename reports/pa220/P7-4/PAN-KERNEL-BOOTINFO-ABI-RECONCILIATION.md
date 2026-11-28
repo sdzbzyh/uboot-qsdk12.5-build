@@ -87,3 +87,12 @@ Expected first checks:
 If the PA-220 MMC host initializes but sustained reads still stall, evaluate the separate known DDR52/eMMC issue and the cavium,no-ddr workaround. Do not mix that second fix into this ABI test.
 
 The next round is RAM-only. No SPI flash writes are part of this phase.
+
+
+## Cloud build and allocation correction (2026-11-28)
+
+- Corrected build completed: Actions #46134874478 SUCCESS, Artifact 15258983126.
+- Final RAM-test image: `artifacts/pa220/builds/pa220-pan-kernel-abi-compat.bin`, 1,402,792 bytes, SHA-256 `318c319b824603ee3080ab12687e940ec317c9216566b1986ea8a9bde9048d1d`.
+- The patch reserves 312 bytes for both hplug and non-hplug paths. The earlier build #46134530956 is not valid for testing because the non-hplug path retained a 288-byte reservation; do not use that artifact.
+- This is a kernel-ABI-derived compatibility layer, not yet a symbol-level reproduction of the OEM U-Boot writer. The original OEM Stage-3 is a flat binary without ELF symbols.
+- Physical RAM test remains pending. Use the corrected image only; do not write SPI.

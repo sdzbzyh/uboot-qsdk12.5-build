@@ -195,3 +195,13 @@ P6-1C 已由 Actions #45600860179 验收通过，报告见 reports/pa220/P6-1C/A
 ## 2026-11-28 live eMMC 启动路径补充
 
 P7-3B dry-run live acceptance 已通过，实际根分区/内核路径与旧板级注释不一致。p2=`sysroot0`，p3=`sysroot1`；p3 `/etc/fstab` 指向 `LABEL=sysroot1`；内核 ELF 位于 p3 `/boot/vmlinux-3.10.87-oct3-mp`。旧 `run bootcmd` 因 p1 两个候选文件均不存在而失败，未执行 Linux kernel。详细证据和待核实项见 `reports/pa220/P7-3/P7-3B-DEVICE-ACCEPTANCE.md`。
+
+## P7-3B PAN kernel bootinfo ABI compatibility build (2026-11-28)
+
+- Exact original kernel disassembly identified a 24-byte PAN-specific bootinfo extension: extension bytes 152..175, FDT pointer at 176, extended coremask at 184. The pinned SDK 5.1.0 U-Boot structure instead places FDT at 152 and extended coremask at 160 (288-byte structure). This explains the kernel's generated cpuid=0 and its fallback to the internal device tree.
+- Compatibility serializer: `patches/pa220/0006-pa220-pan-kernel-bootinfo-compat.patch`; generator: `scripts/generate-pa220-pan-kernel-bootinfo-compat-patch.py`.
+- The Linux handoff reserves 312 bytes in both hplug allocation and normal heap-adjacent paths. The kernel-visible copy contains profile 0, physical core ID, UART 0, board name PA-220, FDT at 176, and a clean 128-byte extended coremask at 184 synthesized from legacy `core_mask`. Generic in-memory U-Boot bootinfo remains unchanged.
+- Actions [#46134874478](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/46134874478) SUCCESS; Artifact [15258983126](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/46134874478/artifacts/15258983126).
+- RAM-test image: `artifacts/pa220/builds/pa220-pan-kernel-abi-compat.bin`; size 1,402,792 bytes; SHA-256 `318c319b824603ee3080ab12687e940ec317c9216566b1986ea8a9bde9048d1d`.
+- The first compile-only image from Actions #46134530956 is invalid for testing: its normal non-hplug path still reserved only 288 bytes. The corrected #46134874478 build reserves all 312 bytes in both paths. Do not use the first artifact.
+- P7-3B is NOT yet accepted. The next step is one RAM-only physical test with the original eMMC kernel on p3, omitting `nousb`, and checking the PA220-PAN-ABI line, passed-FDT selection, four CPUs, USB, and eMMC root mount. No SPI/eMMC writes.

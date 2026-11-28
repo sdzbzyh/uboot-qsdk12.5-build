@@ -202,3 +202,13 @@
 - `pa220 install dry-run 0` live 输出符合预期：DOS/MBR READ_ONLY，`NO_APPROVED_MANIFEST`、`UNMAPPED`、`actions=NONE`。
 - 后续启动必须基于 live label、真实 kernel path 和经核实的 kernel command line；不修改分区表，不自动重分区。内核默认命令行/根选择尚未确认，故尚不宣称原系统已成功启动。
 - 证据：`reports/pa220/P7-3/P7-3B-DEVICE-ACCEPTANCE.md`。
+
+
+## D-026：PAN-OS 3.10.87 bootinfo ABI 兼容层
+
+- 日期：2026-11-28
+- 决策：保留 SDK 5.1.0 的通用 `cvmx_bootinfo_t` 内存结构，不全局改变头文件或所有调用方；仅在向 PAN-OS 3.10.87 Linux 交接时，序列化一份独立的 312-byte kernel-visible bootinfo。
+- 布局：generic prefix 0..151；PAN extension 152..175；FDT pointer 176；128-byte ext_core_mask 184..311。extension 暂按 profile=0、physical cpuid、UART0、board name PA-220 填充；字段名为基于原内核读取行为的推断，必须经 RAM-only 实机验证。
+- ext_core_mask 从已验证的 legacy core_mask 重建，避免 SDK 高位残留；Linux image 的 hplug allocation 与 normal heap-adjacent reservation 均必须预留完整 312 bytes。
+- 该兼容层只用于 RAM handoff，不改变 SPI/eMMC，不执行 saveenv。实机通过前不得将 P7-3B 标记为完成。
+- 构建证据：Actions #46134874478，image SHA-256 `318c319b824603ee3080ab12687e940ec317c9216566b1986ea8a9bde9048d1d`；报告 `reports/pa220/P7-4/PAN-KERNEL-BOOTINFO-ABI-RECONCILIATION.md`。

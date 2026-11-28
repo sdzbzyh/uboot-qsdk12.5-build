@@ -126,3 +126,12 @@
 - 实机下一步：仅 RAM 加载新诊断 U-Boot，使用相同 eMMC p3 kernel 和原命令行（暂时保留 `nousb`），收集 `PA220-HANDOFF`、`PA220-START` 和 Linux 完整启动日志。目标是确认 Linux 可见 bootinfo 的 1.4 / `core_mask=0xf` / 非零 `fdt_addr`，以及内核是否采用传入 FDT并初始化 MMC。
 - 本轮不写 SPI/eMMC，不调用 `saveenv`。原机 Linux 启动未通过前，P7-3B 不得整体验收。
 - 详细报告：`reports/pa220/P7-3B/ORIGINAL-KERNEL-HANDOFF-DIAGNOSTIC.md`。
+
+
+## P7-3B PAN kernel ABI compatibility build (2026-11-28)
+
+- Original kernel binary analysis now proves the 24-byte bootinfo layout mismatch: kernel extension 152..175, FDT 176, extended coremask 184; current generic U-Boot source FDT 152, ext mask 160, size288.
+- Added a kernel-visible compatibility serializer in patch 0006. It keeps generic U-Boot state unchanged, reserves a 312-byte copy in both hplug and normal heap paths, writes FDT at176, and synthesizes the 128-byte extended mask at184 from the validated legacy mask.
+- Cloud build PASS: Actions #46134874478; image size 1,402,792; SHA-256 `318c319b824603ee3080ab12687e940ec317c9216566b1986ea8a9bde9048d1d`. Artifact 15258983126. Build report: `reports/pa220/P7-4/PAN-KERNEL-ABI-COMPAT-BUILD.md`.
+- An earlier build #46134530956 is explicitly rejected because its non-hplug memory reservation remained 288 bytes; only the corrected #46134874478 image is eligible for RAM testing.
+- Next: RAM-only test with p3 kernel and `bootoctlinux 0x22000000 numcores=4 endbootargs console=ttyS0,115200 root=/dev/mmcblk0p3 rootfstype=ext3 rootdelay=10`; omit `nousb`. Verify no internal-FDT fallback, four CPUs, USB initialization and eMMC root. P7-3B remains open until physical acceptance.
