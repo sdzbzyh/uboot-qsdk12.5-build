@@ -84,10 +84,11 @@ def strings(raw):
 def display(raw):
     if raw is None:
         return "ABSENT"
-    vals = strings(raw)
-    if vals:
-        return " | ".join(vals)
-    if len(raw) % 4 == 0 and len(raw) <= 64:
+    if raw and all(byte == 0 or 32 <= byte < 127 for byte in raw):
+        vals = strings(raw)
+        if vals:
+            return " | ".join(vals)
+    if len(raw) % 4 == 0 and len(raw) <= 128:
         return "cells:" + " ".join("%08x" % x for x in struct.unpack(">" + "I" * (len(raw) // 4), raw))
     return "0x" + raw.hex()
 
@@ -117,6 +118,7 @@ def main():
     ap.add_argument("--spi", required=True)
     ap.add_argument("--uboot", required=True)
     ap.add_argument("--toolchain", required=True)
+    ap.add_argument("--source-root", required=False)
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     spi, uboot = Path(a.spi).read_bytes(), Path(a.uboot).read_bytes()
@@ -135,14 +137,24 @@ def main():
                               "oem": display(old[path].get(key)),
                               "rebuilt": display(new[path].get(key))})
     versions = []
-    for header in Path(a.toolchain).rglob("cvmx-bootinfo.h"):
-        try:
-            source = header.read_text(errors="replace")
-        except OSError:
-            continue
-        match = re.search(r"^\s*#\s*define\s+CVMX_BOOTINFO_MIN_VER\s+(\d+)", source, re.M)
-        if match:
-            versions.append({"header": str(header), "minor_version": int(match.group(1))})
+    roots = [Path(a.toolchain)]
+    if a.source_root:
+        roots.append(Path(a.source_root))
+    seen = set()
+    for root in roots:
+        for header in root.rglob("*"):
+            if not header.is_file() or header.suffix not in (".h", ".c", ".inc", ".S"):
+                continue
+            if ".git" in header.parts or str(header) in seen:
+                continue
+            seen.add(str(header))
+            try:
+                source = header.read_text(errors="replace")
+            except OSError:
+                continue
+            match = re.search(r"^\s*#\s*define\s+CVMX_BOOTINFO_MIN_VER\s+(\d+)", source, re.M)
+            if match:
+                versions.append({"file": str(header), "minor_version": int(match.group(1))})
     report = {
         "spi_size": len(spi), "uboot_size": len(uboot),
         "oem_fdt": {"offset": oem["offset"], "size": oem["totalsize"],
@@ -190,7 +202,7 @@ def main():
     if versions:
         for item in versions:
             lines.append("- %s: CVMX_BOOTINFO_MIN_VER=%d" %
-                         (item["header"], item["minor_version"]))
+                         (item["file"], item["minor_version"]))
     else:
         lines.append("- cvmx-bootinfo.h not found in extracted toolchain")
     lines += ["", "## Limits", "",
