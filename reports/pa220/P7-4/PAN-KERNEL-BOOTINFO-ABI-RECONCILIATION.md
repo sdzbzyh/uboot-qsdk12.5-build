@@ -104,6 +104,9 @@ The next round is RAM-only. No SPI flash writes are part of this phase.
 - This run rebuilt the same PAN ABI compatibility patch from integration input commit `478597e5bf4c6af1a77cbae75db708b330331e70`; the workflow archive commit advanced branch HEAD to `d72ef65684ada1b6a9e7950b745d42efa3f91d6b`.
 - Use the latest image only: `artifacts/pa220/builds/pa220-pan-kernel-abi-compat.bin`, 1,402,792 bytes, SHA-256 `2f0fa866999c6684e0f32261da11472927321e4c087eceb862ff6621f3edbc11`; Actions artifact ID `15262267936`.
 - This supersedes the earlier build artifact/hash recorded above for the next physical test. The successful cloud build and static FDT audit are not physical Linux handoff acceptance.
+
+- A RAM TFTP wrapper was generated from the artifact BIN using the repository's existing `tools/pa220/make-p7-stage3-uimage-wrapper.py` format. File: `pa220-pan-kernel-abi-compat-uimage.bin`, 1,402,856 bytes; SHA-256 `c71fd0c71e94e0b53106a1c7fcedf5d9484c587d885843e801520932cca42972`; header CRC32 `4a700c2b`; payload CRC32 `8d3843fc`; payload size `0x1567a8`. Raw payload SHA-256 was independently verified against the Actions build report.
+- The already-proven Stage3 RAM boot sequence is TFTP to `0x20000000`, `iminfo`, copy payload from `0x20000040` to `0x81000000`, `cmp.b`, then `go 0x81000000`. The wrapper itself is not executed.
 - Next test is RAM-only. Load the original kernel from eMMC p3 at `0x22000000`, then run:
 
   ```text
