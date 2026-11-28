@@ -34,9 +34,19 @@ jobs:
           tar -xzf "$D"/*.tar.gz -C "$RUNNER_TEMP/sdk-unpack"
           GCC=$(find "$RUNNER_TEMP/sdk-unpack" -path '*/bin/mips64-octeon-linux-gnu-gcc' -print -quit)
           test -n "$GCC"
-          "$GCC" -std=gnu99 -Wall -Wextra -Werror -Iu-boot/include -c u-boot/board/octeon/pa220/pa220_install_plan.c -o "$RUNNER_TEMP/pa220_install_plan.o"
-          file "$RUNNER_TEMP/pa220_install_plan.o"
-          echo P7_3B_CAVIUM_OBJECT=PASS
+          TOOLCHAIN="$(dirname "$(dirname "$GCC")")"
+          export OCTEON_MODEL=OCTEON_CN70XX
+          export PA220_REPO_DIR="$RUNNER_TEMP/pa220-openwrt"
+          export PA220_OUTPUT_DIR="$RUNNER_TEMP/pa220-output"
+          ./build-pa220.sh "$TOOLCHAIN" 2>&1 | tee reports/pa220/P7-3/42-octeon-full-build.log
+          ELF="$PA220_REPO_DIR/u-boot/u-boot-octeon_pa220"
+          test -s "$ELF"
+          "$TOOLCHAIN/bin/mips64-octeon-linux-gnu-readelf" -s "$ELF" | tee reports/pa220/P7-3/43-final-symbols.txt
+          grep -q 'pa220_install_plan_build' reports/pa220/P7-3/43-final-symbols.txt
+          grep -q 'pa220_install_dry_run_cmd' reports/pa220/P7-3/43-final-symbols.txt
+          cp "$PA220_OUTPUT_DIR/u-boot-octeon_pa220.bin" reports/pa220/P7-3/u-boot-octeon_pa220.bin
+          sha256sum "$ELF" reports/pa220/P7-3/u-boot-octeon_pa220.bin | tee reports/pa220/P7-3/44-build-sha256.txt
+          echo P7_3B_OCTEON_FULL_UBOOT_LINK=PASS
       - name: Upload test evidence
         if: always()
         uses: actions/upload-artifact@v4
