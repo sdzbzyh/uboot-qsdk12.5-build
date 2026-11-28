@@ -150,3 +150,30 @@ This is a reference implementation, not yet verified as byte-for-byte identical 
 5. Once Linux confirms the passed FDT, continue to MMC host probe and root-device startup. Only after that test remove `nousb` in a separate USB test.
 
 No persistent storage was written; no `saveenv`, SPI/eMMC write, erase, partition modification, or filesystem repair was performed.
+
+
+## 7. 固定 U-Boot 源码 ABI 对账（2026-11-28，进行中）
+
+已读取固定源码 `sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`，不再停留在通用假设：
+
+- `u-boot/arch/mips/cpu/octeon/commands/cmd_octeon_linux.c:start_linux()`：
+  - `boot_desc_addr = MAKE_XKPHYS(uboot_tlb_ptr_to_phys(&boot_desc[core_num]))`
+  - `arg3 = boot_desc_addr`
+  - 汇编明确将 `arg3` 放入 MIPS `$7`，即 Linux 入口的 `a3/fw_arg3`。
+- `u-boot/arch/mips/cpu/octeon/octeon_boot.c:octeon_setup_boot_desc_block()`：
+  - Linux 专用 boot descriptor 与 `cvmx_bootinfo_t` 分别分配在低于 `0x7fffffff` 的物理地址；
+  - `boot_desc[core].cvmx_desc_vaddr` 保存 bootinfo 物理地址；
+  - `cvmx_bootinfo_array[core]` 的 major/minor、旧式 `core_mask` 和 FDT 字段在复制前填充；
+  - bootinfo 通过 TLB-aware copy 写到 `cvmx_desc_vaddr`；
+  - Linux descriptor 经 `a3` 传递。
+- 固定 U-Boot 的 bootinfo 头文件 `cvmx-app-init.h` 定义 ABI major 1/minor 4，big-endian 结构中 major/minor 偏移 0/4，FDT 字段偏移 152，与本轮诊断打印的 ABI 布局一致。
+- Linux 参考实现的 `prom_init()` 使用 `fw_arg3` 读取 descriptor，再按 `cvmx_desc_vaddr` 转换 bootinfo 指针；这与固定 U-Boot 的传参方式在接口形式上吻合。仍需获得/核验 PAN SDK-3.1.2 内核的确切实现，不能以通用参考代码代替。
+
+额外发现一个固定 U-Boot 源码问题，暂不修改：
+`octeon_boot.c` 在给 `ext_core_mask` 赋值的条件编译处写成 `CVMX_BOOTINFO_MIN_VERR`（多一个 R），而附近条件使用 `CVMX_BOOTINFO_MIN_VER`。但旧式 `cvmx_bootinfo_array[core].core_mask` 在前面已直接按 `pcm` 设置，因此不能仅凭这个拼写错误解释当前内核只启动一个 CPU；它也不是 FDT 字段写入条件。应作为独立兼容性缺陷记录，待核对影响后再决定修复。
+
+### 当前仍缺少的决定性证据
+
+U-Boot 打印的是 U-Boot 自己通过其地址映射读取的 descriptor/bootinfo 内容；它不能证明 Linux 在 `prom_init()` 中解引用 `fw_arg3` 和 `cvmx_desc_vaddr` 后看到相同字节。当前内核实际回退到 internal FDT，说明必须验证 Linux 侧解引用结果或其所编译的 ABI 定义。
+
+下一步先取得/定位与内核 build ID 对应的 PAN SDK-3.1.2 Linux `setup.c`、`cvmx-bootinfo.h` 和 `cvmx_phys_to_ptr()` 定义；同时从固定 U-Boot 继续核对 boot descriptor 的字段布局、物理地址映射和启动 stub。当前不生成新设备镜像，不重复实机启动。另将 kernel command line 中实际出现的 `cpuid=0` 单独追溯来源；它与 FDT fallback 是两个需分别解释的现象。
