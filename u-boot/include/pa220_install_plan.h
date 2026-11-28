@@ -19,6 +19,9 @@
 #define PA220_PLAN_KIND_LOGICAL (1U << PA220_PART_LOGICAL)
 #define PA220_PLAN_KIND_GPT     (1U << PA220_PART_GPT)
 
+/* APPROVED is a trusted caller assertion: production code may set it only
+ * after matching a reviewed manifest against a firmware-pinned digest. Never
+ * trust an approval flag parsed from an untrusted RAM/file manifest. */
 enum pa220_manifest_state {
     PA220_MANIFEST_ABSENT = 0,
     PA220_MANIFEST_PRESENT_UNREVIEWED,
