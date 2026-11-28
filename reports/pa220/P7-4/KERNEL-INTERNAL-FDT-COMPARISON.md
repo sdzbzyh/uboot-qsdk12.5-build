@@ -80,3 +80,23 @@ A diagnostic-only build has been added behind `PA220_FDT_HANDOFF_DIAGNOSTICS=1`.
 Use those serial values to determine why the kernel does not consume the passed FDT. Keep the first follow-up boot RAM-only and use `nousb` to isolate eMMC enumeration. If the kernel reports the passed PA-220 FDT and eMMC enumerates, repeat without `nousb` to check whether the USB Oops is also resolved.
 
 No SPI/eMMC writes, erases, environment saves, or installer operations are part of this investigation.
+
+
+## Diagnostic build result (2026-11-28)
+
+The opt-in diagnostic build completed successfully.
+
+- Workflow run: [#46129962580](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/46129962580)
+- Integration HEAD used by the run: `0c8702bf837c261d22f833878040e5c2f2f9215d`
+- Fixed source: `801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8`
+- Toolchain: `octeon-sdk-5.1.0`
+- Artifact ID: `15256819985`
+- Diagnostic U-Boot image: `u-boot-octeon_pa220.bin`
+- Image size: `1,403,048` bytes
+- SHA-256: `a4c75b46a660c8f6212f60f9af5123a28754de6c5954d48b9b563204c297d79b`
+
+The binary contains all four `PA220-HANDOFF` diagnostic strings, confirming that the optional diagnostic patch was compiled into this image. The patch is generated from the pinned source and is applied only when `PA220_FDT_HANDOFF_DIAGNOSTICS=1`; normal builds remove/omit it.
+
+The artifact upload succeeded. The workflow's final evidence-commit step was rejected because the integration branch advanced while the run was in progress; this did not affect the build or artifact. The report and generator remain in the integration branch, and the binary is available from the run artifact.
+
+**Physical test required:** RAM-load this diagnostic U-Boot, reload the original kernel if RAM was reset, and run the existing read-only boot test with `nousb`. Capture all `PA220-HANDOFF` lines and the subsequent kernel line selecting either the passed or internal Device Tree. Do not write SPI/eMMC or save the environment.
