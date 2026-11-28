@@ -35,13 +35,14 @@ P7-3A 只读 MBR/EBR inventory 已验收；P7-3B planner 与 `pa220 install dry-
 
 ### 当前诊断构建与下一步
 
-- 诊断生成器提交：`d74ca2614483fddac1a64bc50aefbb2f78159e6e`；原机 handoff 报告最新修订提交：`35e2fd8f54a46dda2fdbe9ae1c7f0fdcc19ab5a5`。
+- 诊断生成器提交：`d74ca2614483fddac1a64bc50aefbb2f78159e6e`；报告已更新记录实际回归结果，见 `reports/pa220/P7-3B/ORIGINAL-KERNEL-HANDOFF-DIAGNOSTIC.md`。
 - Actions [#46131655103](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/46131655103) SUCCESS；Artifact [15257646907](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/46131655103/artifacts/15257646907)。
-- 新 RAM 测试 U-Boot：1,403,592 bytes；SHA-256 `0195a96a511caa3ac2a170bc0b2c11175bbf9ea65bf5d78540be1e1c32cc9d0d`。
-- 新增 `PA220-START` 运行时输出：实际 a3、全局 descriptor TLB 物理地址、独立副本地址、两份 descriptor 比较结果，以及 Linux 将读取的 bootinfo 版本、core_mask、fdt_addr。
-- 之前看到的 `desc=0xc025ef18` 是 U-Boot 虚拟地址，不能直接把低 32 位当作物理地址；descriptor 与 kernel ELF 加载范围是否重叠仍未证实，不得据此直接修改传递指针。
-- 下一步仅做一轮 RAM-only 实机测试：加载新诊断 U-Boot；从 eMMC p3 加载同一原机内核；保留当前 `nousb` 参数；完整记录 `PA220-HANDOFF`、`PA220-START` 和 Linux 启动日志。核对 Linux 可见 bootinfo 是否为 1.4、`core_mask=0xf`、`fdt_addr` 非零，以及是否不再回退到 internal FDT、是否出现 MMC host/block 初始化。
-- FDT handoff 验证前不移除 `nousb`；待 eMMC/root 路径确认后，再单独移除 `nousb` 验证 USB。全程不调用 `saveenv`，不写 SPI/eMMC 或其他持久化介质。
+- 诊断 BIN SHA-256：`0195a96a511caa3ac2a170bc0b2c11175bbf9ea65bf5d78540be1e1c32cc9d0d`。
+- 2026-11-28 实机回归已完成：U-Boot 打印 bootinfo 1.4、`core_mask=0xf`、非零 `fdt_addr=0xfff2da0`；global/copy descriptor `cmp=0`。但 Linux 仍打印 `Using internal Device Tree.`，只启动一个 CPU，且没有 MMC host/block 初始化，最终等待 `/dev/mmcblk0p3`。
+- 因此，U-Boot 侧 descriptor 一致性检查已完成，但尚未证明 Linux 实际读取了同一份 bootinfo。不能重复本轮相同 U-Boot-only 诊断，也不能猜测修改 FDT/descriptor 地址。
+- 下一工作单元改为**精确源码 ABI 对账**：核对固定 PAN Linux 3.10.87 的 `prom_init()`、`device_tree_init()`、`cvmx-bootinfo.h` 与固定 U-Boot `bootoctlinux/start_linux()`。重点追踪 `fw_arg3 -> cvmx_desc_vaddr -> octeon_bootinfo`、大端字段偏移、物理地址转换、FDT 条件和 SMP coremask。找到明确原因后，才生成下一轮能证明 Linux 实际可见字段的 RAM-only 测试镜像。
+- 保持 `nousb`，直到 FDT handoff 与 eMMC root 路径确认；之后再单独移除 `nousb` 测 USB。不要重复分区、标签、内核文件发现工作。
+
 
 P4 DHCP Client/Ping 实机验证仍是独立遗留项，P4 overall 不得标记 COMPLETE。
 
