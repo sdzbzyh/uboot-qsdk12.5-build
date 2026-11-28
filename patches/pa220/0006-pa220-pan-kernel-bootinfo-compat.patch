@@ -1,0 +1,158 @@
+--- a/u-boot/arch/mips/cpu/octeon/octeon_boot.c
++++ b/u-boot/arch/mips/cpu/octeon/octeon_boot.c
+@@ -29,10 +29,11 @@
+ # include <endian.h>
+ # include <string.h>
+ # define swab64 __bswap_64
+ #else
+ # include <common.h>
++# include <stddef.h>
+ # include <malloc.h>
+ # include <exports.h>
+ # include <watchdog.h>
+ # include <fdt_support.h>
+ # include <linux/ctype.h>
+@@ -62,10 +63,90 @@
+ #  include <asm/arch/cvmx-bch.h>
+ # endif
+ 
+ /** Maximum possible buses for the cores in Octeon */
+ #define MAX_CORE_TADS		8
++
++#ifdef __U_BOOT__
++/*
++ * PAN-OS 3.10.87 uses a PA-specific 24-byte bootinfo extension between
++ * config_flags and fdt_addr. Generic SDK 5.1.0 offsets are fdt=152/ext=160;
++ * the PAN kernel reads profile/cpuid/uart/name at 152..175, fdt=176, ext=184.
++ */
++#define PA220_PAN_BOOTINFO_EXTENSION_SIZE 24
++#define PA220_PAN_BOOTINFO_FDT_OFFSET 176
++#define PA220_PAN_BOOTINFO_EXT_CORE_MASK_OFFSET 184
++#define PA220_PAN_BOOTINFO_SIZE \
++	(sizeof(cvmx_bootinfo_t) + PA220_PAN_BOOTINFO_EXTENSION_SIZE)
++
++struct pa220_pan_bootinfo_extension {
++	uint8_t board_profile;
++	uint8_t cpuid;
++	uint8_t console_uart_num;
++	char board_name[20];
++	uint8_t reserved;
++};
++
++typedef char pa220_bi_fdt_offset_check[
++	(offsetof(cvmx_bootinfo_t, fdt_addr) == 152) ? 1 : -1];
++typedef char pa220_bi_ext_offset_check[
++	(offsetof(cvmx_bootinfo_t, ext_core_mask) == 160) ? 1 : -1];
++typedef char pa220_bi_size_check[
++	(sizeof(cvmx_bootinfo_t) == 288) ? 1 : -1];
++typedef char pa220_bi_coremask_size_check[
++	(sizeof(cvmx_coremask_t) == 128) ? 1 : -1];
++typedef char pa220_bi_extension_size_check[
++	(sizeof(struct pa220_pan_bootinfo_extension) == 24) ? 1 : -1];
++
++/*
++ * Serialize only the kernel-visible copy in the PAN SDK 3.1.2 layout.
++ * Profile 0 preserves the currently observed generic PA-220 path; cpuid is
++ * the physical OCTEON core number; UART0 matches the PA-220 console.
++ */
++static void pa220_prepare_pan_kernel_bootinfo(void *dest,
++					      const cvmx_bootinfo_t *src,
++					      int core)
++{
++	uint8_t *bytes = (uint8_t *)dest;
++	struct pa220_pan_bootinfo_extension extension;
++	cvmx_coremask_t clean_core_mask;
++
++	memset(bytes, 0, PA220_PAN_BOOTINFO_SIZE);
++	memcpy(bytes, src, offsetof(cvmx_bootinfo_t, fdt_addr));
++
++	memset(&extension, 0, sizeof(extension));
++	extension.board_profile = 0;
++	extension.cpuid = (uint8_t)core;
++	extension.console_uart_num = 0;
++	memcpy(extension.board_name, "PA-220", sizeof("PA-220"));
++	memcpy(bytes + offsetof(cvmx_bootinfo_t, fdt_addr),
++	       &extension, sizeof(extension));
++	memcpy(bytes + PA220_PAN_BOOTINFO_FDT_OFFSET,
++	       &src->fdt_addr, sizeof(src->fdt_addr));
++
++	cvmx_coremask_clear_all(&clean_core_mask);
++	cvmx_coremask_set64(&clean_core_mask, (uint64_t)src->core_mask);
++	memcpy(bytes + PA220_PAN_BOOTINFO_EXT_CORE_MASK_OFFSET,
++	       &clean_core_mask, sizeof(clean_core_mask));
++
++	if (core == 0) {
++		printf("PA220-PAN-ABI: size=%u profile=%u cpuid=%u uart=%u "
++		       "fdt=0x%llx legacy_mask=0x%x ext_mask=0x%x "
++		       "offsets=fdt:%u/ext:%u\n",
++		       (unsigned)PA220_PAN_BOOTINFO_SIZE,
++		       (unsigned)extension.board_profile,
++		       (unsigned)extension.cpuid,
++		       (unsigned)extension.console_uart_num,
++		       (unsigned long long)src->fdt_addr,
++		       (unsigned)src->core_mask,
++		       (unsigned)cvmx_coremask_get32(&clean_core_mask),
++		       (unsigned)PA220_PAN_BOOTINFO_FDT_OFFSET,
++		       (unsigned)PA220_PAN_BOOTINFO_EXT_CORE_MASK_OFFSET);
++	}
++}
++#endif /* __U_BOOT__ */
++
+ 
+ /************************************************************************/
+ /******* Global variable definitions ************************************/
+ /************************************************************************/
+ uint32_t cur_exception_base = EXCEPTION_BASE_INCR;
+@@ -377,10 +458,12 @@
+ 	int cf_cs0 = -1, cf_cs1 = -1;
+ 	int fdt_size;
+ 	int node;
+ 	uint64_t new_fdt_addr;
+ 	void *new_fdt;
++	uint32_t bootinfo_size = (image_flags & OCTEON_BOOT_DESC_IMAGE_LINUX) ?
++		PA220_PAN_BOOTINFO_SIZE : sizeof(cvmx_bootinfo_t);
+ #endif
+ 	int hplug = 0;
+ 	int rc = 0;
+ 	uint32_t first_core = cvmx_coremask_get_first_core(pcm);
+ 	int core;
+@@ -606,11 +689,11 @@
+ 			if (addr < 0) {
+ 				puts("ERROR allocating memory for boot descriptor block\n");
+ 				return -1;
+ 			}
+ 			boot_info_block_array[core].boot_desc_addr = addr;
+-			addr = cvmx_bootmem_phy_alloc(sizeof(cvmx_bootinfo_t),
++			addr = cvmx_bootmem_phy_alloc(bootinfo_size,
+ 						      0, 0x7fffffff, 0, 0);
+ 			if (addr < 0) {
+ 				puts("ERROR allocating memory for cvmx bootinfo block\n");
+ 				return -1;
+ 			}
+@@ -629,11 +712,11 @@
+ 			/* Put boot descriptor below boot descriptor near
+ 			 * top of heap, align address
+ 			 */
+ 			boot_desc[core].cvmx_desc_vaddr =
+ 			    (boot_info_block_array[core].boot_desc_addr -
+-			     sizeof(cvmx_bootinfo_t)) & (~0x7ull);
++			     bootinfo_size) & (~0x7ull);
+ 		}
+ 
+ 		/* The boot descriptor will be copied into the top of the heap
+ 		 * for the core.  The application init code is responsible for
+ 		 * copying the parts of the descriptor block that the
+@@ -914,10 +997,13 @@
+ 			       (void *)&boot_desc[core],
+ 			       boot_desc[core].desc_size);
+ 			memcpy((void *)(uint32_t) boot_desc[core].cvmx_desc_vaddr,
+ 			       (void *)&cvmx_bootinfo_array[core],
+ 			       sizeof(cvmx_bootinfo_t));
++			pa220_prepare_pan_kernel_bootinfo(
++				(void *)(uint32_t)boot_desc[core].cvmx_desc_vaddr,
++				&cvmx_bootinfo_array[core], core);
+ #else
+ 			memcpy((void *) boot_info_block_array[core].boot_desc_addr,
+ 			       (void *)&boot_desc[core],
+ 			       boot_desc[core].desc_size);
+ 			memcpy((void *) boot_desc[core].cvmx_desc_vaddr,
