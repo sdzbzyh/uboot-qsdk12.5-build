@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read-only scan of the OEM PA-220 SPI backup for executable ELF payloads."""
+"""Read-only scan and raw disassembly of the OEM PA-220 SPI Stage-3 image."""
 import re
 import struct
 import subprocess
@@ -85,17 +85,61 @@ else:
         nm = subprocess.run(["nm", "-n", str(path)], text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False)
         symbols = [x for x in nm.stdout.splitlines() if re.search(r"(octeon_setup_boot_desc_block|start_linux|cvmx_bootinfo_array|cvmx_desc_vaddr|do_bootoctlinux)", x)]
         lines += ["", "Relevant symbols:", *(symbols or ["(none found; likely stripped)"]), "~~~", ""]
-        for sym in ("octeon_setup_boot_desc_block", "start_linux", "do_bootoctlinux"):
-            if any(re.search(r"\b" + re.escape(sym) + r"$", x) for x in symbols):
-                dis = subprocess.run(["objdump", "-d", f"--disassemble={sym}", str(path)], text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False)
-                lines += [f"### Candidate {idx}: {sym}", "", "~~~asm", dis.stdout.rstrip(), "~~~", ""]
+
+# SPI layout audit previously identified the OEM Stage-3 payload at 0x100000,
+# length 1,310,920 bytes. Verify the embedded PA-220 FDT is inside that range.
+stage3_off, stage3_size = 0x100000, 1310920
+if stage3_off + stage3_size <= len(blob):
+    stage3 = blob[stage3_off:stage3_off + stage3_size]
+    stage3_path = Path("/tmp/pa220-oem-stage3.bin")
+    stage3_path.write_bytes(stage3)
+    lines += [
+        "",
+        "## OEM Stage-3 raw image",
+        "",
+        f"- SPI offset: 0x{stage3_off:x}",
+        f"- Size: {stage3_size} bytes (0x{stage3_size:x})",
+        f"- First 64 bytes: {stage3[:64].hex(' ')}",
+        f"- PA-220 FDT relative offset: 0x{0x1c9460 - stage3_off:x}",
+        f"- FDT signature inside extracted image: {stage3.find(bytes.fromhex('d00dfeed')) >= 0}",
+        "",
+    ]
+    dis = subprocess.run(
+        ["objdump", "-D", "-b", "binary", "-m", "mips:isa64r2", "-EB",
+         "--adjust-vma=0xc0000000", str(stage3_path)],
+        text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False
+    )
+    if dis.returncode == 0:
+        dlines = dis.stdout.splitlines()
+        patterns = re.compile(r"\b(?:ld|sd|lw|sw|lwu|lbu|sb|sh)\s+.*(?:0x(?:98|a0|b0|b8)|(?:152|160|176|184))\(")
+        hits = [i for i, line in enumerate(dlines) if patterns.search(line)]
+        lines += [
+            "### Raw MIPS64 disassembly: bootinfo-related field offsets",
+            "",
+            f"- Full disassembly instruction lines: {len(dlines)}",
+            f"- Direct load/store candidates at offsets 152/160/176/184: {len(hits)}",
+            "",
+            "~~~asm",
+        ]
+        emitted = set()
+        for idx in hits[:160]:
+            for j in range(max(0, idx - 2), min(len(dlines), idx + 3)):
+                if j not in emitted:
+                    lines.append(dlines[j])
+                    emitted.add(j)
+            lines.append("")
+        if not hits:
+            lines.append("(No direct load/store instructions matched these offsets.)")
+        lines += ["~~~", ""]
+    else:
+        lines += ["### Raw MIPS64 disassembly", "", "~~~text", dis.stdout.rstrip(), "~~~", ""]
 
 lines += [
     "## Bootloader strings",
     "",
     "~~~text",
 ]
-for m in re.finditer(rb"(?<![ -~])(?:U-Boot|OCTEON|bootinfo|coremask|fdt_addr|PA-220)[ -~]{0,120}", blob):
+for m in re.finditer(rb"(?<![ -~])(?:U-Boot|OCTEON|bootinfo|coremask|fdt_addr|bootoctlinux|PA-220)[ -~]{0,120}", blob):
     raw = m.group(0).decode("ascii", "replace").strip()
     if raw:
         lines.append(f"0x{m.start():x}: {raw}")
@@ -104,9 +148,10 @@ lines += [
     "",
     "## Interpretation limits",
     "",
-    "- An ELF signature scan can miss a flat or compressed U-Boot image.",
-    "- A stripped ELF may not retain function names; absence of symbols is not proof that code is absent.",
-    "- The scan does not assume that the FDT's location identifies the start or full extent of Stage-3.",
+    "- The OEM Stage-3 is a flat binary in this SPI image, not an ELF with symbols.",
+    "- Raw disassembly uses the known Stage-3 image range and a provisional U-Boot text base of 0xc0000000; instruction offsets remain useful even if the linked virtual base differs.",
+    "- Direct load/store matches are candidates and require code-context validation before attributing them to bootinfo fields.",
+    "- No device access or persistent writes are performed.",
     "",
 ]
 out_path.parent.mkdir(parents=True, exist_ok=True)
