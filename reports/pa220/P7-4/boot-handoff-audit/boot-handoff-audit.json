@@ -40,27 +40,27 @@
     {
       "path": "/soc@0/mmc@1180000002000",
       "property": "power-gpios",
-      "oem": "\u0002 | \b",
-      "rebuilt": "\u000b | \b"
+      "oem": "cells:00000002 00000008 00000000",
+      "rebuilt": "cells:0000000b 00000008 00000000"
     },
     {
       "path": "/soc@0/uctl@1180068000000",
       "property": "power",
-      "oem": "\u0002 | \u0002",
-      "rebuilt": "\u000b | \u0002"
+      "oem": "cells:00000002 00000002 00000000",
+      "rebuilt": "cells:0000000b 00000002 00000000"
     },
     {
       "path": "/soc@0/uctl@1180069000000",
       "property": "power",
-      "oem": "\u0002 | \u0003",
-      "rebuilt": "\u000b | \u0003"
+      "oem": "cells:00000002 00000003 00000000",
+      "rebuilt": "cells:0000000b 00000003 00000000"
     }
   ],
   "oem_mmc": [
     {
       "path": "/soc@0/mmc@1180000002000",
       "compatible": "cavium,octeon-6130-mmc",
-      "reg": "\u0001\u0018 |   | \u0001 | \u0001\u0018 | \u0001h |  ",
+      "reg": "cells:00011800 00002000 00000000 00000100 00011800 00000168 00000000 00000020",
       "status": "ABSENT"
     },
     {
@@ -74,7 +74,7 @@
     {
       "path": "/soc@0/mmc@1180000002000",
       "compatible": "cavium,octeon-6130-mmc",
-      "reg": "\u0001\u0018 |   | \u0001 | \u0001\u0018 | \u0001h |  ",
+      "reg": "cells:00011800 00002000 00000000 00000100 00011800 00000168 00000000 00000020",
       "status": "ABSENT"
     },
     {
@@ -88,37 +88,37 @@
     {
       "path": "/soc@0/interrupt-controller@107000000e800",
       "compatible": "cavium,octeon-7130-cib",
-      "reg": "\u0001\u0007 | \ufffd | \b | \u0001\u0007 | \ufffd | \b",
+      "reg": "cells:00010700 0000e800 00000000 00000008 00010700 0000ea00 00000000 00000008",
       "status": "ABSENT"
     },
     {
       "path": "/soc@0/interrupt-controller@107000000e900",
       "compatible": "cavium,octeon-7130-cib",
-      "reg": "\u0001\u0007 | \ufffd | \b | \u0001\u0007 | \ufffd | \b",
+      "reg": "cells:00010700 0000e900 00000000 00000008 00010700 0000eb00 00000000 00000008",
       "status": "ABSENT"
     },
     {
       "path": "/soc@0/uctl@1180068000000",
       "compatible": "cavium,octeon-7130-usb-uctl",
-      "reg": "\u0001\u0018 | h | \u0001",
+      "reg": "cells:00011800 68000000 00000000 00000100",
       "status": "ABSENT"
     },
     {
       "path": "/soc@0/uctl@1180068000000/xhci@1680000000000",
       "compatible": "cavium,octeon-7130-xhci | synopsys,dwc3",
-      "reg": "\u0001h | \u0010",
+      "reg": "cells:00016800 00000000 00000010 00000000",
       "status": "ABSENT"
     },
     {
       "path": "/soc@0/uctl@1180069000000",
       "compatible": "cavium,octeon-7130-usb-uctl",
-      "reg": "\u0001\u0018 | i | \u0001",
+      "reg": "cells:00011800 69000000 00000000 00000100",
       "status": "ABSENT"
     },
     {
       "path": "/soc@0/uctl@1180069000000/xhci@1690000000000",
       "compatible": "cavium,octeon-7130-xhci | synopsys,dwc3",
-      "reg": "\u0001i | \u0010",
+      "reg": "cells:00016900 00000000 00000010 00000000",
       "status": "ABSENT"
     }
   ],
@@ -126,39 +126,44 @@
     {
       "path": "/soc@0/interrupt-controller@107000000e800",
       "compatible": "cavium,octeon-7130-cib",
-      "reg": "\u0001\u0007 | \ufffd | \b | \u0001\u0007 | \ufffd | \b",
+      "reg": "cells:00010700 0000e800 00000000 00000008 00010700 0000ea00 00000000 00000008",
       "status": "ABSENT"
     },
     {
       "path": "/soc@0/interrupt-controller@107000000e900",
       "compatible": "cavium,octeon-7130-cib",
-      "reg": "\u0001\u0007 | \ufffd | \b | \u0001\u0007 | \ufffd | \b",
+      "reg": "cells:00010700 0000e900 00000000 00000008 00010700 0000eb00 00000000 00000008",
       "status": "ABSENT"
     },
     {
       "path": "/soc@0/uctl@1180068000000",
       "compatible": "cavium,octeon-7130-usb-uctl",
-      "reg": "\u0001\u0018 | h | \u0001",
+      "reg": "cells:00011800 68000000 00000000 00000100",
       "status": "ABSENT"
     },
     {
       "path": "/soc@0/uctl@1180068000000/xhci@1680000000000",
       "compatible": "cavium,octeon-7130-xhci | synopsys,dwc3",
-      "reg": "\u0001h | \u0010",
+      "reg": "cells:00016800 00000000 00000010 00000000",
       "status": "ABSENT"
     },
     {
       "path": "/soc@0/uctl@1180069000000",
       "compatible": "cavium,octeon-7130-usb-uctl",
-      "reg": "\u0001\u0018 | i | \u0001",
+      "reg": "cells:00011800 69000000 00000000 00000100",
       "status": "ABSENT"
     },
     {
       "path": "/soc@0/uctl@1180069000000/xhci@1690000000000",
       "compatible": "cavium,octeon-7130-xhci | synopsys,dwc3",
-      "reg": "\u0001i | \u0010",
+      "reg": "cells:00016900 00000000 00000010 00000000",
       "status": "ABSENT"
     }
   ],
-  "toolchain_bootinfo_versions": []
+  "toolchain_bootinfo_versions": [
+    {
+      "file": "external/pa220-openwrt/u-boot/arch/mips/include/asm/arch-octeon/cvmx-app-init.h",
+      "minor_version": 4
+    }
+  ]
 }

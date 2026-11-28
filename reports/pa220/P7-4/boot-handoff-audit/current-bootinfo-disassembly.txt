@@ -1,0 +1,13 @@
+c008bd1c <octeon_setup_boot_desc_block>:
+				 uint32_t boot_flags,
+				 uint64_t stack_heep_base_addr,
+				 uint32_t image_flags,
+				 uint32_t config_flags, cvmx_coremask_t *new_pcm,
+				 int app_index)
+{
+c008bd1c:	27bdfd60 	addiu	sp,sp,-672
+ */
+static inline int cvmx_coremask_get_first_core(const cvmx_coremask_t *pcm)
+{
+	int i;
+
