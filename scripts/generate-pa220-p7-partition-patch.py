@@ -18,13 +18,13 @@ def main():
     root=pathlib.Path(a.source_root).resolve(); out=pathlib.Path(a.output)
     if git(root,"rev-parse","HEAD").strip()!=PIN: raise RuntimeError("wrong fixed PA-220 source pin")
     board=root/BOARD; mk=root/MAKEFILE; bs=board.read_text(); ms=mk.read_text()
-    if "pa220_partition_scan_cmd" in bs and "pa220_partition.o" in ms:
-        if not out.is_file() or "pa220_partition_scan_cmd" not in out.read_text():
+    if "pa220_install_dry_run_cmd" in bs and "pa220_install_plan.o" in ms:
+        if not out.is_file() or "pa220_install_dry_run_cmd" not in out.read_text():
             raise RuntimeError("P7-3 patch missing after source modification")
         print("P7_3_ALREADY_GENERATED=verified")
         print("PATCH_SHA256="+hashlib.sha256(out.read_bytes()).hexdigest())
         return 0
-    bs=once(bs,"#include <command.h>","#include <command.h>\n#include <mmc.h>\n#include <part.h>\n#include <pa220_partition.h>","partition includes")
+    bs=once(bs,"#include <command.h>","#include <command.h>\n#include <mmc.h>\n#include <part.h>\n#include <environment.h>\n#include <asm/arch/octeon_load_range.h>\n#include <pa220_partition.h>\n#include <pa220_install_plan.h>","partition includes")
     helper=r'''
 struct pa220_mmc_reader {
 	block_dev_desc_t *desc;
@@ -101,6 +101,59 @@ static int pa220_partition_scan_cmd(int dev)
 	puts("partition inventory: READ_ONLY; target mapping: UNMAPPED\n");
 	return CMD_RET_SUCCESS;
 }
+
+static int pa220_install_dry_run_cmd(int dev)
+{
+	ulong addr = getenv_hex("fileaddr", 0);
+	ulong size = getenv_hex("filesize", 0);
+	struct pa220_image_info image;
+	struct pa220_mmc_reader reader;
+	struct pa220_partition_table table;
+	struct pa220_install_plan plan;
+	struct mmc *mmc;
+	block_dev_desc_t *desc;
+	enum pa220_plan_status status;
+
+	if (!addr || !size || size > (~0UL - addr) ||
+	    octeon_load_range_check((uint64_t)addr, (uint64_t)size)) {
+		puts("install dry-run: rejected; no valid completed RAM image\n");
+		return CMD_RET_FAILURE;
+	}
+	flush_dcache_range(addr, addr + size);
+	if (pa220_image_parse((const uint8_t *)(uintptr_t)addr,
+			      (uint64_t)size, &image)) {
+		puts("install dry-run: rejected; malformed or unsupported image\n");
+		return CMD_RET_FAILURE;
+	}
+	mmc = find_mmc_device(dev);
+	if (!mmc || mmc_init(mmc)) {
+		printf("install dry-run: MMC device %d unavailable\n", dev);
+		return CMD_RET_FAILURE;
+	}
+	desc = mmc_get_dev(dev);
+	if (!desc || desc->type == DEV_TYPE_UNKNOWN || desc->blksz != 512) {
+		puts("install dry-run: unavailable 512-byte block device\n");
+		return CMD_RET_FAILURE;
+	}
+	reader.desc = desc;
+	if (pa220_partition_scan(pa220_mmc_read_sector, &reader,
+				 (uint64_t)desc->lba, &table)) {
+		printf("install dry-run: partition inventory %s\n",
+		       pa220_pt_status_name(table.status));
+		return CMD_RET_FAILURE;
+	}
+	printf("image: %s size=%llu bytes\n",
+	       pa220_image_format_name(image.format),
+	       (unsigned long long)image.total_size);
+	printf("partition inventory: %s count=%u; READ_ONLY\n",
+	       table.format == PA220_PT_DOS_MBR ? "DOS/MBR" : "GPT",
+	       table.count);
+	status = pa220_install_plan_build(NULL, &table, image.total_size,
+					  NULL, 0, NULL, 0, &plan);
+	printf("install dry-run: REJECTED reason=%s; target mapping=UNMAPPED; actions=NONE\n",
+	       pa220_plan_status_name(status));
+	return CMD_RET_FAILURE;
+}
 '''
     fn_start=bs.index("static int do_pa220(")
     bs=bs[:fn_start]+helper+"\n"+bs[fn_start:]
@@ -114,12 +167,20 @@ static int pa220_partition_scan_cmd(int dev)
 \t\treturn pa220_partition_scan_cmd(dev);
 \t}
 
-\treturn CMD_RET_USAGE;'''
+\tif ((argc == 3 || argc == 4) && !strcmp(argv[1], "install") &&
+	    !strcmp(argv[2], "dry-run")) {
+		int dev = argc == 4 ? (int)simple_strtoul(argv[3], NULL, 10) : 0;
+		if (dev < 0 || dev > 15)
+			return CMD_RET_USAGE;
+		return pa220_install_dry_run_cmd(dev);
+	}
+
+	return CMD_RET_USAGE;'''
     body=once(body,"\treturn CMD_RET_USAGE;",dispatch,"partition command dispatch")
     bs=bs[:fn_start]+body+bs[cmd_start:]
     bs=once(bs,"U_BOOT_CMD(pa220, 3, 1, do_pa220,","U_BOOT_CMD(pa220, 4, 1, do_pa220,","pa220 maxargs")
     ms=once(ms,"COBJS\t= $(BOARD)_board.o pa220_image.o",
-            "COBJS\t= $(BOARD)_board.o pa220_image.o pa220_partition.o",
+            "COBJS\t= $(BOARD)_board.o pa220_image.o pa220_partition.o pa220_install_plan.o",
             "partition object integration")
     with tempfile.TemporaryDirectory() as td:
         env=os.environ.copy(); env["GIT_INDEX_FILE"]=str(pathlib.Path(td)/"index")
