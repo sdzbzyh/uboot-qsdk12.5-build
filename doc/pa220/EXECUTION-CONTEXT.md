@@ -35,7 +35,7 @@ P7-3A 只读 MBR/EBR inventory 已验收；P7-3B planner 与 `pa220 install dry-
 
 ### 当前诊断构建与下一步
 
-- 诊断生成器提交：`d74ca2614483fddac1a64bc50aefbb2f78159e6e`；审计报告提交：`a504621079c70183d5e9238c23b3179da9e82af3`。
+- 诊断生成器提交：`d74ca2614483fddac1a64bc50aefbb2f78159e6e`；原机 handoff 报告最新修订提交：`35e2fd8f54a46dda2fdbe9ae1c7f0fdcc19ab5a5`。
 - Actions [#46131655103](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/46131655103) SUCCESS；Artifact [15257646907](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/46131655103/artifacts/15257646907)。
 - 新 RAM 测试 U-Boot：1,403,592 bytes；SHA-256 `0195a96a511caa3ac2a170bc0b2c11175bbf9ea65bf5d78540be1e1c32cc9d0d`。
 - 新增 `PA220-START` 运行时输出：实际 a3、全局 descriptor TLB 物理地址、独立副本地址、两份 descriptor 比较结果，以及 Linux 将读取的 bootinfo 版本、core_mask、fdt_addr。
