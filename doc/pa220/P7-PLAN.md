@@ -135,3 +135,12 @@
 - Cloud build PASS: Actions #46134874478; image size 1,402,792; SHA-256 `318c319b824603ee3080ab12687e940ec317c9216566b1986ea8a9bde9048d1d`. Artifact 15258983126. Build report: `reports/pa220/P7-4/PAN-KERNEL-ABI-COMPAT-BUILD.md`.
 - An earlier build #46134530956 is explicitly rejected because its non-hplug memory reservation remained 288 bytes; only the corrected #46134874478 image is eligible for RAM testing.
 - Next: RAM-only test with p3 kernel and `bootoctlinux 0x22000000 numcores=4 endbootargs console=ttyS0,115200 root=/dev/mmcblk0p3 rootfstype=ext3 rootdelay=10`; omit `nousb`. Verify no internal-FDT fallback, four CPUs, USB initialization and eMMC root. P7-3B remains open until physical acceptance.
+
+
+## P7-4 continuation: OEM FDT semantic reconciliation (2026-11-28)
+
+The user-reported latest boot reached `PA-HDF login:` after loading the original p3 kernel, but the early boot transcript and exact running U-Boot image identity were not captured. Treat this as partial kernel/userspace progress only: it does not prove the Linux kernel consumed the passed FDT, brought all four CPUs online, or initialized USB. The command included `nousb`, so USB was not tested.
+
+The prior OEM-versus-rebuilt FDT inventory found the MMC and CN7130 USB controller nodes in both trees. The raw GPIO phandle integers differ (OEM 2 versus rebuilt 11), but phandle values are tree-local identifiers and cannot be compared numerically. A new semantic audit now resolves each `power-gpios` / `power` reference to its actual controller node path, records exact FDT SHA-256 values, and exports both DTB blobs as Actions artifacts. The audit runs in the PAN ABI build workflow against the original SPI backup and the freshly built Stage3 image.
+
+Next gate: inspect the new audit result before deciding whether any FDT change is justified. Do not replace the U-Boot runtime FDT with the OEM tree blindly; the U-Boot board code consumes its own tree, while the Linux handoff may need a separately prepared OEM-compatible tree. Preserve the existing RAM-only/no-persistent-write boundary.
