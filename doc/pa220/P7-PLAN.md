@@ -113,3 +113,16 @@
 - P7-1 parser、Host Harness、ASan/UBSan、Actions OCTEON 完整构建及真实 PA-220 实机 preview 均已通过；云端证据见 `reports/pa220/P7-1/ACCEPTANCE.md`，实机串口证据见 `reports/pa220/P7-1/DEVICE-ACCEPTANCE.md`。
 - 实机已验证 wrapper TFTP 接收、uImage 校验、payload RAM-copy/compare、RAM Stage3 启动、外层 legacy uImage preview、内层 OCTEON bootloader preview 和 reservation descriptor 不变。
 - P7-1 验收完成。P7-2A SPI NOR 静态取证与 P7-2C eMMC DOS/MBR 实机只读取证已完成。P7-2B FIT preview 已通过 Actions #45970127218 / #45970607698 的 Host/ASan/UBSan、Cavium OCTEON object、N32 relocatable link 和完整 U-Boot final link；FIT fixtures 已打包在 [Artifact 15184393205](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/45970607698/artifacts/15184393205)。PA-220 已完成正常与损坏两个 FIT fixture 的 RAM-only 实机语义验收，P7-2B PASS。正常 fixture 的 kernel/ramdisk CRC32、SHA1、MD5 均 PASS，ignored/unsupported/signature/external-data 状态正确，default configuration 三项引用全部 RESOLVED，hash_failures=0；损坏 fixture 的 kernel 三种 hash 均 FAIL、ramdisk 三种 hash 均 PASS，hash_failures=1。两次均 target mapping UNMAPPED、actions NONE，未执行加载/启动或持久化写入。完整实机证据见 `reports/pa220/P7-2/FIT-IMPLEMENTATION.md`。P7-2A、P7-2B、P7-2C 均已完成。P7-3 源码审计完成；P7-3A parser 与只读 `pa220 partition scan` 命令已集成；Host GCC、ASan/UBSan、Cavium GCC 4.7.0 object、完整 U-Boot final link 在 Actions #45987282068 均 PASS（Artifact 15192027629）。P7-3A live read-only inventory 已于 2026-11-28 验收通过，报告见 `reports/pa220/P7-3/DEVICE-ACCEPTANCE.md`；P7-3B 已进入实现：planner core、显式目标选择策略与只读 dry-run 命令已集成，Host/ASan/UBSan 和一次完整 OCTEON 链接通过；后续容量边界修订的最新 Actions 验证及实机只读 dry-run 尚待闭环。P7 整体仍未完成。
+
+
+## P7-3B 原机 Linux handoff 后续诊断（2026-11-28）
+
+- 从 eMMC p3 成功读取原机 `vmlinux-3.10.87-oct3-mp` 并进入 Linux 3.10.87；但内核打印 `Using internal Device Tree.`，随后等待 `/dev/mmcblk0p3`，故原机启动路径仍未验收。
+- U-Boot 诊断输出显示 bootinfo 1.4、FDT 地址非零且复制后的 FDT header 有效；这并不证明 Linux 实际采用了该 FDT。
+- Actions #46131655103 的 OEM SPI / 重建 U-Boot FDT 审计确认，两份 FDT 都含 CN7130 eMMC host/slot 与 USB UCTL/xHCI 节点。当前重建 FDT 并非缺少这些节点；主要矛盾是 Linux 回退到内核内部 FDT。
+- 同一日志中的 `usbcore: USB support disabled` 是在显式传入 `nousb` 的条件下产生，不能据此判断内核 USB 配置缺失。后续应在 FDT handoff 和 eMMC root 路径确认后单独测试 USB。
+- 新诊断 U-Boot 在 Actions #46131655103 构建成功，Artifact 15257646907，BIN SHA-256 `0195a96a511caa3ac2a170bc0b2c11175bbf9ea65bf5d78540be1e1c32cc9d0d`。它会输出实际 a3、全局 descriptor 物理地址、独立副本地址、descriptor 比较结果及 Linux 可见 bootinfo 字段。
+- 之前根据虚拟指针 `0xc025ef18` 推测其与 kernel ELF 加载范围重叠尚未证实；必须以新增 TLB 物理地址输出为准，不得直接修改传递指针。
+- 实机下一步：仅 RAM 加载新诊断 U-Boot，使用相同 eMMC p3 kernel 和原命令行（暂时保留 `nousb`），收集 `PA220-HANDOFF`、`PA220-START` 和 Linux 完整启动日志。目标是确认 Linux 可见 bootinfo 的 1.4 / `core_mask=0xf` / 非零 `fdt_addr`，以及内核是否采用传入 FDT并初始化 MMC。
+- 本轮不写 SPI/eMMC，不调用 `saveenv`。原机 Linux 启动未通过前，P7-3B 不得整体验收。
+- 详细报告：`reports/pa220/P7-3B/ORIGINAL-KERNEL-HANDOFF-DIAGNOSTIC.md`。
