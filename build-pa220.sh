@@ -84,6 +84,8 @@ fi
 # Patch application is idempotent: already-applied patches are left in place.
 PA220_SOURCE_ROOT=$(git -C "$UBOOT_DIR" rev-parse --show-toplevel)
 PATCH_DIR="$ROOT_DIR/patches/pa220"
+# Generate the PAN-OS 3.10.87 bootinfo ABI compatibility patch from the pinned source.
+python3 "$ROOT_DIR/scripts/generate-pa220-pan-kernel-bootinfo-compat-patch.py" --source-root "$PA220_SOURCE_ROOT" --output "$PATCH_DIR/0006-pa220-pan-kernel-bootinfo-compat.patch"
 if [ -d "$PATCH_DIR" ]; then
     for PATCH_FILE in "$PATCH_DIR"/*.patch; do
         [ -f "$PATCH_FILE" ] || continue

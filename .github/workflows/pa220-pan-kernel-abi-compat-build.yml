@@ -1,0 +1,184 @@
+name: PA-220 PAN kernel bootinfo ABI compatibility build
+
+on:
+  push:
+    branches:
+      - feature/pa220-ubootkit-web
+    paths:
+      - build-pa220.sh
+      - scripts/generate-pa220-pan-kernel-bootinfo-compat-patch.py
+      - .github/workflows/pa220-pan-kernel-abi-compat-build.yml
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build RAM-test U-Boot with PAN 3.10.87 ABI compatibility
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout integration branch
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: feature/pa220-ubootkit-web
+          fetch-depth: 0
+
+      - name: Download SDK, build, and record evidence
+        id: build
+        env:
+          GH_TOKEN: ${{ secrets.OCTEON_SDK_READ_TOKEN }}
+        shell: bash
+        run: |
+          set +e
+          REPORT_DIR="reports/pa220/P7-4"
+          mkdir -p "$REPORT_DIR" "$RUNNER_TEMP/octeon-download" "$RUNNER_TEMP/octeon-sdk"
+          LOG="$REPORT_DIR/PAN-KERNEL-ABI-COMPAT-BUILD.log"
+          SDK_RC=99
+          CHECKSUM_RC=99
+          BUILD_RC=99
+          IMAGE_SHA="not-built"
+          IMAGE_SIZE=0
+
+          {
+            echo "========== PA-220 PAN KERNEL ABI COMPAT BUILD =========="
+            date -u '+UTC_DATE=%Y-%m-%dT%H:%M:%SZ'
+            echo "BRANCH=feature/pa220-ubootkit-web"
+            echo "CHECKED_OUT_COMMIT=$(git rev-parse HEAD)"
+            echo "SOURCE_COMMIT=801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8"
+            echo "SDK_RELEASE=octeon-sdk-5.1.0"
+            echo
+
+            if [ -z "$GH_TOKEN" ]; then
+              echo "ERROR: OCTEON_SDK_READ_TOKEN secret is unavailable"
+            else
+              gh release download octeon-sdk-5.1.0 \
+                --repo sdzbzyh/pa220-toolchains \
+                --pattern '*.tar.gz' --pattern '*.sha256' \
+                --dir "$RUNNER_TEMP/octeon-download"
+              SDK_RC=$?
+            fi
+            echo "SDK_DOWNLOAD_RC=$SDK_RC"
+
+            if [ "$SDK_RC" -eq 0 ]; then
+              cd "$RUNNER_TEMP/octeon-download"
+              sha256sum -c ./*.sha256
+              CHECKSUM_RC=$?
+              cd "$GITHUB_WORKSPACE"
+            fi
+            echo "SDK_CHECKSUM_RC=$CHECKSUM_RC"
+
+            if [ "$SDK_RC" -eq 0 ] && [ "$CHECKSUM_RC" -eq 0 ]; then
+              ARCHIVE=$(find "$RUNNER_TEMP/octeon-download" -maxdepth 1 -type f -name '*.tar.gz' -print -quit)
+              tar -xzf "$ARCHIVE" -C "$RUNNER_TEMP/octeon-sdk"
+              TAR_RC=$?
+              echo "SDK_EXTRACT_RC=$TAR_RC"
+              if [ "$TAR_RC" -eq 0 ]; then
+                GCC_PATH=$(find "$RUNNER_TEMP/octeon-sdk" -path '*/bin/mips64-octeon-linux-gnu-gcc' -print -quit)
+                if [ -n "$GCC_PATH" ]; then
+                  TOOLCHAIN_DIR=$(dirname "$(dirname "$GCC_PATH")")
+                  echo "TOOLCHAIN_DIR=$TOOLCHAIN_DIR"
+                  "$GCC_PATH" --version | head -n 2
+                  echo "TARGET=$("$GCC_PATH" -dumpmachine)"
+                  echo
+                  echo "========== BUILD =========="
+                  PA220_FDT_HANDOFF_DIAGNOSTICS=0 ./build-pa220.sh "$TOOLCHAIN_DIR"
+                  BUILD_RC=$?
+                else
+                  echo "ERROR: extracted SDK does not contain mips64-octeon-linux-gnu-gcc"
+                  BUILD_RC=98
+                fi
+              else
+                BUILD_RC=97
+              fi
+            else
+              BUILD_RC=96
+            fi
+
+            IMAGE="bin/pa220/u-boot-octeon_pa220.bin"
+            if [ "$BUILD_RC" -eq 0 ] && [ -s "$IMAGE" ]; then
+              IMAGE_SHA=$(sha256sum "$IMAGE" | awk '{print $1}')
+              IMAGE_SIZE=$(stat -c %s "$IMAGE")
+              mkdir -p artifacts/pa220/builds
+              cp "$IMAGE" artifacts/pa220/builds/pa220-pan-kernel-abi-compat.bin
+              echo "IMAGE_SHA256=$IMAGE_SHA"
+              echo "IMAGE_SIZE=$IMAGE_SIZE"
+              file "$IMAGE"
+            else
+              echo "ERROR: U-Boot image was not produced"
+              BUILD_RC=95
+            fi
+
+            echo
+            echo "========== FINAL STATUS =========="
+            echo "SDK_DOWNLOAD_RC=$SDK_RC"
+            echo "SDK_CHECKSUM_RC=$CHECKSUM_RC"
+            echo "BUILD_RC=$BUILD_RC"
+            echo "IMAGE_SHA256=$IMAGE_SHA"
+            echo "IMAGE_SIZE=$IMAGE_SIZE"
+            echo "========== END =========="
+          } > "$LOG" 2>&1
+
+          cat "$LOG"
+          cat > "$REPORT_DIR/PAN-KERNEL-ABI-COMPAT-BUILD.md" <<EOF
+          # PA-220 PAN kernel bootinfo ABI compatibility build
+
+          - Branch: feature/pa220-ubootkit-web
+          - Source baseline: sdzbzyh/pa220-openwrt@801717ba6a8a59ed2cfd53bf3e1b19841fecd2e8
+          - Integration commit: $(git rev-parse HEAD)
+          - SDK release: octeon-sdk-5.1.0
+          - SDK download exit code: $SDK_RC
+          - SDK checksum exit code: $CHECKSUM_RC
+          - U-Boot build exit code: $BUILD_RC
+          - Image size: $IMAGE_SIZE bytes
+          - Image SHA-256: $IMAGE_SHA
+
+          The build serializes the PAN-OS 3.10.87 bootinfo copy with its 24-byte
+          extension at offsets 152..175, FDT address at 176, and extended coremask
+          at 184. The coremask is synthesized from the validated legacy mask.
+
+          Full output: PAN-KERNEL-ABI-COMPAT-BUILD.log
+          EOF
+
+          echo "sdk_rc=$SDK_RC" >> "$GITHUB_OUTPUT"
+          echo "checksum_rc=$CHECKSUM_RC" >> "$GITHUB_OUTPUT"
+          echo "build_rc=$BUILD_RC" >> "$GITHUB_OUTPUT"
+          if [ "$SDK_RC" -ne 0 ] || [ "$CHECKSUM_RC" -ne 0 ] || [ "$BUILD_RC" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Upload build evidence and RAM-test image
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: pa220-pan-kernel-abi-compat-build
+          path: |
+            reports/pa220/P7-4/PAN-KERNEL-ABI-COMPAT-BUILD.*
+            patches/pa220/0006-pa220-pan-kernel-bootinfo-compat.patch
+            artifacts/pa220/builds/pa220-pan-kernel-abi-compat.bin
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Commit build evidence and RAM-test image
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/pa220/P7-4/PAN-KERNEL-ABI-COMPAT-BUILD.md reports/pa220/P7-4/PAN-KERNEL-ABI-COMPAT-BUILD.log
+          if [ -f patches/pa220/0006-pa220-pan-kernel-bootinfo-compat.patch ]; then
+            git add -f patches/pa220/0006-pa220-pan-kernel-bootinfo-compat.patch
+          fi
+          if [ -f artifacts/pa220/builds/pa220-pan-kernel-abi-compat.bin ]; then
+            git add -f artifacts/pa220/builds/pa220-pan-kernel-abi-compat.bin
+          fi
+          if git diff --cached --quiet; then
+            echo "No new evidence to commit."
+            exit 0
+          fi
+          git commit -m "pa220: record PAN kernel ABI compatibility build"
+          if ! git push origin HEAD:refs/heads/feature/pa220-ubootkit-web; then
+            git fetch origin feature/pa220-ubootkit-web
+            git rebase origin/feature/pa220-ubootkit-web
+            git push origin HEAD:refs/heads/feature/pa220-ubootkit-web
+          fi
