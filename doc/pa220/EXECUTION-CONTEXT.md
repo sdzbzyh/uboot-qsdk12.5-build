@@ -33,15 +33,22 @@ P7-3A 只读 MBR/EBR inventory 已验收；P7-3B planner 与 `pa220 install dry-
 - Actions #46131655103 的只读 FDT 审计确认：当前重建 U-Boot FDT 与 OEM FDT 都包含 CN7130 eMMC host/slot 和 USB UCTL/xHCI 节点；因此当前首要问题是 Linux 没有采用传入的 PA-220 FDT，而不是重建 FDT 中完全缺少 MMC/USB 节点。
 - OEM FDT 59 nodes / 10,850 bytes；重建 FDT 52 nodes / 10,277 bytes。差异包括部分 LED、风扇、EEPROM、温度节点及 root compatible / GPIO phandle 数值；详细内容以 P7-4 审计报告为准。
 
-### 当前诊断构建与下一步
+### PAN kernel ABI 兼容构建与下一步（2026-11-28，源码/二进制对账已完成）
 
-- 诊断生成器提交：`d74ca2614483fddac1a64bc50aefbb2f78159e6e`；报告已更新记录实际回归结果，见 `reports/pa220/P7-3B/ORIGINAL-KERNEL-HANDOFF-DIAGNOSTIC.md`。
-- Actions [#46131655103](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/46131655103) SUCCESS；Artifact [15257646907](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/46131655103/artifacts/15257646907)。
-- 诊断 BIN SHA-256：`0195a96a511caa3ac2a170bc0b2c11175bbf9ea65bf5d78540be1e1c32cc9d0d`。
-- 2026-11-28 实机回归已完成：U-Boot 打印 bootinfo 1.4、`core_mask=0xf`、非零 `fdt_addr=0xfff2da0`；global/copy descriptor `cmp=0`。但 Linux 仍打印 `Using internal Device Tree.`，只启动一个 CPU，且没有 MMC host/block 初始化，最终等待 `/dev/mmcblk0p3`。
-- 因此，U-Boot 侧 descriptor 一致性检查已完成，但尚未证明 Linux 实际读取了同一份 bootinfo。不能重复本轮相同 U-Boot-only 诊断，也不能猜测修改 FDT/descriptor 地址。
-- 固定 U-Boot 源码的 `start_linux()` 已核实：`a3/fw_arg3` 指向 XKPHYS boot descriptor，descriptor 的 `cvmx_desc_vaddr` 指向低 2 GiB 物理 bootinfo；bootinfo major/minor 与 FDT 字段偏移符合 U-Boot ABI 1.4。U-Boot 也确实将 bootinfo 复制到该物理地址。仍未获得 PAN SDK-3.1.2 内核的确切 `prom_init()/device_tree_init()/cvmx-bootinfo.h/cvmx_phys_to_ptr()` 实现，故 Linux 仍回退 internal FDT 的根因未定。下一步只继续固定内核 ABI 源码/二进制对账，并追溯命令行中 `cpuid=0` 的来源；不生成新设备镜像、不重复实机启动。详细源码审计与待办见 `reports/pa220/P7-3B/ORIGINAL-KERNEL-HANDOFF-DIAGNOSTIC.md`。
-- 保持 `nousb`，直到 FDT handoff 与 eMMC root 路径确认；之后再单独移除 `nousb` 测 USB。不要重复分区、标签、内核文件发现工作。
+- 原机内核 ELF Build ID：`b305d1bd17f2baaf2776ace2712707b47a73a3ae`；二进制读取证实 PAN bootinfo 布局：generic prefix 0..151、PAN extension 152..175、FDT pointer 176、extended coremask 184..311，总长 312 bytes。
+- 根因已由原机内核编译代码的字段读取偏移确认：SDK 5.1.0 通用结构将 FDT 放在 152、ext_core_mask 放在 160；PAN 内核则在 152..175 读取扩展、在 176 读取 FDT、在 184 读取扩展 coremask。24-byte 偏移差异解释意外生成的 `cpuid=0`、internal-FDT fallback 与单核启动现象。
+- 兼容补丁：`patches/pa220/0006-pa220-pan-kernel-bootinfo-compat.patch`。只序列化 Linux 可见 bootinfo 副本，不修改 SDK 通用结构；312-byte reservation 覆盖 Linux handoff 分配路径。
+- 最新构建 Actions [#46143662432](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/46143662432) SUCCESS；SDK 下载/校验、U-Boot 构建、OEM FDT audit 均通过。
+- 最新 RAM-test BIN：`artifacts/pa220/builds/pa220-pan-kernel-abi-compat.bin`，1,402,792 bytes，SHA-256 `2f0fa866999c6684e0f32261da11472927321e4c087eceb862ff6621f3edbc11`；Artifact [15262267936](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/46143662432/artifacts/15262267936)。此前 #46134874478 的 1,403,? bytes 镜像仅作历史记录，不用于下一轮测试。
+- 分支最新 HEAD：`d72ef65684ada1b6a9e7950b745d42efa3f91d6b`。Actions 构建输入提交为 `478597e5bf4c6af1a77cbae75db708b330331e70`，随后由 workflow 归档提交推进分支。
+- **下一步唯一必要实机工作：使用上述最新 BIN 做一次 RAM-only 原机 Linux handoff 验证**。不写 SPI/eMMC、不调用 `saveenv`，不重复分区/内核文件发现。
+- 从 eMMC p3 加载已确认的 `/boot/vmlinux-3.10.87-oct3-mp` 到 `0x22000000`，使用 ABI 报告中的命令行：
+  `bootoctlinux 0x22000000 numcores=4 endbootargs console=ttyS0,115200 root=/dev/mmcblk0p3 rootfstype=ext3 rootdelay=10`
+  **本轮不带 `nousb`**，以同时观察 FDT、四核、USB、MMC 初始化。
+- 首要判据：U-Boot 输出 `PA220-PAN-ABI: size=312`、FDT offset 176、ext mask offset 184，legacy/ext mask 均为 `0xf`；Linux 不再出现 `Using internal Device Tree.`，并应枚举四核、USB controller 与 MMC host。随后观察 p3 root mount 和 PAN 用户空间启动。
+- 如果 FDT 采用但 MMC 仍不出现，再单独分析 MMC probe；若 MMC host 已初始化但持续读取卡住，再评估已知 DDR52/eMMC 问题及 `cavium,no-ddr`，不得混入本轮 ABI 验证。
+- PA-HDF login 停滞与 cgroups 用户空间异常已按 D-027 记录为竣工后遗留项；不阻塞当前 ABI/其他独立功能开发。只有证明其阻断某项验收时才提前切回。
+- 在上述 RAM-only 实机验证通过前，P7-3B 原机 Linux 启动兼容性仍 NOT ACCEPTED；不进行 SPI/eMMC 安装写入。
 
 
 P4 DHCP Client/Ping 实机验证仍是独立遗留项，P4 overall 不得标记 COMPLETE。
