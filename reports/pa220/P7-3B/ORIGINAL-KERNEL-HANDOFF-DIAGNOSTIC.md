@@ -104,3 +104,49 @@ PA220-START: bootinfo=... version=... core_mask=... fdt=...
 5. 若 FDT 已采用但 MMC 仍未出现，再按驱动 probe、GPIO、电源、clock 与中断逐项排查；若 FDT 仍回退，依据实际 a3/descriptor/bootinfo 地址继续定位 ABI 或地址转换问题。
 
 本轮只读取 eMMC 文件并在 RAM 中启动；不写 eMMC、SPI、环境变量或其他持久化介质。原机 Linux 启动仍为未验收状态。
+
+
+## 6. 2026-11-28 诊断 U-Boot 实机回归结果（已执行）
+
+用户已完成上一节要求的 RAM-only 测试；本节取代“等待 RAM-only 实机回归”的状态，不再重复该轮命令。
+
+关键输出：
+
+```text
+PA220-HANDOFF: build ABI=1.4 offsets major=0 minor=4 fdt=152 size=288
+PA220-HANDOFF: array=1.4 fdt=0xfff2da0 copy=1.4 fdt=0xfff2da0
+PA220-HANDOFF: src=00080000 new=0fff2da0 new_phys=0xfff2da0 size=10240 copied=0fff2da0 check=0 total=9253
+PA220-HANDOFF: desc=c025f118 version=7 size=400 argc=8 flags=0x5 coremask=0xf boot_desc_copy=0x7ffffe60
+PA220-START: a3=0x800000020f25f118 global=c025f118 global_phys=0x20f25f118 copy_phys=0x7ffffe60
+PA220-START: global_desc cvmx=0x7ffffd40 argc=8 flags=0x5 coremask=0xf; copy_desc cvmx=0x7ffffd40 argc=8 flags=0x5 coremask=0xf cmp=0
+PA220-START: bootinfo=7ffffd40 version=1.4 core_mask=0xf fdt=0xfff2da0 phy_mem=0x6c108
+```
+
+Linux nevertheless prints `Using internal Device Tree.` and later waits for `/dev/mmcblk0p3`. The kernel reports only one CPU online. Thus the U-Boot-side descriptor snapshot is internally consistent, but the kernel has not demonstrated that it consumed the same bootinfo/FDT values.
+
+A source-level cross-check of the OCTEON Linux boot path shows:
+- `prom_init()` obtains the boot descriptor from `fw_arg3`;
+- it obtains `octeon_bootinfo` by translating `octeon_boot_desc_ptr->cvmx_desc_vaddr`;
+- `device_tree_init()` uses the passed FDT only when the kernel-visible `octeon_bootinfo->minor_version >= 3` and `fdt_addr != 0`; otherwise it selects the built-in OCTEON tree and prints `Using internal Device Tree.`.
+
+Reference implementation for this control flow: Linux `arch/mips/cavium-octeon/setup.c`, lines 632-639 and 1090-1116:
+https://cos.googlesource.com/third_party/kernel/+/58bd6e060260d938650687cdd8f02dfafcb51f91/arch/mips/cavium-octeon/setup.c
+This is a reference implementation, not yet verified as byte-for-byte identical to the pinned PAN SDK 3.1.2 kernel source.
+
+### Updated diagnosis
+
+- The previous proposed descriptor *copy mismatch* is ruled out at the U-Boot-observed level: `cmp=0`.
+- The FDT bytes/header and U-Boot-observed bootinfo fields are valid/nonzero.
+- The remaining discrepancy is at the boundary between the values printed by U-Boot and the values actually consumed by Linux: Linux's `fw_arg3 -> cvmx_desc_vaddr -> octeon_bootinfo` resolution and the kernel's bootinfo structure layout/address translation must be traced against the exact PAN kernel build.
+- Do not change the FDT contents, GPIO phandles, descriptor pointer, coremask, or USB settings by guesswork. In particular, `nousb` remains intentional for this test and explains the USB-disabled line.
+- The eMMC root wait is currently a downstream symptom of the absent Linux MMC host/block device; do not repeat partition, filesystem-label, or kernel-file discovery.
+
+### Next work unit — source-level ABI reconciliation (no new device round yet)
+
+1. Inspect the exact pinned U-Boot `bootoctlinux` / `start_linux()` handoff code and the PAN Linux 3.10.87 `prom_init()` / `device_tree_init()` / `cvmx-bootinfo.h` definitions.
+2. Compare the exact byte offsets and address domains for `fw_arg3`, `cvmx_desc_vaddr`, bootinfo major/minor, `core_mask`, and `fdt_addr`; include big-endian MIPS64 and the kernel's `cvmx_phys_to_ptr()` semantics.
+3. Establish why the live kernel behaves as if `minor_version < 3` or `fdt_addr == 0` despite the U-Boot-side print. Also reconcile why Linux brings up one CPU despite the descriptor coremask being 0xf.
+4. Only after the source trace identifies one concrete candidate change, build one instrumented or corrected RAM-only test image. The next device round must add a kernel-visible early diagnostic or an equivalent observable proof; do not repeat the current U-Boot-only printout.
+5. Once Linux confirms the passed FDT, continue to MMC host probe and root-device startup. Only after that test remove `nousb` in a separate USB test.
+
+No persistent storage was written; no `saveenv`, SPI/eMMC write, erase, partition modification, or filesystem repair was performed.
