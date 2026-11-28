@@ -53,3 +53,16 @@ P7-3B remains pending live device acceptance. This report records cloud/software
 The live `pa220 install dry-run 0` test passed its intended fail-closed behavior: the device reported a read-only DOS/MBR inventory and `NO_APPROVED_MANIFEST`, `UNMAPPED`, `actions=NONE`. The subsequent unchanged legacy `run bootcmd` did not boot Linux because neither `/vmlinux.oct3-mp` nor its `.bak` fallback exists at the p1 filesystem root; `bootoctlinux` consequently found no ELF at `0x21000000`. The kernel was not launched.
 
 Live read-only investigation found the actual kernel ELF at `mmc 0:3 /boot/vmlinux-3.10.87-oct3-mp` (10,387,920 bytes, ELF64 big-endian MIPS). The p2 ext label is `sysroot0`; p3 is `sysroot1`, matching the previously inspected p3 `/etc/fstab` root label. Thus the current installation's root is p3, contrary to the old board-header comment that says p2. Kernel built-in command-line/root-selection behavior remains unverified; no Linux boot acceptance is claimed. Full evidence: `reports/pa220/P7-3/P7-3B-DEVICE-ACCEPTANCE.md`.
+
+
+## User-reported kernel handoff progress (2026-11-28; partial evidence)
+
+A subsequent manual boot from the confirmed eMMC p3 kernel path progressed beyond the earlier root-device wait and reached the PAN-OS intermediate serial prompt `PA-HDF login:` at 9600 baud. The prompt remained unchanged for more than one hour. This is evidence that the kernel progressed substantially farther into the PAN-OS userspace startup path than the earlier `Using internal Device Tree.` / missing MMC block-device failure.
+
+Evidence limitations:
+- The complete early boot log, including any `PA220-PAN-ABI` line, Linux FDT selection message, CPU enumeration, and MMC host probe, was not captured in the current handoff record.
+- The exact running Stage3 BIN SHA-256 was not recorded with this serial observation; do not attribute this result conclusively to the ABI-compatibility artifact solely from the prompt.
+- The boot command included `nousb`; this run does not validate USB initialization.
+- The unchanged `PA-HDF login:` prompt is not a completed PAN-OS boot and remains a deferred userspace-startup issue (D-027).
+
+Status: record as **kernel-to-userspace progress observed; ABI/FDT/CPU/USB acceptance evidence incomplete**. Do not repeat the same boot merely to wait at this prompt. No SPI/eMMC writes or `saveenv` were performed.
