@@ -193,3 +193,12 @@
 - 若后续需要在本地 Debian 对完整 eMMC 镜像做大规模离线分析，可按需将 Debian 注册为 GitHub Actions self-hosted runner。部署的是受限 runner agent，不是把整台 Debian 主机上传到 GitHub，也不是开放 SSH/远程 shell。
 - 部署前必须先设计隔离：专用低权限账户、专用工作目录、限制 runner 标签和仓库范围、不挂载真实块设备、不提供 SPI/eMMC 写权限、不在 workflow 中暴露个人凭据；大镜像只读处理，报告/哈希/必要切片作为 Actions artifact 归档。
 - 当前 P7-3B 使用托管 runner 与仓库内 sparse fixtures 即可，不需要部署 Debian runner，也不要求上传 29.6 GB eMMC 镜像。只有当离线证据不足以回答具体问题时再启用该路径。
+
+
+## D-025：按 live 文件系统标签确定原机 eMMC 根分区（2026-11-28）
+
+- 实机只读超级块检查确认 p2 标签为 `sysroot0`，p3 标签为 `sysroot1`；p3 的 `/etc/fstab` 将 `LABEL=sysroot1` 指定为根文件系统。因此当前 PAN 10.2.11 根分区是 `mmc 0:3`，不能沿用旧板级注释中“root on p2”的推断。
+- 实机在 `mmc 0:3 /boot/vmlinux-3.10.87-oct3-mp` 找到 10,387,920-byte ELF64 big-endian MIPS kernel。旧 `CONFIG_BOOTCOMMAND` 从 p1 根目录加载 `/vmlinux.oct3-mp` 和 `.bak` 均失败；该失败没有启动内核。
+- `pa220 install dry-run 0` live 输出符合预期：DOS/MBR READ_ONLY，`NO_APPROVED_MANIFEST`、`UNMAPPED`、`actions=NONE`。
+- 后续启动必须基于 live label、真实 kernel path 和经核实的 kernel command line；不修改分区表，不自动重分区。内核默认命令行/根选择尚未确认，故尚不宣称原系统已成功启动。
+- 证据：`reports/pa220/P7-3/P7-3B-DEVICE-ACCEPTANCE.md`。
