@@ -71,9 +71,10 @@ jobs:
             ./build-pa220.sh "$TOOLCHAIN_DIR"
             echo
             echo "========== BOOTINFO HEADER VERSION =========="
-            find "$TOOLCHAIN_DIR" -iname cvmx-bootinfo.h -print
-            grep -R -n -E 'CVMX_BOOTINFO_(MAJ|MIN)_VER' "$TOOLCHAIN_DIR" \
-              --include='cvmx-bootinfo.h' || true
+            echo "Macro definitions across the pinned source and SDK:"
+            grep -R -n -E 'CVMX_BOOTINFO_(MAJ|MIN)_VER' \
+              external/pa220-openwrt/u-boot "$RUNNER_TEMP/octeon-sdk" \
+              --include='*.h' --include='*.c' --include='*.inc' --include='*.S' || true
             echo
             echo "========== BOOT DESCRIPTOR SYMBOL =========="
             ELF="external/pa220-openwrt/u-boot/u-boot-octeon_pa220"
@@ -81,10 +82,12 @@ jobs:
             readelf -sW "$ELF" | grep -E 'octeon_setup_boot_desc_block|octeon_setup_boot_desc_bl' || true
             OBJDUMP=$(find "$TOOLCHAIN_DIR/bin" -name 'mips64-octeon-linux-gnu-objdump' -print -quit)
             if [ -n "$OBJDUMP" ]; then
-              "$OBJDUMP" -d --disassemble=octeon_setup_boot_desc_block "$ELF" \
+              "$OBJDUMP" -d -S "$ELF" > "$REPORT_DIR/full-current-uboot-disassembly.txt" || true
+              awk '/<octeon_setup_boot_desc_block>:/ {show=1} show {print} show && /^$/ {exit}' \
+                "$REPORT_DIR/full-current-uboot-disassembly.txt" \
                 > "$REPORT_DIR/current-bootinfo-disassembly.txt" || true
-              grep -i -E 'fdt|0x15[0-9a-f]|0x16[0-9a-f]' \
-                "$REPORT_DIR/current-bootinfo-disassembly.txt" | head -80 || true
+              grep -n -i -A5 -B5 -E 'fdt_addr|minor_version' \
+                "$REPORT_DIR/current-bootinfo-disassembly.txt" | head -120 || true
             fi
             echo
             echo "========== OEM VS REBUILT FDT =========="
@@ -92,6 +95,7 @@ jobs:
               --spi "$RUNNER_TEMP/pa220-spi-normal.img" \
               --uboot bin/pa220/u-boot-octeon_pa220.bin \
               --toolchain "$TOOLCHAIN_DIR" \
+              --source-root external/pa220-openwrt/u-boot \
               --out "$REPORT_DIR"
             echo
             echo "========== HASHES =========="
