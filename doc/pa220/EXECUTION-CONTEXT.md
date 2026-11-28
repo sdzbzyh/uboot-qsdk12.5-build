@@ -40,7 +40,7 @@ P7-3A 只读 MBR/EBR inventory 已验收；P7-3B planner 与 `pa220 install dry-
 - 诊断 BIN SHA-256：`0195a96a511caa3ac2a170bc0b2c11175bbf9ea65bf5d78540be1e1c32cc9d0d`。
 - 2026-11-28 实机回归已完成：U-Boot 打印 bootinfo 1.4、`core_mask=0xf`、非零 `fdt_addr=0xfff2da0`；global/copy descriptor `cmp=0`。但 Linux 仍打印 `Using internal Device Tree.`，只启动一个 CPU，且没有 MMC host/block 初始化，最终等待 `/dev/mmcblk0p3`。
 - 因此，U-Boot 侧 descriptor 一致性检查已完成，但尚未证明 Linux 实际读取了同一份 bootinfo。不能重复本轮相同 U-Boot-only 诊断，也不能猜测修改 FDT/descriptor 地址。
-- 下一工作单元改为**精确源码 ABI 对账**：核对固定 PAN Linux 3.10.87 的 `prom_init()`、`device_tree_init()`、`cvmx-bootinfo.h` 与固定 U-Boot `bootoctlinux/start_linux()`。重点追踪 `fw_arg3 -> cvmx_desc_vaddr -> octeon_bootinfo`、大端字段偏移、物理地址转换、FDT 条件和 SMP coremask。找到明确原因后，才生成下一轮能证明 Linux 实际可见字段的 RAM-only 测试镜像。
+- 固定 U-Boot 源码的 `start_linux()` 已核实：`a3/fw_arg3` 指向 XKPHYS boot descriptor，descriptor 的 `cvmx_desc_vaddr` 指向低 2 GiB 物理 bootinfo；bootinfo major/minor 与 FDT 字段偏移符合 U-Boot ABI 1.4。U-Boot 也确实将 bootinfo 复制到该物理地址。仍未获得 PAN SDK-3.1.2 内核的确切 `prom_init()/device_tree_init()/cvmx-bootinfo.h/cvmx_phys_to_ptr()` 实现，故 Linux 仍回退 internal FDT 的根因未定。下一步只继续固定内核 ABI 源码/二进制对账，并追溯命令行中 `cpuid=0` 的来源；不生成新设备镜像、不重复实机启动。详细源码审计与待办见 `reports/pa220/P7-3B/ORIGINAL-KERNEL-HANDOFF-DIAGNOSTIC.md`。
 - 保持 `nousb`，直到 FDT handoff 与 eMMC root 路径确认；之后再单独移除 `nousb` 测 USB。不要重复分区、标签、内核文件发现工作。
 
 
