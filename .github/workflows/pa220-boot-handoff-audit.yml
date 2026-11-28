@@ -50,9 +50,9 @@ jobs:
           sha256sum -c ./*.sha256
           ARCHIVE=$(find . -maxdepth 1 -type f -name '*.tar.gz' -print -quit)
           tar -xzf "$ARCHIVE" -C "$RUNNER_TEMP/octeon-sdk"
-          GCC_PATH=$(find "$RUNNER_TEMP/octeon-sdk" -path '*/bin/mips64-octeon-linux-gnu-gcc' -print -quit)
-          test -n "$GCC_PATH"
-          TOOLCHAIN_DIR=$(dirname "$(dirname "$GCC_PATH")")
+          TOOLCHAIN_DIR="$RUNNER_TEMP/octeon-sdk/tools-gcc-4.7"
+          GCC_PATH="$TOOLCHAIN_DIR/bin/mips64-octeon-linux-gnu-gcc"
+          test -x "$GCC_PATH"
           echo "TOOLCHAIN_DIR=$TOOLCHAIN_DIR" >> "$GITHUB_ENV"
           echo "GCC_PATH=$GCC_PATH" >> "$GITHUB_ENV"
           "$GCC_PATH" --version | head -n 2
