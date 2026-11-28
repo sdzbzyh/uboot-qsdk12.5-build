@@ -39,7 +39,7 @@ P7-3A 只读 MBR/EBR inventory 已验收；P7-3B planner 与 `pa220 install dry-
 - 根因已由原机内核编译代码的字段读取偏移确认：SDK 5.1.0 通用结构将 FDT 放在 152、ext_core_mask 放在 160；PAN 内核则在 152..175 读取扩展、在 176 读取 FDT、在 184 读取扩展 coremask。24-byte 偏移差异解释意外生成的 `cpuid=0`、internal-FDT fallback 与单核启动现象。
 - 兼容补丁：`patches/pa220/0006-pa220-pan-kernel-bootinfo-compat.patch`。只序列化 Linux 可见 bootinfo 副本，不修改 SDK 通用结构；312-byte reservation 覆盖 Linux handoff 分配路径。
 - 最新构建 Actions [#46143662432](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/46143662432) SUCCESS；SDK 下载/校验、U-Boot 构建、OEM FDT audit 均通过。
-- 最新 RAM-test BIN：`artifacts/pa220/builds/pa220-pan-kernel-abi-compat.bin`，1,402,792 bytes，SHA-256 `2f0fa866999c6684e0f32261da11472927321e4c087eceb862ff6621f3edbc11`；Artifact [15262267936](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/46143662432/artifacts/15262267936)。此前 #46134874478 的 1,403,? bytes 镜像仅作历史记录，不用于下一轮测试。
+- 最新 RAM-test BIN：`artifacts/pa220/builds/pa220-pan-kernel-abi-compat.bin`，1,402,792 bytes，SHA-256 `2f0fa866999c6684e0f32261da11472927321e4c087eceb862ff6621f3edbc11`；Artifact [15262267936](https://github.com/sdzbzyh/uboot-qsdk12.5-build/actions/runs/46143662432/artifacts/15262267936)。此前 #46134874478 的镜像 SHA-256 为 `318c319b824603ee3080ab12687e940ec317c9216566b1986ea8a9bde9048d1d`，仅作历史记录，不用于下一轮测试。
 - 分支最新 HEAD：`d72ef65684ada1b6a9e7950b745d42efa3f91d6b`。Actions 构建输入提交为 `478597e5bf4c6af1a77cbae75db708b330331e70`，随后由 workflow 归档提交推进分支。
 - **下一步唯一必要实机工作：使用上述最新 BIN 做一次 RAM-only 原机 Linux handoff 验证**。不写 SPI/eMMC、不调用 `saveenv`，不重复分区/内核文件发现。
 - 从 eMMC p3 加载已确认的 `/boot/vmlinux-3.10.87-oct3-mp` 到 `0x22000000`，使用 ABI 报告中的命令行：
