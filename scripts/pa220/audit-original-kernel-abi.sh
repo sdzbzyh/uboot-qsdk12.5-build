@@ -3,8 +3,8 @@ set -euo pipefail
 KERNEL="artifacts/pa220/original-kernel/pa220-original-vmlinux"
 OUT="reports/pa220/P7-4/ORIGINAL-KERNEL-ABI-DISASSEMBLY.md"
 EXPECTED_SHA="eff6e9d16cf11144642404ddd010bb9d1f62616df185460491a9cd1fd7639e6d"
-OBJDUMP="${MIPS_OBJDUMP:-mips64-linux-gnuabi64-objdump}"
-NM="${MIPS_NM:-mips64-linux-gnuabi64-nm}"
+OBJDUMP="${MIPS_OBJDUMP:-objdump}"
+NM="${MIPS_NM:-nm}"
 test -s "$KERNEL"
 command -v "$OBJDUMP" >/dev/null
 command -v "$NM" >/dev/null
@@ -25,8 +25,6 @@ test "$SIZE" -eq 10387920
   echo "- Tool: $($OBJDUMP --version | head -n 1)"
   echo
   echo "## ELF header and program headers"
-  echo
-  echo '    readelf -hW / readelf -lW'
   echo
   echo '~~~text'
   readelf -hW "$KERNEL"

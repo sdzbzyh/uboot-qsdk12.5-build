@@ -23,13 +23,16 @@ jobs:
           ref: feature/pa220-ubootkit-web
           fetch-depth: 0
 
-      - name: Install MIPS64 binutils
+      - name: Install multi-architecture binutils
         run: |
           sudo apt-get update
-          sudo apt-get install -y binutils-mips64-linux-gnuabi64
+          sudo apt-get install -y binutils-multiarch
 
       - name: Audit exact uploaded kernel ELF
         shell: bash
+        env:
+          MIPS_OBJDUMP: objdump
+          MIPS_NM: nm
         run: |
           set -euo pipefail
           scripts/pa220/audit-original-kernel-abi.sh
@@ -44,6 +47,7 @@ jobs:
           retention-days: 30
 
       - name: Commit audit report
+        if: success()
         shell: bash
         run: |
           set -euo pipefail
