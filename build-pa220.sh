@@ -99,6 +99,31 @@ if [ -d "$PATCH_DIR" ]; then
     done
 fi
 
+# Optional read-only bootinfo/FDT diagnostics for the PA-220 original-kernel handoff.
+# The patch is generated from the pinned source with Python's unified-diff engine.
+DIAG_REPORT_DIR="$ROOT_DIR/reports/pa220/P7-4"
+DIAG_PATCH="$DIAG_REPORT_DIR/0001-pa220-fdt-handoff-diagnostics.patch"
+mkdir -p "$DIAG_REPORT_DIR"
+python3 "$ROOT_DIR/scripts/generate-pa220-fdt-handoff-diagnostics-patch.py" \
+    --source-root "$PA220_SOURCE_ROOT" --output "$DIAG_PATCH"
+if [ "${PA220_FDT_HANDOFF_DIAGNOSTICS:-0}" = "1" ]; then
+    if git -C "$PA220_SOURCE_ROOT" apply --reverse --check "$DIAG_PATCH" >/dev/null 2>&1; then
+        echo "PA-220 FDT handoff diagnostics already applied"
+    else
+        git -C "$PA220_SOURCE_ROOT" apply --check "$DIAG_PATCH" || \
+            fail "FDT handoff diagnostic patch does not apply cleanly"
+        git -C "$PA220_SOURCE_ROOT" apply "$DIAG_PATCH" || \
+            fail "failed to apply FDT handoff diagnostic patch"
+        echo "Applied optional PA-220 FDT handoff diagnostics"
+    fi
+else
+    if git -C "$PA220_SOURCE_ROOT" apply --reverse --check "$DIAG_PATCH" >/dev/null 2>&1; then
+        git -C "$PA220_SOURCE_ROOT" apply --reverse "$DIAG_PATCH" || \
+            fail "failed to remove optional FDT handoff diagnostics"
+        echo "Removed optional PA-220 FDT handoff diagnostics for normal build"
+    fi
+fi
+
 # Stage the complete P5-2C production implementation into the pinned source.
 # The fixed source repository remains untouched; only this disposable checkout
 # is modified by the integration build.
