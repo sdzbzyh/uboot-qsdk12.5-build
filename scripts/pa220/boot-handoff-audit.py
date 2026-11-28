@@ -23,7 +23,7 @@ def parse_fdt(blob, offset):
         token = struct.unpack_from(">I", data, p)[0]
         p += 4
         if token == 1:
-            end = data.find(b"\\0", p)
+            end = data.find(b"\0", p)
             if end < 0:
                 raise ValueError("unterminated node name")
             name = data[p:end].decode("utf-8", "replace")
@@ -42,7 +42,7 @@ def parse_fdt(blob, offset):
             p += 8
             if nameoff >= len(strings) or p + length > len(data):
                 raise ValueError("property out of bounds")
-            end = strings.find(b"\\0", nameoff)
+            end = strings.find(b"\0", nameoff)
             if end < 0:
                 raise ValueError("unterminated property name")
             name = strings[nameoff:end].decode("utf-8", "replace")
@@ -62,7 +62,7 @@ def parse_fdt(blob, offset):
 
 
 def scan_fdts(blob):
-    found, pos, magic = [], 0, b"\\xd0\\x0d\\xfe\\xed"
+    found, pos, magic = [], 0, b"\xd0\x0d\xfe\xed"
     while True:
         pos = blob.find(magic, pos)
         if pos < 0:
@@ -78,7 +78,7 @@ def scan_fdts(blob):
 def strings(raw):
     if raw is None:
         return []
-    return [x.decode("utf-8", "replace") for x in raw.split(b"\\0") if x]
+    return [x.decode("utf-8", "replace") for x in raw.split(b"\0") if x]
 
 
 def display(raw):
@@ -140,7 +140,7 @@ def main():
             source = header.read_text(errors="replace")
         except OSError:
             continue
-        match = re.search(r"^\\s*#\\s*define\\s+CVMX_BOOTINFO_MIN_VER\\s+(\\d+)", source, re.M)
+        match = re.search(r"^\s*#\s*define\s+CVMX_BOOTINFO_MIN_VER\s+(\d+)", source, re.M)
         if match:
             versions.append({"header": str(header), "minor_version": int(match.group(1))})
     report = {
@@ -161,7 +161,7 @@ def main():
     }
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
-    (out / "boot-handoff-audit.json").write_text(json.dumps(report, indent=2) + "\\n")
+    (out / "boot-handoff-audit.json").write_text(json.dumps(report, indent=2) + "\n")
     lines = [
         "# PA-220 OEM Stage-3 and rebuilt U-Boot FDT comparison", "",
         "Read-only comparison of the original SPI Stage-3 FDT and the FDT embedded in the rebuilt PA-220 U-Boot image.", "",
@@ -198,7 +198,7 @@ def main():
               "- The live kernel message 'Using internal Device Tree.' is separate evidence of fallback selection.",
               "- No device access or SPI/eMMC writes are performed.", "",
               "Full machine-readable inventory: boot-handoff-audit.json", ""]
-    (out / "BOOT-HANDOFF-AUDIT.md").write_text("\\n".join(lines))
+    (out / "BOOT-HANDOFF-AUDIT.md").write_text("\n".join(lines))
     print((out / "BOOT-HANDOFF-AUDIT.md").read_text())
     return 0
 
