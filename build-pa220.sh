@@ -123,6 +123,8 @@ cp "$ROOT_DIR/u-boot/board/octeon/pa220/pa220_image.c" "$UBOOT_DIR/board/octeon/
 cp "$ROOT_DIR/u-boot/include/pa220_image.h" "$UBOOT_DIR/include/pa220_image.h"
 cp "$ROOT_DIR/u-boot/board/octeon/pa220/pa220_partition.c" "$UBOOT_DIR/board/octeon/pa220/pa220_partition.c"
 cp "$ROOT_DIR/u-boot/include/pa220_partition.h" "$UBOOT_DIR/include/pa220_partition.h"
+cp "$ROOT_DIR/u-boot/board/octeon/pa220/pa220_install_plan.c" "$UBOOT_DIR/board/octeon/pa220/pa220_install_plan.c"
+cp "$ROOT_DIR/u-boot/include/pa220_install_plan.h" "$UBOOT_DIR/include/pa220_install_plan.h"
 # Generate the Makefile patch with Git's diff engine (never hand-count hunks).
 mkdir -p "$ROOT_DIR/reports/pa220/P5-2C"
 python3 "$ROOT_DIR/scripts/generate-pa220-p5-2c-makefile-patch.py" \
